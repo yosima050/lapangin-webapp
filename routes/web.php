@@ -34,8 +34,8 @@ Route::middleware(['auth', 'IsKasir'])->group(function () {
 // Halaman Pelanggan
 Route::middleware(['auth', 'IsPelanggan'])->group(function () {
     Route::get('/pelanggan', function () {
-        return "Halaman Pelanggan";
-    });
+        return view('Pelanggan.index');
+    })->name('pelanggan.dashboard');
 });
 
 require __DIR__.'/auth.php';
