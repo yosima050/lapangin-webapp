@@ -8,6 +8,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/lapangan/{id}', function ($id) {
+    return view('lapangan.show', ['id' => $id]);
+});
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 
 Route::get('/dashboard', function () {
