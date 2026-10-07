@@ -15,10 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Hidden(['password_hash'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasUuids;
-
-    public $timestamps = false;
 
     public function jadwals(): HasMany
     {
@@ -30,16 +27,18 @@ class User extends Authenticatable
         return $this->password_hash;
     }
 
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['nama'] ?? null;
+    }
+
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['nama'] = $value;
+    }
+
     protected function casts(): array
     {
         return [];
     }
-
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'no_hp',
-        'role',
-    ];
 }

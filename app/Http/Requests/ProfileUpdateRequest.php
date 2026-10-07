@@ -28,4 +28,11 @@ class ProfileUpdateRequest extends FormRequest
             ],
         ];
     }
+
+    protected function passedValidation(): void
+    {
+        $this->merge([
+            'nama' => $this->input('name'),
+        ]);
+    }
 }
