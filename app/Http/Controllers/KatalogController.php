@@ -45,4 +45,22 @@ class KatalogController extends Controller
             'tanggal' => $tanggal
         ]);
     }
+
+    public function show(Request $request, $id)
+    {
+        // Ambil data lapangan dari database
+        $lapangan = Lapangan::findOrFail($id);
+        
+        // Ambil tanggal dari request (default: hari ini)
+        $tanggal = $request->query('tanggal', now()->toDateString());
+
+        // Ambil status ketersediaan jam dari JadwalService Anda
+        $jadwalData = $this->jadwalService->getSlotStatus((string) $id, $tanggal);
+
+        return view('lapangan.show', [
+            'lapangan' => $lapangan,
+            'jadwalData' => $jadwalData,
+            'tanggalDipilih' => $tanggal
+        ]);
+    }
 }
