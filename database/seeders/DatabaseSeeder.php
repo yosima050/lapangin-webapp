@@ -12,12 +12,9 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        
+        // 1. Buat Akun Pegawai
         User::create([
             'nama' => 'Admin Lapangin',
             'email' => 'admin@lapangin.com',
@@ -36,19 +33,36 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
         ]);
 
+        // 2. Buat Data 4 Venue Sesuai Desain Widi
         Lapangan::create([
-            'nama' => 'Lapangan Futsal A',
+            'nama' => 'Viva Futsal Arena Malang',
             'kategori' => 'Futsal',
             'jam_buka' => '08:00',
-            'jam_tutup' => '22:00',
+            'jam_tutup' => '23:00',
             'created_at' => now(),
         ]);
 
         Lapangan::create([
-            'nama' => 'Lapangan Futsal B',
+            'nama' => 'Badminton Smash Arena Malang',
+            'kategori' => 'Badminton',
+            'jam_buka' => '08:00',
+            'jam_tutup' => '23:00',
+            'created_at' => now(),
+        ]);
+
+        Lapangan::create([
+            'nama' => 'Garuda Mini Soccer Stadium Malang',
+            'kategori' => 'Mini Soccer',
+            'jam_buka' => '06:00',
+            'jam_tutup' => '23:00',
+            'created_at' => now(),
+        ]);
+
+        Lapangan::create([
+            'nama' => 'Supreme Futsal & Padel Hub Malang',
             'kategori' => 'Futsal',
             'jam_buka' => '08:00',
-            'jam_tutup' => '22:00',
+            'jam_tutup' => '24:00',
             'created_at' => now(),
         ]);
     }

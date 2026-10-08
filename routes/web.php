@@ -4,13 +4,9 @@ use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [KatalogController::class, 'index'])->name('home');
 
-Route::get('/lapangan/{id}', function ($id) {
-    return view('lapangan.show', ['id' => $id]);
-});
+Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 
 Route::get('/dashboard', function () {
