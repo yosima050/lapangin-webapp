@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
+use App\Models\Pelanggan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,12 +17,12 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_pelanggans_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $pelanggan = Pelanggan::factory()->create();
 
         $response = $this->post('/login', [
-            'email' => $user->email,
+            'email' => $pelanggan->email,
             'password' => 'password',
         ]);
 
@@ -30,23 +30,23 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
+    public function test_pelanggans_can_not_authenticate_with_invalid_password(): void
     {
-        $user = User::factory()->create();
+        $pelanggan = Pelanggan::factory()->create();
 
         $this->post('/login', [
-            'email' => $user->email,
+            'email' => $pelanggan->email,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
     }
 
-    public function test_users_can_logout(): void
+    public function test_pelanggans_can_logout(): void
     {
-        $user = User::factory()->create();
+        $pelanggan = Pelanggan::factory()->create();
 
-        $response = $this->actingAs($user)->post('/logout');
+        $response = $this->actingAs($pelanggan)->post('/logout');
 
         $this->assertGuest();
         $response->assertRedirect('/');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('harga_masters', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->uuid('lapangan_id');
             $table->enum('jenis_hari', ['weekday', 'weekend']);
             $table->date('tanggal_khusus')->nullable();

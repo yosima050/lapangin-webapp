@@ -12,6 +12,21 @@ class Lapangan extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'nama',
+        'kategori',
+        'jam_buka',
+        'jam_tutup',
+        'created_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
+
     public function jadwals(): HasMany
     {
         return $this->hasMany(Jadwal::class, 'lapangan_id');

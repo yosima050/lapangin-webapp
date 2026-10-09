@@ -2,15 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Models\Pelanggan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
- * @extends Factory<User>
+ * @extends Factory<Pelanggan>
  */
-class UserFactory extends Factory
+class PelangganFactory extends Factory
 {
     /**
      * The current password being used by the factory.
@@ -35,7 +34,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate that the model's email address is unverified.
      */
     public function unverified(): static
     {

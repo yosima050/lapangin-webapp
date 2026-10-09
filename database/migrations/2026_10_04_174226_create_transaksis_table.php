@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('transaksis', function (Blueprint $table) {
@@ -19,20 +16,20 @@ return new class extends Migration
                 'dp',
                 'pelunasan',
                 'full',
-                'refund'
+                'refund',
             ]);
 
             $table->decimal('jumlah', 12, 2);
 
             $table->enum('metode', [
                 'online',
-                'tunai'
+                'tunai',
             ]);
 
             $table->enum('status', [
                 'pending',
                 'berhasil',
-                'gagal'
+                'gagal',
             ]);
 
             $table->string('referensi_midtrans')->nullable();
@@ -42,14 +39,9 @@ return new class extends Migration
                 ->references('id')
                 ->on('jadwals')
                 ->cascadeOnDelete();
-
-            $table->unique('jadwal_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('transaksis');

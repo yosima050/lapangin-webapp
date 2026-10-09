@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Pelanggan;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,12 +32,12 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . Pelanggan::class],
             'no_hp' => ['required', 'string', 'max:15'],
-            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $pelanggan = Pelanggan::create([
             'nama' => $request->input('name'),
             'email' => $request->email,
             'no_hp' => $request->input('no_hp'),
@@ -45,9 +45,9 @@ class RegisteredUserController extends Controller
             'role' => 'pelanggan',
         ]);
 
-        event(new Registered($user));
+        event(new Registered($pelanggan));
 
-        Auth::login($user);
+        Auth::login($pelanggan);
 
         return redirect(route('dashboard', absolute: false));
     }
