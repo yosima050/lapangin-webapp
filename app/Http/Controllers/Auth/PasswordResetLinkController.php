@@ -26,9 +26,9 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
+        $status = Password::broker('Pelanggan')->sendResetLink(
+            $request->only('email')
+        );
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we

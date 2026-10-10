@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Transaksi extends Model
+class Reschedule extends Model
 {
     use HasUuids;
 
@@ -14,21 +14,29 @@ class Transaksi extends Model
 
     protected $fillable = [
         'jadwal_id',
-        'jenis',
-        'jumlah',
-        'metode',
+        'tanggal_baru',
+        'jam_mulai_baru',
+        'jam_selesai_baru',
         'status',
-        'referensi_midtrans',
-        'midtrans_transaction_id',
-        'snap_token',
-        'dibayar_pada',
+        'alasan_pengajuan',
+        'created_at',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function ($reschedule) {
+            if (empty($reschedule->created_at)) {
+                $reschedule->created_at = now();
+            }
+        });
+    }
+
+    
     protected function casts(): array
     {
         return [
-            'jumlah' => 'decimal:2',
-            'dibayar_pada' => 'datetime',
+            'tanggal_baru' => 'date',
+            'created_at' => 'datetime',
         ];
     }
 

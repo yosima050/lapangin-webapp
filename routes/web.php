@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\HargaMasterController;
+use App\Http\Controllers\Admin\LapanganController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -20,17 +23,25 @@ Route::middleware('auth')->group(function () {
 });
 
 // Halaman Admin
-Route::middleware(['auth', 'IsAdmin'])->group(function () {
-    Route::get('/admin', function () {
-        return view('Admin.index');
-    });
+Route::middleware(['auth', 'IsAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('lapangan', LapanganController::class);
+    Route::resource('harga', HargaMasterController::class);
+    Route::get('/pegawai', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('pegawai.index');
+    Route::post('/pegawai', [\App\Http\Controllers\Admin\PegawaiController::class, 'store'])->name('pegawai.store');
+    Route::get('/custom-price', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('custom-price');
 });
 
 // Halaman Kasir
-Route::middleware(['auth', 'IsKasir'])->group(function () {
-    Route::get('/kasir', function () {
-        return view('Kasir.index');
-    });
+Route::middleware(['auth', 'IsKasir'])->prefix('kasir')->name('kasir.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Kasir\KasirController::class, 'index'])->name('index');
+    Route::post('/checkin/{id}', [\App\Http\Controllers\Kasir\KasirController::class, 'checkin'])->name('checkin');
+    Route::get('/jadwal', [\App\Http\Controllers\Kasir\KasirController::class, 'jadwal'])->name('jadwal');
+    Route::post('/walkin', [\App\Http\Controllers\Kasir\KasirController::class, 'storeWalkin'])->name('walkin.store');
+    Route::get('/reschedule', [\App\Http\Controllers\Kasir\KasirController::class, 'reschedule'])->name('reschedule');
+    Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Kasir\KasirController::class, 'approveReschedule'])->name('reschedule.approve');
+    Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Kasir\KasirController::class, 'rejectReschedule'])->name('reschedule.reject');
+    Route::get('/transaksi', [\App\Http\Controllers\Kasir\KasirController::class, 'transaksi'])->name('transaksi');
 });
 
 // Halaman Pelanggan
