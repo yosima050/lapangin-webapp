@@ -20,10 +20,21 @@ class DatabaseSeeder extends Seeder
         $admin = Pelanggan::firstOrCreate(
             ['email' => 'admin@lapangin.com'],
             [
-                'nama' => 'Admin Owner',
+                'nama' => 'Admin Lapangin',
                 'no_hp' => '081234567890',
                 'password_hash' => Hash::make('admin1'),
                 'role' => 'admin',
+                'created_at' => now(),
+            ]
+        );
+
+        $kasirDefault = Pelanggan::firstOrCreate(
+            ['email' => 'kasir@lapangin.com'],
+            [
+                'nama' => 'Kasir Lapangin',
+                'no_hp' => '081234567899',
+                'password_hash' => Hash::make('kasir1'),
+                'role' => 'kasir',
                 'created_at' => now(),
             ]
         );
@@ -83,7 +94,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Data Lapangan
+        // 2. Data Lapangan (Venue Utama POS & Venue Desain Katalog Widi)
         $lapangan1 = Lapangan::firstOrCreate(
             ['nama' => 'Lapangan 1 - Vinyl Pro (Futsal Indoor)'],
             [
@@ -120,15 +131,67 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $lapanganViva = Lapangan::firstOrCreate(
+            ['nama' => 'Viva Futsal Arena Malang'],
+            [
+                'kategori' => 'Futsal',
+                'jam_buka' => '08:00',
+                'jam_tutup' => '23:00',
+                'deskripsi' => 'Arena futsal modern dengan rumput sintetis lembut dan ruang ganti ber-AC.',
+                'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+                'created_at' => now(),
+            ]
+        );
+
+        $lapanganSmash = Lapangan::firstOrCreate(
+            ['nama' => 'Badminton Smash Arena Malang'],
+            [
+                'kategori' => 'Badminton',
+                'jam_buka' => '08:00',
+                'jam_tutup' => '23:00',
+                'deskripsi' => 'Gedung olahraga badminton 6 lapangan berstandar nasional dengan kantin.',
+                'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',
+                'created_at' => now(),
+            ]
+        );
+
+        $lapanganGaruda = Lapangan::firstOrCreate(
+            ['nama' => 'Garuda Mini Soccer Stadium Malang'],
+            [
+                'kategori' => 'Mini Soccer',
+                'jam_buka' => '06:00',
+                'jam_tutup' => '23:00',
+                'deskripsi' => 'Stadion mini soccer rumput alami berstandar FIFA dengan tribun penonton.',
+                'foto' => 'https://images.unsplash.com/photo-1556056504-5c7696c4c28d?auto=format&fit=crop&w=1200&q=80',
+                'created_at' => now(),
+            ]
+        );
+
+        $lapanganSupreme = Lapangan::firstOrCreate(
+            ['nama' => 'Supreme Futsal & Padel Hub Malang'],
+            [
+                'kategori' => 'Futsal',
+                'jam_buka' => '08:00',
+                'jam_tutup' => '24:00',
+                'deskripsi' => 'Hub olahraga terpadu futsal dan padel dengan pro-shop dan cafe.',
+                'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
+                'created_at' => now(),
+            ]
+        );
+
         // 3. Aturan Harga Master (Weekday, Weekend, & Tanggal Khusus Libur)
-        $lapangans = [$lapangan1, $lapangan2, $lapangan3];
+        $allLapangans = [$lapangan1, $lapangan2, $lapangan3, $lapanganViva, $lapanganSmash, $lapanganGaruda, $lapanganSupreme];
         $rates = [
             $lapangan1->id => ['weekday' => 120000, 'weekend' => 200000],
             $lapangan2->id => ['weekday' => 140000, 'weekend' => 190000],
             $lapangan3->id => ['weekday' => 60000, 'weekend' => 90000],
+            $lapanganViva->id => ['weekday' => 150000, 'weekend' => 180000],
+            $lapanganSmash->id => ['weekday' => 50000, 'weekend' => 75000],
+            $lapanganGaruda->id => ['weekday' => 350000, 'weekend' => 500000],
+            $lapanganSupreme->id => ['weekday' => 160000, 'weekend' => 220000],
         ];
 
-        foreach ($lapangans as $lap) {
+        foreach ($allLapangans as $lap) {
             HargaMaster::firstOrCreate(
                 [
                     'lapangan_id' => $lap->id,
@@ -181,7 +244,7 @@ class DatabaseSeeder extends Seeder
         // 4. Data Jadwal Nyata Hari Ini & Booking Aktif
         $today = now()->toDateString();
 
-        // Booking 1: Dimas Prasetyo (Spartan FC) - DP 50%, Menunggu Pelunasan di Kasir (Image 1)
+        // Booking 1: Dimas Prasetyo (Spartan FC) - DP 50%, Menunggu Pelunasan di Kasir
         $jadwalDimas = Jadwal::firstOrCreate(
             ['kode_qr' => 'LPGN-20250513-8821'],
             [
@@ -290,8 +353,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 5. Data Reschedule Nyata (Image 5)
-        // Jadwal Semula yang ingin di-reschedule
+        // 5. Data Reschedule Nyata
         $jadwalReschedule1 = Jadwal::firstOrCreate(
             ['kode_qr' => 'LPGN-RESCH-001'],
             [
