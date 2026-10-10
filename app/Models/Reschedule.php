@@ -19,7 +19,17 @@ class Reschedule extends Model
         'jam_selesai_baru',
         'status',
         'alasan_pengajuan',
+        'created_at',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function ($reschedule) {
+            if (empty($reschedule->created_at)) {
+                $reschedule->created_at = now();
+            }
+        });
+    }
 
     
     protected function casts(): array
