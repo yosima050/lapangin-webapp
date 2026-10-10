@@ -12,6 +12,26 @@ class Transaksi extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'jadwal_id',
+        'jenis',
+        'jumlah',
+        'metode',
+        'status',
+        'referensi_midtrans',
+        'midtrans_transaction_id',
+        'snap_token',
+        'dibayar_pada',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'jumlah' => 'decimal:2',
+            'dibayar_pada' => 'datetime',
+        ];
+    }
+
     public function jadwal(): BelongsTo
     {
         return $this->belongsTo(Jadwal::class, 'jadwal_id');

@@ -29,7 +29,13 @@ return new class extends Migration
                 'lunas_online',
                 'lunas_kasir'
             ]);
-            $table->string('status');
+            $table->enum('status', [
+                'pending',
+                'terverifikasi',
+                'lunas',
+                'selesai',
+                'dibatalkan',
+            ]);
             $table->string('kode_qr')->nullable();
             $table->string('token_manual')->nullable();
             $table->integer('sewa_rompi');
@@ -43,7 +49,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->foreign('pelanggan_id')
                 ->references('id')
-                ->on('users')
+                ->on('pelanggans')
                 ->nullOnDelete();
         });
     }
