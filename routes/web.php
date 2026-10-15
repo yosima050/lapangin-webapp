@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\HargaMasterController;
 use App\Http\Controllers\Admin\LapanganController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Pelanggan\RiwayatController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [KatalogController::class, 'index'])->name('home');
@@ -49,6 +51,12 @@ Route::middleware(['auth', 'IsPelanggan'])->group(function () {
     Route::get('/pelanggan', function () {
         return view('Pelanggan.index');
     })->name('pelanggan.dashboard');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])
+        ->name('checkout.index');
+
+    Route::get('/pelanggan/riwayat', [RiwayatController::class, 'index'])
+        ->name('pelanggan.riwayat');
 });
 
 require __DIR__.'/auth.php';

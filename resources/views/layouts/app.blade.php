@@ -19,15 +19,17 @@
         >
             <div class="h-20 flex items-center justify-between">
 
-                {{-- Logo --}}
+               {{-- Logo --}}
                 <a
                     href="/"
                     class="flex items-center shrink-0"
-                    aria-label="Lapangin"
+                    aria-label="LapangIn"
                 >
-                    <span class="text-2xl font-extrabold tracking-tight text-indigo-900">
-                        Lapangin
-                    </span>
+                    <img
+                        src="{{ asset('images/logo-lapangin.png') }}"
+                        alt="LapangIn"
+                        class="h-8 w-auto"
+                    >
                 </a>
 
                 {{-- Desktop Navigation --}}
