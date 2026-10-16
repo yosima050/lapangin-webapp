@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '081234567890',
                 'password_hash' => Hash::make('admin1'),
                 'role' => 'admin',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '081234567899',
                 'password_hash' => Hash::make('kasir1'),
                 'role' => 'kasir',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -46,6 +48,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '081234567891',
                 'password_hash' => Hash::make('kasir1'),
                 'role' => 'kasir',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -57,6 +60,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '081234567892',
                 'password_hash' => Hash::make('kasir1'),
                 'role' => 'kasir',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -68,6 +72,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '0812-9845-7721',
                 'password_hash' => Hash::make('password'),
                 'role' => 'pelanggan',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -79,6 +84,7 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '0813-8899-7711',
                 'password_hash' => Hash::make('password'),
                 'role' => 'pelanggan',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
@@ -90,9 +96,19 @@ class DatabaseSeeder extends Seeder
                 'no_hp' => '0815-4422-9900',
                 'password_hash' => Hash::make('password'),
                 'role' => 'pelanggan',
+                'email_verified_at' => now(),
                 'created_at' => now(),
             ]
         );
+
+        // Ensure email_verified_at is set on matching existing accounts for non-production seed data
+        if (!app()->isProduction()) {
+            foreach ([$admin, $kasirDefault, $kasir1, $kasir2, $memberDimas, $memberBudi, $memberSiti] as $account) {
+                if (!$account->email_verified_at) {
+                    $account->update(['email_verified_at' => now()]);
+                }
+            }
+        }
 
         // 2. Data Lapangan (Venue Utama POS & Venue Desain Katalog Widi)
         $lapangan1 = Lapangan::firstOrCreate(

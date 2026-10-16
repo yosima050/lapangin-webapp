@@ -13,7 +13,11 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'LapangIn'),
+
+    'venue_name' => env('VENUE_NAME', 'LapangIn Venue'),
+
+    'support_whatsapp' => env('SUPPORT_WHATSAPP', '6281234567890'),
 
     /*
     |--------------------------------------------------------------------------

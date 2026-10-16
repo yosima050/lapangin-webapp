@@ -30,7 +30,6 @@
                         <span class="material-symbols-outlined text-xl text-[#1a146b]">sports_soccer</span>
                         <span>Informasi Utama Lapangan</span>
                     </h2>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">FR-12 UPDATE</span>
                 </div>
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">

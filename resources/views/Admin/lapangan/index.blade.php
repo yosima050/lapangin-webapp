@@ -22,9 +22,6 @@
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-[#102000] bg-[#acf847] px-2.5 py-0.5 rounded-full">
-                    FR-12 • UC12
-                </span>
                 <span class="text-xs font-semibold text-[#474651] flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
                     Master Engine V2.4
@@ -212,7 +209,7 @@
                     <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         <span class="text-[#777682] flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">schedule</span>
-                            Terakhir dimodifikasi: 12 Jul 2025, 14:20 oleh Bambang S.
+                            Terakhir diperbarui: {{ ($lapangan->updated_at ?? $lapangan->created_at ?? now())->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}
                         </span>
 
                         <div class="flex items-center gap-2">

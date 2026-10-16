@@ -13,15 +13,24 @@ Route::get('/', [KatalogController::class, 'index'])->name('home');
 
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
+Route::get('/jadwal', [KatalogController::class, 'index'])->name('jadwal.index');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    $role = auth()->user()?->role;
+    if ($role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($role === 'kasir') {
+        return redirect()->route('kasir.index');
+    }
+    return redirect()->route('pelanggan.dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 });
 
 // Halaman Admin
@@ -32,6 +41,7 @@ Route::middleware(['auth', 'IsAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/pegawai', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('pegawai.index');
     Route::post('/pegawai', [\App\Http\Controllers\Admin\PegawaiController::class, 'store'])->name('pegawai.store');
     Route::get('/custom-price', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('custom-price');
+    Route::get('/laporan', [AdminDashboardController::class, 'laporan'])->name('laporan.index');
 });
 
 // Halaman Kasir
@@ -52,11 +62,10 @@ Route::middleware(['auth', 'IsPelanggan'])->group(function () {
         return view('Pelanggan.index');
     })->name('pelanggan.dashboard');
 
-    Route::get('/checkout', [CheckoutController::class, 'index'])
-        ->name('checkout.index');
-
     Route::get('/pelanggan/riwayat', [RiwayatController::class, 'index'])
         ->name('pelanggan.riwayat');
+    Route::get('/pelanggan/booking', [RiwayatController::class, 'index'])
+        ->name('pelanggan.booking.index');
 });
 
 require __DIR__.'/auth.php';

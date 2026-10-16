@@ -11,7 +11,7 @@ class IsPelanggan
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'pelanggan') {
+        if (Auth::check() && in_array(Auth::user()->role, ['pelanggan', 'admin'])) {
             return $next($request);
         }
         abort(403, 'Akses ditolak.');

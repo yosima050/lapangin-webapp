@@ -81,16 +81,30 @@
                     <span>Transaksi &amp; Tutup Shift</span>
                 </a>
 
-                <!-- 4. Approval Reschedule (with 3 pending badge) -->
+@php
+    $pendingRescheduleCount = \App\Models\Reschedule::where('status', 'pending')->count();
+    $currentHour = (int) now()->timezone('Asia/Jakarta')->format('H');
+    if ($currentHour >= 7 && $currentHour < 15) {
+        $shiftLabel = 'Shift 1 Pagi (07:00 - 15:00)';
+    } elseif ($currentHour >= 15 && $currentHour < 23) {
+        $shiftLabel = 'Shift 2 Malam (15:00 - 23:00)';
+    } else {
+        $shiftLabel = 'Shift 3 Dini Hari (23:00 - 07:00)';
+    }
+@endphp
+
+                <!-- 4. Approval Reschedule (Dynamic Pending Badge) -->
                 <a href="{{ route('kasir.reschedule') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.reschedule') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-[20px]">pending_actions</span>
                         <span>Approval Reschedule</span>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#acf847] text-[#102000] shadow-xs">
-                        3 pending
-                    </span>
+                    @if($pendingRescheduleCount > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#acf847] text-[#102000] shadow-xs">
+                            {{ $pendingRescheduleCount }} pending
+                        </span>
+                    @endif
                 </a>
             </nav>
         </div>
@@ -133,7 +147,7 @@
                 </div>
                 <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#eff4ff] border border-[#e5eeff]">
                     <span class="material-symbols-outlined text-[#474651] text-base">schedule</span>
-                    <span class="text-xs font-medium text-[#474651]">Shift 1 Pagi (07:00 - 15:00)</span>
+                    <span class="text-xs font-medium text-[#474651]">{{ $shiftLabel }}</span>
                 </div>
             </div>
 
@@ -141,11 +155,11 @@
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#acf847] text-[#102000] shadow-sm font-bold text-xs">
                     <span class="material-symbols-outlined text-base">badge</span>
-                    <span>{{ Auth::user()->nama ?? 'Bima Kasir' }}</span>
+                    <span>{{ Auth::user()?->nama ?? 'Kasir LapangIn' }}</span>
                 </div>
 
-                <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                    {{ strtoupper(substr(Auth::user()->nama ?? 'B', 0, 1)) }}
+                <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-sm" title="{{ Auth::user()?->nama }}">
+                    {{ strtoupper(substr(Auth::user()?->nama ?? 'K', 0, 1)) }}
                 </div>
             </div>
         </header>

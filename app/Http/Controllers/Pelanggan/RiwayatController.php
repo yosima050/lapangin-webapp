@@ -17,6 +17,6 @@ class RiwayatController extends Controller
             ->orderByDesc('jam_mulai')
             ->paginate(10);
 
-        return view('pelanggan.riwayat', compact('jadwals'));
+        return view('Pelanggan.riwayat', compact('jadwals'));
     }
 }
