@@ -14,12 +14,9 @@
     class="min-h-screen bg-[#f8f9ff] text-[#0b1c30]"
 >
     {{-- Hero --}}
-    <section class="px-4 sm:px-6 lg:px-8 pt-10 pb-8">
+  <section class="px-4 sm:px-6 lg:px-8 pt-28 pb-8">
         <div class="max-w-7xl mx-auto">
 
-            <div class="mb-6 inline-block">
-                <x-application-logo />
-            </div>
 
             <div class="inline-flex items-center gap-2 px-3 py-1.5 mb-5 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-bold">
                 <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
@@ -190,7 +187,7 @@
                                 <img
                                     src="{{ $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
                                     alt="{{ $item['lapangan_nama'] }}"
-                                    class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                                   class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden"></div>

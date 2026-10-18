@@ -12,7 +12,7 @@ class RiwayatController extends Controller
         $pelanggan = $request->user();
 
         $jadwals = $pelanggan->jadwals()
-            ->with('lapangan')
+            ->with(['lapangan', 'transaksis'])
             ->orderByDesc('tanggal')
             ->orderByDesc('jam_mulai')
             ->paginate(10);

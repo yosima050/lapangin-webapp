@@ -6,6 +6,7 @@ use App\Models\Lapangan;
 use App\Models\HargaMaster;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
@@ -124,6 +125,12 @@ class CheckoutController extends Controller
 
         $hargaPerJam = $durasi > 0 ? ($totalHarga / $durasi) : 0;
 
+        $pelanggan = Auth::user();
+
+        $dpPersen = 50;
+        $nominalDp = round($totalHarga * $dpPersen / 100);
+        $sisaPembayaran = $totalHarga - $nominalDp;
+
         return view('checkout.index', [
             'lapangan' => $lapangan,
             'tanggal' => $data['tanggal'],
@@ -132,6 +139,11 @@ class CheckoutController extends Controller
             'durasi' => $durasi,
             'hargaPerJam' => $hargaPerJam,
             'totalHarga' => $totalHarga,
-        ]);
-    }
-}
+            'dpPersen' => $dpPersen,
+            'nominalDp' => $nominalDp,
+            'sisaPembayaran' => $sisaPembayaran,
+            'pelanggan' => $pelanggan
+                ]);
+                
+            }
+        }
