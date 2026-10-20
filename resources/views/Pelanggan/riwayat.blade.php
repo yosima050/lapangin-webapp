@@ -1,7 +1,153 @@
 @extends('layouts.pelanggan')
 
 @section('content')
-<div x-data="{ showTicketModal: false, activeTicket: null }" class="min-h-screen bg-gray-50 px-4 py-8 sm:py-10">
+<div x-data="{
+    showTicketModal: false,
+    activeTicket: null,
+    payModalOpen: false,
+    selectedJadwalId: null,
+    selectedLapanganNama: '',
+    selectedTanggal: '',
+    selectedJamMulai: '',
+    selectedJamSelesai: '',
+    selectedHarga: 0,
+    checkoutUrl: '',
+    tipeBayar: 'dp',
+    isProcessing: false,
+    errorMessage: '',
+    modalRemainingSec: 600,
+    modalTimerInterval: null,
+    isModalExpired: false,
+
+    openPayModal(id, nama, tgl, mulai, selesai, harga, url, remainingSec) {
+        this.selectedJadwalId = id;
+        this.selectedLapanganNama = nama;
+        this.selectedTanggal = tgl;
+        this.selectedJamMulai = mulai;
+        this.selectedJamSelesai = selesai;
+        this.selectedHarga = harga;
+        this.checkoutUrl = url;
+        this.tipeBayar = 'dp';
+        this.errorMessage = '';
+        this.isProcessing = false;
+        this.isModalExpired = false;
+        this.modalRemainingSec = (typeof remainingSec === 'number' && remainingSec >= 0) ? remainingSec : 600;
+
+        if (this.modalTimerInterval) clearInterval(this.modalTimerInterval);
+
+        const self = this;
+        this.modalTimerInterval = setInterval(() => {
+            if (self.modalRemainingSec <= 0) {
+                self.modalRemainingSec = 0;
+                self.isModalExpired = true;
+                self.errorMessage = 'Batas waktu pembayaran (10 menit) telah habis. Reservasi otomatis dibatalkan.';
+                clearInterval(self.modalTimerInterval);
+                self.expireBooking(self.selectedJadwalId);
+            } else {
+                self.modalRemainingSec--;
+            }
+        }, 1000);
+
+        this.payModalOpen = true;
+    },
+
+    formatTimerText(sec) {
+        const s = Math.max(0, parseInt(sec || 0, 10));
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return String(m).padStart(2, '0') + ':' + String(rem).padStart(2, '0');
+    },
+
+    expireBooking(jadwalId) {
+        if (!jadwalId) return;
+        fetch('/checkout/expire/' + jadwalId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        }).then(() => {
+            setTimeout(() => {
+                window.location.reload();
+            }, 2500);
+        }).catch(console.error);
+    },
+
+    nominalBayar() {
+        if (this.tipeBayar === 'full') {
+            return this.selectedHarga;
+        }
+        return Math.round(this.selectedHarga * 0.5);
+    },
+
+    formatRupiah(num) {
+        return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    },
+
+    processPayment() {
+        if (this.isProcessing) return;
+        if (this.isModalExpired || this.modalRemainingSec <= 0) {
+            this.errorMessage = 'Batas waktu pembayaran telah kedaluwarsa. Silakan pesan ulang di katalog.';
+            return;
+        }
+
+        this.isProcessing = true;
+        this.errorMessage = '';
+
+        const self = this;
+        fetch('{{ route('checkout.pay') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                jadwal_id: this.selectedJadwalId,
+                tipe_bayar: this.tipeBayar
+            })
+        })
+        .then(function (res) {
+            if (!res.ok) {
+                return res.json().then(function (e) {
+                    throw new Error(e.message || 'Gagal memproses pembayaran');
+                });
+            }
+            return res.json();
+        })
+        .then(function (data) {
+            if (!data.snap_token) {
+                throw new Error('Snap token tidak diterima dari server.');
+            }
+
+            if (typeof window.snap === 'undefined') {
+                window.location.href = self.checkoutUrl + '&tipe_bayar=' + self.tipeBayar;
+                return;
+            }
+
+            window.snap.pay(data.snap_token, {
+                onSuccess: function (result) {
+                    window.location.href = '{{ route('pelanggan.booking.index') }}?status=success';
+                },
+                onPending: function (result) {
+                    window.location.href = '{{ route('pelanggan.booking.index') }}?status=pending';
+                },
+                onError: function (result) {
+                    self.errorMessage = 'Pembayaran gagal diproses atau dibatalkan. Silakan coba kembali.';
+                    self.isProcessing = false;
+                },
+                onClose: function () {
+                    self.isProcessing = false;
+                }
+            });
+        })
+        .catch(function (err) {
+            self.errorMessage = err.message || 'Terjadi kesalahan sistem, silakan coba kembali.';
+            self.isProcessing = false;
+        });
+    }
+}" class="space-y-6" style="font-family: 'Plus Jakarta Sans', sans-serif;">
 
         {{-- Header Riwayat Booking --}}
         <div class="mb-8 overflow-hidden rounded-2xl bg-[#1a146b] text-white shadow-lg sm:rounded-3xl">
@@ -105,10 +251,20 @@
         {{-- Daftar Kartu Booking Aktif --}}
         @forelse ($jadwals as $jadwal)
             @php
-                $lunas = in_array($jadwal->status_pembayaran, [
+                $isPaidOrVerified = in_array($jadwal->status_pembayaran, [
+                    'lunas_online',
+                    'lunas_kasir',
+                    'dp_terverifikasi'
+                ]) || $jadwal->status === 'terverifikasi';
+
+                $isLunas = in_array($jadwal->status_pembayaran, [
                     'lunas_online',
                     'lunas_kasir'
                 ]);
+
+                $isDP = $jadwal->status_pembayaran === 'dp_terverifikasi';
+                $isDibatalkan = in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']);
+                $isUnpaid = ! $isPaidOrVerified && ! $isDibatalkan;
 
                 $statusLabel = ucfirst(str_replace(
                     '_',
@@ -124,6 +280,8 @@
                 $mulaiMenit = \Carbon\Carbon::parse($jadwal->jam_mulai)->hour * 60 + \Carbon\Carbon::parse($jadwal->jam_mulai)->minute;
                 $selesaiMenit = \Carbon\Carbon::parse($jadwal->jam_selesai)->hour * 60 + \Carbon\Carbon::parse($jadwal->jam_selesai)->minute;
                 $durasiJam = max(1, round(($selesaiMenit - $mulaiMenit) / 60));
+                $tanggalStr = $jadwal->tanggal instanceof \Carbon\Carbon ? $jadwal->tanggal->toDateString() : (string) $jadwal->tanggal;
+                $namaLapangan = $jadwal->lapangan?->nama ?? 'Lapangan';
             @endphp
 
             <article x-data="{ showModal: false }" class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
@@ -141,13 +299,38 @@
                     </div>
 
                     {{-- Badge Status Utama --}}
-                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold
-                        {{ $lunas
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-[#acf847]/40 text-emerald-950 border border-[#acf847]' }}">
-                        <span class="h-1.5 w-1.5 rounded-full {{ $lunas ? 'bg-green-600' : 'bg-emerald-600' }}"></span>
-                        {{ $statusLabel }} {{ !$lunas ? '(Siap Main)' : '' }}
-                    </span>
+                    @if ($isLunas)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                            <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                            Lunas 100% (Siap Main)
+                        </span>
+                    @elseif ($isDP)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-[#acf847]/40 text-emerald-950 border border-[#acf847]">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                            DP 50% Terverifikasi (Siap Main)
+                        </span>
+                    @elseif ($isDibatalkan)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
+                            Dibatalkan
+                        </span>
+                    @else
+                        @php
+                            $elapsedSec = abs(now()->diffInSeconds(\Carbon\Carbon::parse($jadwal->created_at)));
+                            $remainingSec = max(0, 600 - $elapsedSec);
+                        @endphp
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                Belum Dibayar
+                            </span>
+                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                                  data-card-timer="{{ $jadwal->id }}"
+                                  data-remaining="{{ $remainingSec }}">
+                                ⏱️ <span class="font-mono">{{ sprintf('%02d:%02d', floor($remainingSec / 60), $remainingSec % 60) }}</span>
+                            </span>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Konten Utama 3 Kolom ala Figma --}}
@@ -159,7 +342,6 @@
                         {{-- Gambar Full Height ala Katalog --}}
                         <div class="relative w-28 sm:w-32 shrink-0 overflow-hidden rounded-xl bg-gray-900 border border-gray-100 self-stretch flex items-center justify-center">
                             @php
-                                $namaLapangan = $jadwal->lapangan?->nama ?? 'Lapangan';
                                 $fotoUrl = $jadwal->lapangan?->foto_url ?? asset('storage/' . $jadwal->lapangan?->foto);
                                 $fallbackAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($namaLapangan) . '&background=1a146b&color=acf847&size=512';
                             @endphp
@@ -224,16 +406,35 @@
 
                         {{-- Kolom 3: Tombol Aksi Kanan --}}
                         <div class="lg:col-span-3 flex flex-col gap-2">
-                            @if ($lunas)
-                                <button type="button" @click="showModal = true" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-900 transition">
+                            @if ($isPaidOrVerified)
+                                <button type="button" @click="showModal = true" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-900 transition cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2a1 1 0 001-1v-5a1 1 0 00-1-1h-2M6 8H4a1 1 0 00-1 1v5a1 1 0 001 1h2m13-8V4a1 1 0 00-1-1H6a1 1 0 00-1 1v4m16 0e" />
                                     </svg>
                                     Lihat E-Tiket Masuk &amp; QR
                                 </button>
+                            @elseif ($isUnpaid)
+                                @php
+                                    $checkoutUrl = route('checkout.index', [
+                                        'lapangan_id' => $jadwal->lapangan_id,
+                                        'tanggal' => $tanggalStr,
+                                        'jam_mulai' => substr((string) $jadwal->jam_mulai, 0, 5),
+                                        'durasi' => $durasiJam,
+                                    ]);
+                                @endphp
+                                <button type="button"
+                                        @click="openPayModal('{{ $jadwal->id }}', '{{ addslashes($namaLapangan) }}', '{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}', '{{ substr((string) $jadwal->jam_mulai, 0, 5) }}', '{{ substr((string) $jadwal->jam_selesai, 0, 5) }}', {{ (float) $jadwal->harga_disepakati }}, '{{ $checkoutUrl }}', {{ $remainingSec ?? 600 }})"
+                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#acf847] hover:bg-[#9de03d] text-[#1a146b] px-4 py-2.5 text-xs font-black shadow-md transition cursor-pointer">
+                                    <span>💳</span>
+                                    <span>Bayar Sekarang</span>
+                                </button>
+                                <a href="{{ $checkoutUrl }}"
+                                   class="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 px-3 py-1.5 text-[11px] font-bold text-[#1a146b] transition">
+                                    Buka Checkout Penuh &rarr;
+                                </a>
                             @else
-                                <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-xs font-bold text-gray-600 cursor-not-allowed">
-                                    E-Tiket Belum Tersedia
+                                <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-xs font-bold text-gray-500 cursor-not-allowed">
+                                    Booking Dibatalkan
                                 </button>
                             @endif
 
@@ -247,14 +448,20 @@
                             </div>
 
                             <p class="text-[10px] text-center text-gray-400">
-                                Tunjukkan kode QR ke gerbang turnstile
+                                @if ($isPaidOrVerified)
+                                    Tunjukkan kode QR ke gerbang turnstile
+                                @elseif ($isUnpaid)
+                                    Selesaikan pembayaran agar jadwal Anda terkonfirmasi
+                                @else
+                                    Reservasi telah dibatalkan
+                                @endif
                             </p>
                         </div>
 
                     </div>
                 </div>
 {{-- POP-UP MODAL E-TICKET & QR CODE FIGMA --}}
-@if (isset($lunas) && $lunas)
+@if (isset($isPaidOrVerified) && $isPaidOrVerified)
     <div x-show="showModal" 
          x-cloak
          x-transition:enter="transition ease-out duration-300"
@@ -486,6 +693,166 @@
             </div>
         @endforelse
 
+    {{-- POP-UP MODAL SELESAIKAN PEMBAYARAN VIA MIDTRANS SNAP --}}
+    <div x-show="payModalOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+         style="display: none;">
+
+        <div @click.away="if (!isProcessing) payModalOpen = false"
+             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-7 text-left border border-gray-100">
+
+            {{-- Tombol Close X --}}
+            <button @click="payModalOpen = false"
+                    :disabled="isProcessing"
+                    type="button"
+                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
+                ✕
+            </button>
+
+            {{-- Header Modal --}}
+            <div class="flex items-start gap-3">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#acf847] text-2xl text-[#1a146b] shadow-xs">
+                    💳
+                </span>
+                <div>
+                    <h3 class="text-lg font-extrabold text-[#1a146b]">
+                        Selesaikan Pembayaran Booking
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Pilih skema pembayaran untuk mengaktifkan kode QR dan e-tiket masuk lapangan.
+                    </p>
+                </div>
+            </div>
+
+            {{-- Banner Timer 10 Menit di Modal --}}
+            <div class="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3.5 text-amber-900 shadow-2xs">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl animate-pulse">⏱️</span>
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-wide">Batas Waktu Pembayaran:</p>
+                        <p class="text-[11px] text-amber-700">Slot dikunci sementara selama waktu ini</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-1.5 border border-amber-200 shadow-2xs">
+                    <span class="font-mono text-base font-black text-amber-900" x-text="formatTimerText(modalRemainingSec)"></span>
+                </div>
+            </div>
+
+            {{-- Rincian Booking Ringkas --}}
+            <div class="mt-4 rounded-2xl bg-[#f8faff] border border-[#dce9ff] p-4 text-xs space-y-2">
+                <div class="flex justify-between items-start">
+                    <span class="text-gray-500 font-semibold">Lapangan:</span>
+                    <span class="font-bold text-[#0b1c30] text-right" x-text="selectedLapanganNama"></span>
+                </div>
+                <div class="flex justify-between items-start">
+                    <span class="text-gray-500 font-semibold">Jadwal:</span>
+                    <span class="font-bold text-[#1a146b] text-right">
+                        <span x-text="selectedTanggal"></span>, <span x-text="selectedJamMulai"></span> – <span x-text="selectedJamSelesai"></span> WIB
+                    </span>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-indigo-100">
+                    <span class="text-gray-600 font-bold uppercase tracking-wider text-[10px]">Total Tagihan Sewa:</span>
+                    <span class="font-extrabold text-sm text-[#1a146b]" x-text="formatRupiah(selectedHarga)"></span>
+                </div>
+            </div>
+
+            {{-- Pilihan Tipe Pembayaran (Radio Cards) --}}
+            <div class="mt-4 space-y-2.5">
+                <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
+                    Pilih Skema Pembayaran:
+                </label>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {{-- Opsi 1: DP 50% --}}
+                    <div @click="tipeBayar = 'dp'"
+                         :class="tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 hover:border-gray-300 bg-white'"
+                         class="cursor-pointer rounded-2xl border-2 p-3.5 transition flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold" :class="tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-gray-700'">
+                                Bayar DP (50%)
+                            </span>
+                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                  :class="tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300'">
+                                <span x-show="tipeBayar === 'dp'" class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                            </span>
+                        </div>
+                        <p class="mt-2 text-base font-black text-[#0b1c30]" x-text="formatRupiah(Math.round(selectedHarga * 0.5))"></p>
+                        <p class="mt-1 text-[10px] text-gray-500 leading-tight">
+                            Sisa dilunasi di meja kasir saat datang.
+                        </p>
+                    </div>
+
+                    {{-- Opsi 2: Lunas 100% --}}
+                    <div @click="tipeBayar = 'full'"
+                         :class="tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 hover:border-gray-300 bg-white'"
+                         class="cursor-pointer rounded-2xl border-2 p-3.5 transition flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold" :class="tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-gray-700'">
+                                Bayar Lunas (100%)
+                            </span>
+                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                  :class="tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300'">
+                                <span x-show="tipeBayar === 'full'" class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                            </span>
+                        </div>
+                        <p class="mt-2 text-base font-black text-[#0b1c30]" x-text="formatRupiah(selectedHarga)"></p>
+                        <p class="mt-1 text-[10px] text-[#416900] font-semibold leading-tight">
+                            Langsung check-in tanpa antre kasir.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Error Message Alert --}}
+            <div x-show="errorMessage" x-cloak class="mt-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                <span x-text="errorMessage"></span>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="mt-5 space-y-2">
+                <button type="button"
+                        @click="processPayment()"
+                        :disabled="isProcessing || isModalExpired || modalRemainingSec <= 0"
+                        class="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130d52] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-3.5 text-xs sm:text-sm font-extrabold text-white shadow-md transition cursor-pointer">
+                    <span x-show="!isProcessing && !isModalExpired && modalRemainingSec > 0">Bayar Sekarang (<span x-text="formatRupiah(nominalBayar())"></span>)</span>
+                    <span x-show="!isProcessing && (isModalExpired || modalRemainingSec <= 0)" x-cloak>Waktu Pembayaran Telah Habis</span>
+                    <span x-show="isProcessing" x-cloak class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Menghubungkan Midtrans Snap...
+                    </span>
+                </button>
+
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <a :href="checkoutUrl + '&tipe_bayar=' + tipeBayar"
+                       class="text-xs font-bold text-[#1a146b] hover:underline">
+                        Buka di Halaman Checkout Penuh →
+                    </a>
+
+                    <button type="button"
+                            @click="payModalOpen = false"
+                            :disabled="isProcessing"
+                            class="text-xs font-semibold text-gray-500 hover:text-gray-800">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+            <p class="mt-3 text-center text-[10px] text-gray-400">
+                🔒 Pembayaran aman &amp; otomatis diverifikasi via Midtrans Snap (QRIS, VA, E-Wallet, CC).
+            </p>
+        </div>
+    </div>
+
         {{-- Bagian Tabel Riwayat Transaksi Lalu ala Figma --}}
         <div class="mt-12 pt-6 border-t border-gray-200">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -605,8 +972,65 @@
             </div>
 
 
+{{-- Midtrans Snap SDK --}}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+
 {{-- Script Alpine.js sederhana jika belum ada di layout --}}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+{{-- Real-time Countdown Timer untuk Kartu Booking Belum Bayar --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const timerElements = document.querySelectorAll('[data-card-timer]');
+        if (!timerElements.length) return;
+
+        const intervalId = setInterval(function () {
+            let activeCount = 0;
+
+            timerElements.forEach(function (el) {
+                let remaining = parseInt(el.getAttribute('data-remaining') || '0', 10);
+                const jadwalId = el.getAttribute('data-card-timer');
+                const textSpan = el.querySelector('span.font-mono');
+
+                if (remaining > 0) {
+                    activeCount++;
+                    remaining--;
+                    el.setAttribute('data-remaining', remaining);
+
+                    const mins = Math.floor(remaining / 60);
+                    const secs = remaining % 60;
+                    const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+                    if (textSpan) {
+                        textSpan.innerText = formatted;
+                    }
+                } else {
+                    if (textSpan && textSpan.innerText !== '00:00 (Habis)') {
+                        textSpan.innerText = '00:00 (Habis)';
+                        if (jadwalId) {
+                            fetch('/checkout/expire/' + jadwalId, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            }).then(function () {
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 2000);
+                            }).catch(console.error);
+                        }
+                    }
+                }
+            });
+
+            if (activeCount === 0) {
+                clearInterval(intervalId);
+            }
+        }, 1000);
+    });
+</script>
 
 {{-- Pengaturan Cetak --}}
 <style>

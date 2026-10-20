@@ -26,6 +26,7 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(Pelanggan::class)->ignore($this->user()->id),
             ],
+            'no_hp' => ['nullable', 'string', 'max:25'],
         ];
     }
 

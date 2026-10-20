@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Transaksi;
+use Illuminate\Support\Str;
+use Midtrans\Config;
+use Midtrans\Snap;
+
+class PaymentService
+{
+    /**
+     * Inisialisasi konfigurasi Midtrans SDK.
+     */
+    public function __construct()
+    {
+        $this->initMidtrans();
+    }
+
+    /**
+     * Konfigurasi parameter Midtrans SDK dari konfigurasi aplikasi.
+     */
+    public function initMidtrans(): void
+    {
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = (bool) config('services.midtrans.is_production', false);
+        Config::$isSanitized = (bool) config('services.midtrans.is_sanitized', true);
+        Config::$is3ds = (bool) config('services.midtrans.is_3ds', true);
+    }
+
+    /**
+     * Buat Snap Token melalui Midtrans Snap API.
+     *
+     * @param  mixed  $customerDetails
+     */
+    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = []): string
+    {
+        $this->initMidtrans();
+
+        // Caching: gunakan snap_token yang sudah ada jika belum expired/terbayar
+        if (! empty($transaksi->snap_token) && ($transaksi->status === 'pending' || empty($transaksi->status))) {
+            return $transaksi->snap_token;
+        }
+
+        // Pastikan order_id unik terisi
+        if (empty($transaksi->order_id)) {
+            $transaksi->order_id = 'LPNG-'.date('Ymd').'-'.strtoupper(Str::random(6));
+            $transaksi->save();
+        }
+
+        $grossAmount = (int) round((float) $transaksi->jumlah);
+
+        // Ekstraksi data pelanggan secara fleksibel (array atau model Pelanggan/User)
+        $firstName = 'Pelanggan Lapangin';
+        $email = 'customer@lapangin.id';
+        $phone = '081234567890';
+
+        if (is_array($customerDetails)) {
+            $firstName = $customerDetails['first_name'] ?? $customerDetails['nama'] ?? $customerDetails['name'] ?? $firstName;
+            $email = $customerDetails['email'] ?? $email;
+            $phone = $customerDetails['phone'] ?? $customerDetails['no_hp'] ?? $customerDetails['no_telp'] ?? $phone;
+        } elseif (is_object($customerDetails)) {
+            $firstName = $customerDetails->nama ?? $customerDetails->name ?? $customerDetails->first_name ?? $firstName;
+            $email = $customerDetails->email ?? $email;
+            $phone = $customerDetails->no_hp ?? $customerDetails->no_telp ?? $customerDetails->phone ?? $phone;
+        }
+
+        // Siapkan item details default jika tidak diberikan
+        if (empty($itemDetails)) {
+            $namaLapangan = 'Sewa Lapangan';
+            if ($transaksi->jadwal && $transaksi->jadwal->lapangan) {
+                $namaLapangan = $transaksi->jadwal->lapangan->nama;
+            }
+
+            $prefix = ($transaksi->jenis === 'full') ? 'Pelunasan ' : 'DP ';
+            $itemDetails = [
+                [
+                    'id' => (string) $transaksi->order_id,
+                    'price' => $grossAmount,
+                    'quantity' => 1,
+                    'name' => mb_substr($prefix.$namaLapangan, 0, 50),
+                ],
+            ];
+        }
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $transaksi->order_id,
+                'gross_amount' => $grossAmount,
+            ],
+            'customer_details' => [
+                'first_name' => $firstName,
+                'email' => $email,
+                'phone' => $phone,
+            ],
+            'item_details' => $itemDetails,
+        ];
+
+        $snapToken = Snap::getSnapToken($params);
+
+        // Simpan snap_token ke record transaksi di database untuk caching/reusable payment attempt
+        $transaksi->snap_token = $snapToken;
+        $transaksi->save();
+
+        return $snapToken;
+    }
+}
