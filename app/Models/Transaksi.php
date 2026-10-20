@@ -21,6 +21,9 @@ class Transaksi extends Model
         'referensi_midtrans',
         'midtrans_transaction_id',
         'snap_token',
+        'order_id',
+        'payment_type',
+        'transaction_status',
         'dibayar_pada',
     ];
 

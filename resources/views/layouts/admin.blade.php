@@ -56,9 +56,9 @@
             <div class="px-3 py-2 rounded-xl bg-[#e5eeff] flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#416900]"></span>
-                    <span class="text-xs font-semibold text-[#0b1c30]">Arena GOR Utama</span>
+                    <span class="text-xs font-semibold text-[#0b1c30]">{{ config('app.venue_name', 'LapangIn Venue') }}</span>
                 </div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-[#474651]">Aktif</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#416900]">Aktif</span>
             </div>
 
             <!-- Navigation Links -->
@@ -99,14 +99,14 @@
                 </a>
 
                 <!-- 6. Laporan & Analitik -->
-                <a href="#" onclick="alert('Modul Laporan & Analitik dalam persiapan rilis.'); return false;"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]">
+                <a href="{{ route('admin.laporan.index') }}"
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.laporan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">monitoring</span>
                     <span>Laporan &amp; Analitik</span>
                 </a>
 
                 <!-- 7. Pengaturan Venue -->
-                <a href="#" onclick="alert('Pengaturan Venue Arena GOR Utama'); return false;"
+                <a href="{{ route('admin.custom-price') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]">
                     <span class="material-symbols-outlined text-[20px]">settings</span>
                     <span>Pengaturan Venue</span>
@@ -118,11 +118,11 @@
         <div class="p-3.5 rounded-2xl bg-white shadow-sm border border-[#e5eeff] flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-xs">
-                    {{ strtoupper(substr(Auth::user()->nama ?? 'B', 0, 1)) }}
+                    {{ strtoupper(substr(Auth::user()?->nama ?? 'A', 0, 1)) }}
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-xs font-bold text-[#0b1c30] leading-tight">{{ Auth::user()->nama ?? 'Bambang S.' }}</span>
-                    <span class="text-[10px] text-[#474651]">Venue Owner</span>
+                    <span class="text-xs font-bold text-[#0b1c30] leading-tight truncate max-w-[130px]">{{ Auth::user()?->nama ?? 'Administrator' }}</span>
+                    <span class="text-[10px] text-[#474651]">{{ Auth::user()?->role === 'admin' ? 'Owner Admin' : ucfirst(Auth::user()?->role ?? 'Admin') }}</span>
                 </div>
             </div>
             <form method="POST" action="{{ route('logout') }}">
@@ -141,15 +141,26 @@
         <header class="fixed top-0 left-72 right-0 h-16 bg-[#f8f9ff]/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-8 border-b border-[#e5eeff]">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm font-headline font-bold text-[#0b1c30]">Arena GOR Utama Dashboard</span>
+                    <span class="text-sm font-headline font-bold text-[#0b1c30]">{{ config('app.venue_name', 'LapangIn Venue') }} Dashboard</span>
                     <span class="text-[11px] font-semibold uppercase px-2 py-0.5 rounded bg-[#e2dfff] text-[#100563]">
                         Owner Admin
                     </span>
                 </div>
                 <div class="h-4 w-[1px] bg-[#c8c5d3] hidden sm:block"></div>
-                <div class="hidden sm:flex items-center gap-2 text-xs text-[#474651]">
+                <div class="hidden sm:flex items-center gap-2 text-xs text-[#474651]"
+                     x-data="{
+                         clockText: '{{ now()->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i') }} WIB',
+                         startClock() {
+                             setInterval(() => {
+                                 const d = new Date();
+                                 const opt = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' };
+                                 this.clockText = new Intl.DateTimeFormat('id-ID', opt).format(d).replace('pukul ', '') + ' WIB';
+                             }, 1000);
+                         }
+                     }"
+                     x-init="startClock()">
                     <span class="material-symbols-outlined text-[16px]">schedule</span>
-                    <span>Senin, 14 Juli 2025 • 10:45 WIB</span>
+                    <span x-text="clockText">{{ now()->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i') }} WIB</span>
                 </div>
             </div>
 
@@ -159,15 +170,15 @@
                     <span>Server Normal</span>
                 </div>
                 <div class="flex items-center gap-1 text-[#474651]">
-                    <button type="button" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors">
+                    <a href="{{ route('admin.laporan.index') }}" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors" title="Laporan & Notifikasi">
                         <span class="material-symbols-outlined text-[20px]">notifications</span>
-                    </button>
-                    <button type="button" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">help_outline</span>
-                    </button>
+                    </a>
+                    <a href="{{ route('katalog.index') }}" target="_blank" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors" title="Buka Katalog Publik">
+                        <span class="material-symbols-outlined text-[20px]">open_in_new</span>
+                    </a>
                 </div>
-                <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                    {{ strtoupper(substr(Auth::user()->nama ?? 'B', 0, 1)) }}
+                <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-sm" title="{{ Auth::user()?->nama }}">
+                    {{ strtoupper(substr(Auth::user()?->nama ?? 'A', 0, 1)) }}
                 </div>
             </div>
         </header>

@@ -25,6 +25,11 @@ class Pelanggan extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(Jadwal::class, 'pelanggan_id');
     }
 
+    public function getAuthPasswordName(): string
+    {
+        return 'password_hash';
+    }
+
     public function getAuthPassword(): string
     {
         return $this->password_hash;

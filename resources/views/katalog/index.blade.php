@@ -14,8 +14,9 @@
     class="min-h-screen bg-[#f8f9ff] text-[#0b1c30]"
 >
     {{-- Hero --}}
-    <section class="px-4 sm:px-6 lg:px-8 pt-10 pb-8">
+  <section class="px-4 sm:px-6 lg:px-8 pt-28 pb-8">
         <div class="max-w-7xl mx-auto">
+
 
             <div class="inline-flex items-center gap-2 px-3 py-1.5 mb-5 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-bold">
                 <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
@@ -54,45 +55,25 @@
                         type="button"
                         @click="sport = 'Semua'"
                         :class="sport === 'Semua'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
+                            ? 'bg-[#1a146b] text-white shadow-sm'
+                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
                         class="px-4 py-2 rounded-full text-sm font-semibold transition"
                     >
                         Semua <span class="opacity-70">({{ count($katalog) }})</span>
                     </button>
 
-                    <button
-                        type="button"
-                        @click="sport = 'Futsal'"
-                        :class="sport === 'Futsal'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Futsal
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="sport = 'Badminton'"
-                        :class="sport === 'Badminton'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Badminton
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="sport = 'Mini Soccer'"
-                        :class="sport === 'Mini Soccer'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Mini Soccer
-                    </button>
+                    @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->unique()) as $kat)
+                        <button
+                            type="button"
+                            @click="sport = '{{ $kat }}'"
+                            :class="sport === '{{ $kat }}'
+                                ? 'bg-[#1a146b] text-white shadow-sm'
+                                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+                            class="px-4 py-2 rounded-full text-sm font-semibold transition"
+                        >
+                            {{ $kat }}
+                        </button>
+                    @endforeach
 
                 </div>
 
@@ -194,71 +175,94 @@
 
                 @forelse ($katalog as $item)
                     <article
-                        {{-- Filter Alpine.js tetap berjalan karena membaca atribut data --}}
                         x-show="sport === 'Semua' || '{{ $item['kategori'] }}' === sport"
                         x-transition
-                        {{-- LINK DINAMIS menggunakan UUID asli dari database --}}
                         onclick="window.location.href = '{{ route('katalog.show', $item['lapangan_id']) }}'"
-                        class="cursor-pointer bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition overflow-hidden"
+                        class="cursor-pointer bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col"
                     >
-                        <div class="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] flex-1">
 
-                            {{-- Image Placeholder --}}
-                            <div class="relative h-56 md:h-full min-h-[240px] bg-gray-100 overflow-hidden">
+                            {{-- Image Lapangan Asli dari PostgreSQL / Upload --}}
+                            <div class="relative h-60 md:h-full min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
                                 <img
-                                    src="https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=E0E7FF&color=3730A3&size=512"
+                                    src="{{ $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
                                     alt="{{ $item['lapangan_nama'] }}"
-                                    class="w-full h-full object-cover"
+                                   class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
+                                    onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >
-                                <span class="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 text-[#1a146b] text-xs font-bold shadow-sm">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden"></div>
+
+                                <span class="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-xs font-bold shadow-sm">
                                     {{ $item['kategori'] }}
                                 </span>
                             </div>
 
-                            {{-- Content --}}
-                            <div class="p-5 flex flex-col">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p class="text-xs font-bold uppercase tracking-wide text-[#416900]">
-                                            {{ $item['kategori'] }}
-                                        </p>
-                                        <h3 class="mt-1 text-lg font-extrabold text-[#1a146b]">
-                                            {{ $item['lapangan_nama'] }}
-                                        </h3>
+                            {{-- Content Lapangan & Tarif --}}
+                            <div class="p-6 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wider text-[#416900]">
+                                                {{ $item['kategori'] }}
+                                            </p>
+                                            <h3 class="mt-1 text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition">
+                                                {{ $item['lapangan_nama'] }}
+                                            </h3>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold">
+                                                ★ 5.0
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="text-right shrink-0">
-                                        <div class="font-bold text-sm text-gray-900">★ 5.0</div>
+
+                                    @if (!empty($item['deskripsi']))
+                                        <p class="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                                            {{ $item['deskripsi'] }}
+                                        </p>
+                                    @endif
+
+                                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                        <span>Jam Buka: {{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
                                     </div>
                                 </div>
 
-                                <p class="mt-3 text-sm text-gray-500">
-                                    Jam Buka: {{ $item['jam_operasional']['jam_buka'] }} - {{ $item['jam_operasional']['jam_tutup'] }}
-                                </p>
-
                                 <div class="mt-5 pt-4 border-t border-gray-100">
-                                    <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-end justify-between gap-3">
                                         <div>
-                                            <p class="text-xs text-gray-400">Jadwal hari ini</p>
-                                            <p class="text-sm font-bold text-[#416900]">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
+                                            <div class="flex items-baseline gap-1">
+                                                <span class="text-lg font-extrabold text-[#0b1c30]">
+                                                    Rp {{ number_format($item['harga_termurah'] ?? ($item['harga_weekday'] ?? 100000), 0, ',', '.') }}
+                                                </span>
+                                                <span class="text-xs text-gray-500 font-medium">/jam</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-right">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#eaf7d8] text-[#416900]">
+                                                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                                                 {{ collect($item['slots'])->where('is_tersedia', true)->count() }} slot kosong
-                                            </p>
+                                            </span>
                                         </div>
                                     </div>
 
                                     <a
                                         href="{{ route('katalog.show', $item['lapangan_id']) }}"
-                                        class="mt-4 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#1a146b] text-white text-sm font-bold hover:bg-[#312e81] transition"
+                                        class="mt-4 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold shadow-sm transition"
                                     >
-                                        Lihat Detail & Jadwal
+                                        Lihat Detail &amp; Jadwal Lengkap →
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </article>
                 @empty
-                    <div class="col-span-full py-16 text-center">
-                        <h3 class="text-lg font-bold text-gray-700">Venue tidak ditemukan</h3>
-                        <p class="mt-2 text-sm text-gray-500">Belum ada data lapangan di database.</p>
+                    <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-gray-100 p-8">
+                        <span class="text-4xl mb-3 block">🏟️</span>
+                        <h3 class="text-lg font-bold text-gray-800">Venue tidak ditemukan</h3>
+                        <p class="mt-1 text-sm text-gray-500">Belum ada data lapangan yang terdaftar untuk kategori ini.</p>
                     </div>
                 @endforelse
 

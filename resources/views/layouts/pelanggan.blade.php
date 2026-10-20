@@ -4,34 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Pelanggan - Lapangin')</title>
+    <title>@yield('title', 'Pelanggan - ' . config('app.name', 'LapangIn'))</title>
+
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 text-gray-900 min-h-screen">
-    <div class="min-h-screen">
-        <header class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-                <a href="{{ route('pelanggan.dashboard') }}" class="text-2xl font-extrabold text-indigo-950">
-                    Lapangin
-                </a>
+<body class="bg-[#f8f9ff] text-[#0b1c30] min-h-screen flex flex-col font-sans antialiased">
+    <div class="min-h-screen flex flex-col">
+        {{-- Unified Pelanggan Navbar --}}
+        @include('layouts.navigation-pelanggan')
 
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-600">{{ Auth::user()->nama }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-sm font-semibold text-indigo-900 hover:text-indigo-700">
-                            Keluar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </header>
-
-        <main class="max-w-7xl mx-auto px-6 py-10">
+        {{-- Main Content --}}
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 flex-1 w-full">
             @yield('content')
         </main>
+
+        {{-- Unified Pelanggan Footer --}}
+        @include('layouts.footer-pelanggan')
     </div>
 </body>
 </html>

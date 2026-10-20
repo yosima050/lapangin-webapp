@@ -17,9 +17,12 @@ class JadwalService
     public function getSlotStatus(string $lapanganId, string $tanggal): array
     {
         $lapangan = Lapangan::findOrFail($lapanganId);
+        Jadwal::autoCancelExpiredPendingBookings();
+
         $daftarJadwal = Jadwal::query()
             ->where('lapangan_id', $lapanganId)
             ->whereDate('tanggal', $tanggal)
+            ->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])
             ->get();
 
         $jamBuka = $this->parseTime($lapangan->jam_buka);
@@ -80,6 +83,10 @@ class JadwalService
     {
         $status = strtolower((string) $jadwal->status);
         $statusPembayaran = strtolower((string) $jadwal->status_pembayaran);
+
+        if (in_array($status, ['dibatalkan', 'cancelled', 'rejected'], true)) {
+            return 'tersedia';
+        }
 
         return in_array($status, ['pending', 'menunggu_pembayaran'], true)
             || $statusPembayaran === 'belum_bayar'

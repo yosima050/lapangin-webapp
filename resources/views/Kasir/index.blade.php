@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $bookingCode = $activeBooking->kode_qr ?? $activeBooking->token_manual ?? ($activeBooking ? substr($activeBooking->id, 0, 8) : '-');
+    $bookingCode = $activeBooking?->kode_qr ?? $activeBooking?->token_manual ?? ($activeBooking ? substr($activeBooking->id, 0, 8) : '-');
     $customerName = $activeBooking?->pelanggan?->nama ?? $activeBooking?->nama_tamu ?? '-';
     $customerPhone = $activeBooking?->pelanggan?->no_hp ?? $activeBooking?->no_wa_tamu ?? '-';
     $courtName = $activeBooking?->lapangan?->nama ?? '-';
@@ -147,7 +147,7 @@
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-lg">search</span>
                             <input type="text" name="code" x-model="bookingCode"
                                    class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-sm font-bold tracking-wider outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] transition-all border border-[#e5eeff]"
-                                   placeholder="Contoh: LPGN-20250513-8821">
+                                   placeholder="Contoh: LPGN-{{ date('Ymd') }}-8821">
                         </div>
                         <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0">
                             <span class="material-symbols-outlined text-base">check</span>
@@ -284,7 +284,7 @@
                             </div>
                             <div class="text-xs text-[#474651] mt-1 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-sm text-[#1a146b]">groups</span>
-                                <span>{{ $activeBooking->nama_tamu ?: 'Penyewa Terdaftar LapangIn' }}</span>
+                                <span>{{ $activeBooking?->nama_tamu ?: 'Penyewa Terdaftar LapangIn' }}</span>
                             </div>
                         </div>
 
@@ -297,7 +297,7 @@
                             </div>
                             <div class="text-xs text-[#474651] mt-1 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-sm text-[#416900]">sports</span>
-                                <span>{{ $activeBooking->catatan_kasir ?: 'Termasuk Rompi Latihan & Bola Match' }}</span>
+                                <span>{{ $activeBooking?->catatan_kasir ?: 'Termasuk Rompi Latihan & Bola Match' }}</span>
                             </div>
                         </div>
                     </div>
