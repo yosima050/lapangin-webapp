@@ -64,4 +64,32 @@ class Jadwal extends Model
     {
         return $this->hasMany(Reschedule::class, 'jadwal_id');
     }
+
+    /**
+     * Otomatis batalkan reservasi pending belum bayar yang telah melebihi batas waktu 10 menit.
+     */
+    public static function autoCancelExpiredPendingBookings(): int
+    {
+        $expiredJadwals = static::where('status', 'pending')
+            ->where('status_pembayaran', 'belum_bayar')
+            ->where('created_at', '<=', now()->subMinutes(10))
+            ->get();
+
+        $count = 0;
+        foreach ($expiredJadwals as $jadwal) {
+            $jadwal->update([
+                'status' => 'dibatalkan',
+            ]);
+
+            Transaksi::where('jadwal_id', $jadwal->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'gagal',
+                ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
 }

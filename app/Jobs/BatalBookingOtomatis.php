@@ -32,15 +32,20 @@ class BatalBookingOtomatis implements ShouldQueue
 
         // Pastikan jadwal ditemukan dan statusnya masih pending
         if ($jadwal && $jadwal->status === 'pending') {
-            
+            // Mencegah auto-cancel prematur saat menggunakan queue driver sync (seperti di testing atau local dev)
+            if ($jadwal->created_at && \Carbon\Carbon::parse($jadwal->created_at)->gt(now()->subMinutes(9)->subSeconds(50))) {
+                return;
+            }
+
             // Cek status transaksi yang terkait dengan jadwal ini
             $transaksi = Transaksi::where('jadwal_id', $this->jadwal_id)->first();
 
             // Jika belum lunas (masih pending)
-            if (!$transaksi || $transaksi->status === 'pending') {
+            if (!$transaksi || in_array($transaksi->status, ['pending', 'gagal'], true)) {
                 
-                // Kembalikan slot menjadi kosong/tersedia
-                $jadwal->status = 'tersedia';
+                // Kembalikan slot menjadi dibatalkan agar exclusion constraint PostgreSQL membuka kembali slot
+                $jadwal->status = 'dibatalkan';
+                $jadwal->status_pembayaran = 'belum_bayar';
                 $jadwal->save();
 
                 // Update status transaksi menjadi gagal

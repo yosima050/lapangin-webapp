@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsKasir;
+use App\Http\Middleware\IsPelanggan;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,11 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'IsAdmin' => \App\Http\Middleware\IsAdmin::class,
-            'IsKasir' => \App\Http\Middleware\IsKasir::class,
-            'IsPelanggan' => \App\Http\Middleware\IsPelanggan::class,
+            'IsAdmin' => IsAdmin::class,
+            'IsKasir' => IsKasir::class,
+            'IsPelanggan' => IsPelanggan::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/webhook',
+            'api/midtrans/webhook',
+            'api/midtrans/notification',
+            'midtrans/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();   
+    })->create();

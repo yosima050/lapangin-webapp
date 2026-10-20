@@ -9,6 +9,8 @@ class RiwayatController extends Controller
 {
     public function index(Request $request)
     {
+        \App\Models\Jadwal::autoCancelExpiredPendingBookings();
+
         $pelanggan = $request->user();
 
         $jadwals = $pelanggan->jadwals()
