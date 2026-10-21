@@ -73,6 +73,19 @@ Route::middleware(['auth', 'IsKasir'])->prefix('kasir')->name('kasir.')->group(f
     Route::get('/', [KasirController::class, 'index'])
         ->name('index');
 
+    // Pemindai Kamera QR Code & Lookup Tiket (Sprint 4)
+    Route::get('/scan', [KasirController::class, 'scan'])
+        ->name('scan');
+
+    Route::get('/ticket/lookup', [KasirController::class, 'lookupTicket'])
+        ->name('ticket.lookup');
+
+    Route::post('/ticket/lookup', [KasirController::class, 'lookupTicket'])
+        ->name('ticket.lookup.post');
+
+    Route::get('/ticket/{code}', [KasirController::class, 'lookupTicket'])
+        ->name('ticket.detail');
+
     Route::post('/checkin/{id}', [KasirController::class, 'checkin'])
         ->name('checkin');
 
