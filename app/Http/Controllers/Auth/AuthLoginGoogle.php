@@ -19,13 +19,18 @@ class AuthLoginGoogle extends Controller
             ->redirect();
     }
 
-    public function google_callback()
+    public function google_callback(Request $request)
     {
+        // Jika pengguna membatalkan proses di Google atau parameter code tidak ada
+        if ($request->has('error') || ! $request->has('code')) {
+            return redirect()->route('login')->with('status', 'Login dengan akun Google dibatalkan.');
+        }
+
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Gagal masuk dengan Google: ' . $e->getMessage(),
+                'email' => 'Proses masuk dengan Google dibatalkan atau sesi telah kedaluwarsa. Silakan coba kembali.',
             ]);
         }
 
