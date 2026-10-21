@@ -19,7 +19,7 @@
 
                 <div class="flex items-center gap-2 font-bold text-[#1a146b]">
                     <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#1a146b] text-white">2</span>
-                    <span>Pembayaran (<span id="breadcrumb-tipe-text">{{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}</span>)</span>
+                    <span>Pembayaran ({{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }})</span>
                 </div>
 
                 <span class="h-0.5 w-8 bg-[#d3e4fe]"></span>
@@ -46,7 +46,7 @@
             </a>
 
             <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-[#0b1c30] sm:text-3xl">
-                Checkout Booking &amp; Pembayaran <span id="title-tipe-text">{{ $tipeBayar === 'full' ? 'Lunas (100%)' : 'DP (50%)' }}</span>
+                Checkout Booking &amp; Pembayaran {{ $tipeBayar === 'full' ? 'Lunas (100%)' : 'DP (50%)' }}
             </h1>
 
             <p class="mt-2 text-sm leading-6 text-[#474651]">
@@ -148,27 +148,25 @@
                             Pilih Skema &amp; Metode Pembayaran
                         </h2>
 
-                        <span id="section-badge-tipe" class="rounded-full bg-[#acf847] px-3 py-1 text-xs font-bold text-[#304f00]">
+                        <span class="rounded-full bg-[#acf847] px-3 py-1 text-xs font-bold text-[#304f00]">
                             {{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}
                         </span>
                     </div>
 
-                    {{-- Selector Tipe Pembayaran (Radio Card Interaktif Tanpa Reload) --}}
+                    {{-- Selector Tipe Pembayaran (Radio Card Interaktif) --}}
                     <div class="mb-5">
                         <label class="block text-xs font-bold uppercase tracking-wider text-[#474651] mb-2.5">
                             Pilih Tipe Pembayaran
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {{-- Opsi A: DP 50% --}}
-                            <button type="button"
-                                    id="card-tipe-dp"
-                                    onclick="setTipeBayar('dp')"
-                                    class="text-left w-full relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                            <a href="{{ $dpUrl }}"
+                               class="relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                 <div class="flex items-center justify-between">
-                                    <span id="label-tipe-dp" class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
+                                    <span class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
                                         Bayar DP (50%)
                                     </span>
-                                    <span id="radio-tipe-dp" class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
+                                    <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                         @if($tipeBayar === 'dp')
                                             <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
                                         @endif
@@ -180,18 +178,16 @@
                                 <p class="mt-1 text-xs leading-5 text-[#474651]">
                                     Bayar uang muka Rp{{ number_format($nominalDp, 0, ',', '.') }}, sisa dilunasi di meja kasir saat datang.
                                 </p>
-                            </button>
+                            </a>
 
                             {{-- Opsi B: Bayar Lunas 100% --}}
-                            <button type="button"
-                                    id="card-tipe-full"
-                                    onclick="setTipeBayar('full')"
-                                    class="text-left w-full relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                            <a href="{{ $fullUrl }}"
+                               class="relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                 <div class="flex items-center justify-between">
-                                    <span id="label-tipe-full" class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
+                                    <span class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
                                         Bayar Lunas (100%)
                                     </span>
-                                    <span id="radio-tipe-full" class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
+                                    <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                         @if($tipeBayar === 'full')
                                             <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
                                         @endif
@@ -203,7 +199,7 @@
                                 <p class="mt-1 text-xs leading-5 text-[#416900] font-semibold">
                                     Bayar lunas Rp{{ number_format($totalHarga, 0, ',', '.') }}, langsung terverifikasi tanpa antre kasir.
                                 </p>
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -280,14 +276,14 @@
                         <div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-white p-4 border border-[#e5eeff]">
                             <div>
                                 <p class="text-xs font-bold text-[#0b1c30]">
-                                    Nominal yang Harus Dibayar (<span id="snap-nominal-label">{{ $tipeBayar === 'full' ? '100% Lunas' : '50% DP' }}</span>)
+                                    Nominal yang Harus Dibayar ({{ $tipeBayar === 'full' ? '100% Lunas' : '50% DP' }})
                                 </p>
-                                <p id="snap-nominal-sub" class="mt-0.5 text-[11px] text-[#777682]">
+                                <p class="mt-0.5 text-[11px] text-[#777682]">
                                     {{ $tipeBayar === 'full' ? 'Pembayaran lunas online penuh via Midtrans Snap' : 'Pembayaran awal uang muka via Midtrans Snap' }}
                                 </p>
                             </div>
 
-                            <span id="snap-nominal-val" class="shrink-0 text-right font-extrabold text-base text-[#1a146b]">
+                            <span class="shrink-0 text-right font-extrabold text-base text-[#1a146b]">
                                 Rp{{ number_format($nominalBayar, 0, ',', '.') }}
                             </span>
                         </div>
@@ -379,26 +375,26 @@
                         {{-- Panel Pembayaran (DP vs Full) --}}
                         <div class="mt-5 rounded-xl bg-[#1a146b] p-5 text-white">
                             <div class="flex items-center justify-between gap-3">
-                                <span id="sidebar-panel-title" class="text-xs font-bold uppercase tracking-wide text-[#e2dfff]">
+                                <span class="text-xs font-bold uppercase tracking-wide text-[#e2dfff]">
                                     {{ $tipeBayar === 'full' ? 'Total Pembayaran Lunas' : 'DP yang Harus Dibayar' }}
                                 </span>
 
-                                <span id="sidebar-panel-badge" class="rounded-md bg-[#416900] px-2 py-1 text-xs font-bold text-white">
+                                <span class="rounded-md bg-[#416900] px-2 py-1 text-xs font-bold text-white">
                                     {{ $tipeBayar === 'full' ? '100% LUNAS' : '50% DP' }}
                                 </span>
                             </div>
 
-                            <p id="sidebar-panel-amount" class="mt-3 text-2xl font-extrabold">
+                            <p class="mt-3 text-2xl font-extrabold">
                                 Rp{{ number_format($nominalBayar, 0, ',', '.') }}
                             </p>
 
                             <div class="mt-4 border-t border-white/20 pt-4">
                                 <div class="flex items-center justify-between gap-3">
-                                    <span id="sidebar-status-label" class="text-sm text-[#e2dfff]">
+                                    <span class="text-sm text-[#e2dfff]">
                                         {{ $tipeBayar === 'full' ? 'Status pelunasan' : 'Sisa pembayaran di kasir' }}
                                     </span>
 
-                                    <span id="sidebar-status-val" class="text-right font-bold text-[#acf847]">
+                                    <span class="text-right font-bold text-[#acf847]">
                                         @if($tipeBayar === 'full')
                                             Rp0 (Lunas Online)
                                         @else
@@ -407,7 +403,7 @@
                                     </span>
                                 </div>
 
-                                <p id="sidebar-status-note" class="mt-2 text-xs leading-5 text-[#e2dfff]">
+                                <p class="mt-2 text-xs leading-5 text-[#e2dfff]">
                                     @if($tipeBayar === 'full')
                                         Pembayaran sewa lunas online. Tidak ada tagihan sewa lapangan lagi saat tiba di kasir venue.
                                     @else
@@ -466,129 +462,6 @@
 {{-- Integrasi Script Midtrans Snap SDK & Timer Countdown 10 Menit --}}
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 <script>
-    // Konfigurasi dinamis Tipe Pembayaran (DP vs Full) tanpa refresh halaman
-    const totalHarga = {{ (float) $totalHarga }};
-    const nominalDp = {{ (float) $nominalDp }};
-    window.currentTipeBayar = "{{ $tipeBayar }}";
-
-    function formatRupiah(num) {
-        return 'Rp' + new Intl.NumberFormat('id-ID').format(num);
-    }
-
-    window.setTipeBayar = function(type) {
-        if (window.currentTipeBayar === type) return;
-        window.currentTipeBayar = type;
-
-        // Perbarui query parameter di URL secara halus tanpa reload browser
-        try {
-            const url = new URL(window.location.href);
-            url.searchParams.set('tipe_bayar', type);
-            window.history.replaceState({}, '', url);
-        } catch (e) {}
-
-        const isFull = (type === 'full');
-        const nominal = isFull ? totalHarga : nominalDp;
-        const sisa = isFull ? 0 : (totalHarga - nominalDp);
-
-        // 1. Breadcrumb, Judul, dan Badge
-        const breadcrumb = document.getElementById('breadcrumb-tipe-text');
-        if (breadcrumb) breadcrumb.textContent = isFull ? 'Lunas 100%' : 'DP 50%';
-
-        const titleTipe = document.getElementById('title-tipe-text');
-        if (titleTipe) titleTipe.textContent = isFull ? 'Lunas (100%)' : 'DP (50%)';
-
-        const sectionBadge = document.getElementById('section-badge-tipe');
-        if (sectionBadge) sectionBadge.textContent = isFull ? 'Lunas 100%' : 'DP 50%';
-
-        // 2. Styling Tombol Radio Card
-        const btnDp = document.getElementById('card-tipe-dp');
-        const btnFull = document.getElementById('card-tipe-full');
-        const radioDp = document.getElementById('radio-tipe-dp');
-        const radioFull = document.getElementById('radio-tipe-full');
-        const textDp = document.getElementById('label-tipe-dp');
-        const textFull = document.getElementById('label-tipe-full');
-
-        const activeClasses = ['border-[#1a146b]', 'bg-[#eff4ff]', 'shadow-sm', 'ring-1', 'ring-[#1a146b]'];
-        const inactiveClasses = ['border-[#e8edfa]', 'bg-white'];
-
-        if (isFull) {
-            if (btnFull) {
-                btnFull.classList.add(...activeClasses);
-                btnFull.classList.remove(...inactiveClasses);
-            }
-            if (btnDp) {
-                btnDp.classList.remove(...activeClasses);
-                btnDp.classList.add(...inactiveClasses);
-            }
-            if (radioFull) {
-                radioFull.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center border-[#1a146b] bg-[#1a146b]';
-                radioFull.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-white"></span>';
-            }
-            if (radioDp) {
-                radioDp.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center border-gray-300';
-                radioDp.innerHTML = '';
-            }
-            if (textFull) textFull.className = 'text-xs font-bold uppercase tracking-wide text-[#1a146b]';
-            if (textDp) textDp.className = 'text-xs font-bold uppercase tracking-wide text-[#474651]';
-        } else {
-            if (btnDp) {
-                btnDp.classList.add(...activeClasses);
-                btnDp.classList.remove(...inactiveClasses);
-            }
-            if (btnFull) {
-                btnFull.classList.remove(...activeClasses);
-                btnFull.classList.add(...inactiveClasses);
-            }
-            if (radioDp) {
-                radioDp.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center border-[#1a146b] bg-[#1a146b]';
-                radioDp.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-white"></span>';
-            }
-            if (radioFull) {
-                radioFull.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center border-gray-300';
-                radioFull.innerHTML = '';
-            }
-            if (textDp) textDp.className = 'text-xs font-bold uppercase tracking-wide text-[#1a146b]';
-            if (textFull) textFull.className = 'text-xs font-bold uppercase tracking-wide text-[#474651]';
-        }
-
-        // 3. Rincian Card Midtrans Snap
-        const snapLabel = document.getElementById('snap-nominal-label');
-        if (snapLabel) snapLabel.textContent = isFull ? '100% Lunas' : '50% DP';
-
-        const snapSub = document.getElementById('snap-nominal-sub');
-        if (snapSub) snapSub.textContent = isFull ? 'Pembayaran lunas online penuh via Midtrans Snap' : 'Pembayaran awal uang muka via Midtrans Snap';
-
-        const snapVal = document.getElementById('snap-nominal-val');
-        if (snapVal) snapVal.textContent = formatRupiah(nominal);
-
-        // 4. Panel Sidebar Ringkasan Kanan
-        const sideTitle = document.getElementById('sidebar-panel-title');
-        if (sideTitle) sideTitle.textContent = isFull ? 'Total Pembayaran Lunas' : 'DP yang Harus Dibayar';
-
-        const sideBadge = document.getElementById('sidebar-panel-badge');
-        if (sideBadge) sideBadge.textContent = isFull ? '100% LUNAS' : '50% DP';
-
-        const sideAmount = document.getElementById('sidebar-panel-amount');
-        if (sideAmount) sideAmount.textContent = formatRupiah(nominal);
-
-        const sideStatusLabel = document.getElementById('sidebar-status-label');
-        if (sideStatusLabel) sideStatusLabel.textContent = isFull ? 'Status pelunasan' : 'Sisa pembayaran di kasir';
-
-        const sideStatusVal = document.getElementById('sidebar-status-val');
-        if (sideStatusVal) sideStatusVal.textContent = isFull ? 'Rp0 (Lunas Online)' : formatRupiah(sisa);
-
-        const sideStatusNote = document.getElementById('sidebar-status-note');
-        if (sideStatusNote) {
-            sideStatusNote.textContent = isFull
-                ? 'Pembayaran sewa lunas online. Tidak ada tagihan sewa lapangan lagi saat tiba di kasir venue.'
-                : 'Sisa tagihan dibayarkan di kasir. Pastikan pembayaran DP sudah terverifikasi sebelum menggunakan e-tiket.';
-        }
-
-        // 5. Teks Tombol Bayar Sekarang
-        const payText = document.getElementById('pay-button-text');
-        if (payText) payText.textContent = `Bayar Sekarang (${formatRupiah(nominal)})`;
-    };
-
     document.addEventListener('DOMContentLoaded', function () {
         const payButton = document.getElementById('pay-button');
         const countdownDisplay = document.getElementById('countdown-display');
@@ -681,7 +554,7 @@
                     tanggal: "{{ $tanggal }}",
                     jam_mulai: "{{ $jamMulai }}",
                     durasi: {{ $durasi }},
-                    tipe_bayar: window.currentTipeBayar,
+                    tipe_bayar: "{{ $tipeBayar }}",
                     jadwal_id: "{{ $jadwalId ?? '' }}",
                     booking_id: "{{ $bookingId ?? ($jadwalId ?? '') }}"
                 })

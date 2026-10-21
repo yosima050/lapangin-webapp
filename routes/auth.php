@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\AuthLoginGoogle;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -17,15 +16,6 @@ Route::middleware('guest')->group(function () {
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::get('/auth/google/redirect', [AuthLoginGoogle::class, 'google_redirect'])
-        ->name('auth.google');
-    Route::get('/auth/google/callback', [AuthLoginGoogle::class, 'google_callback'])
-        ->name('auth.google.callback');
-    Route::get('/auth/google/complete', [AuthLoginGoogle::class, 'completeForm'])
-        ->name('auth.google.complete');
-    Route::post('/auth/google/complete', [AuthLoginGoogle::class, 'storeComplete'])
-        ->name('auth.google.complete.store');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
