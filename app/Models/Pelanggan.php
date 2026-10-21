@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 
-#[Fillable(['nama', 'name', 'email', 'email_verified_at', 'no_hp', 'password_hash', 'role'])]
+#[Fillable(['nama', 'name', 'email', 'no_hp', 'password_hash', 'role'])]
 #[Hidden(['password_hash'])]
 class Pelanggan extends Authenticatable implements MustVerifyEmailContract
 {
@@ -47,8 +47,6 @@ class Pelanggan extends Authenticatable implements MustVerifyEmailContract
 
     protected function casts(): array
     {
-        return [
-            'email_verified_at' => 'datetime',
-        ];
+        return [];
     }
 }

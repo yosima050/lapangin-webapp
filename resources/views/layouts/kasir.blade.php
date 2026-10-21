@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Kasir POS - LapangIn')</title>
 
     <!-- Google Fonts & Material Symbols -->
@@ -61,13 +60,6 @@
 
             <!-- Navigation Links -->
             <nav class="flex flex-col gap-1.5 mt-1">
-                <!-- Pemindai Kamera QR Tiket (Sprint 4) -->
-                <a href="{{ route('kasir.scan') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.scan') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
-                    <span>Scan QR Tiket</span>
-                </a>
-
                 <!-- 1. Check-in & Validasi -->
                 <a href="{{ route('kasir.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.index') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">

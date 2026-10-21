@@ -43,18 +43,6 @@
         </div>
     @endif
 
-    @if (session('error'))
-        <div class="p-4 rounded-2xl bg-[#ffdad6] border border-[#ba1a1a]/30 flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#ba1a1a]">error</span>
-                <span class="text-xs font-bold text-[#ba1a1a]">{{ session('error') }}</span>
-            </div>
-            <button type="button" @click="$el.parentElement.remove()" class="text-[#ba1a1a] hover:text-[#410002]">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-        </div>
-    @endif
-
     <!-- Subheader Strip -->
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
@@ -104,10 +92,10 @@
                             <p class="text-xs text-[#777682]">Kamera Scanner &amp; 2D Optical Reader</p>
                         </div>
                     </div>
-                    <a href="{{ route('kasir.scan') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1a146b] hover:bg-[#2b249b] text-white text-[11px] font-extrabold transition-all shadow-sm">
-                        <span class="material-symbols-outlined text-sm">videocam</span>
-                        <span>Buka Kamera Interaktif</span>
-                    </a>
+                    <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#acf847] text-[#102000] text-[11px] font-extrabold">
+                        <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                        Kamera Standby
+                    </span>
                 </div>
 
                 <!-- Camera Viewfinder with Laser & Corner Accents -->

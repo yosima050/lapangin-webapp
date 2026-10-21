@@ -1,36 +1,6 @@
 <x-guest-layout>
-    @php
-        $isRegister = ($initialTab ?? null) === 'register'
-            || request()->routeIs('register')
-            || request()->is('*register*')
-            || old('name') !== null
-            || old('no_hp') !== null
-            || $errors->hasAny(['name', 'no_hp', 'password_confirmation']);
-        $activeTab = $isRegister ? 'register' : 'login';
-    @endphp
-
     <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between"
-         x-data="{
-             tab: '{{ $activeTab }}',
-             showPassword: false,
-             showPasswordConfirm: false,
-             switchTab(target) {
-                 this.tab = target;
-                 const url = target === 'register' ? '{{ route('register') }}' : '{{ route('login') }}';
-                 if (window.location.pathname !== new URL(url).pathname) {
-                     window.history.pushState({ tab: target }, '', url);
-                 }
-             },
-             init() {
-                 window.addEventListener('popstate', (e) => {
-                     if (window.location.pathname.includes('register')) {
-                         this.tab = 'register';
-                     } else {
-                         this.tab = 'login';
-                     }
-                 });
-             }
-         }">
+         x-data="{ showPassword: false }">
 
         {{-- Top Minimalist Navigation Bar --}}
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-6 sm:mb-10">
@@ -50,10 +20,10 @@
             </div>
         </div>
 
-        {{-- Main Content Grid: 2 Columns on Desktop, Centered on Mobile --}}
+        {{-- Main Content Grid: 2 Columns on Desktop (Image 1), Centered on Mobile (Image 3) --}}
         <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center flex-1 my-auto">
 
-            {{-- Left Column: Brand Hero & Arena Showcase --}}
+            {{-- Left Column: Brand Hero & Arena Showcase (Desktop only - Image 1) --}}
             <div class="hidden lg:flex lg:col-span-6 flex-col justify-center pr-4">
                 <div class="mb-6">
                     <x-application-logo />
@@ -96,472 +66,167 @@
                 </div>
             </div>
 
-            {{-- Right Column: Interactive Auth Card (Single Unified Container) --}}
+            {{-- Right Column: Interactive Login Card (Image 1 Desktop & Image 3 Mobile) --}}
             <div class="lg:col-span-6 flex justify-center w-full">
-                <div class="w-full max-w-lg bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
+                <div class="w-full max-w-md bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
 
-                    {{-- Top Tabs Segmented Control (Smooth Client-Side Switch without Full Reload) --}}
-                    <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-6 border border-[#dce9ff]">
-                        <button
-                            type="button"
-                            @click="switchTab('login')"
-                            :class="tab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer"
-                        >
-                            <span x-show="tab === 'login'" class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                    {{-- Top Tabs Segmented Control --}}
+                    <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-8 border border-[#dce9ff]">
+                        <div class="flex-1 py-2.5 px-3 rounded-xl bg-white text-[#1a146b] font-headline font-bold text-xs sm:text-sm shadow-xs flex items-center justify-center gap-2 text-center">
+                            <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                             <span class="material-symbols-outlined text-base">login</span>
                             <span>Masuk ke Akun</span>
-                        </button>
+                        </div>
 
-                        <button
-                            type="button"
-                            @click="switchTab('register')"
-                            :class="tab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer"
-                        >
-                            <span x-show="tab === 'register'" class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                        <a href="{{ route('register') }}"
+                           class="flex-1 py-2.5 px-3 rounded-xl text-gray-500 hover:text-[#1a146b] font-headline font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition">
                             <span class="material-symbols-outlined text-base">person_add</span>
                             <span>Daftar Akun Baru</span>
+                        </a>
+                    </div>
+
+                    {{-- Card Heading --}}
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
+                            Selamat Datang Kembali
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                            Masuk untuk mengelola jadwal bertanding dan tim Anda.
+                        </p>
+                    </div>
+
+                    {{-- Session Status --}}
+                    @if (session('status'))
+                        <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                            <span>{{ session('status') }}</span>
+                        </div>
+                    @endif
+
+                    {{-- Login Form --}}
+                    <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                        @csrf
+
+                        {{-- Email Input --}}
+                        <div>
+                            <label for="email" class="text-[11px] font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
+                                EMAIL ATAU NOMOR WHATSAPP
+                            </label>
+
+                            <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
+                                <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
+                                    badge
+                                </span>
+                                <input
+                                    id="email"
+                                    type="text"
+                                    name="email"
+                                    value="{{ old('email') }}"
+                                    required
+                                    autofocus
+                                    autocomplete="username"
+                                    placeholder="nama@email.com atau 0812xxxx"
+                                    class="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
+                                >
+                            </div>
+
+                            @if ($errors->has('email'))
+                                <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">error</span>
+                                    <span>{{ $errors->first('email') }}</span>
+                                </p>
+                            @endif
+                        </div>
+
+                        {{-- Password Input --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="password" class="text-[11px] font-bold uppercase tracking-wider text-gray-700">
+                                    KATA SANDI
+                                </label>
+
+                                @if (Route::has('password.request'))
+                                    <a href="{{ route('password.request') }}"
+                                       class="text-xs font-bold text-[#1a146b] hover:text-[#312e81] hover:underline transition">
+                                        Lupa Kata Sandi?
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
+                                <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
+                                    lock
+                                </span>
+                                <input
+                                    id="password"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
+                                    placeholder="••••••••••••"
+                                    class="w-full pl-11 pr-11 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
+                                >
+                                <button
+                                    type="button"
+                                    @click="showPassword = !showPassword"
+                                    class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
+                                    tabindex="-1"
+                                >
+                                    <span class="material-symbols-outlined text-lg"
+                                          x-text="showPassword ? 'visibility_off' : 'visibility'">
+                                    </span>
+                                </button>
+                            </div>
+
+                            @if ($errors->has('password'))
+                                <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">error</span>
+                                    <span>{{ $errors->first('password') }}</span>
+                                </p>
+                            @endif
+                        </div>
+
+                        {{-- Remember Me & Security Badge --}}
+                        <div class="flex items-center justify-between pt-1">
+                            <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer">
+                                <input
+                                    id="remember_me"
+                                    type="checkbox"
+                                    name="remember"
+                                    class="rounded border-gray-300 text-[#1a146b] shadow-xs focus:ring-[#acf847]"
+                                >
+                                <span class="text-xs font-semibold text-gray-600">
+                                    Ingat Saya di Perangkat Ini
+                                </span>
+                            </label>
+
+                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#416900]">
+                                <span class="material-symbols-outlined text-xs">lock</span>
+                                <span>Sesi Aman</span>
+                            </span>
+                        </div>
+
+                        {{-- Submit Button --}}
+                        <button
+                            type="submit"
+                            class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
+                        >
+                            <span>Masuk Sekarang</span>
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold transition group-hover:translate-x-0.5">
+                                →
+                            </span>
                         </button>
-                    </div>
+                    </form>
 
-                    {{-- ======================================================== --}}
-                    {{-- TAB 1: FORM LOGIN --}}
-                    {{-- ======================================================== --}}
-                    <div x-show="tab === 'login'"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
-
-                        <div class="mb-5">
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
-                                Selamat Datang Kembali
-                            </h2>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                                Masuk untuk mengelola jadwal bertanding dan tim Anda.
-                            </p>
-                        </div>
-
-                        {{-- Session Status --}}
-                        @if (session('status'))
-                            <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">check_circle</span>
-                                <span>{{ session('status') }}</span>
-                            </div>
-                        @endif
-
-                        {{-- Google SSO Button --}}
-                        <div class="mb-5">
-                            <a href="{{ route('auth.google') }}"
-                               class="w-full py-3 px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-headline font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-3 group">
-                                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                                </svg>
-                                <span>Lanjutkan dengan Google</span>
+                    {{-- Mobile Prompt Link --}}
+                    <div class="mt-6 pt-5 border-t border-gray-100 text-center">
+                        <p class="text-xs text-gray-500">
+                            Belum punya akun LapangIn?
+                            <a href="{{ route('register') }}" class="font-extrabold text-[#1a146b] hover:underline ml-1">
+                                Daftar Sekarang ↗
                             </a>
-
-                            <div class="relative flex items-center justify-center mt-5">
-                                <div class="border-t border-gray-200 w-full"></div>
-                                <span class="bg-white px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider absolute">atau masuk dengan email</span>
-                            </div>
-                        </div>
-
-                        {{-- Login Form --}}
-                        <form method="POST" action="{{ route('login') }}" class="space-y-4">
-                            @csrf
-
-                            {{-- Email / WhatsApp Input --}}
-                            <div>
-                                <label for="login_email" class="text-[11px] font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
-                                    EMAIL ATAU NOMOR WHATSAPP
-                                </label>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
-                                    <input
-                                        id="login_email"
-                                        type="text"
-                                        name="email"
-                                        value="{{ old('email') }}"
-                                        required
-                                        autofocus
-                                        autocomplete="username"
-                                        placeholder="nama@email.com atau 0812xxxx"
-                                        class="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                </div>
-
-                                @if ($activeTab === 'login' && $errors->has('email'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('email') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- Password Input --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label for="login_password" class="text-[11px] font-bold uppercase tracking-wider text-gray-700">
-                                        KATA SANDI
-                                    </label>
-
-                                    @if (Route::has('password.request'))
-                                        <a href="{{ route('password.request') }}"
-                                           class="text-xs font-bold text-[#1a146b] hover:text-[#312e81] hover:underline transition">
-                                            Lupa Kata Sandi?
-                                        </a>
-                                    @endif
-                                </div>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
-                                    <input
-                                        id="login_password"
-                                        :type="showPassword ? 'text' : 'password'"
-                                        name="password"
-                                        required
-                                        autocomplete="current-password"
-                                        placeholder="••••••••••••"
-                                        class="w-full pl-11 pr-11 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                    <button
-                                        type="button"
-                                        @click="showPassword = !showPassword"
-                                        class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
-                                        tabindex="-1"
-                                    >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
-                                    </button>
-                                </div>
-
-                                @if ($activeTab === 'login' && $errors->has('password'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('password') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- Remember Me & Security Badge --}}
-                            <div class="flex items-center justify-between pt-1">
-                                <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        id="remember_me"
-                                        type="checkbox"
-                                        name="remember"
-                                        class="rounded border-gray-300 text-[#1a146b] shadow-xs focus:ring-[#acf847]"
-                                    >
-                                    <span class="text-xs font-semibold text-gray-600">
-                                        Ingat Saya di Perangkat Ini
-                                    </span>
-                                </label>
-
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#416900]">
-                                    <span class="material-symbols-outlined text-xs">lock</span>
-                                    <span>Sesi Aman</span>
-                                </span>
-                            </div>
-
-                            {{-- Submit Button --}}
-                            <button
-                                type="submit"
-                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
-                            >
-                                <span>Masuk Sekarang</span>
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold transition group-hover:translate-x-0.5">
-                                    →
-                                </span>
-                            </button>
-                        </form>
-
-                        {{-- Switch Prompt to Register --}}
-                        <div class="mt-6 pt-5 border-t border-gray-100 text-center">
-                            <p class="text-xs text-gray-500">
-                                Belum punya akun LapangIn?
-                                <button
-                                    type="button"
-                                    @click="switchTab('register')"
-                                    class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
-                                    Daftar Sekarang ↗
-                                </button>
-                            </p>
-                        </div>
+                        </p>
                     </div>
-
-                    {{-- ======================================================== --}}
-                    {{-- TAB 2: FORM REGISTER --}}
-                    {{-- ======================================================== --}}
-                    <div x-show="tab === 'register'"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-cloak>
-
-                        <div class="mb-5">
-                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider mb-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
-                                <span>SATU AKUN SELURUH LAPANGAN</span>
-                            </div>
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
-                                Daftar Akun Baru
-                            </h2>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                                Buat akun untuk simpan riwayat booking dan kemudahan klaim pesanan.
-                            </p>
-                        </div>
-
-                        <div class="mb-5">
-                            <a href="{{ route('auth.google') }}"
-                               class="w-full py-3 px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-headline font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-3 group">
-                                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                                </svg>
-                                <span>Lanjutkan dengan Google</span>
-                            </a>
-
-                            <div class="relative flex items-center justify-center mt-5">
-                                <div class="border-t border-gray-200 w-full"></div>
-                                <span class="bg-white px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider absolute">atau daftar manual</span>
-                            </div>
-                        </div>
-
-                        {{-- Registration Form --}}
-                        <form method="POST" action="{{ route('register') }}" class="space-y-4">
-                            @csrf
-
-                            {{-- 1. Nama Lengkap --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label for="register_name" class="text-[11px] font-bold uppercase tracking-wider text-gray-700">
-                                        NAMA LENGKAP
-                                    </label>
-                                    <span class="text-[11px] text-gray-400">Sesuai KTP/Identitas</span>
-                                </div>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
-                                    <input
-                                        id="register_name"
-                                        type="text"
-                                        name="name"
-                                        value="{{ old('name') }}"
-                                        required
-                                        autocomplete="name"
-                                        placeholder="contoh: Budi Santoso"
-                                        class="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                </div>
-
-                                @if ($activeTab === 'register' && $errors->has('name'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('name') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- 2. Email Akun --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label for="register_email" class="text-[11px] font-bold uppercase tracking-wider text-gray-700">
-                                        EMAIL AKUN
-                                    </label>
-                                    <span class="text-[11px] text-gray-400">Untuk E-Tiket &amp; Notifikasi</span>
-                                </div>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        mail
-                                    </span>
-                                    <input
-                                        id="register_email"
-                                        type="email"
-                                        name="email"
-                                        value="{{ old('name') ? old('email') : '' }}"
-                                        required
-                                        autocomplete="username"
-                                        placeholder="contoh: budi@email.com"
-                                        class="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                </div>
-
-                                @if ($activeTab === 'register' && $errors->has('email'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('email') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- 3. Nomor WhatsApp / HP --}}
-                            <div>
-                                <label for="register_no_hp" class="text-[11px] font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
-                                    NOMOR WHATSAPP / HP
-                                </label>
-
-                                <div class="flex items-center rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition overflow-hidden">
-                                    <span class="inline-flex items-center gap-1 px-3.5 py-3 bg-[#e2edff] text-xs font-bold text-[#1a146b] shrink-0 border-r border-[#dce9ff]">
-                                        <span class="material-symbols-outlined text-sm">chat</span>
-                                        <span>+62</span>
-                                    </span>
-                                    <input
-                                        id="register_no_hp"
-                                        type="text"
-                                        name="no_hp"
-                                        value="{{ old('no_hp') }}"
-                                        required
-                                        autocomplete="tel"
-                                        placeholder="812-3456-7890"
-                                        class="w-full px-3.5 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                </div>
-
-                                @if ($activeTab === 'register' && $errors->has('no_hp'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('no_hp') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- 4. Kata Sandi --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label for="register_password" class="text-[11px] font-bold uppercase tracking-wider text-gray-700">
-                                        KATA SANDI
-                                    </label>
-                                    <span class="text-[11px] text-gray-400">Min. 8 karakter</span>
-                                </div>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
-                                    <input
-                                        id="register_password"
-                                        :type="showPassword ? 'text' : 'password'"
-                                        name="password"
-                                        required
-                                        autocomplete="new-password"
-                                        placeholder="Minimal 8 karakter"
-                                        class="w-full pl-11 pr-11 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                    <button
-                                        type="button"
-                                        @click="showPassword = !showPassword"
-                                        class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
-                                        tabindex="-1"
-                                    >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
-                                    </button>
-                                </div>
-
-                                @if ($activeTab === 'register' && $errors->has('password'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('password') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- 5. Konfirmasi Kata Sandi --}}
-                            <div>
-                                <label for="register_password_confirmation" class="text-[11px] font-bold uppercase tracking-wider text-gray-700 block mb-1.5">
-                                    KONFIRMASI KATA SANDI
-                                </label>
-
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock_reset
-                                    </span>
-                                    <input
-                                        id="register_password_confirmation"
-                                        :type="showPasswordConfirm ? 'text' : 'password'"
-                                        name="password_confirmation"
-                                        required
-                                        autocomplete="new-password"
-                                        placeholder="Ulangi kata sandi"
-                                        class="w-full pl-11 pr-11 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
-                                    >
-                                    <button
-                                        type="button"
-                                        @click="showPasswordConfirm = !showPasswordConfirm"
-                                        class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
-                                        tabindex="-1"
-                                    >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPasswordConfirm ? 'visibility_off' : 'visibility'">
-                                        </span>
-                                    </button>
-                                </div>
-
-                                @if ($activeTab === 'register' && $errors->has('password_confirmation'))
-                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
-                                        <span>{{ $errors->first('password_confirmation') }}</span>
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- 6. Checkbox Syarat & Ketentuan --}}
-                            <div class="pt-1">
-                                <label class="flex items-start gap-2.5 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        required
-                                        class="mt-0.5 rounded border-gray-300 text-[#1a146b] focus:ring-[#acf847]"
-                                    >
-                                    <span class="text-xs text-gray-600 leading-relaxed">
-                                        Saya menyetujui
-                                        <a href="{{ route('home') }}#syarat" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
-                                        serta
-                                        <a href="{{ route('home') }}#kebijakan" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
-                                        LapangIn
-                                    </span>
-                                </label>
-                            </div>
-
-                            {{-- 7. Tombol Submit (⚡ Daftar) --}}
-                            <button
-                                type="submit"
-                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
-                            >
-                                <span class="material-symbols-outlined text-base text-[#acf847]">bolt</span>
-                                <span>Daftar Akun Sekarang</span>
-                            </button>
-                        </form>
-
-                        {{-- Switch Prompt to Login --}}
-                        <div class="mt-6 pt-5 border-t border-gray-100 text-center">
-                            <p class="text-xs text-gray-500">
-                                Sudah memiliki akun LapangIn?
-                                <button
-                                    type="button"
-                                    @click="switchTab('login')"
-                                    class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
-                                    Masuk Sekarang ↗
-                                </button>
-                            </p>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 

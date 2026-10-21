@@ -9,7 +9,6 @@ use App\Models\Lapangan;
 use App\Models\Reschedule;
 use App\Models\Transaksi;
 use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -30,12 +29,8 @@ class KasirController extends Controller
             $activeBooking = Jadwal::with(['lapangan', 'pelanggan', 'transaksis'])
                 ->where(function ($query) use ($code) {
                     $query->where('kode_qr', $code)
-                        ->orWhere('token_manual', strtoupper($code))
-                        ->orWhere('token_manual', $code);
-
-                    if (Str::isUuid($code)) {
-                        $query->orWhere('id', $code);
-                    }
+                        ->orWhere('token_manual', $code)
+                        ->orWhere('id', $code);
                 })
                 ->first();
         }
@@ -92,153 +87,11 @@ class KasirController extends Controller
     }
 
     /**
-     * Tampilan Pemindai Kamera QR Code & Check-in Otomatis 
-     */
-    public function scan(Request $request): View
-    {
-        $lapangans = Lapangan::all();
-
-        // Ambil riwayat check-in hari ini dari kasir
-        $recentCheckIns = Jadwal::with(['lapangan', 'pelanggan'])
-            ->whereDate('tanggal', now()->toDateString())
-            ->where('status_pembayaran', 'lunas_kasir')
-            ->latest('created_at')
-            ->take(6)
-            ->get();
-
-        return view()->exists('kasir.scan')
-            ? view('kasir.scan', compact('lapangans', 'recentCheckIns'))
-            : view('Kasir.scan', compact('lapangans', 'recentCheckIns'));
-    }
-
-    /**
-     * API Lookup Detail Tiket via QR Code atau Token Manual 6 Karakter
-     */
-    public function lookupTicket(Request $request, ?string $code = null): JsonResponse
-    {
-        $searchCode = trim($code ?? $request->input('code', ''));
-
-        if (empty($searchCode)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Kode QR atau token manual wajib diisi.',
-            ], 400);
-        }
-
-        $jadwal = Jadwal::with(['lapangan', 'pelanggan', 'transaksis'])
-            ->where(function ($query) use ($searchCode) {
-                $query->where('kode_qr', $searchCode)
-                    ->orWhere('token_manual', strtoupper($searchCode))
-                    ->orWhere('token_manual', $searchCode);
-
-                if (Str::isUuid($searchCode)) {
-                    $query->orWhere('id', $searchCode);
-                }
-            })
-            ->first();
-
-        if (!$jadwal) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tiket tidak ditemukan! Pastikan kode QR atau 6 digit token manual sudah sesuai.',
-            ], 404);
-        }
-
-        // 1. Cek duplikat (sudah check-in sebelumnya / lunas_kasir / selesai)
-        $isDuplicate = ($jadwal->status_pembayaran === 'lunas_kasir' || $jadwal->status === 'selesai');
-
-        // 2. Cek kedaluwarsa (tanggal lampau atau status dibatalkan)
-        $today = now()->toDateString();
-        $isExpired = ($jadwal->tanggal->toDateString() < $today) || ($jadwal->status === 'dibatalkan');
-
-        // 3. Status validitas
-        $isValid = !$isDuplicate && !$isExpired && in_array($jadwal->status_pembayaran, ['dp_terverifikasi', 'lunas_online', 'belum_bayar']);
-
-        $totalHarga = (float) $jadwal->harga_disepakati;
-        $dpPaid = (float) $jadwal->transaksis->where('status', 'berhasil')->sum('jumlah');
-        $sisaTagihan = max(0, $totalHarga - $dpPaid);
-
-        $statusLabel = 'Tiket Valid';
-        if ($isDuplicate) {
-            $statusLabel = 'Tiket Sudah Digunakan (Duplikat)';
-        } elseif ($isExpired) {
-            $statusLabel = 'Tiket Kedaluwarsa';
-        }
-
-        return response()->json([
-            'success' => true,
-            'is_valid' => $isValid,
-            'is_duplicate' => $isDuplicate,
-            'is_expired' => $isExpired,
-            'status_label' => $statusLabel,
-            'jadwal' => [
-                'id' => $jadwal->id,
-                'kode_qr' => $jadwal->kode_qr,
-                'token_manual' => $jadwal->token_manual,
-                'nama_penyewa' => $jadwal->pelanggan->nama ?? $jadwal->nama_tamu ?? 'Penyewa',
-                'no_hp' => $jadwal->pelanggan->no_hp ?? $jadwal->no_wa_tamu ?? '-',
-                'nama_lapangan' => $jadwal->lapangan->nama ?? '-',
-                'kategori' => $jadwal->lapangan->kategori ?? '-',
-                'tanggal' => $jadwal->tanggal->format('d M Y'),
-                'tanggal_raw' => $jadwal->tanggal->toDateString(),
-                'jam_mulai' => substr($jadwal->jam_mulai, 0, 5),
-                'jam_selesai' => substr($jadwal->jam_selesai, 0, 5),
-                'total_harga' => $totalHarga,
-                'dp_paid' => $dpPaid,
-                'sisa_tagihan' => $sisaTagihan,
-                'status_pembayaran' => $jadwal->status_pembayaran,
-                'status' => $jadwal->status,
-                'catatan_kasir' => $jadwal->catatan_kasir,
-            ],
-            'checkin_url' => route('kasir.checkin', $jadwal->id),
-        ]);
-    }
-
-    /**
      * Konfirmasi Pelunasan & Validasi Check-in di Meja Kasir
      */
-    public function checkin(Request $request, string $id)
+    public function checkin(Request $request, string $id): RedirectResponse
     {
-        $jadwal = Jadwal::with(['lapangan', 'pelanggan', 'transaksis'])
-            ->where(function ($query) use ($id) {
-                $query->where('kode_qr', $id)
-                    ->orWhere('token_manual', strtoupper($id))
-                    ->orWhere('token_manual', $id);
-
-                if (Str::isUuid($id)) {
-                    $query->orWhere('id', $id);
-                }
-            })
-            ->firstOrFail();
-
-        // 1. Cek Duplikat Check-in (tiket sudah pernah check-in sebelumnya)
-        if ($jadwal->status_pembayaran === 'lunas_kasir' || $jadwal->status === 'selesai') {
-            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'duplicate',
-                    'message' => 'Tiket ini sudah pernah digunakan untuk check-in sebelumnya (duplikat)!',
-                ], 422);
-            }
-
-            return redirect()->back()
-                ->with('error', 'Tiket ini sudah pernah digunakan untuk check-in sebelumnya (duplikat)!');
-        }
-
-        // 2. Cek Kedaluwarsa Tiket (tanggal lampau atau booking dibatalkan)
-        $today = now()->toDateString();
-        if ($jadwal->tanggal->toDateString() < $today || $jadwal->status === 'dibatalkan') {
-            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'expired',
-                    'message' => 'Tiket ini sudah kedaluwarsa dan tidak dapat digunakan untuk check-in.',
-                ], 422);
-            }
-
-            return redirect()->back()
-                ->with('error', 'Tiket ini sudah kedaluwarsa dan tidak dapat digunakan untuk check-in.');
-        }
+        $jadwal = Jadwal::with('transaksis')->findOrFail($id);
 
         $dpPaid = (float) $jadwal->transaksis->where('status', 'berhasil')->sum('jumlah');
         $sisaTagihan = max(0, (float)$jadwal->harga_disepakati - $dpPaid);
@@ -246,13 +99,13 @@ class KasirController extends Controller
         $metode = $request->input('metode', 'tunai');
         $jumlahBayar = (float) $request->input('jumlah', $sisaTagihan);
 
-        // Catat transaksi pelunasan di database bila masih ada tagihan
+        // Catat transaksi pelunasan di PostgreSQL bila masih ada tagihan
         if ($sisaTagihan > 0 && $jumlahBayar > 0) {
             Transaksi::create([
                 'jadwal_id' => $jadwal->id,
                 'jenis' => 'pelunasan',
                 'jumlah' => $jumlahBayar,
-                'metode' => in_array($metode, ['cash', 'tunai']) ? 'tunai' : 'online',
+                'metode' => $metode === 'cash' || $metode === 'tunai' ? 'tunai' : 'online',
                 'status' => 'berhasil',
                 'dibayar_pada' => now(),
             ]);
@@ -266,18 +119,9 @@ class KasirController extends Controller
         ]);
 
         $namaPenyewa = $jadwal->pelanggan->nama ?? $jadwal->nama_tamu ?? 'Penyewa';
-        $successMessage = "Pelunasan sebesar Rp " . number_format($jumlahBayar, 0, ',', '.') . " untuk {$namaPenyewa} berhasil dicatat! Status booking telah lunas.";
 
-        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => $successMessage,
-                'jadwal' => $jadwal,
-            ]);
-        }
-
-        return redirect()->route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->token_manual ?? $jadwal->id])
-            ->with('success', $successMessage);
+        return redirect()->route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id])
+            ->with('success', "Pelunasan sebesar Rp " . number_format($jumlahBayar, 0, ',', '.') . " untuk {$namaPenyewa} berhasil dicatat! Status booking telah lunas.");
     }
 
     /**

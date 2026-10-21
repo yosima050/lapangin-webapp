@@ -112,7 +112,7 @@
                                 Rp {{ number_format($tx->jumlah, 0, ',', '.') }}
                             </td>
                             <td class="px-6 py-4">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ in_array($tx->status, ['berhasil', 'settlement']) ? 'bg-[#eaf7d8] text-[#416900]' : ($tx->status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700') }}">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ $tx->status === 'settlement' ? 'bg-[#eaf7d8] text-[#416900]' : 'bg-amber-100 text-amber-800' }}">
                                     {{ $tx->status }}
                                 </span>
                             </td>
