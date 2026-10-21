@@ -30,7 +30,7 @@ Route::get('/dashboard', function () {
         return redirect()->route('kasir.index');
     }
 
-    return redirect()->route('pelanggan.dashboard');
+    return redirect()->route('katalog.index');
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

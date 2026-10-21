@@ -23,7 +23,7 @@ class AuthLoginGoogle extends Controller
     {
         // Jika pengguna membatalkan proses di Google atau parameter code tidak ada
         if ($request->has('error') || ! $request->has('code')) {
-            return redirect()->route('login')->with('status', 'Login dengan akun Google dibatalkan.');
+            return redirect()->route('login');
         }
 
         try {
