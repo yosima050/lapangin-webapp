@@ -45,6 +45,19 @@ class Jadwal extends Model
         ];
     }
 
+    /**
+     * Mutator untuk memastikan slot yang berakhir di tengah malam disimpan sebagai 24:00:00
+     * agar valid dalam constraint tsrange PostgreSQL.
+     */
+    public function setJamSelesaiAttribute($value): void
+    {
+        if (in_array(substr((string) $value, 0, 5), ['00:00', '24:00'], true)) {
+            $this->attributes['jam_selesai'] = '24:00:00';
+        } else {
+            $this->attributes['jam_selesai'] = $value;
+        }
+    }
+
     public function pelanggan(): BelongsTo
     {
         return $this->belongsTo(Pelanggan::class, 'pelanggan_id');

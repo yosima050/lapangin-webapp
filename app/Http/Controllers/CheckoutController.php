@@ -59,11 +59,16 @@ class CheckoutController extends Controller
             $persenBayar = 50;
         }
 
+        $selesaiFormatted = ($details['selesai']->format('H:i:s') === '00:00:00') ? '24:00:00' : $details['selesai']->format('H:i:s');
+
         $existingJadwal = Jadwal::where('lapangan_id', $details['lapangan']->id)
             ->where('pelanggan_id', $pelanggan?->id)
             ->whereDate('tanggal', $data['tanggal'])
             ->where('jam_mulai', $details['mulai']->format('H:i:s'))
-            ->where('jam_selesai', $details['selesai']->format('H:i:s'))
+            ->where(function ($q) use ($selesaiFormatted) {
+                $q->where('jam_selesai', $selesaiFormatted)
+                  ->orWhere('jam_selesai', '00:00:00');
+            })
             ->where('status', 'pending')
             ->first();
 
@@ -74,7 +79,7 @@ class CheckoutController extends Controller
                 'pelanggan_id' => $pelanggan->id,
                 'tanggal' => $data['tanggal'],
                 'jam_mulai' => $details['mulai']->format('H:i:s'),
-                'jam_selesai' => $details['selesai']->format('H:i:s'),
+                'jam_selesai' => $selesaiFormatted,
                 'harga_disepakati' => $totalHarga,
                 'biaya_layanan' => 0,
                 'status_pembayaran' => 'belum_bayar',
@@ -245,12 +250,17 @@ class CheckoutController extends Controller
         $totalHarga = $details['totalHarga'];
         $nominalBayar = ($tipeBayar === 'full') ? (float) $totalHarga : round($totalHarga * 0.5);
 
+        $selesaiFormatted = ($details['selesai']->format('H:i:s') === '00:00:00') ? '24:00:00' : $details['selesai']->format('H:i:s');
+
         // Ambil atau buat booking jadwal yang belum dibayar oleh pengguna ini
         $jadwal = Jadwal::where('lapangan_id', $details['lapangan']->id)
             ->where('pelanggan_id', $user->id)
             ->whereDate('tanggal', $data['tanggal'])
             ->where('jam_mulai', $details['mulai']->format('H:i:s'))
-            ->where('jam_selesai', $details['selesai']->format('H:i:s'))
+            ->where(function ($q) use ($selesaiFormatted) {
+                $q->where('jam_selesai', $selesaiFormatted)
+                  ->orWhere('jam_selesai', '00:00:00');
+            })
             ->where('status', 'pending')
             ->first();
 
@@ -259,7 +269,10 @@ class CheckoutController extends Controller
             $unpaidOther = Jadwal::where('lapangan_id', $details['lapangan']->id)
                 ->whereDate('tanggal', $data['tanggal'])
                 ->where('jam_mulai', $details['mulai']->format('H:i:s'))
-                ->where('jam_selesai', $details['selesai']->format('H:i:s'))
+                ->where(function ($q) use ($selesaiFormatted) {
+                    $q->where('jam_selesai', $selesaiFormatted)
+                      ->orWhere('jam_selesai', '00:00:00');
+                })
                 ->where('status', 'pending')
                 ->where('status_pembayaran', 'belum_bayar')
                 ->first();
@@ -276,7 +289,7 @@ class CheckoutController extends Controller
                 'pelanggan_id' => $user->id,
                 'tanggal' => $data['tanggal'],
                 'jam_mulai' => $details['mulai']->format('H:i:s'),
-                'jam_selesai' => $details['selesai']->format('H:i:s'),
+                'jam_selesai' => $selesaiFormatted,
                 'harga_disepakati' => $totalHarga,
                 'biaya_layanan' => 0,
                 'status_pembayaran' => 'belum_bayar',

@@ -354,7 +354,8 @@ class KasirController extends Controller
         $tanggal = $request->input('tanggal', now()->toDateString());
         $jamMulai = Carbon::parse($request->jam_mulai)->format('H:i:00');
         $durasi = (int) $request->durasi;
-        $jamSelesai = Carbon::parse($request->jam_mulai)->addHours($durasi)->format('H:i:00');
+        $selesaiCarbon = Carbon::parse($request->jam_mulai)->addHours($durasi);
+        $jamSelesai = ($selesaiCarbon->format('H:i:00') === '00:00:00') ? '24:00:00' : $selesaiCarbon->format('H:i:00');
 
         $lapangan = Lapangan::with('hargaMasters')->findOrFail($request->lapangan_id);
         
