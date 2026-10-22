@@ -31,20 +31,4 @@ class AdminDashboardController extends Controller
             'lapangansTerbaru'
         ));
     }
-
-    public function laporan(): View
-    {
-        $totalPendapatan = \App\Models\Transaksi::where('status', 'berhasil')->sum('jumlah');
-        $transaksiTerbaru = \App\Models\Transaksi::with(['jadwal.pelanggan', 'jadwal.lapangan'])
-            ->orderByDesc('dibayar_pada')
-            ->take(15)
-            ->get();
-        $totalTransaksiSukses = \App\Models\Transaksi::where('status', 'berhasil')->count();
-
-        return view('Admin.laporan.index', compact(
-            'totalPendapatan',
-            'transaksiTerbaru',
-            'totalTransaksiSukses'
-        ));
-    }
 }

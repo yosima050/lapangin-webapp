@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\HargaMasterController;
 use App\Http\Controllers\Admin\LapanganController;
 use App\Http\Controllers\Admin\PegawaiController;
@@ -64,8 +65,11 @@ Route::middleware(['auth', 'IsAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/custom-price', [PegawaiController::class, 'index'])
         ->name('custom-price');
 
-    Route::get('/laporan', [AdminDashboardController::class, 'laporan'])
+    Route::get('/laporan', [AdminLaporanController::class, 'index'])
         ->name('laporan.index');
+
+    Route::get('/laporan/export-pdf', [AdminLaporanController::class, 'exportPdf'])
+        ->name('laporan.exportPdf');
 });
 
 // Halaman Kasir
