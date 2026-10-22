@@ -616,7 +616,7 @@
                     <div class="mt-3 w-full bg-white py-2 px-3 rounded-xl border border-gray-200">
                         <p class="text-[8px] font-bold text-gray-400 uppercase">TOKEN MANUAL (6 KARAKTER)</p>
                         <p class="font-mono text-base font-extrabold text-[#1a146b] tracking-widest">
-                            {{ $jadwal->token_manual ?? substr($jadwal->kode_qr ?? $jadwal->id, -6) }}
+                            {{ $jadwal->token_manual ?? 'Token belum tersedia' }}
                         </p>
                     </div>
                 </div>

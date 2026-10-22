@@ -101,8 +101,17 @@ class MidtransCallbackController extends Controller
                 if (empty($jadwal->kode_qr)) {
                     $jadwal->kode_qr = 'LPGN-' . date('Ymd') . '-' . rand(1000, 9999);
                 }
-                if (empty($jadwal->token_manual)) {
-                    $jadwal->token_manual = strtoupper(Str::random(6));
+                if (
+                    empty($jadwal->token_manual) ||
+                    !preg_match('/^[A-Z0-9]{6}$/', $jadwal->token_manual)
+                ) {
+                    do {
+                        $token = strtoupper(Str::random(6));
+                    } while (
+                        Jadwal::where('token_manual', $token)->where('id', '!=', $jadwal->id)->exists()
+                    );
+
+                    $jadwal->token_manual = $token;
                 }
 
                 $jadwal->save();
