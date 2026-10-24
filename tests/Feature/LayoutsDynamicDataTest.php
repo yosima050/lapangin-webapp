@@ -32,7 +32,7 @@ class LayoutsDynamicDataTest extends TestCase
         // Test that laporan page is also accessible
         $laporanResponse = $this->actingAs($admin)->get(route('admin.laporan.index'));
         $laporanResponse->assertStatus(200);
-        $laporanResponse->assertSee('Laporan &amp; Analitik Transaksi', false);
+        $laporanResponse->assertSee( 'Laporan &amp; Rekonsiliasi Finansial', false);
     }
 
     public function test_kasir_layout_renders_dynamic_cashier_and_shift(): void

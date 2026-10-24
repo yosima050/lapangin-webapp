@@ -330,6 +330,7 @@ class KasirCheckInFlowTest extends TestCase
             'biaya_layanan' => 0,
             'status_pembayaran' => 'lunas_kasir', // Sudah check-in
             'status' => 'terverifikasi',
+            'checked_in_at' => now(),
             'kode_qr' => 'LPNG-QR-DUPLICATE-77',
             'token_manual' => 'DUP777',
             'sewa_rompi' => 0,

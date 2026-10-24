@@ -45,7 +45,9 @@ class KatalogSyncAndApiTest extends TestCase
 
     public function test_katalog_page_displays_synchronized_data_from_database(): void
     {
-        $response = $this->get(route('katalog.index'));
+        $response = $this->get(route('katalog.index', [
+            'tanggal' => '2026-10-23',
+        ]));
 
         $response->assertStatus(200);
         $response->assertSee('Grand Futsal Arena');
