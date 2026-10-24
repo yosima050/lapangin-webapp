@@ -16,6 +16,8 @@ class Jadwal extends Model
     protected $fillable = [
         'lapangan_id',
         'pelanggan_id',
+        'kasir_id',
+        'checked_in_at',
         'nama_tamu',
         'no_wa_tamu',
         'email_tamu',
@@ -42,13 +44,10 @@ class Jadwal extends Model
             'harga_disepakati' => 'decimal:2',
             'denda_pembatalan' => 'decimal:2',
             'created_at' => 'datetime',
+            'checked_in_at' => 'datetime',
         ];
     }
 
-    /**
-     * Mutator untuk memastikan slot yang berakhir di tengah malam disimpan sebagai 24:00:00
-     * agar valid dalam constraint tsrange PostgreSQL.
-     */
     public function setJamSelesaiAttribute($value): void
     {
         if (in_array(substr((string) $value, 0, 5), ['00:00', '24:00'], true)) {
@@ -61,6 +60,11 @@ class Jadwal extends Model
     public function pelanggan(): BelongsTo
     {
         return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
+    }
+
+    public function kasir(): BelongsTo
+    {
+        return $this->belongsTo(Pelanggan::class, 'kasir_id');
     }
 
     public function lapangan(): BelongsTo
@@ -78,9 +82,6 @@ class Jadwal extends Model
         return $this->hasMany(Reschedule::class, 'jadwal_id');
     }
 
-    /**
-     * Otomatis batalkan reservasi pending belum bayar yang telah melebihi batas waktu 10 menit.
-     */
     public static function autoCancelExpiredPendingBookings(): int
     {
         $expiredJadwals = static::where('status', 'pending')
@@ -89,6 +90,7 @@ class Jadwal extends Model
             ->get();
 
         $count = 0;
+
         foreach ($expiredJadwals as $jadwal) {
             $jadwal->update([
                 'status' => 'dibatalkan',
