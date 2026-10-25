@@ -77,6 +77,14 @@ class Jadwal extends Model
         return $this->hasMany(Transaksi::class, 'jadwal_id');
     }
 
+    public function detailSewaPerlengkapans(): HasMany
+    {
+        return $this->hasMany(
+            DetailSewaPerlengkapan::class,
+            'jadwal_id'
+        );
+    }
+
     public function reschedules(): HasMany
     {
         return $this->hasMany(Reschedule::class, 'jadwal_id');

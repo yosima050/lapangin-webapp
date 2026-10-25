@@ -84,6 +84,13 @@
                     <span>Custom Price Hari Libur</span>
                 </a>
 
+                <!-- 3. Kelola Perlengkapan -->
+                <a href="{{ route('admin.perlengkapan.index') }}"
+                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.perlengkapan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
+                    <span class="material-symbols-outlined text-[20px]">sports_tennis</span>
+                    <span>Kelola Perlengkapan</span>
+                </a>
+
                 <!-- 4. Kelola Pegawai / Kasir -->
                 <a href="{{ route('admin.pegawai.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.pegawai.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">

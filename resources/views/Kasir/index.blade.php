@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+﻿@extends('layouts.kasir')
 
 @section('title', 'Validasi Check-in & Pelunasan Kasir - LapangIn')
 
@@ -11,6 +11,13 @@
     $jamMulai = $activeBooking ? substr($activeBooking->jam_mulai, 0, 5) : '--:--';
     $jamSelesai = $activeBooking ? substr($activeBooking->jam_selesai, 0, 5) : '--:--';
     $initialDue = (int) $sisaTagihan;
+    $totalBiayaPerlengkapan = (float) (
+    $activeBooking?->detailSewaPerlengkapans?->sum('subtotal') ?? 0
+    );
+    $totalTarifLapangan = max(
+    0,
+    $totalHarga - $totalBiayaPerlengkapan
+    );
     $preset2 = $initialDue > 0 ? (ceil($initialDue / 100000) * 100000) : 100000;
     if ($preset2 <= $initialDue) { $preset2 += 50000; }
     $preset3 = $preset2 + 50000;
@@ -88,27 +95,149 @@
     </div>
 
     <!-- Main Workspace Split Grid (5 cols / 7 cols) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+<style>
+    .receipt-print {
+        display: none;
+    }
 
-        <!-- LEFT COLUMN: QR Scanner & Scan Guide (5 cols) -->
-        <div class="lg:col-span-5 flex flex-col gap-5">
-            <!-- Scanner Card -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-5">
-                <div class="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                            <span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
-                        </div>
-                        <div>
-                            <h2 class="text-base font-bold text-[#0b1c30] leading-tight">Pemindai QR E-Ticket</h2>
-                            <p class="text-xs text-[#777682]">Kamera Scanner &amp; 2D Optical Reader</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('kasir.scan') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1a146b] hover:bg-[#2b249b] text-white text-[11px] font-extrabold transition-all shadow-sm">
-                        <span class="material-symbols-outlined text-sm">videocam</span>
-                        <span>Buka Kamera Interaktif</span>
-                    </a>
-                </div>
+    @media print {
+        @page {
+            size: 80mm auto;
+            margin: 2mm;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        .receipt-print,
+        .receipt-print * {
+            visibility: visible !important;
+        }
+
+        .receipt-print {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: #fff !important;
+            color: #222 !important;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .receipt-print table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .receipt-print th,
+        .receipt-print td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .receipt-print th:last-child,
+        .receipt-print td:last-child {
+            text-align: right;
+        }
+
+        .receipt-print .receipt-total {
+            border-top: 2px solid #222;
+            margin-top: 12px;
+            padding-top: 10px;
+        }
+    }
+</style>
+
+@if ($activeBooking)
+    <div class="receipt-print">
+        <div style="text-align:center; padding-bottom:16px; border-bottom:2px solid #222;">
+            <h1 style="font-size:24px; font-weight:bold; margin:0 0 6px;">
+                LAPANGIN
+            </h1>
+            <p style="margin:0;">STRUK PEMBAYARAN SEWA LAPANGAN</p>
+            <p style="margin:5px 0 0; font-size:10px;">
+                Dicetak: {{ now()->format('d/m/Y H:i') }}
+            </p>
+        </div>
+
+        <div style="margin:16px 0; line-height:1.8;">
+            <div><strong>Kode Reservasi:</strong> {{ $bookingCode }}</div>
+            <div><strong>Pelanggan:</strong> {{ $customerName }}</div>
+            <div><strong>No. Telepon:</strong> {{ $customerPhone }}</div>
+            <div><strong>Lapangan:</strong> {{ $courtName }}</div>
+            <div>
+                <strong>Jam Sewa:</strong>
+                {{ $jamMulai }} - {{ $jamSelesai }}
+            </div>
+            <div>
+                <strong>Tanggal Reservasi:</strong>
+                {{ $activeBooking->created_at?->format('d/m/Y') ?? '-' }}
+            </div>
+        </div>
+
+        <h3 style="font-size:14px; font-weight:bold; margin:18px 0 8px;">
+            Rincian Biaya
+        </h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Jumlah</th>
+                    <th>Harga Satuan</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sewa Lapangan - {{ $courtName }}</td>
+                    <td>1 sesi</td>
+                    <td>Rp {{ number_format($totalTarifLapangan, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($totalTarifLapangan, 0, ',', '.') }}</td>
+                </tr>
+
+                @foreach ($activeBooking->detailSewaPerlengkapans as $detail)
+                    <tr>
+                        <td>{{ $detail->nama_perlengkapan }}</td>
+                        <td>{{ $detail->jumlah }}</td>
+                        <td>
+                            Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}
+                        </td>
+                        <td>
+                            Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div class="receipt-total">
+            <div style="display:flex; justify-content:space-between; margin:8px 0;">
+                <strong>Total Keseluruhan</strong>
+                <strong>Rp {{ number_format($totalHarga, 0, ',', '.') }}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin:8px 0;">
+                <span>DP / Pembayaran Berhasil</span>
+                <span>Rp {{ number_format($dpPaid, 0, ',', '.') }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin:8px 0; font-size:15px;">
+                <strong>Sisa Tagihan</strong>
+                <strong>Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</strong>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:35px; padding-top:12px; border-top:1px dashed #999;">
+            <p style="font-weight:bold; margin-bottom:6px;">Terima kasih telah menggunakan LapangIn!</p>
+            <p style="font-size:10px;">Simpan struk ini sebagai bukti transaksi Anda.</p>
+        </div>
+    </div>
+@endif
+
 
                 <!-- Camera Viewfinder with Laser & Corner Accents -->
                 <div class="relative w-full h-64 rounded-2xl overflow-hidden bg-[#1c2437] flex flex-col items-center justify-center shadow-inner group">
@@ -319,10 +448,51 @@
                         <span class="text-[11px] font-bold uppercase tracking-wider text-[#474651]">RINCIAN FINANSIAL &amp; RIWAYAT DP</span>
 
                         <div class="flex items-center justify-between text-sm text-[#0b1c30]">
-                            <span>Total Tarif Lapangan</span>
-                            <span class="font-bold">Rp {{ number_format($totalHarga, 0, ',', '.') }}</span>
+                            <span>Tarif Sewa Lapangan</span>
+                            <span class="font-bold">
+                                Rp {{ number_format($totalTarifLapangan, 0, ',', '.') }}
+                            </span>
                         </div>
 
+                        @if ($activeBooking?->detailSewaPerlengkapans?->isNotEmpty())
+                            <div class="border-t border-[#dce9ff] pt-3 mt-1">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-[#474651]">
+                                    RINCIAN SEWA TAMBAHAN
+                                </span>
+
+                                @foreach ($activeBooking->detailSewaPerlengkapans as $detail)
+                                    <div class="flex items-start justify-between gap-3 text-sm text-[#0b1c30] mt-2">
+                                        <div>
+                                            <div class="font-semibold">
+                                                {{ $detail->nama_perlengkapan }}
+                                            </div>
+                                            <div class="text-xs text-[#474651]">
+                                                {{ $detail->jumlah }} × Rp
+                                                {{ number_format($detail->harga_satuan, 0, ',', '.') }}
+                                            </div>
+                                        </div>
+
+                                        <span class="font-bold whitespace-nowrap">
+                                            Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endforeach
+
+                                <div class="flex items-center justify-between text-sm text-[#0b1c30] mt-3 pt-2 border-t border-[#dce9ff]">
+                                    <span>Total Sewa Tambahan</span>
+                                    <span class="font-bold">
+                                        Rp {{ number_format($totalBiayaPerlengkapan, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="flex items-center justify-between text-sm text-[#0b1c30] border-t border-[#dce9ff] pt-3">
+                            <span class="font-bold">Total Keseluruhan</span>
+                            <span class="font-extrabold">
+                                Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                            </span>
+                        </div>
                         <div class="flex items-center justify-between text-sm text-[#416900]">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-base">check_circle</span>
@@ -434,10 +604,42 @@
                         <div class="pt-3 flex flex-col gap-3">
                             @if ($activeBooking)
                                 <form method="POST" action="{{ route('kasir.checkin', $activeBooking->id) }}">
+                                    
                                     @csrf
                                     <input type="hidden" name="metode" :value="paymentMethod">
                                     <input type="hidden" name="jumlah" :value="receivedAmount">
                                     <input type="hidden" name="catatan" :value="notes">
+
+                            @if (isset($perlengkapans) && $perlengkapans->isNotEmpty())
+                                    <div class="mt-4 rounded-xl border border-[#dce9ff] bg-[#eff4ff] p-4">
+                                        <h3 class="mb-3 text-sm font-bold text-[#0b1c30]">
+                                            Tambahan Sewa Perlengkapan
+                                        </h3>
+
+                                        @foreach ($perlengkapans as $perlengkapan)
+                                            <div class="mb-3 flex items-center justify-between gap-3">
+                                                <div>
+                                                    <p class="text-sm font-semibold text-[#0b1c30]">
+                                                        {{ $perlengkapan->nama }}
+                                                    </p>
+                                                    <p class="text-xs text-[#474651]">
+                                                        Rp {{ number_format($perlengkapan->harga, 0, ',', '.') }}
+                                                        / item
+                                                    </p>
+                                                </div>
+
+                                                <input
+                                                    type="number"
+                                                    name="perlengkapan[{{ $perlengkapan->id }}]"
+                                                    min="0"
+                                                    max="20"
+                                                    value="0"
+                                                    class="w-20 rounded-lg border border-[#dce9ff] bg-white px-2 py-2 text-sm"
+                                                >
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
 
                                     <button type="submit"
                                             class="w-full py-4 px-6 rounded-2xl bg-[#acf847] hover:bg-[#91db2a] text-[#102000] font-headline font-black text-base flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99] cursor-pointer">
@@ -453,8 +655,8 @@
                             @endif
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button type="button" onclick="window.print()"
-                                        class="py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
+                               <button type="button" onclick="window.print()"
+                                        class="print:hidden py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
                                     <span class="material-symbols-outlined text-lg">print</span>
                                     <span>Cetak Struk Pembayaran</span>
                                 </button>
@@ -469,9 +671,11 @@
                     </div>
                 </div>
             </div>
-
+        
         </div>
 
     </div>
+    
 </div>
+
 @endsection

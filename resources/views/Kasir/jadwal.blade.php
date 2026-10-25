@@ -10,12 +10,24 @@
     selectedCourtId: '{{ $lapangans->first()?->id }}',
     selectedCourtName: '{{ $lapangans->first()?->nama }}',
     startTime: '{{ $availableSlots[0] ?? '14:00' }}',
-    duration: 2,
+   duration: 2,
     ratePerHour: {{ (int) ($lapangans->first()?->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday')->first()?->harga ?? 120000) }},
+
+    equipmentQty: @js($perlengkapans->mapWithKeys(fn ($item) => [$item->id => 0])),
+    equipmentPrices: @js($perlengkapans->mapWithKeys(fn ($item) => [$item->id => (float) $item->harga])),
+
     payType: 'full',
-    printReceipt: true,
-    get totalFee() {
+
+    get equipmentTotal() {
+        return Object.keys(this.equipmentQty).reduce((total, id) => {
+            return total + (Number(this.equipmentQty[id]) || 0) * Number(this.equipmentPrices[id]);
+        }, 0);
+    },
+    get courtFee() {
         return this.ratePerHour * this.duration;
+    },
+    get totalFee() {
+        return this.courtFee + this.equipmentTotal;
     },
     get amountToPay() {
         return this.payType === 'dp' ? this.totalFee * 0.5 : this.totalFee;
@@ -323,6 +335,47 @@
                         </div>
                     </div>
 
+                     <!-- Pilihan Perlengkapan Tambahan -->
+                    <div class="flex flex-col gap-3">
+                        <label class="text-xs font-bold text-[#0b1c30]">
+                            Perlengkapan Tambahan (Opsional)
+                        </label>
+
+                        @forelse ($perlengkapans as $perlengkapan)
+                            <div class="flex items-center justify-between gap-3 rounded-xl border border-[#e5eeff] p-3">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-bold text-[#0b1c30]">
+                                        {{ $perlengkapan->nama }}
+                                    </span>
+                                    <span class="text-[10px] text-[#777682]">
+                                        Rp {{ number_format($perlengkapan->harga, 0, ',', '.') }} / unit
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <label for="perlengkapan_{{ $perlengkapan->id }}"
+                                           class="text-[10px] text-[#474651]">
+                                        Jumlah
+                                    </label>
+                                    <input
+                                    type="number"
+                                    id="perlengkapan_{{ $perlengkapan->id }}"
+                                    name="perlengkapan[{{ $perlengkapan->id }}]"
+                                    min="0"
+                                    max="20"
+                                    value="0"
+                                    x-model.number="equipmentQty['{{ $perlengkapan->id }}']"
+                                   class="w-16 rounded-lg border border-[#dce9ff] bg-[#eff4ff] px-2 py-2 text-xs"
+                                    >
+                            </div>
+                            </div>
+                        @empty
+                            <p class="rounded-xl bg-[#eff4ff] p-3 text-xs text-[#777682]">
+                                Belum ada perlengkapan aktif.
+                            </p>
+                        @endforelse
+                    </div>
+
                     <!-- Pilihan Pembayaran Langsung -->
                     <div class="flex flex-col gap-2">
                         <label class="text-xs font-bold text-[#0b1c30]">Pilihan Pembayaran di Kasir</label>
@@ -345,24 +398,58 @@
                             </label>
                         </div>
                     </div>
+<!-- Cost Summary Box -->
+<div class="rounded-xl border border-[#dce9ff] bg-[#eff4ff] p-4 flex flex-col gap-3">
 
-                    <!-- Cost Summary Box -->
-                    <div class="rounded-xl bg-[#eff4ff] p-4 border border-[#dce9ff] flex flex-col gap-2">
-                        <div class="flex items-center justify-between text-xs text-[#474651]">
-                            <span>Biaya Sewa Lapangan (<span x-text="duration">2</span> Jam):</span>
-                            <span class="font-bold">Rp <span x-text="formatRupiah(totalFee)"></span></span>
-                        </div>
-                        <div class="pt-2 border-t border-[#dce9ff] flex items-baseline justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-[#1a146b]">NOMINAL PEMBAYARAN DI KASIR</p>
-                                <p class="text-[10px] text-[#416900] font-semibold" x-text="payType === 'full' ? '(Pelunasan Penuh 100%)' : '(DP 50% di Meja Kasir)'"></p>
-                            </div>
-                            <span class="text-2xl font-headline font-black text-[#1a146b]">
-                                Rp <span x-text="formatRupiah(amountToPay)"></span>
-                            </span>
-                        </div>
-                    </div>
+    <!-- Biaya Sewa Lapangan -->
+    <div class="flex items-center justify-between gap-3 text-xs text-[#474651]">
+        <span>
+            Biaya Sewa Lapangan
+            (<span x-text="duration"></span> Jam)
+        </span>
+        <span class="shrink-0 font-bold text-[#0b1c30]">
+            Rp <span x-text="formatRupiah(courtFee)"></span>
+        </span>
+    </div>
 
+    <!-- Biaya Perlengkapan -->
+    <div class="flex items-center justify-between gap-3 text-xs text-[#474651]">
+        <span>Biaya Perlengkapan</span>
+        <span class="shrink-0 font-bold text-[#0b1c30]">
+            Rp <span x-text="formatRupiah(equipmentTotal)"></span>
+        </span>
+    </div>
+
+    <!-- Total Tagihan -->
+    <div class="border-t border-[#dce9ff] pt-3 flex items-center justify-between gap-3">
+        <span class="text-sm font-extrabold text-[#0b1c30]">
+            Total Tagihan
+        </span>
+        <span class="shrink-0 text-base font-black text-[#1a146b]">
+            Rp <span x-text="formatRupiah(totalFee)"></span>
+        </span>
+    </div>
+
+    <!-- Nominal Pembayaran -->
+    <div class="border-t border-[#dce9ff] pt-3 flex items-center justify-between gap-3">
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1a146b]">
+                Nominal Pembayaran di Kasir
+            </p>
+            <p
+                class="mt-1 text-[10px] font-semibold text-[#416900]"
+                x-text="payType === 'full'
+                    ? '(Pelunasan Penuh 100%)'
+                    : '(DP 50% di Meja Kasir)'"
+            ></p>
+        </div>
+
+        <span class="shrink-0 text-xl font-black text-[#1a146b]">
+            Rp <span x-text="formatRupiah(amountToPay)"></span>
+        </span>
+    </div>
+
+</div>
                     <!-- CTA Submit Button -->
                     <button type="submit"
                             class="w-full py-3.5 px-5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer">
