@@ -166,8 +166,14 @@
                             $isAdmin = $pegawai->role === 'admin';
                             $terminal = $isAdmin ? 'Semua Terminal & Venue' : 'Meja Resepsionis #0' . ($index + 1);
                         @endphp
-                        <tr class="hover:bg-[#eff4ff]/50 transition-colors"
-                            x-show="tabKasir === 'all' || (tabKasir === 'kasir' && '{{ $pegawai->role }}' === 'kasir')">
+
+                <tr
+                    class="hover:bg-[#eff4ff]/50 transition-colors"
+                    x-show="(tabKasir === 'all' || (tabKasir === 'kasir' && @js($pegawai->role) === 'kasir'))
+                        && (@js(strtolower($pegawai->nama)) + ' ' + @js(strtolower($pegawai->email)))
+                            .includes(searchKasir.toLowerCase().trim())"
+                >
+
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-full {{ $isAdmin ? 'bg-[#1a146b] text-white' : 'bg-[#dce9ff] text-[#1a146b]' }} flex items-center justify-center font-bold text-xs">
@@ -179,10 +185,44 @@
                                     </div>
                                 </div>
                             </td>
+
                             <td class="px-5 py-4">
-                                <span class="px-2.5 py-1 rounded-md {{ $isAdmin ? 'bg-[#e2dfff] text-[#100563]' : 'bg-[#eff4ff] text-[#1a146b]' }} font-bold text-[11px]">
-                                    {{ $isAdmin ? 'Pemilik / Super Admin' : 'Kasir / Staf Operasional' }}
-                                </span>
+                                @if ((string) auth()->id() !== (string) $pegawai->id)
+                                    <form
+                                        action="{{ route('admin.pegawai.update-role', $pegawai->id) }}"
+                                        method="POST"
+                                        class="flex items-center gap-2"
+                                        onsubmit="return confirm('Yakin ingin mengubah role pegawai ini?')"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <select
+                                            name="role"
+                                            aria-label="Role {{ $pegawai->nama }}"
+                                            class="max-w-[190px] px-2.5 py-2 rounded-lg border border-[#e5eeff] bg-white text-[11px] font-bold text-[#1a146b]"
+                                        >
+                                            <option value="kasir" @selected($pegawai->role === 'kasir')>
+                                                Kasir / Staf Operasional
+                                            </option>
+                                            <option value="admin" @selected($pegawai->role === 'admin')>
+                                                Pemilik / Super Admin
+                                            </option>
+                                        </select>
+
+                                        <button
+                                            type="submit"
+                                            class="px-3 py-2 rounded-lg bg-[#eff4ff] hover:bg-[#dce9ff] text-[#1a146b] text-[11px] font-bold"
+                                        >
+                                            Simpan
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-md bg-[#e2dfff] text-[#100563] font-bold text-[11px]">
+                                        Pemilik / Super Admin
+                                    </span>
+                                    <p class="mt-1 text-[10px] text-[#777682]">Role akun sendiri terkunci</p>
+                                @endif
                             </td>
                             <td class="px-5 py-4 text-[#474651] font-medium">
                                 <span class="flex items-center gap-1.5">
@@ -190,24 +230,44 @@
                                     {{ $terminal }}
                                 </span>
                             </td>
+
                             <td class="px-5 py-4">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $isAdmin ? 'bg-[#acf847]/40 text-[#102000]' : 'bg-[#dce9ff] text-[#1a146b]' }} text-[11px] font-bold">
-                                    <span class="w-2 h-2 rounded-full {{ $isAdmin ? 'bg-[#416900]' : 'bg-[#312e81]' }}"></span>
-                                    {{ $isAdmin ? 'Aktif Sesi Ini' : ($index % 2 === 0 ? 'Aktif Shift Pagi' : 'Shift Siang (14:00)') }}
-                                </span>
+                                @if ($isAdmin)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#acf847]/40 text-[#102000] text-[11px] font-bold">
+                                        <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                                        Akun Admin
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $pegawai->is_active ? 'bg-[#acf847]/40 text-[#102000]' : 'bg-[#ffdad6] text-[#ba1a1a]' }} text-[11px] font-bold">
+                                        <span class="w-2 h-2 rounded-full {{ $pegawai->is_active ? 'bg-[#416900]' : 'bg-[#ba1a1a]' }}"></span>
+                                        {{ $pegawai->is_active ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                @endif
                             </td>
+
+
                             <td class="px-5 py-4 text-right">
                                 @if ($isAdmin)
-                                    <span class="text-[#777682] text-[11px] font-bold">Akses Utama</span>
+                                    <span class="text-[#777682] text-[11px] font-bold">
+                                        Akses Utama
+                                    </span>
                                 @else
-                                    <div class="flex items-center justify-end gap-2 text-[#777682]">
-                                        <button type="button" onclick="alert('Reset password untuk {{ $pegawai->nama }}')" class="p-1 hover:text-[#1a146b]" title="Reset Password">
-                                            <span class="material-symbols-outlined text-base">key</span>
+                                    <form
+                                        action="{{ route('admin.pegawai.toggle-status', $pegawai->id) }}"
+                                        method="POST"
+                                        class="flex justify-end"
+                                        onsubmit="return confirm('Yakin ingin {{ $pegawai->is_active ? 'menonaktifkan' : 'mengaktifkan' }} akun kasir ini?')"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <button
+                                            type="submit"
+                                            class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors {{ $pegawai->is_active ? 'bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4ab]' : 'bg-[#acf847] text-[#102000] hover:bg-[#92dc32]' }}"
+                                        >
+                                            {{ $pegawai->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
-                                        <button type="button" onclick="alert('Edit akun {{ $pegawai->nama }}')" class="p-1 hover:text-[#1a146b]" title="Edit Akun">
-                                            <span class="material-symbols-outlined text-base">edit</span>
-                                        </button>
-                                    </div>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
@@ -247,15 +307,22 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-bold text-[#0b1c30]">Password Sementara</label>
-                    <div class="relative">
-                        <input type="text" name="password" value="KasirLapangIn{{ date('Y') }}!" required
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] font-mono font-bold border border-[#e5eeff] outline-none">
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-[#777682]">lock</span>
-                    </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-bold text-[#0b1c30]">Password Sementara *</label>
+                <div class="relative">
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                        placeholder="Masukkan password sementara"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] font-mono font-bold border border-[#e5eeff] focus:bg-white focus:ring-2 focus:ring-[#acf847] outline-none transition-all"
+                    >
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-[#777682]">lock</span>
                 </div>
+            </div>
 
                 <div class="flex flex-col gap-1.5">
                     <label class="font-bold text-[#0b1c30]">Pilihan Terminal &amp; Role</label>

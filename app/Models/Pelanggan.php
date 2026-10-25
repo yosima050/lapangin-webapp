@@ -48,7 +48,7 @@ class Pelanggan extends Authenticatable implements MustVerifyEmailContract
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'email_verified_at' => 'datetime', 'is_active' => 'boolean',
         ];
     }
 }

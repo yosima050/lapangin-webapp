@@ -13,6 +13,7 @@ use App\Http\Controllers\MidtransCallbackController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\Pelanggan\RiwayatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\HargaKhususController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [KatalogController::class, 'index'])->name('home');
@@ -46,31 +47,60 @@ Route::middleware('auth')->group(function () {
 });
 
 // Halaman Admin
-Route::middleware(['auth', 'IsAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'IsAdmin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
 
-    Route::resource('lapangan', LapanganController::class);
-    Route::resource('harga', HargaMasterController::class);
+        Route::resource('lapangan', LapanganController::class);
+        Route::resource('harga', HargaMasterController::class);
 
-    // Halaman transaksi admin
-    Route::get('/transaksi', [TransaksiController::class, 'index'])
-        ->name('transaksi.index');
+        // Transaksi admin
+        Route::get('/transaksi', [TransaksiController::class, 'index'])
+            ->name('transaksi.index');
 
-    Route::get('/pegawai', [PegawaiController::class, 'index'])
-        ->name('pegawai.index');
+        // Manajemen pegawai dan akun kasir
+        Route::get('/pegawai', [PegawaiController::class, 'index'])
+            ->name('pegawai.index');
 
-    Route::post('/pegawai', [PegawaiController::class, 'store'])
-        ->name('pegawai.store');
+        Route::post('/pegawai', [PegawaiController::class, 'store'])
+            ->name('pegawai.store');
 
-    Route::get('/custom-price', [PegawaiController::class, 'index'])
-        ->name('custom-price');
+        Route::patch('/pegawai/{id}/status', [PegawaiController::class, 'toggleStatus'])
+            ->name('pegawai.toggle-status');
 
-    Route::get('/laporan', [AdminLaporanController::class, 'index'])
-        ->name('laporan.index');
+        // Manajemen harga khusus
+        Route::get('/harga-khusus', [HargaKhususController::class, 'index'])
+            ->name('harga-khusus.index');
 
-    Route::get('/laporan/export-pdf', [AdminLaporanController::class, 'exportPdf'])
-        ->name('laporan.exportPdf');
-});
+        Route::post('/harga-khusus', [HargaKhususController::class, 'store'])
+            ->name('harga-khusus.store');
+
+        Route::patch('/harga-khusus/{id}', [HargaKhususController::class, 'update'])
+            ->name('harga-khusus.update');
+
+        Route::patch('/harga-khusus/{id}/status', [HargaKhususController::class, 'toggleStatus'])
+            ->name('harga-khusus.toggle-status');
+
+        Route::delete('/harga-khusus/{id}', [HargaKhususController::class, 'destroy'])
+            ->name('harga-khusus.destroy');
+
+        // Laporan admin
+        Route::get('/laporan', [AdminLaporanController::class, 'index'])
+            ->name('laporan.index');
+
+        Route::get('/laporan/export-pdf', [AdminLaporanController::class, 'exportPdf'])
+            ->name('laporan.exportPdf');
+
+        // Alias lama, dipertahankan sementara untuk kompatibilitas.
+        Route::get('/custom-price', [HargaKhususController::class, 'index'])
+            ->name('custom-price');
+
+        Route::patch('/pegawai/{id}/role', [\App\Http\Controllers\Admin\PegawaiController::class,'updateRole',])
+            ->name('pegawai.update-role');
+    });
 
 // Halaman Kasir
 Route::middleware(['auth', 'IsKasir'])->prefix('kasir')->name('kasir.')->group(function () {
