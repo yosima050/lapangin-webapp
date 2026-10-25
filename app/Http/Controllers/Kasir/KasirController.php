@@ -7,6 +7,8 @@ use App\Models\Jadwal;
 use App\Models\Lapangan;
 use App\Models\Reschedule;
 use App\Models\Transaksi;
+use App\Models\Perlengkapan;
+use App\Models\DetailSewaPerlengkapan;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +32,7 @@ class KasirController extends Controller
                 'lapangan',
                 'pelanggan',
                 'transaksis',
+                'detailSewaPerlengkapans',
             ])
                 ->where(function ($query) use ($code) {
                     $query->where('kode_qr', $code)
@@ -48,6 +51,7 @@ class KasirController extends Controller
                 'lapangan',
                 'pelanggan',
                 'transaksis',
+                'detailSewaPerlengkapans',
             ])
                 ->whereDate('tanggal', now()->toDateString())
                 ->where('status_pembayaran', '!=', 'lunas_kasir')
@@ -59,6 +63,7 @@ class KasirController extends Controller
                     'lapangan',
                     'pelanggan',
                     'transaksis',
+                    'detailSewaPerlengkapans',
                 ])
                     ->latest('created_at')
                     ->first();
@@ -91,6 +96,7 @@ class KasirController extends Controller
                 'lapangan',
                 'pelanggan',
                 'transaksis',
+                'detailSewaPerlengkapans',
             ])
                 ->orderBy('jam_mulai')
                 ->take(6)
@@ -100,9 +106,14 @@ class KasirController extends Controller
         $totalCapacitySlots = max(12, $antreanHariIni->count() + 4);
         $occupiedSlots = $antreanHariIni->count();
 
-        $occupancyRate = round(
+         $occupancyRate = round(
             ($occupiedSlots / $totalCapacitySlots) * 100
         );
+
+        // Ambil perlengkapan aktif untuk fitur tambahan saat check-in.
+        $perlengkapans = Perlengkapan::where('is_active', true)
+            ->orderBy('nama')
+            ->get();
 
         return view('Kasir.index', compact(
             'lapangans',
@@ -114,7 +125,8 @@ class KasirController extends Controller
             'occupancyRate',
             'occupiedSlots',
             'totalCapacitySlots',
-            'code'
+            'code',
+            'perlengkapans'
         ));
     }
 
@@ -324,7 +336,65 @@ class KasirController extends Controller
                     ];
                 }
 
-                // Kunci transaksi terkait selama perhitungan pembayaran.
+                // Validasi pilihan perlengkapan dari form check-in.
+                $validatedPerlengkapan = $request->validate([
+                    'perlengkapan' => 'sometimes|array',
+                    'perlengkapan.*' => 'nullable|integer|min:0|max:20',
+                ]);
+
+                $jumlahPerlengkapan = collect(
+                    $validatedPerlengkapan['perlengkapan'] ?? []
+                )
+                    ->map(fn ($jumlah) => (int) ($jumlah ?? 0))
+                    ->filter(fn ($jumlah) => $jumlah > 0);
+
+                // Ambil perlengkapan aktif beserta harga dari database.
+                $perlengkapans = Perlengkapan::where('is_active', true)
+                    ->whereIn('id', $jumlahPerlengkapan->keys())
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                if ($perlengkapans->count() !== $jumlahPerlengkapan->count()) {
+                    throw ValidationException::withMessages([
+                        'perlengkapan' => 'Ada perlengkapan yang tidak tersedia atau sudah tidak aktif.',
+                    ]);
+                }
+
+                $totalBiayaPerlengkapan = 0;
+                $detailPerlengkapan = [];
+
+                foreach ($jumlahPerlengkapan as $id => $jumlah) {
+                    $item = $perlengkapans->get($id);
+                    $hargaSatuan = (float) $item->harga;
+                    $subtotal = $hargaSatuan * $jumlah;
+
+                    $detailPerlengkapan[] = [
+                        'nama_perlengkapan' => $item->nama,
+                        'jumlah' => $jumlah,
+                        'harga_satuan' => $hargaSatuan,
+                        'subtotal' => $subtotal,
+                        'created_at' => now(),
+                    ];
+
+                    $totalBiayaPerlengkapan += $subtotal;
+                }
+
+                // Simpan rincian tambahan perlengkapan.
+                foreach ($detailPerlengkapan as $detail) {
+                    $jadwal->detailSewaPerlengkapans()->create($detail);
+                }
+
+                // Tambahkan biaya perlengkapan ke total booking.
+                if ($totalBiayaPerlengkapan > 0) {
+                    $jadwal->harga_disepakati =
+                        (float) $jadwal->harga_disepakati
+                        + $totalBiayaPerlengkapan;
+
+                    $jadwal->save();
+                }
+
+                // Hitung tagihan setelah tambahan perlengkapan.
                 $transaksis = Transaksi::query()
                     ->where('jadwal_id', $jadwal->id)
                     ->lockForUpdate()
@@ -337,6 +407,7 @@ class KasirController extends Controller
                     ->sum('jumlah');
 
                 $sisaTagihan = max(0, $totalHarga - $sudahDibayar);
+
 
                 $metode = $request->input('metode', 'tunai');
 
@@ -492,6 +563,9 @@ class KasirController extends Controller
         $selectedCourtId = $request->input('lapangan_id', 'all');
 
         $lapangans = Lapangan::with('hargaMasters')->get();
+        $perlengkapans = Perlengkapan::where('is_active', true)
+        ->orderBy('nama')
+        ->get();
 
         $jadwalsQuery = Jadwal::with([
             'lapangan',
@@ -554,6 +628,7 @@ class KasirController extends Controller
 
         return view('Kasir.jadwal', compact(
             'lapangans',
+            'perlengkapans',
             'jadwals',
             'selectedDate',
             'selectedCourtId',
@@ -564,124 +639,186 @@ class KasirController extends Controller
         ));
     }
 
-    public function storeWalkin(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'nama_tamu' => 'required|string|max:100',
-            'no_wa_tamu' => 'required|string|max:20',
-            'lapangan_id' => 'required|exists:lapangans,id',
-            'jam_mulai' => 'required',
-            'durasi' => 'required|integer|min:1|max:4',
-            'payType' => 'required|in:full,dp',
-            'tanggal' => 'nullable|date',
+public function storeWalkin(Request $request): RedirectResponse
+{
+    $validated = $request->validate([
+        'nama_tamu' => 'required|string|max:100',
+        'no_wa_tamu' => 'required|string|max:20',
+        'lapangan_id' => 'required|exists:lapangans,id',
+        'jam_mulai' => 'required',
+        'durasi' => 'required|integer|min:1|max:4',
+        'payType' => 'required|in:full,dp',
+        'tanggal' => 'nullable|date',
+        'perlengkapan' => 'sometimes|array',
+        'perlengkapan.*' => 'nullable|integer|min:0|max:20',
+    ]);
+
+    $tanggal = $validated['tanggal'] ?? now()->toDateString();
+    $jamMulai = Carbon::parse($validated['jam_mulai'])->format('H:i:00');
+    $durasi = (int) $validated['durasi'];
+
+    $selesaiCarbon = Carbon::parse($validated['jam_mulai'])
+        ->addHours($durasi);
+
+    $jamSelesai = $selesaiCarbon->format('H:i:00') === '00:00:00'
+        ? '24:00:00'
+        : $selesaiCarbon->format('H:i:00');
+
+   // Periksa apakah lapangan sudah memiliki jadwal pada waktu tersebut.
+    $bentrok = Jadwal::where('lapangan_id', $validated['lapangan_id'])
+        ->whereDate('tanggal', $tanggal)
+        ->where('status', '!=', 'dibatalkan')
+        ->whereRaw(
+            '? < jam_selesai AND ? > jam_mulai',
+            [$jamMulai, $jamSelesai]
+        )
+        ->exists();
+
+    if ($bentrok) {
+        throw ValidationException::withMessages([
+            'jam_mulai' => 'Lapangan sudah dipesan pada jam tersebut. Silakan pilih jam lain.',
+        ]);
+    }
+
+    $lapangan = Lapangan::with('hargaMasters')
+        ->findOrFail($validated['lapangan_id']);
+
+    $dayOfWeek = Carbon::parse($tanggal)->dayOfWeek;
+    $isWeekend = in_array($dayOfWeek, [0, 6], true);
+
+    $customPrice = $lapangan->hargaMasters
+        ->firstWhere('tanggal_khusus', $tanggal);
+
+    if ($customPrice) {
+        $ratePerHour = (float) $customPrice->harga;
+    } else {
+        $defaultPrice = $lapangan->hargaMasters
+            ->whereNull('tanggal_khusus')
+            ->where('jenis_hari', $isWeekend ? 'weekend' : 'weekday')
+            ->first();
+
+        $ratePerHour = $defaultPrice
+            ? (float) $defaultPrice->harga
+            : 150000;
+    }
+
+    $totalTarifLapangan = $ratePerHour * $durasi;
+
+    // Ambil jumlah perlengkapan dari form.
+    $jumlahPerlengkapan = $validated['perlengkapan'] ?? [];
+
+    // Abaikan jumlah nol dan ubah jumlah menjadi integer.
+    $jumlahPerlengkapan = collect($jumlahPerlengkapan)
+        ->map(fn ($jumlah) => (int) ($jumlah ?? 0))
+        ->filter(fn ($jumlah) => $jumlah > 0);
+
+    // Ambil harga perlengkapan dari database, bukan dari browser.
+    $perlengkapans = Perlengkapan::where('is_active', true)
+        ->whereIn('id', $jumlahPerlengkapan->keys())
+        ->get()
+        ->keyBy('id');
+
+    // Pastikan semua perlengkapan yang dipilih masih aktif.
+    if ($perlengkapans->count() !== $jumlahPerlengkapan->count()) {
+        throw ValidationException::withMessages([
+            'perlengkapan' => 'Ada perlengkapan yang tidak tersedia atau sudah tidak aktif. Silakan muat ulang halaman.',
+        ]);
+    }
+
+    $detailPerlengkapan = [];
+    $totalBiayaPerlengkapan = 0;
+
+    foreach ($jumlahPerlengkapan as $id => $jumlah) {
+        $perlengkapan = $perlengkapans->get($id);
+        $hargaSatuan = (float) $perlengkapan->harga;
+        $subtotal = $hargaSatuan * $jumlah;
+
+        $detailPerlengkapan[] = [
+            'nama_perlengkapan' => $perlengkapan->nama,
+            'jumlah' => $jumlah,
+            'harga_satuan' => $hargaSatuan,
+            'subtotal' => $subtotal,
+            'created_at' => now(),
+        ];
+
+        $totalBiayaPerlengkapan += $subtotal;
+    }
+
+    // Total akhir terdiri dari tarif lapangan dan perlengkapan.
+    $totalTarif = $totalTarifLapangan + $totalBiayaPerlengkapan;
+
+    $jadwal = DB::transaction(function () use (
+        $validated,
+        $tanggal,
+        $jamMulai,
+        $jamSelesai,
+        $lapangan,
+        $totalTarif,
+        $totalTarifLapangan,
+        $detailPerlengkapan
+    ) {
+        $payFull = $validated['payType'] === 'full';
+
+        $jadwal = Jadwal::create([
+            'lapangan_id' => $lapangan->id,
+            'nama_tamu' => $validated['nama_tamu'],
+            'no_wa_tamu' => $validated['no_wa_tamu'],
+            'tanggal' => $tanggal,
+            'jam_mulai' => $jamMulai,
+            'jam_selesai' => $jamSelesai,
+            'harga_disepakati' => $totalTarif,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => $payFull
+                ? 'lunas_kasir'
+                : 'dp_terverifikasi',
+            'status' => 'terverifikasi',
+            'kode_qr' => 'LPGN-'
+                . now()->format('Ymd')
+                . '-'
+                . strtoupper(Str::random(8)),
+            'token_manual' => strtoupper(Str::random(6)),
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'catatan_kasir' => 'Booking Walk-in Meja Kasir POS',
+            'created_at' => now(),
         ]);
 
-        $tanggal = $validated['tanggal'] ?? now()->toDateString();
-
-        $jamMulai = Carbon::parse($validated['jam_mulai'])
-            ->format('H:i:00');
-
-        $durasi = (int) $validated['durasi'];
-
-        $selesaiCarbon = Carbon::parse($validated['jam_mulai'])
-            ->addHours($durasi);
-
-        $jamSelesai = $selesaiCarbon->format('H:i:00') === '00:00:00'
-            ? '24:00:00'
-            : $selesaiCarbon->format('H:i:00');
-
-        $lapangan = Lapangan::with('hargaMasters')
-            ->findOrFail($validated['lapangan_id']);
-
-        $dayOfWeek = Carbon::parse($tanggal)->dayOfWeek;
-        $isWeekend = in_array($dayOfWeek, [0, 6], true);
-
-        $customPrice = $lapangan->hargaMasters
-            ->firstWhere('tanggal_khusus', $tanggal);
-
-        if ($customPrice) {
-            $ratePerHour = (float) $customPrice->harga;
-        } else {
-            $defaultPrice = $lapangan->hargaMasters
-                ->whereNull('tanggal_khusus')
-                ->where(
-                    'jenis_hari',
-                    $isWeekend ? 'weekend' : 'weekday'
-                )
-                ->first();
-
-            $ratePerHour = $defaultPrice
-                ? (float) $defaultPrice->harga
-                : 150000;
+        // Simpan rincian perlengkapan yang disewa.
+        foreach ($detailPerlengkapan as $detail) {
+            $jadwal->detailSewaPerlengkapans()->create($detail);
         }
 
-        $totalTarif = $ratePerHour * $durasi;
+        // Pembayaran penuh atau DP 50% dari total akhir.
+        $bayarNominal = $payFull
+            ? $totalTarif
+            : ($totalTarif * 0.5);
 
-        $jadwal = DB::transaction(function () use (
-            $validated,
-            $tanggal,
-            $jamMulai,
-            $jamSelesai,
-            $durasi,
-            $lapangan,
-            $totalTarif
-        ) {
-            $payFull = $validated['payType'] === 'full';
+        Transaksi::create([
+            'jadwal_id' => $jadwal->id,
+            'jenis' => $payFull ? 'full' : 'dp',
+            'jumlah' => $bayarNominal,
+            'metode' => 'tunai',
+            'status' => 'berhasil',
+            'dibayar_pada' => now(),
+        ]);
 
-            $jadwal = Jadwal::create([
-                'lapangan_id' => $lapangan->id,
-                'nama_tamu' => $validated['nama_tamu'],
-                'no_wa_tamu' => $validated['no_wa_tamu'],
-                'tanggal' => $tanggal,
-                'jam_mulai' => $jamMulai,
-                'jam_selesai' => $jamSelesai,
-                'harga_disepakati' => $totalTarif,
-                'biaya_layanan' => 0,
-                'status_pembayaran' => $payFull
-                    ? 'lunas_kasir'
-                    : 'dp_terverifikasi',
-                'status' => 'terverifikasi',
-                'kode_qr' => 'LPGN-'
-                    . now()->format('Ymd')
-                    . '-'
-                    . strtoupper(Str::random(8)),
-                'token_manual' => strtoupper(Str::random(6)),
-                'sewa_rompi' => 0,
-                'sewa_bola' => 0,
-                'denda_pembatalan' => 0,
-                'catatan_kasir' => 'Booking Walk-in Meja Kasir POS',
-                'created_at' => now(),
-            ]);
+        // Booking walk-in belum otomatis check-in.
+        // Audit check-in tetap null sampai check-in dilakukan.
 
-            $bayarNominal = $payFull
-                ? $totalTarif
-                : ($totalTarif * 0.5);
+        return $jadwal;
+    }, 3);
 
-            Transaksi::create([
-                'jadwal_id' => $jadwal->id,
-                'jenis' => $payFull ? 'full' : 'dp',
-                'jumlah' => $bayarNominal,
-                'metode' => 'tunai',
-                'status' => 'berhasil',
-                'dibayar_pada' => now(),
-            ]);
-
-            // Booking walk-in belum otomatis check-in.
-            // checked_in_at dan kasir_id tetap null sampai check-in dilakukan.
-
-            return $jadwal;
-        }, 3);
-
-        return redirect()->route('kasir.jadwal', [
-            'tanggal' => $tanggal,
-            'lapangan_id' => $lapangan->id,
-        ])->with(
-            'success',
-            "Booking walk-in untuk {$jadwal->nama_tamu} di "
-            . "{$lapangan->nama} berhasil disimpan dengan kode "
-            . "{$jadwal->kode_qr}!"
-        );
-    }
+    return redirect()->route('kasir.jadwal', [
+        'tanggal' => $tanggal,
+        'lapangan_id' => $lapangan->id,
+    ])->with(
+        'success',
+        "Booking walk-in untuk {$jadwal->nama_tamu} di "
+        . "{$lapangan->nama} berhasil disimpan dengan kode "
+        . "{$jadwal->kode_qr}!"
+    );
+}
 
     public function reschedule(Request $request): View
     {

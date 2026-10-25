@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\HargaMasterController;
 use App\Http\Controllers\Admin\LapanganController;
 use App\Http\Controllers\Admin\PegawaiController;
+use App\Http\Controllers\Admin\PerlengkapanController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Kasir\KasirController;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'IsAdmin'])->prefix('admin')->name('admin.')->group(f
 
     Route::resource('lapangan', LapanganController::class);
     Route::resource('harga', HargaMasterController::class);
+    Route::resource('perlengkapan', PerlengkapanController::class);
 
     // Halaman transaksi admin
     Route::get('/transaksi', [TransaksiController::class, 'index'])
