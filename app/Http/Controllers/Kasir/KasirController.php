@@ -9,6 +9,7 @@ use App\Models\Reschedule;
 use App\Models\Transaksi;
 use App\Models\Perlengkapan;
 use App\Models\DetailSewaPerlengkapan;
+use App\Models\HargaKhusus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -683,26 +684,140 @@ public function storeWalkin(Request $request): RedirectResponse
     $lapangan = Lapangan::with('hargaMasters')
         ->findOrFail($validated['lapangan_id']);
 
-    $dayOfWeek = Carbon::parse($tanggal)->dayOfWeek;
-    $isWeekend = in_array($dayOfWeek, [0, 6], true);
+   $baseDate = Carbon::parse($tanggal)->startOfDay();
+$mulai = $baseDate->copy()->setTimeFromTimeString($jamMulai);
 
-    $customPrice = $lapangan->hargaMasters
-        ->firstWhere('tanggal_khusus', $tanggal);
+$dayOfWeek = $baseDate->dayOfWeek;
+$jenisHari = in_array($dayOfWeek, [0, 6], true)
+    ? 'weekend'
+    : 'weekday';
+
+$hargaKhususAktif = HargaKhusus::query()
+    ->where('lapangan_id', $lapangan->id)
+    ->whereDate('tanggal', $tanggal)
+    ->where('is_active', true)
+    ->orderBy('jam_mulai')
+    ->get();
+
+$totalTarifLapangan = 0;
+
+for ($i = 0; $i < $durasi; $i++) {
+    $slotStart = $mulai->copy()->addHours($i);
+    $slotEnd = $slotStart->copy()->addHour();
+
+    $customPrice = $hargaKhususAktif->first(
+        function ($hk) use ($baseDate, $slotStart, $slotEnd) {
+            $hkMulai = $baseDate->copy()->setTimeFromTimeString(
+                substr($hk->jam_mulai, 0, 5)
+            );
+
+            $jamSelesaiKhusus = substr($hk->jam_selesai, 0, 5);
+
+            $hkSelesai = in_array(
+                $jamSelesaiKhusus,
+                ['24:00', '00:00'],
+                true
+            )
+                ? $baseDate->copy()->addDay()->startOfDay()
+                : $baseDate->copy()->setTimeFromTimeString(
+                    $jamSelesaiKhusus
+                );
+
+            return $slotStart->gte($hkMulai)
+                && $slotEnd->lte($hkSelesai);
+        }
+    );
 
     if ($customPrice) {
-        $ratePerHour = (float) $customPrice->harga;
+        $rate = (float) $customPrice->harga;
     } else {
-        $defaultPrice = $lapangan->hargaMasters
-            ->whereNull('tanggal_khusus')
-            ->where('jenis_hari', $isWeekend ? 'weekend' : 'weekday')
+        $legacyCustomPrice = $lapangan->hargaMasters
+            ->filter(function ($hm) use (
+                $tanggal,
+                $baseDate,
+                $slotStart,
+                $slotEnd
+            ) {
+                if (
+                    ! $hm->tanggal_khusus
+                    || $hm->tanggal_khusus->toDateString() !== $tanggal
+                ) {
+                    return false;
+                }
+
+                if (! $hm->jam_mulai || ! $hm->jam_selesai) {
+                    return true;
+                }
+
+                $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                    substr($hm->jam_mulai, 0, 5)
+                );
+
+                $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
+
+                $hmSelesai = in_array(
+                    $jamSelesaiMaster,
+                    ['24:00', '00:00'],
+                    true
+                )
+                    ? $baseDate->copy()->addDay()->startOfDay()
+                    : $baseDate->copy()->setTimeFromTimeString(
+                        $jamSelesaiMaster
+                    );
+
+                return $slotStart->gte($hmMulai)
+                    && $slotEnd->lte($hmSelesai);
+            })
             ->first();
 
-        $ratePerHour = $defaultPrice
-            ? (float) $defaultPrice->harga
-            : 150000;
+        if ($legacyCustomPrice) {
+            $rate = (float) $legacyCustomPrice->harga;
+        } else {
+            $defaultPrice = $lapangan->hargaMasters
+                ->filter(function ($hm) use (
+                    $jenisHari,
+                    $baseDate,
+                    $slotStart,
+                    $slotEnd
+                ) {
+                    if (
+                        $hm->tanggal_khusus !== null
+                        || $hm->jenis_hari !== $jenisHari
+                    ) {
+                        return false;
+                    }
+
+                    if (! $hm->jam_mulai || ! $hm->jam_selesai) {
+                        return true;
+                    }
+
+                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                        substr($hm->jam_mulai, 0, 5)
+                    );
+
+                    $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
+
+                    $hmSelesai = in_array(
+                        $jamSelesaiMaster,
+                        ['24:00', '00:00'],
+                        true
+                    )
+                        ? $baseDate->copy()->addDay()->startOfDay()
+                        : $baseDate->copy()->setTimeFromTimeString(
+                            $jamSelesaiMaster
+                        );
+
+                    return $slotStart->gte($hmMulai)
+                        && $slotEnd->lte($hmSelesai);
+                })
+                ->first();
+
+            $rate = (float) ($defaultPrice?->harga ?? 150000);
+        }
     }
 
-    $totalTarifLapangan = $ratePerHour * $durasi;
+    $totalTarifLapangan += $rate;
+}
 
     // Ambil jumlah perlengkapan dari form.
     $jumlahPerlengkapan = $validated['perlengkapan'] ?? [];
@@ -784,7 +899,8 @@ public function storeWalkin(Request $request): RedirectResponse
             'created_at' => now(),
         ]);
 
-        // Simpan rincian perlengkapan yang disewa.
+
+         // Simpan rincian perlengkapan yang disewa.
         foreach ($detailPerlengkapan as $detail) {
             $jadwal->detailSewaPerlengkapans()->create($detail);
         }
@@ -803,7 +919,7 @@ public function storeWalkin(Request $request): RedirectResponse
             'dibayar_pada' => now(),
         ]);
 
-        // Booking walk-in belum otomatis check-in.
+       // Booking walk-in belum otomatis check-in.
         // Audit check-in tetap null sampai check-in dilakukan.
 
         return $jadwal;
@@ -873,60 +989,134 @@ public function storeWalkin(Request $request): RedirectResponse
             $court = $selectedReschedule->jadwal?->lapangan;
 
             if ($court) {
-                $newDate = Carbon::parse(
-                    $selectedReschedule->tanggal_baru
-                );
+            $newDate = Carbon::parse(
+                $selectedReschedule->tanggal_baru
+            )->startOfDay();
 
-                $newDayOfWeek = $newDate->dayOfWeek;
-                $isNewWeekend = in_array(
-                    $newDayOfWeek,
-                    [0, 6],
-                    true
-                );
+            $tanggalBaru = $newDate->toDateString();
 
-                $customPrice = $court->hargaMasters
-                    ->firstWhere(
-                        'tanggal_khusus',
-                        $newDate->toDateString()
-                    );
+            $jenisHari = in_array(
+                $newDate->dayOfWeek,
+                [0, 6],
+                true
+            ) ? 'weekend' : 'weekday';
+
+            $hargaKhususAktif = HargaKhusus::query()
+                ->where('lapangan_id', $court->id)
+                ->whereDate('tanggal', $tanggalBaru)
+                ->where('is_active', true)
+                ->orderBy('jam_mulai')
+                ->get();
+
+            $start = Carbon::parse(
+                $tanggalBaru . ' ' .
+                substr($selectedReschedule->jam_mulai_baru, 0, 5)
+            );
+
+            $end = Carbon::parse(
+                $tanggalBaru . ' ' .
+                substr($selectedReschedule->jam_selesai_baru, 0, 5)
+            );
+
+            if ($end->lessThanOrEqualTo($start)) {
+                $end->addDay();
+            }
+
+            $durasiJam = max(
+                1,
+                (int) $start->diffInHours($end)
+            );
+
+            $tarifSesiBaru = 0;
+
+            for ($i = 0; $i < $durasiJam; $i++) {
+                $slotStart = $start->copy()->addHours($i);
+                $slotEnd = $slotStart->copy()->addHour();
+
+                // Prioritas 1: harga khusus aktif.
+                $customPrice = $hargaKhususAktif->first(
+                    function ($hk) use ($slotStart, $slotEnd, $tanggalBaru) {
+                        $hkMulai = Carbon::parse(
+                            $tanggalBaru . ' ' .
+                            substr($hk->jam_mulai, 0, 5)
+                        );
+
+                        $jamSelesai = substr($hk->jam_selesai, 0, 5);
+
+                        $hkSelesai = in_array(
+                            $jamSelesai,
+                            ['24:00', '00:00'],
+                            true
+                        )
+                            ? Carbon::parse($tanggalBaru)->addDay()->startOfDay()
+                            : Carbon::parse($tanggalBaru . ' ' . $jamSelesai);
+
+                        return $slotStart->gte($hkMulai)
+                            && $slotEnd->lte($hkSelesai);
+                    }
+                );
 
                 if ($customPrice) {
-                    $ratePerHour = (float) $customPrice->harga;
+                    $rate = (float) $customPrice->harga;
                 } else {
-                    $regular = $court->hargaMasters
-                        ->whereNull('tanggal_khusus')
-                        ->where(
-                            'jenis_hari',
-                            $isNewWeekend ? 'weekend' : 'weekday'
-                        )
+                    // Prioritas 2: harga khusus lama dari HargaMaster.
+                    $legacyPrice = $court->hargaMasters
+                        ->filter(function ($hm) use (
+                            $tanggalBaru,
+                            $slotStart,
+                            $slotEnd
+                        ) {
+                            if (
+                                ! $hm->tanggal_khusus
+                                || Carbon::parse($hm->tanggal_khusus)->toDateString()
+                                    !== $tanggalBaru
+                            ) {
+                                return false;
+                            }
+
+                            // Harga khusus lama tanpa rentang jam berlaku
+                            // untuk seluruh hari pada tanggal tersebut.
+                            if (! $hm->jam_mulai || ! $hm->jam_selesai) {
+                                return true;
+                            }
+
+                            $hmMulai = Carbon::parse(
+                                $tanggalBaru . ' ' .
+                                substr($hm->jam_mulai, 0, 5)
+                            );
+
+                            $jamSelesai = substr($hm->jam_selesai, 0, 5);
+
+                            $hmSelesai = in_array(
+                                $jamSelesai,
+                                ['24:00', '00:00'],
+                                true
+                            )
+                                ? Carbon::parse($tanggalBaru)->addDay()->startOfDay()
+                                : Carbon::parse($tanggalBaru . ' ' . $jamSelesai);
+
+                            return $slotStart->gte($hmMulai)
+                                && $slotEnd->lte($hmSelesai);
+                        })
                         ->first();
 
-                    $ratePerHour = $regular
-                        ? (float) $regular->harga
-                        : (float) (
-                            $selectedReschedule->jadwal?->harga_disepakati
-                            ?? 0
-                        );
+                    if ($legacyPrice) {
+                        $rate = (float) $legacyPrice->harga;
+                    } else {
+                        // Prioritas 3: harga master weekday/weekend.
+                        $regular = $court->hargaMasters
+                            ->filter(function ($hm) use ($jenisHari) {
+                                return $hm->tanggal_khusus === null
+                                    && $hm->jenis_hari === $jenisHari;
+                            })
+                            ->first();
+
+                        $rate = (float) ($regular?->harga ?? 150000);
+                    }
                 }
 
-                $start = Carbon::parse(
-                    $selectedReschedule->jam_mulai_baru
-                );
-
-                $end = Carbon::parse(
-                    $selectedReschedule->jam_selesai_baru
-                );
-
-                if ($end->lessThanOrEqualTo($start)) {
-                    $end->addDay();
-                }
-
-                $durasiJam = max(
-                    1,
-                    (int) $start->diffInHours($end)
-                );
-
-                $tarifSesiBaru = $ratePerHour * $durasiJam;
+                $tarifSesiBaru += $rate;
+            }
             } else {
                 $tarifSesiBaru = (float) (
                     $selectedReschedule->jadwal?->harga_disepakati

@@ -19,9 +19,9 @@ class AuthLoginGoogle extends Controller
             ->redirect();
     }
 
+
     public function google_callback(Request $request)
     {
-        // Jika pengguna membatalkan proses di Google atau parameter code tidak ada
         if ($request->has('error') || ! $request->has('code')) {
             return redirect()->route('login');
         }
@@ -34,18 +34,24 @@ class AuthLoginGoogle extends Controller
             ]);
         }
 
-        // Cari pelanggan berdasarkan email
         $pelanggan = Pelanggan::where('email', $googleUser->getEmail())->first();
 
-        // JIKA AKUN SUDAH TERDAFTAR:
+        // Jika akun sudah terdaftar
         if ($pelanggan) {
+            // Tolak akun yang dinonaktifkan
+            if (! $pelanggan->is_active) {
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Akun Anda dinonaktifkan. Silakan hubungi administrator.',
+                ]);
+            }
+
             // Tandai email terverifikasi jika belum
             if (empty($pelanggan->email_verified_at)) {
                 $pelanggan->email_verified_at = now();
                 $pelanggan->save();
             }
 
-            // Jika nomor HP masih kosong atau '-' (dari testing sebelumnya), minta lengkapi
+            // Minta lengkapi nomor HP jika masih kosong
             if (empty($pelanggan->no_hp) || $pelanggan->no_hp === '-') {
                 session()->put('google_complete_user', [
                     'pelanggan_id' => $pelanggan->id,
@@ -57,15 +63,13 @@ class AuthLoginGoogle extends Controller
                 return redirect()->route('auth.google.complete');
             }
 
-            // Login dan redirect ke dashboard
             Auth::login($pelanggan, true);
-            request()->session()->regenerate();
+            $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        // JIKA AKUN BARU (Belum terdaftar di database):
-        // Simpan data dari Google ke dalam session dan arahkan ke halaman pengisian No HP
+        // Jika akun baru, arahkan ke formulir pelengkapan profil
         session()->put('google_complete_user', [
             'nama' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Pengguna Google',
             'email' => $googleUser->getEmail(),
@@ -74,6 +78,7 @@ class AuthLoginGoogle extends Controller
 
         return redirect()->route('auth.google.complete');
     }
+
 
     /**
      * Tampilkan formulir untuk melengkapi Nomor HP pendaftaran Google SSO
@@ -116,15 +121,21 @@ class AuthLoginGoogle extends Controller
         $cleanPhone = preg_replace('/[^0-9]/', '', $request->no_hp);
 
         if (isset($googleData['pelanggan_id'])) {
-            // Update akun yang sudah ada tapi belum punya nomor HP
             $pelanggan = Pelanggan::find($googleData['pelanggan_id']);
-            if ($pelanggan) {
-                $pelanggan->update([
-                    'nama' => $request->nama,
-                    'no_hp' => $cleanPhone,
-                    'email_verified_at' => now(),
+
+            if (! $pelanggan || ! $pelanggan->is_active) {
+                session()->forget('google_complete_user');
+
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Akun tidak tersedia atau telah dinonaktifkan.',
                 ]);
             }
+
+            $pelanggan->update([
+                'nama' => $request->nama,
+                'no_hp' => $cleanPhone,
+                'email_verified_at' => now(),
+            ]);
         } else {
             // Buat akun baru di tabel pelanggans
             $pelanggan = Pelanggan::create([

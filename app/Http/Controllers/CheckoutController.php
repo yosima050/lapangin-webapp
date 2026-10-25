@@ -7,6 +7,7 @@ use App\Models\Jadwal;
 use App\Models\Lapangan;
 use App\Models\Transaksi;
 use App\Services\PaymentService;
+use App\Models\HargaKhusus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -382,6 +383,13 @@ class CheckoutController extends Controller
 
         $lapangan = Lapangan::with('hargaMasters')->findOrFail($lapanganId);
 
+        $hargaKhususAktif = HargaKhusus::query()
+            ->where('lapangan_id', $lapangan->id)
+            ->whereDate('tanggal', $tanggal)
+            ->where('is_active', true)
+            ->orderBy('jam_mulai')
+            ->get();
+
         $baseDate = Carbon::parse($tanggal)->startOfDay();
         $jamBuka = $baseDate->copy()->setTimeFromTimeString(substr($lapangan->jam_buka, 0, 5));
         $jamTutupStr = substr($lapangan->jam_tutup, 0, 5);
@@ -450,42 +458,51 @@ class CheckoutController extends Controller
             $slotEnd = $slotStart->copy()->addHour();
 
             // Cek harga khusus tanggal ini yang mencakup jam ini
-            $customPrice = $lapangan->hargaMasters
-                ->filter(function ($hm) use ($tanggal, $baseDate, $slotStart, $slotEnd) {
-                    if (! $hm->tanggal_khusus || $hm->tanggal_khusus->toDateString() !== $tanggal) {
-                        return false;
-                    }
-                    if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                        return true;
-                    }
-                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
-                    $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                    $hmSelesai = ($hmSelesaiStr === '24:00' || $hmSelesaiStr === '00:00')
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
+            $customPrice = $hargaKhususAktif->first(
+                function ($hk) use ($baseDate, $slotStart, $slotEnd) {
+                    $hkMulai = $baseDate->copy()->setTimeFromTimeString(
+                        substr($hk->jam_mulai, 0, 5)
+                    );
 
-                    return $slotStart->gte($hmMulai) && $slotEnd->lte($hmSelesai);
-                })
-                ->first();
+                    $hkSelesaiStr = substr($hk->jam_selesai, 0, 5);
+                    $hkSelesai = in_array($hkSelesaiStr, ['24:00', '00:00'], true)
+                        ? $baseDate->copy()->addDay()->startOfDay()
+                        : $baseDate->copy()->setTimeFromTimeString($hkSelesaiStr);
+
+                    return $slotStart->gte($hkMulai)
+                        && $slotEnd->lte($hkSelesai);
+                }
+            );
 
             if ($customPrice) {
+                // Prioritas pertama: harga khusus dari tabel harga_khusus.
                 $rate = (float) $customPrice->harga;
             } else {
+                // Prioritas kedua: harga master weekday/weekend.
                 $defaultPrice = $lapangan->hargaMasters
                     ->filter(function ($hm) use ($jenisHari, $baseDate, $slotStart, $slotEnd) {
-                        if ($hm->tanggal_khusus !== null || $hm->jenis_hari !== $jenisHari) {
+                        if (
+                            $hm->tanggal_khusus !== null
+                            || $hm->jenis_hari !== $jenisHari
+                        ) {
                             return false;
                         }
+
                         if (! $hm->jam_mulai || ! $hm->jam_selesai) {
                             return true;
                         }
-                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
+
+                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                            substr($hm->jam_mulai, 0, 5)
+                        );
+
                         $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                        $hmSelesai = ($hmSelesaiStr === '24:00' || $hmSelesaiStr === '00:00')
+                        $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
                             ? $baseDate->copy()->addDay()->startOfDay()
                             : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
 
-                        return $slotStart->gte($hmMulai) && $slotEnd->lte($hmSelesai);
+                        return $slotStart->gte($hmMulai)
+                            && $slotEnd->lte($hmSelesai);
                     })
                     ->first();
 
