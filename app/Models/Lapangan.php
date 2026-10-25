@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\HargaKhusus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,5 +59,10 @@ class Lapangan extends Model
     public function hargaMasters(): HasMany
     {
         return $this->hasMany(HargaMaster::class, 'lapangan_id');
+    }
+
+    public function hargaKhusus(): HasMany
+    {
+        return $this->hasMany(HargaKhusus::class, 'lapangan_id');
     }
 }
