@@ -376,5 +376,125 @@ class KasirCheckInFlowTest extends TestCase
             'error' => 'duplicate',
         ]);
     }
+
+    /**
+     * Test 9: Check-in ditolak jika tiket berstatus 'rejected' atau 'dibatalkan'.
+     */
+    public function test_checkin_fails_and_is_rejected_for_cancelled_or_rejected_ticket(): void
+    {
+        $rejectedJadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'nama_tamu' => 'Tamu Tiket Ditolak',
+            'no_wa_tamu' => '081299990000',
+            'tanggal' => now()->toDateString(),
+            'jam_mulai' => '16:00:00',
+            'jam_selesai' => '17:00:00',
+            'harga_disepakati' => 100000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'dp_terverifikasi',
+            'status' => 'rejected',
+            'kode_qr' => 'LPNG-QR-REJECTED-99',
+            'token_manual' => 'REJ999',
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'created_at' => now(),
+        ]);
+
+        $this->assertTrue($rejectedJadwal->isCancelled());
+
+        $lookupResponse = $this->actingAs($this->kasir)->getJson(route('kasir.ticket.lookup', ['code' => 'REJ999']));
+        $lookupResponse->assertStatus(200);
+        $lookupResponse->assertJson([
+            'success' => true,
+            'is_valid' => false,
+            'is_cancelled' => true,
+            'status_label' => 'Tiket Dibatalkan',
+        ]);
+
+        $checkinResponse = $this->actingAs($this->kasir)->post(route('kasir.checkin', $rejectedJadwal->id), [
+            'metode' => 'tunai',
+            'jumlah' => 50000,
+        ]);
+
+        $checkinResponse->assertRedirect();
+        $checkinResponse->assertSessionHas('error');
+
+        $jsonCheckinResponse = $this->actingAs($this->kasir)->postJson(route('kasir.checkin', $rejectedJadwal->id), [
+            'metode' => 'tunai',
+            'jumlah' => 50000,
+        ]);
+
+        $jsonCheckinResponse->assertStatus(422);
+        $jsonCheckinResponse->assertJson([
+            'success' => false,
+            'error' => 'cancelled',
+        ]);
+    }
+
+    /**
+     * Test 10: storeWalkin mengabaikan jadwal berstatus 'dibatalkan', 'cancelled', dan 'rejected' saat cek bentrok.
+     */
+    public function test_store_walkin_ignores_cancelled_and_rejected_slots_when_checking_conflicts(): void
+    {
+        $today = now()->toDateString();
+
+        // Jadwal 1: berstatus 'rejected' di jam 10:00 - 11:00
+        Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'nama_tamu' => 'Tamu Rejected',
+            'no_wa_tamu' => '081211112222',
+            'tanggal' => $today,
+            'jam_mulai' => '10:00:00',
+            'jam_selesai' => '11:00:00',
+            'harga_disepakati' => 100000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'belum_bayar',
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'status' => 'rejected',
+            'created_at' => now(),
+        ]);
+
+        // Jadwal 2: berstatus 'dibatalkan' di jam 11:00 - 12:00
+        Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'nama_tamu' => 'Tamu Dibatalkan',
+            'no_wa_tamu' => '081233334444',
+            'tanggal' => $today,
+            'jam_mulai' => '11:00:00',
+            'jam_selesai' => '12:00:00',
+            'harga_disepakati' => 100000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'belum_bayar',
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'status' => 'dibatalkan',
+            'created_at' => now(),
+        ]);
+
+        // Walk-in order pada jam 10:00 - 12:00 (menimpa slot yang sudah dibatalkan/ditolak)
+        $response = $this->actingAs($this->kasir)->post(route('kasir.walkin.store'), [
+            'nama_tamu' => 'Tamu Walkin Baru',
+            'no_wa_tamu' => '081288889999',
+            'lapangan_id' => $this->lapangan->id,
+            'tanggal' => $today,
+            'jam_mulai' => '10:00',
+            'durasi' => 2,
+            'payType' => 'full',
+        ]);
+
+        $response->assertRedirect(route('kasir.jadwal', ['tanggal' => $today, 'lapangan_id' => $this->lapangan->id]));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('jadwals', [
+            'nama_tamu' => 'Tamu Walkin Baru',
+            'jam_mulai' => '10:00:00',
+            'jam_selesai' => '12:00:00',
+            'status' => 'terverifikasi',
+        ]);
+    }
 }
 

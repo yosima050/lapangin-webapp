@@ -108,7 +108,7 @@ class BookingAdjustmentService
         $conflictJadwal = Jadwal::query()
             ->where('lapangan_id', $lapanganId)
             ->whereDate('tanggal', $tanggal)
-            ->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])
+            ->notCancelled()
             ->when($excludeJadwalId, fn ($q) => $q->where('id', '!=', $excludeJadwalId))
             ->where(function ($query) use ($jamMulaiFormatted, $jamSelesaiFormatted) {
                 $query->where('jam_mulai', '<', $jamSelesaiFormatted)
@@ -389,7 +389,7 @@ class BookingAdjustmentService
         ?string $alasan = null,
         ?Pelanggan $cancelledBy = null
     ): array {
-        if (in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected', 'selesai'], true)) {
+        if ($jadwal->isCancelled() || $jadwal->status === 'selesai') {
             throw ValidationException::withMessages([
                 'cancellation' => 'Jadwal ini sudah tidak aktif atau telah selesai.',
             ]);

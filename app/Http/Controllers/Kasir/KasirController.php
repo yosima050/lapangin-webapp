@@ -106,7 +106,7 @@ class KasirController extends Controller
         }
 
         $totalCapacitySlots = max(12, $antreanHariIni->count() + 4);
-        $occupiedSlots = $antreanHariIni->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])->count();
+        $occupiedSlots = $antreanHariIni->reject->isCancelled()->count();
 
         $occupancyRate = round(
             ($occupiedSlots / $totalCapacitySlots) * 100
@@ -197,7 +197,7 @@ class KasirController extends Controller
             ], 404);
         }
 
-        $isCancelled = in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']);
+        $isCancelled = $jadwal->isCancelled();
 
         // Tiket dianggap duplikat jika sudah check-in
         // atau status jadwal sudah selesai.
@@ -315,10 +315,10 @@ class KasirController extends Controller
                     ];
                 }
 
-                if ($jadwal->status === 'dibatalkan' || $jadwal->status === 'cancelled') {
+                if ($jadwal->isCancelled()) {
                     return [
                         'error' => 'cancelled',
-                        'message' => 'Reservasi ini telah dibatalkan. Tidak dapat melakukan pelunasan atau check-in.',
+                        'message' => 'Reservasi ini telah dibatalkan atau ditolak. Tidak dapat melakukan pelunasan atau check-in.',
                     ];
                 }
 
@@ -610,14 +610,14 @@ class KasirController extends Controller
         }
 
         $totalDailySlots = 14;
-        $occupancyCount = $jadwals->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])->count();
+        $occupancyCount = $jadwals->reject->isCancelled()->count();
 
         $occupancyRate = round(
             ($occupancyCount / $totalDailySlots) * 100
         );
 
         $bookedHours = $jadwals
-            ->filter(fn ($jadwal) => ! in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']))
+            ->reject->isCancelled()
             ->map(fn ($jadwal) => substr($jadwal->jam_mulai, 0, 5))
             ->toArray();
 
@@ -681,7 +681,7 @@ public function storeWalkin(Request $request): RedirectResponse
    // Periksa apakah lapangan sudah memiliki jadwal pada waktu tersebut.
     $bentrok = Jadwal::where('lapangan_id', $validated['lapangan_id'])
         ->whereDate('tanggal', $tanggal)
-        ->where('status', '!=', 'dibatalkan')
+        ->notCancelled()
         ->whereRaw(
             '? < jam_selesai AND ? > jam_mulai',
             [$jamMulai, $jamSelesai]

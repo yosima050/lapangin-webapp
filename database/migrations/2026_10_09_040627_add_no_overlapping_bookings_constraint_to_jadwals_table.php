@@ -46,8 +46,8 @@ return new class extends Migration
                      AND (a.jam_mulai, a.jam_selesai)
                          OVERLAPS
                          (b.jam_mulai, b.jam_selesai)
-                    WHERE a.status <> 'dibatalkan'
-                      AND b.status <> 'dibatalkan'
+                    WHERE a.status NOT IN ('dibatalkan', 'cancelled', 'rejected')
+                      AND b.status NOT IN ('dibatalkan', 'cancelled', 'rejected')
                 ) AS ada_bentrok
             ");
 
@@ -70,7 +70,7 @@ return new class extends Migration
                         )
                     ) WITH &&
                 )
-                WHERE (status <> 'dibatalkan')
+                WHERE (status NOT IN ('dibatalkan', 'cancelled', 'rejected'))
             ");
         });
     }

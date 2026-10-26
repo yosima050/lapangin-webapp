@@ -11,6 +11,36 @@ class Jadwal extends Model
 {
     use HasUuids;
 
+    public const CANCELLED_STATUSES = [
+        'dibatalkan',
+        'cancelled',
+        'rejected',
+    ];
+
+    /**
+     * Memeriksa apakah jadwal telah dibatalkan atau ditolak.
+     */
+    public function isCancelled(): bool
+    {
+        return in_array($this->status, self::CANCELLED_STATUSES, true);
+    }
+
+    /**
+     * Scope untuk mengambil jadwal yang aktif (tidak dibatalkan/ditolak).
+     */
+    public function scopeNotCancelled($query)
+    {
+        return $query->whereNotIn('status', self::CANCELLED_STATUSES);
+    }
+
+    /**
+     * Scope untuk mengambil jadwal yang dibatalkan/ditolak.
+     */
+    public function scopeCancelled($query)
+    {
+        return $query->whereIn('status', self::CANCELLED_STATUSES);
+    }
+
     public $timestamps = false;
 
     protected $fillable = [
