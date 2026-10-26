@@ -106,9 +106,9 @@ class KasirController extends Controller
         }
 
         $totalCapacitySlots = max(12, $antreanHariIni->count() + 4);
-        $occupiedSlots = $antreanHariIni->count();
+        $occupiedSlots = $antreanHariIni->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])->count();
 
-         $occupancyRate = round(
+        $occupancyRate = round(
             ($occupiedSlots / $totalCapacitySlots) * 100
         );
 
@@ -197,6 +197,8 @@ class KasirController extends Controller
             ], 404);
         }
 
+        $isCancelled = in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']);
+
         // Tiket dianggap duplikat jika sudah check-in
         // atau status jadwal sudah selesai.
         // Status lunas_kasir saja tidak berarti sudah check-in.
@@ -205,8 +207,7 @@ class KasirController extends Controller
 
         $today = now()->toDateString();
 
-        $isExpired = $jadwal->tanggal->toDateString() < $today
-            || $jadwal->status === 'dibatalkan';
+        $isExpired = $jadwal->tanggal->toDateString() < $today;
 
         $allowedPaymentStatuses = [
             'dp_terverifikasi',
@@ -221,7 +222,8 @@ class KasirController extends Controller
             true
         );
 
-        $isValid = ! $isDuplicate
+        $isValid = ! $isCancelled
+            && ! $isDuplicate
             && ! $isExpired
             && $isPaymentStatusValid;
 
@@ -233,7 +235,9 @@ class KasirController extends Controller
 
         $sisaTagihan = max(0, $totalHarga - $dpPaid);
 
-        if ($isDuplicate) {
+        if ($isCancelled) {
+            $statusLabel = 'Tiket Dibatalkan';
+        } elseif ($isDuplicate) {
             $statusLabel = 'Tiket Sudah Digunakan (Duplikat)';
         } elseif ($isExpired) {
             $statusLabel = 'Tiket Kedaluwarsa';
@@ -246,6 +250,7 @@ class KasirController extends Controller
         return response()->json([
             'success' => true,
             'is_valid' => $isValid,
+            'is_cancelled' => $isCancelled,
             'is_duplicate' => $isDuplicate,
             'is_expired' => $isExpired,
             'status_label' => $statusLabel,
@@ -310,13 +315,19 @@ class KasirController extends Controller
                     ];
                 }
 
+                if ($jadwal->status === 'dibatalkan' || $jadwal->status === 'cancelled') {
+                    return [
+                        'error' => 'cancelled',
+                        'message' => 'Reservasi ini telah dibatalkan. Tidak dapat melakukan pelunasan atau check-in.',
+                    ];
+                }
+
                 if (
                     $jadwal->tanggal->toDateString() < now()->toDateString()
-                    || $jadwal->status === 'dibatalkan'
                 ) {
                     return [
                         'error' => 'expired',
-                        'message' => 'Tiket kedaluwarsa atau dibatalkan.',
+                        'message' => 'Tiket kedaluwarsa.',
                     ];
                 }
 
@@ -599,13 +610,14 @@ class KasirController extends Controller
         }
 
         $totalDailySlots = 14;
-        $occupancyCount = $jadwals->count();
+        $occupancyCount = $jadwals->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])->count();
 
         $occupancyRate = round(
             ($occupancyCount / $totalDailySlots) * 100
         );
 
         $bookedHours = $jadwals
+            ->filter(fn ($jadwal) => ! in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']))
             ->map(fn ($jadwal) => substr($jadwal->jam_mulai, 0, 5))
             ->toArray();
 

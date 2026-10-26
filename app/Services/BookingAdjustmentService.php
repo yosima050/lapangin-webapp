@@ -154,11 +154,18 @@ class BookingAdjustmentService
             ]);
         }
 
-        // Validasi waktu tujuan tidak boleh berada di masa lalu
+        // Validasi waktu tujuan tidak boleh berada di masa lalu dan wajib berjarak minimal 24 jam dari sekarang
         $targetKickoff = Carbon::parse($tanggalBaru . ' ' . substr($jamMulaiBaru, 0, 5));
         if ($targetKickoff->isPast()) {
             throw ValidationException::withMessages([
                 'tanggal_baru' => 'Waktu jadwal baru tidak boleh berada di masa lalu.',
+            ]);
+        }
+
+        $hoursUntilTarget = now()->diffInHours($targetKickoff, false);
+        if ($hoursUntilTarget < self::H_MINUS_HOURS) {
+            throw ValidationException::withMessages([
+                'jam_mulai_baru' => 'Slot jadwal baru wajib berjarak minimal ' . self::H_MINUS_HOURS . ' jam dari waktu saat ini agar kasir memiliki waktu untuk meninjau pengajuan.',
             ]);
         }
 
@@ -232,7 +239,7 @@ class BookingAdjustmentService
                 'tanggal' => $lockedReschedule->tanggal_baru,
                 'jam_mulai' => $lockedReschedule->jam_mulai_baru,
                 'jam_selesai' => $lockedReschedule->jam_selesai_baru,
-                'catatan_kasir' => $catatan ?? ('Reschedule disetujui kasir pada ' . now()->format('d/m/Y H:i')),
+                'catatan_kasir' => $catatan ?? ('Reschedule disetujui kasir pada ' . now()->timezone('Asia/Jakarta')->format('d/m/Y H:i') . ' WIB'),
             ]);
 
             $lockedReschedule->update([
@@ -267,7 +274,7 @@ class BookingAdjustmentService
                 $oldNote = $lockedReschedule->jadwal->catatan_kasir;
                 $lockedReschedule->jadwal->update([
                     'catatan_kasir' => ($oldNote ? $oldNote . ' | ' : '') .
-                        'Reschedule ditolak: ' . $alasan . ' (' . now()->format('d/m/Y H:i') . ')',
+                        'Reschedule ditolak: ' . $alasan . ' (' . now()->timezone('Asia/Jakarta')->format('d/m/Y H:i') . ' WIB)',
                 ]);
             }
 
@@ -400,7 +407,7 @@ class BookingAdjustmentService
             $cancellerName = $cancelledBy?->nama ?? ($jadwal->pelanggan?->nama ?? 'Pelanggan');
 
             // Format catatan audit riwayat
-            $cancellationNote = "Dibatalkan oleh {$cancellerName} pada " . now()->format('d/m/Y H:i') .
+            $cancellationNote = "Dibatalkan oleh {$cancellerName} pada " . now()->timezone('Asia/Jakarta')->format('d/m/Y H:i') . ' WIB' .
                 ". Penalti: Rp " . number_format($penaltyData['penalty_amount'], 0, ',', '.') .
                 " (" . $penaltyData['policy_badge'] . ")." .
                 ($alasan ? " Alasan: {$alasan}" : "");

@@ -95,7 +95,12 @@ class BookingRescheduleController extends Controller
             $slotMulai = $curr->format('H:i');
             $slotSelesai = $curr->copy()->addHours($durasiJam)->format('H:i');
 
-            $isAvailable = $this->adjustmentService->checkSlotAvailability(
+            // Cek apakah slot berjarak minimal 24 jam dari waktu saat ini
+            $slotDateTime = Carbon::parse($tanggal . ' ' . $slotMulai);
+            $hoursUntilSlot = now()->diffInHours($slotDateTime, false);
+            $isTooClose = $hoursUntilSlot < BookingAdjustmentService::H_MINUS_HOURS;
+
+            $isAvailable = ! $isTooClose && $this->adjustmentService->checkSlotAvailability(
                 $lapangan,
                 $tanggal,
                 $slotMulai,
@@ -108,6 +113,8 @@ class BookingRescheduleController extends Controller
                 'jam_selesai' => $slotSelesai,
                 'label' => "{$slotMulai} - {$slotSelesai} WIB ({$durasiJam} Jam)",
                 'is_available' => $isAvailable,
+                'is_too_close' => $isTooClose,
+                'hours_until_slot' => (int) $hoursUntilSlot,
             ];
         }
 

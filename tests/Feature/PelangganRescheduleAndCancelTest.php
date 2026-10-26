@@ -264,4 +264,84 @@ class PelangganRescheduleAndCancelTest extends TestCase
             'denda_pembatalan' => 40000,
         ]);
     }
+
+    public function test_api_check_slots_marks_slot_as_too_close_if_less_than_24h(): void
+    {
+        // Set waktu pengujian ke jam 16:00
+        \Carbon\Carbon::setTestNow('2026-10-26 16:00:00');
+
+        $jadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'pelanggan_id' => $this->pelanggan->id,
+            'tanggal' => '2026-10-29',
+            'jam_mulai' => '18:00:00',
+            'jam_selesai' => '19:00:00',
+            'harga_disepakati' => 200000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'lunas_online',
+            'status' => 'terverifikasi',
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'created_at' => now(),
+        ]);
+
+        // Cek ketersediaan untuk besok (27 Okt 2026)
+        $response = $this->actingAs($this->pelanggan)
+            ->getJson(route('pelanggan.booking.reschedule.slots', [
+                'id' => $jadwal->id,
+                'tanggal' => '2026-10-27',
+            ]));
+
+        $response->assertOk();
+        $slots = collect($response->json('slots'));
+
+        // Slot 08:00 besok (hanya 16 jam dari sekarang) harus is_available = false dan is_too_close = true
+        $slotPagi = $slots->firstWhere('jam_mulai', '08:00');
+        $this->assertNotNull($slotPagi);
+        $this->assertFalse($slotPagi['is_available']);
+        $this->assertTrue($slotPagi['is_too_close']);
+
+        // Slot 17:00 besok (25 jam dari sekarang) harus is_available = true dan is_too_close = false
+        $slotSore = $slots->firstWhere('jam_mulai', '17:00');
+        $this->assertNotNull($slotSore);
+        $this->assertTrue($slotSore['is_available']);
+        $this->assertFalse($slotSore['is_too_close']);
+
+        \Carbon\Carbon::setTestNow();
+    }
+
+    public function test_customer_cannot_submit_reschedule_slot_less_than_24h_from_now(): void
+    {
+        \Carbon\Carbon::setTestNow('2026-10-26 16:00:00');
+
+        $jadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'pelanggan_id' => $this->pelanggan->id,
+            'tanggal' => '2026-10-29',
+            'jam_mulai' => '18:00:00',
+            'jam_selesai' => '19:00:00',
+            'harga_disepakati' => 200000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'lunas_online',
+            'status' => 'terverifikasi',
+            'sewa_rompi' => 0,
+            'sewa_bola' => 0,
+            'denda_pembatalan' => 0,
+            'created_at' => now(),
+        ]);
+
+        // Coba ajukan slot besok pagi jam 08:00 (hanya 16 jam lagi)
+        $response = $this->actingAs($this->pelanggan)
+            ->post(route('pelanggan.booking.reschedule.store', $jadwal->id), [
+                'tanggal_baru' => '2026-10-27',
+                'jam_mulai_baru' => '08:00',
+                'jam_selesai_baru' => '09:00',
+                'alasan_pengajuan' => 'Ingin bermain lebih pagi besok.',
+            ]);
+
+        $response->assertSessionHasErrors(['jam_mulai_baru']);
+
+        \Carbon\Carbon::setTestNow();
+    }
 }

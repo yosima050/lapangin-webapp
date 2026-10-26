@@ -140,6 +140,10 @@
             <span class="font-medium text-[#0b1c30]">Booking DP (Perlu Pelunasan)</span>
         </div>
         <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-[#ba1a1a]"></span>
+            <span class="font-medium text-[#ba1a1a]">Dibatalkan (Slot Bebas)</span>
+        </div>
+        <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-[#777682]"></span>
             <span class="font-medium text-[#777682]">Selesai Main</span>
         </div>
@@ -153,25 +157,30 @@
 
             @forelse ($jadwals as $jadwal)
                 @php
+                    $isCancelled = in_array($jadwal->status, ['dibatalkan', 'cancelled', 'rejected']);
                     $isLunas = $jadwal->status_pembayaran === 'lunas_online' || $jadwal->status_pembayaran === 'lunas_kasir';
                     $isDp = $jadwal->status_pembayaran === 'dp_terverifikasi';
                     $dpPaid = (float) $jadwal->transaksis->where('status', 'berhasil')->sum('jumlah');
                     $sisaTagihan = max(0, (float)$jadwal->harga_disepakati - $dpPaid);
                     $namaPenyewa = $jadwal->pelanggan->nama ?? $jadwal->nama_tamu ?? 'Penyewa Terdaftar';
                 @endphp
-                <div class="bg-white p-5 rounded-2xl shadow-sm border {{ $isDp ? 'border-2 border-[#f59e0b]/40' : 'border-[#e5eeff]' }} flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border {{ $isCancelled ? 'border-2 border-red-300 bg-red-50/40' : ($isDp ? 'border-2 border-[#f59e0b]/40' : 'border-[#e5eeff]') }} flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-center justify-center w-24 py-2 px-1 bg-[#eff4ff] rounded-xl shrink-0">
-                            <span class="text-lg font-headline font-extrabold text-[#0b1c30] tracking-tight">
+                        <div class="flex flex-col items-center justify-center w-24 py-2 px-1 {{ $isCancelled ? 'bg-red-100 text-red-900' : 'bg-[#eff4ff]' }} rounded-xl shrink-0">
+                            <span class="text-lg font-headline font-extrabold {{ $isCancelled ? 'text-red-700 line-through' : 'text-[#0b1c30]' }} tracking-tight">
                                 {{ substr($jadwal->jam_mulai, 0, 5) }}
                             </span>
-                            <span class="text-[10px] font-bold text-[#777682] uppercase">
+                            <span class="text-[10px] font-bold {{ $isCancelled ? 'text-red-500' : 'text-[#777682]' }} uppercase">
                                 s/d {{ substr($jadwal->jam_selesai, 0, 5) }}
                             </span>
                         </div>
                         <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-2">
-                                @if ($isLunas)
+                                @if ($isCancelled)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ba1a1a] text-white">
+                                        DIBATALKAN (SLOT BEBAS)
+                                    </span>
+                                @elseif ($isLunas)
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#1a146b] text-white">
                                         {{ $jadwal->status_pembayaran === 'lunas_kasir' ? 'LUNAS KASIR' : 'LUNAS ONLINE' }}
                                     </span>
@@ -186,17 +195,27 @@
                                 @endif
                                 <span class="text-xs text-[#777682]">{{ $jadwal->lapangan->nama ?? 'Lapangan' }}</span>
                             </div>
-                            <h3 class="text-sm font-bold text-[#0b1c30]">{{ $namaPenyewa }}</h3>
+                            <h3 class="text-sm font-bold {{ $isCancelled ? 'text-red-900 line-through' : 'text-[#0b1c30]' }}">{{ $namaPenyewa }}</h3>
                             <p class="text-xs text-[#474651]">
                                 {{ $jadwal->pelanggan->no_hp ?? $jadwal->no_wa_tamu ?: 'Kontak: -' }}
                             </p>
-                            @if ($sisaTagihan > 0)
+                            @if ($isCancelled)
+                                <p class="text-xs font-bold text-[#ba1a1a]">
+                                    Slot Dilepas • Denda: Rp {{ number_format((float) $jadwal->denda_pembatalan, 0, ',', '.') }}
+                                </p>
+                            @elseif ($sisaTagihan > 0)
                                 <p class="text-xs font-bold text-[#ba1a1a]">Sisa Tagihan: Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</p>
                             @endif
                         </div>
                     </div>
 
-                    @if ($sisaTagihan > 0)
+                    @if ($isCancelled)
+                        <a href="{{ route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id]) }}"
+                           class="px-4 py-2.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold transition-colors shrink-0 flex items-center justify-center gap-1.5 border border-red-300">
+                            <span class="material-symbols-outlined text-base">cancel</span>
+                            <span>Dibatalkan (Slot Bebas)</span>
+                        </a>
+                    @elseif ($sisaTagihan > 0)
                         <a href="{{ route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id]) }}"
                            class="px-4 py-2.5 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] text-white text-xs font-extrabold transition-all shadow-sm shrink-0 flex items-center justify-center gap-1.5">
                             <span class="material-symbols-outlined text-base">payments</span>

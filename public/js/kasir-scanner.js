@@ -349,7 +349,29 @@ class KasirScanner {
             btnConfirmCheckin.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        if (data.is_duplicate) {
+        if (data.is_cancelled || j.status === 'dibatalkan' || j.status === 'cancelled') {
+            // TIKET DIBATALKAN
+            if (statusBadge) {
+                statusBadge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#ba1a1a] text-white border border-red-700 shadow-xs';
+                statusBadge.textContent = 'RESERVASI DIBATALKAN';
+            }
+
+            if (warningContainer) {
+                warningContainer.classList.remove('hidden');
+                warningContainer.className = 'p-4 rounded-xl bg-red-100 border-2 border-red-400 flex items-start gap-3 text-red-950';
+            }
+            if (warningTitle) warningTitle.textContent = 'PERINGATAN: RESERVASI SUDAH DIBATALKAN!';
+            if (warningMessage) {
+                const dendaText = j.catatan_kasir ? ` Catatan: ${j.catatan_kasir}` : '';
+                warningMessage.textContent = `Reservasi ini telah dibatalkan. Slot jadwal telah dilepas kembali ke publik. Dilarang melayani check-in untuk tiket ini.${dendaText}`;
+            }
+
+            if (btnConfirmCheckin) {
+                btnConfirmCheckin.setAttribute('disabled', 'true');
+                btnConfirmCheckin.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (paymentSection) paymentSection.classList.add('hidden');
+        } else if (data.is_duplicate) {
             // TIKET DUPLIKAT (SUDAH DIPAKAI)
             if (statusBadge) {
                 statusBadge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#ffdad6] text-[#ba1a1a] border border-[#ba1a1a]/30';

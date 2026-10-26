@@ -1,4 +1,4 @@
-﻿@extends('layouts.kasir')
+@extends('layouts.kasir')
 
 @section('title', 'Validasi Check-in & Pelunasan Kasir - LapangIn')
 
@@ -314,18 +314,21 @@
                     @forelse ($antreanHariIni as $antrean)
                         @php
                             $isSelected = $activeBooking && $activeBooking->id === $antrean->id;
+                            $antreanBatal = in_array($antrean->status, ['dibatalkan', 'cancelled', 'rejected']);
                             $antreanNama = $antrean->pelanggan->nama ?? $antrean->nama_tamu ?? 'Penyewa Tamu';
                             $antreanDp = (float) $antrean->transaksis->where('status', 'berhasil')->sum('jumlah');
                             $antreanSisa = max(0, (float)$antrean->harga_disepakati - $antreanDp);
                         @endphp
                         <a href="{{ route('kasir.index', ['code' => $antrean->kode_qr ?? $antrean->token_manual ?? $antrean->id]) }}"
-                           class="p-3.5 rounded-xl transition-all border {{ $isSelected ? 'bg-[#dce9ff] border-[#1a146b] shadow-xs' : 'bg-[#eff4ff] hover:bg-[#e5eeff] border-transparent' }} flex flex-col gap-1.5">
+                           class="p-3.5 rounded-xl transition-all border {{ $isSelected ? ($antreanBatal ? 'bg-[#ffdad6]/60 border-[#ba1a1a] shadow-xs' : 'bg-[#dce9ff] border-[#1a146b] shadow-xs') : ($antreanBatal ? 'bg-[#ffdad6]/30 hover:bg-[#ffdad6]/50 border-red-200/60 opacity-80' : 'bg-[#eff4ff] hover:bg-[#e5eeff] border-transparent') }} flex flex-col gap-1.5">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $isSelected ? 'bg-[#416900]' : 'bg-[#1a146b]' }}"></span>
-                                    <span class="text-xs font-bold text-[#0b1c30]">{{ $antreanNama }}</span>
+                                    <span class="w-2.5 h-2.5 rounded-full {{ $antreanBatal ? 'bg-[#ba1a1a]' : ($isSelected ? 'bg-[#416900]' : 'bg-[#1a146b]') }}"></span>
+                                    <span class="text-xs font-bold {{ $antreanBatal ? 'text-[#ba1a1a] line-through' : 'text-[#0b1c30]' }}">{{ $antreanNama }}</span>
                                 </div>
-                                @if ($isSelected)
+                                @if ($antreanBatal)
+                                    <span class="px-2 py-0.5 rounded-md bg-[#ba1a1a] text-white text-[10px] font-black tracking-wide">Dibatalkan</span>
+                                @elseif ($isSelected)
                                     <span class="px-2 py-0.5 rounded-md bg-[#acf847] text-[#102000] text-[10px] font-extrabold">Dipilih</span>
                                 @elseif ($antrean->status_pembayaran === 'lunas_online' || $antreanSisa == 0)
                                     <span class="px-2 py-0.5 rounded-md bg-white text-[#416900] text-[10px] font-bold">Lunas</span>
@@ -335,8 +338,10 @@
                             </div>
 
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span>{{ substr($antrean->jam_mulai, 0, 5) }} - {{ substr($antrean->jam_selesai, 0, 5) }} ({{ $antrean->lapangan->kategori ?? 'Lapangan' }})</span>
-                                @if ($antreanSisa > 0)
+                                <span class="{{ $antreanBatal ? 'line-through text-gray-400' : '' }}">{{ substr($antrean->jam_mulai, 0, 5) }} - {{ substr($antrean->jam_selesai, 0, 5) }} ({{ $antrean->lapangan->kategori ?? 'Lapangan' }})</span>
+                                @if ($antreanBatal)
+                                    <span class="font-bold text-[#ba1a1a]">Slot Dilepas (Denda Rp {{ number_format((float) $antrean->denda_pembatalan, 0, ',', '.') }})</span>
+                                @elseif ($antreanSisa > 0)
                                     <span class="font-bold text-[#ba1a1a]">Sisa Rp {{ number_format($antreanSisa, 0, ',', '.') }}</span>
                                 @else
                                     <span class="font-bold text-[#416900]">Rp 0 (Lunas)</span>
@@ -391,35 +396,89 @@
         <!-- RIGHT COLUMN: Confirmed Details & Cashier Payment Form (7 cols) -->
         <div class="lg:col-span-7 flex flex-col gap-5">
 
-            <!-- Verified Booking Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-[#e5eeff] overflow-hidden">
-                <!-- Verified Top Header Banner -->
-                <div class="p-6 bg-[#eff4ff] border-b border-[#e5eeff] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-10 h-10 rounded-full bg-[#acf847] flex items-center justify-center text-[#102000] shadow-sm">
-                            <span class="material-symbols-outlined text-2xl font-bold">verified</span>
-                        </div>
-                        <div>
-                            <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#acf847] text-[#102000] text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
-                                KODE VALID TERKONFIRMASI
-                            </span>
-                            <div class="text-xl font-headline font-extrabold text-[#0b1c30] tracking-tight">
-                                {{ $bookingCode }}
+            <!-- Verified / Cancelled Booking Card -->
+            @php
+                $isCancelled = $activeBooking && in_array($activeBooking->status, ['dibatalkan', 'cancelled', 'rejected']);
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border {{ $isCancelled ? 'border-2 border-red-300' : 'border-[#e5eeff]' }} overflow-hidden">
+                @if ($isCancelled)
+                    <!-- Cancelled Danger Header Banner -->
+                    <div class="p-6 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white border-b-2 border-red-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+                                ✕
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider mb-1">
+                                    <span class="h-2 w-2 rounded-full bg-red-200 animate-pulse"></span>
+                                    STATUS: RESERVASI DIBATALKAN
+                                </span>
+                                <div class="text-2xl font-headline font-black text-white tracking-tight">
+                                    {{ $bookingCode }}
+                                </div>
+                                <p class="text-xs text-red-100 font-semibold mt-0.5">
+                                    Slot jadwal telah dilepas kembali ke publik. Tiket ini TIDAK VALID untuk check-in.
+                                </p>
                             </div>
                         </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-xs font-black px-3.5 py-1.5 rounded-xl bg-white text-red-700 border border-red-200 shadow-sm">
+                                🚫 TIKET TIDAK BERLAKU
+                            </span>
+                        </div>
                     </div>
-                    <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white border border-[#dce9ff] text-[#474651]">
-                        Server: Synced 1 mnt lalu
-                    </span>
-                </div>
+                @else
+                    <!-- Verified Top Header Banner -->
+                    <div class="p-6 bg-[#eff4ff] border-b border-[#e5eeff] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-full bg-[#acf847] flex items-center justify-center text-[#102000] shadow-sm">
+                                <span class="material-symbols-outlined text-2xl font-bold">verified</span>
+                            </div>
+                            <div>
+                                <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#acf847] text-[#102000] text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
+                                    KODE VALID TERKONFIRMASI
+                                </span>
+                                <div class="text-xl font-headline font-extrabold text-[#0b1c30] tracking-tight">
+                                    {{ $bookingCode }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white border border-[#dce9ff] text-[#474651]">
+                            Server: Synced 1 mnt lalu
+                        </span>
+                    </div>
+                @endif
 
                 <div class="p-6 flex flex-col gap-6">
+                    @if ($isCancelled)
+                        <!-- Peringatan Pembatalan Eksplisit untuk Kasir -->
+                        <div class="p-4 rounded-2xl bg-red-50 border-2 border-red-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-red-900 shadow-xs">
+                            <div class="flex items-start gap-3">
+                                <div class="h-10 w-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-black text-xl shrink-0 mt-0.5">
+                                    ⚠️
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-red-900">PERINGATAN KASIR: PEMESANAN TELAH DIBATALKAN</h4>
+                                    <p class="text-xs text-red-700 mt-0.5 leading-relaxed font-semibold">
+                                        {{ $activeBooking->catatan_kasir ?: 'Jadwal ini telah dibatalkan. Jangan izinkan pemain masuk ke lapangan.' }}
+                                    </p>
+                                </div>
+                            </div>
+                            @if ($activeBooking->denda_pembatalan > 0)
+                                <div class="bg-white px-3.5 py-2 rounded-xl border border-red-200 text-right shrink-0 shadow-xs">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-red-600 block">DENDA PENALTI TERPOTONG</span>
+                                    <span class="text-sm font-black text-red-800">Rp {{ number_format((float) $activeBooking->denda_pembatalan, 0, ',', '.') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     <!-- 2 Columns: Pemesan vs Spesifikasi Lapangan -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 rounded-xl bg-[#eff4ff] border border-[#e5eeff] flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">PEMESAN</span>
+                        <div class="p-4 rounded-xl {{ $isCancelled ? 'bg-red-50/50 border border-red-200' : 'bg-[#eff4ff] border border-[#e5eeff]' }} flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider {{ $isCancelled ? 'text-red-700' : 'text-[#777682]' }}">PEMESAN</span>
                             <div class="text-base font-bold text-[#0b1c30]">{{ $customerName }}</div>
-                            <div class="flex items-center gap-2 text-xs text-[#416900] font-semibold mt-0.5">
+                            <div class="flex items-center gap-2 text-xs {{ $isCancelled ? 'text-red-700' : 'text-[#416900]' }} font-semibold mt-0.5">
                                 <span class="material-symbols-outlined text-base">chat</span>
                                 <span>{{ $customerPhone }}</span>
                             </div>
@@ -429,23 +488,32 @@
                             </div>
                         </div>
 
-                        <div class="p-4 rounded-xl bg-[#eff4ff] border border-[#e5eeff] flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">SPESIFIKASI LAPANGAN</span>
-                            <div class="text-base font-bold text-[#0b1c30]">{{ $courtName }}</div>
-                            <div class="flex items-center gap-2 text-xs text-[#1a146b] font-medium mt-0.5">
-                                <span class="material-symbols-outlined text-base">schedule</span>
-                                <span>{{ $jamMulai }} - {{ $jamSelesai }} WIB</span>
+                        <div class="p-4 rounded-xl {{ $isCancelled ? 'bg-red-50/70 border-2 border-red-300' : 'bg-[#eff4ff] border border-[#e5eeff]' }} flex flex-col gap-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider {{ $isCancelled ? 'text-red-700' : 'text-[#777682]' }}">SPESIFIKASI LAPANGAN</span>
+                                @if ($isCancelled)
+                                    <span class="px-2 py-0.5 rounded-md bg-red-600 text-white text-[9px] font-black uppercase">
+                                        DIBATALKAN
+                                    </span>
+                                @endif
                             </div>
-                            <div class="text-xs text-[#474651] mt-1 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-[#416900]">sports</span>
+                            <div class="text-base font-bold {{ $isCancelled ? 'text-red-900 line-through' : 'text-[#0b1c30]' }}">{{ $courtName }}</div>
+                            <div class="flex items-center gap-2 text-xs {{ $isCancelled ? 'text-red-700 font-semibold' : 'text-[#1a146b] font-medium' }} mt-0.5">
+                                <span class="material-symbols-outlined text-base">schedule</span>
+                                <span class="{{ $isCancelled ? 'line-through' : '' }}">{{ $jamMulai }} - {{ $jamSelesai }} WIB</span>
+                            </div>
+                            <div class="text-xs {{ $isCancelled ? 'text-red-800 bg-red-100/80 p-2 rounded-lg font-semibold' : 'text-[#474651]' }} mt-1 flex items-start gap-1.5">
+                                <span class="material-symbols-outlined text-sm {{ $isCancelled ? 'text-red-600' : 'text-[#416900]' }} shrink-0 mt-0.5">
+                                    {{ $isCancelled ? 'cancel' : 'sports' }}
+                                </span>
                                 <span>{{ $activeBooking?->catatan_kasir ?: 'Termasuk Rompi Latihan & Bola Match' }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Financial Breakdown & Sisa Tagihan Onsite -->
-                    <div class="rounded-2xl bg-[#eff4ff] p-5 border border-[#e5eeff] flex flex-col gap-3">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#474651]">RINCIAN FINANSIAL &amp; RIWAYAT DP</span>
+                    <div class="rounded-2xl {{ $isCancelled ? 'bg-red-50/40 border border-red-200' : 'bg-[#eff4ff] border border-[#e5eeff]' }} p-5 flex flex-col gap-3">
+                        <span class="text-[11px] font-bold uppercase tracking-wider {{ $isCancelled ? 'text-red-700' : 'text-[#474651]' }}">RINCIAN FINANSIAL &amp; RIWAYAT PEMBATALAN</span>
 
                         <div class="flex items-center justify-between text-sm text-[#0b1c30]">
                             <span>Tarif Sewa Lapangan</span>
@@ -488,7 +556,7 @@
                         @endif
 
                         <div class="flex items-center justify-between text-sm text-[#0b1c30] border-t border-[#dce9ff] pt-3">
-                            <span class="font-bold">Total Keseluruhan</span>
+                            <span class="font-bold">Total Nilai Booking</span>
                             <span class="font-extrabold">
                                 Rp {{ number_format($totalHarga, 0, ',', '.') }}
                             </span>
@@ -496,27 +564,70 @@
                         <div class="flex items-center justify-between text-sm text-[#416900]">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-base">check_circle</span>
-                                <span>DP Dibayar Online (via Midtrans / QRIS)</span>
+                                <span>DP / Pembayaran Masuk (Online / Kasir)</span>
                             </div>
                             <span class="font-extrabold">- Rp {{ number_format($dpPaid, 0, ',', '.') }}</span>
                         </div>
 
-                        <!-- Big Sisa Tagihan Box -->
-                        <div class="mt-2 pt-4 border-t border-[#dce9ff] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div>
-                                <div class="text-[11px] font-bold uppercase tracking-wider text-[#ba1a1a]">SISA TAGIHAN PELUNASAN ONSITE</div>
-                                <div class="text-xs text-[#ba1a1a] font-medium mt-0.5">Wajib diselesaikan kasir sebelum kick-off</div>
+                        @if ($isCancelled)
+                            <!-- Big Status Pembatalan Box -->
+                            <div class="mt-2 pt-4 border-t-2 border-red-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <div class="text-[11px] font-black uppercase tracking-wider text-red-700">STATUS PEMBATALAN SEWA</div>
+                                    <div class="text-xs text-red-600 font-semibold mt-0.5">Denda penalti tercatat resmi di database venue</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl lg:text-3xl font-headline font-black text-red-700 tracking-tight">
+                                        Penalti: Rp {{ number_format((float) $activeBooking->denda_pembatalan, 0, ',', '.') }}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <span class="text-3xl lg:text-4xl font-headline font-black text-[#ba1a1a] tracking-tight">
-                                    Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
-                                </span>
+                        @else
+                            <!-- Big Sisa Tagihan Box -->
+                            <div class="mt-2 pt-4 border-t border-[#dce9ff] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <div class="text-[11px] font-bold uppercase tracking-wider text-[#ba1a1a]">SISA TAGIHAN PELUNASAN ONSITE</div>
+                                    <div class="text-xs text-[#ba1a1a] font-medium mt-0.5">Wajib diselesaikan kasir sebelum kick-off</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-3xl lg:text-4xl font-headline font-black text-[#ba1a1a] tracking-tight">
+                                        Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
-                    <!-- Cashier Payment Form -->
-                    <div class="flex flex-col gap-5 pt-2">
+                    @if ($isCancelled)
+                        <!-- Panel Dinonaktifkan Karena Batal -->
+                        <div class="rounded-2xl border-2 border-dashed border-red-300 bg-red-50/70 p-6 sm:p-8 text-center space-y-4">
+                            <div class="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-black text-3xl mx-auto shadow-xs">
+                                🚫
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="text-lg font-headline font-black text-red-950">
+                                    Transaksi Pelunasan &amp; Check-in Dinonaktifkan
+                                </h3>
+                                <p class="text-xs text-red-700 max-w-md mx-auto leading-relaxed">
+                                    Tiket ini telah <strong>Dibatalkan</strong>. Sesi bermain tidak dapat divalidasi dan gerbang masuk turnstile ditutup untuk reservasi ini. Slot jadwal telah kembali tersedia untuk publik.
+                                </p>
+                            </div>
+                            <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+                                <a href="{{ route('kasir.index') }}"
+                                   class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-red-200 text-red-700 hover:bg-red-50 font-bold text-xs transition shadow-xs">
+                                    <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                                    <span>Scan / Cari Tiket Lain</span>
+                                </a>
+                                <a href="{{ route('kasir.jadwal') }}"
+                                   class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#1a146b] text-white hover:bg-indigo-900 font-bold text-xs transition shadow-xs">
+                                    <span class="material-symbols-outlined text-base">calendar_month</span>
+                                    <span>Buka Jadwal Lapangan</span>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <!-- Cashier Payment Form -->
+                        <div class="flex flex-col gap-5 pt-2">
                         <div class="flex items-center gap-2 text-base font-bold text-[#0b1c30]">
                             <span class="material-symbols-outlined text-[#1a146b]">payments</span>
                             <span>Form Pembayaran Kasir</span>
@@ -669,6 +780,7 @@
                         </div>
 
                     </div>
+                    @endif
                 </div>
             </div>
         

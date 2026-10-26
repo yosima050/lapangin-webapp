@@ -38,7 +38,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Kebijakan Venue</p>
-                    <p class="text-xs font-extrabold text-white">Minimal H-1 (24 Jam)</p>
+                    <p class="text-xs font-extrabold text-white">Minimal 24 Jam Sebelum Kickoff</p>
                 </div>
             </div>
         </div>
@@ -142,7 +142,11 @@
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-emerald-600 font-bold">✓</span>
-                        <span>Maksimal pengajuan adalah <strong>H-1 (24 jam sebelum kickoff)</strong>.</span>
+                        <span>Paling lambat pengajuan dilakukan <strong>H-1 (minimal 24 jam sebelum kickoff jadwal lama)</strong>.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-600 font-bold">✓</span>
+                        <span>Slot jadwal baru yang dipilih juga wajib berjarak <strong>minimal 24 jam dari waktu saat ini</strong> (agar kasir memiliki waktu memproses persetujuan).</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-indigo-600 font-bold">ℹ️</span>
@@ -245,12 +249,15 @@
                             </label>
                             
                             {{-- Legenda Slot --}}
-                            <div class="flex items-center gap-3 text-[11px]">
+                            <div class="flex flex-wrap items-center gap-3 text-[11px]">
                                 <span class="inline-flex items-center gap-1 text-emerald-700">
                                     <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Tersedia
                                 </span>
+                                <span class="inline-flex items-center gap-1 text-amber-700">
+                                    <span class="h-2 w-2 rounded-full bg-amber-400"></span> Mepet (&lt; 24 Jam)
+                                </span>
                                 <span class="inline-flex items-center gap-1 text-gray-400">
-                                    <span class="h-2 w-2 rounded-full bg-gray-300"></span> Terisi / Tidak Tersedia
+                                    <span class="h-2 w-2 rounded-full bg-gray-300"></span> Terisi / Bentrok
                                 </span>
                             </div>
                         </div>
@@ -281,14 +288,15 @@
                                             :class="{
                                                 'border-[#1a146b] bg-[#1a146b] text-white ring-2 ring-[#acf847] shadow-md': jamMulai === slot.jam_mulai,
                                                 'border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-950': slot.is_available && jamMulai !== slot.jam_mulai,
-                                                'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60': !slot.is_available
+                                                'border-amber-200 bg-amber-50/60 text-amber-800 cursor-not-allowed opacity-75': !slot.is_available && slot.is_too_close,
+                                                'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60': !slot.is_available && !slot.is_too_close
                                             }"
                                             class="relative flex flex-col items-center justify-center p-3 rounded-xl border text-center transition cursor-pointer">
                                         
                                         <span class="text-xs font-extrabold" x-text="slot.jam_mulai + ' - ' + slot.jam_selesai"></span>
                                         <span class="text-[10px] mt-1 font-semibold"
-                                              :class="jamMulai === slot.jam_mulai ? 'text-[#acf847]' : (slot.is_available ? 'text-emerald-700' : 'text-gray-400')"
-                                              x-text="slot.is_available ? (jamMulai === slot.jam_mulai ? '✓ Terpilih' : 'Tersedia') : 'Terisi'">
+                                              :class="jamMulai === slot.jam_mulai ? 'text-[#acf847]' : (slot.is_available ? 'text-emerald-700' : (slot.is_too_close ? 'text-amber-700' : 'text-gray-400'))"
+                                              x-text="slot.is_available ? (jamMulai === slot.jam_mulai ? '✓ Terpilih' : 'Tersedia') : (slot.is_too_close ? 'Mepet (<24 Jam)' : 'Terisi')">
                                         </span>
                                     </button>
                                 </template>
