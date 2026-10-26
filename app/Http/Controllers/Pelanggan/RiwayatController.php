@@ -31,7 +31,7 @@ class RiwayatController extends Controller
         }
 
         $jadwals = $pelanggan ? $pelanggan->jadwals()
-            ->with(['lapangan', 'transaksis'])
+            ->with(['lapangan', 'transaksis', 'reschedules'])
             ->orderByDesc('tanggal')
             ->orderByDesc('jam_mulai')
             ->paginate(10) : collect();

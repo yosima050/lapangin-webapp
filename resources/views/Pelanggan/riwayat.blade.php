@@ -16,8 +16,46 @@
     isProcessing: false,
     errorMessage: '',
     modalRemainingSec: 600,
-    modalTimerInterval: null,
     isModalExpired: false,
+
+    // Auto-Penalty Cancellation State (Sprint 5)
+    cancelModalOpen: false,
+    cancelLoading: false,
+    cancelSubmitting: false,
+    cancelJadwalId: null,
+    cancelLapanganNama: '',
+    cancelTanggal: '',
+    cancelJam: '',
+    cancelPenalty: null,
+    cancelFormUrl: '',
+
+    openCancelModal(id, nama, tgl, jam) {
+        this.cancelJadwalId = id;
+        this.cancelLapanganNama = nama;
+        this.cancelTanggal = tgl;
+        this.cancelJam = jam;
+        this.cancelLoading = true;
+        this.cancelSubmitting = false;
+        this.cancelPenalty = null;
+        this.cancelFormUrl = '/pelanggan/booking/' + id + '/cancel';
+        this.cancelModalOpen = true;
+
+        fetch('/pelanggan/booking/' + id + '/cancel-preview', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.cancelPenalty = data.penalty;
+            this.cancelLoading = false;
+        })
+        .catch(err => {
+            console.error(err);
+            this.cancelLoading = false;
+        });
+    },
 
     openPayModal(id, nama, tgl, mulai, selesai, harga, url, remainingSec) {
         this.selectedJadwalId = id;
@@ -282,6 +320,13 @@
                 $durasiJam = max(1, round(($selesaiMenit - $mulaiMenit) / 60));
                 $tanggalStr = $jadwal->tanggal instanceof \Carbon\Carbon ? $jadwal->tanggal->toDateString() : (string) $jadwal->tanggal;
                 $namaLapangan = $jadwal->lapangan?->nama ?? 'Lapangan';
+
+                // Helper Reschedule & Pembatalan (Sprint 5)
+                $kickoff = \Carbon\Carbon::parse($tanggalStr . ' ' . substr((string) $jadwal->jam_mulai, 0, 5));
+                $hoursUntilKickoff = now()->diffInHours($kickoff, false);
+                $pendingReschedule = $jadwal->reschedules ? $jadwal->reschedules->firstWhere('status', 'diajukan') : null;
+                $canReschedule = ! $isDibatalkan && empty($jadwal->checked_in_at) && ! $pendingReschedule && $hoursUntilKickoff >= 24;
+                $canCancel = ! $isDibatalkan && empty($jadwal->checked_in_at) && $jadwal->status !== 'selesai';
             @endphp
 
             <article x-data="{ showModal: false }" class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
@@ -402,6 +447,34 @@
                                 <span class="text-gray-500">Total Harga:</span>
                                 <span class="font-bold text-gray-900">Rp{{ number_format((float) $jadwal->harga_disepakati, 0, ',', '.') }}</span>
                             </div>
+
+                            {{-- Status Pengajuan Reschedule (Sprint 5) --}}
+                            @if ($pendingReschedule)
+                                <div class="mt-3 rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900 flex items-start gap-2">
+                                    <span class="text-sm">⏳</span>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold">Permohonan Reschedule Menunggu Kasir</p>
+                                        <p class="text-[11px] text-amber-700 mt-0.5">
+                                            Jadwal baru: <strong>{{ \Carbon\Carbon::parse($pendingReschedule->tanggal_baru)->translatedFormat('d M Y') }}</strong> ({{ substr((string) $pendingReschedule->jam_mulai_baru, 0, 5) }} - {{ substr((string) $pendingReschedule->jam_selesai_baru, 0, 5) }} WIB).
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Catatan Denda Penalti Jika Dibatalkan (Sprint 5) --}}
+                            @if ($isDibatalkan)
+                                <div class="mt-3 rounded-xl bg-red-50 border border-red-200 p-2.5 text-xs text-red-900 space-y-1">
+                                    <div class="flex items-center justify-between font-bold">
+                                        <span>Denda Penalti Pembatalan:</span>
+                                        <span class="text-red-700">Rp{{ number_format((float) $jadwal->denda_pembatalan, 0, ',', '.') }}</span>
+                                    </div>
+                                    @if ($jadwal->catatan_kasir)
+                                        <p class="text-[10px] text-red-700/80 italic leading-snug">
+                                            {{ $jadwal->catatan_kasir }}
+                                        </p>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
 
                         {{-- Kolom 3: Tombol Aksi Kanan --}}
@@ -438,13 +511,40 @@
                                 </button>
                             @endif
 
+                            {{-- Tombol Aksi Reschedule & Pembatalan (Sprint 5) --}}
                             <div class="grid grid-cols-2 gap-2">
-                                <button type="button" class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-gray-700 hover:bg-gray-50 transition">
-                                    🔄 Reschedule
-                                </button>
-                                <button type="button" class="inline-flex items-center justify-center gap-1 rounded-xl border border-red-100 bg-red-50/50 px-2.5 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50 transition">
-                                    🚫 Batalkan
-                                </button>
+                                @if ($pendingReschedule)
+                                    <a href="{{ route('pelanggan.booking.reschedule', $jadwal->id) }}"
+                                       class="inline-flex items-center justify-center gap-1 rounded-xl border border-amber-300 bg-amber-50 px-2 py-2 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition text-center leading-tight">
+                                        ⏳ Review Kasir
+                                    </a>
+                                @elseif ($canReschedule)
+                                    <a href="{{ route('pelanggan.booking.reschedule', $jadwal->id) }}"
+                                       class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-bold text-gray-700 hover:bg-indigo-50 hover:text-[#1a146b] hover:border-indigo-200 transition">
+                                        🔄 Reschedule
+                                    </a>
+                                @else
+                                    <button type="button"
+                                            disabled
+                                            title="{{ $isDibatalkan ? 'Jadwal telah dibatalkan' : (!empty($jadwal->checked_in_at) ? 'Tiket sudah check-in' : 'Reschedule minimal H-1 (24 jam sebelum kickoff)') }}"
+                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
+                                        🔄 Reschedule
+                                    </button>
+                                @endif
+
+                                @if ($canCancel)
+                                    <button type="button"
+                                            @click="openCancelModal('{{ $jadwal->id }}', '{{ addslashes($namaLapangan) }}', '{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}', '{{ substr((string)$jadwal->jam_mulai, 0, 5) }} - {{ substr((string)$jadwal->jam_selesai, 0, 5) }} WIB')"
+                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50/70 px-2.5 py-2 text-[11px] font-bold text-red-700 hover:bg-red-100 transition cursor-pointer">
+                                        🚫 Batalkan
+                                    </button>
+                                @else
+                                    <button type="button"
+                                            disabled
+                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
+                                        🚫 Batalkan
+                                    </button>
+                                @endif
                             </div>
 
                             <p class="text-[10px] text-center text-gray-400">
@@ -850,6 +950,123 @@
             <p class="mt-3 text-center text-[10px] text-gray-400">
                 🔒 Pembayaran aman &amp; otomatis diverifikasi via Midtrans Snap (QRIS, VA, E-Wallet, CC).
             </p>
+        </div>
+    </div>
+
+    {{-- POP-UP MODAL PEMBATALAN SEWA & AUTO-PENALTY POLICY (SPRINT 5) --}}
+    <div x-show="cancelModalOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+         style="display: none;">
+
+        <div @click.away="if (!cancelSubmitting) cancelModalOpen = false"
+             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-8 space-y-5 text-left border border-gray-100">
+            
+            {{-- Close Button --}}
+            <button @click="cancelModalOpen = false"
+                    :disabled="cancelSubmitting"
+                    type="button"
+                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
+                ✕
+            </button>
+
+            {{-- Modal Header --}}
+            <div class="flex items-center gap-3">
+                <div class="h-11 w-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-black text-xl shrink-0">
+                    🚫
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-gray-900">
+                        Konfirmasi Pembatalan Sewa
+                    </h3>
+                    <p class="text-xs text-gray-500" x-text="cancelLapanganNama + ' • ' + cancelTanggal"></p>
+                </div>
+            </div>
+
+            {{-- Loading Indicator --}}
+            <div x-show="cancelLoading" class="p-8 text-center rounded-2xl bg-gray-50 border border-gray-100">
+                <svg class="animate-spin h-6 w-6 text-red-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2 text-xs font-semibold text-gray-500">Mengkalkulasi kebijakan denda penalti...</p>
+            </div>
+
+            {{-- Content Once Loaded --}}
+            <div x-show="!cancelLoading && cancelPenalty" class="space-y-4">
+                
+                {{-- Banner Kebijakan Penalti --}}
+                <div :class="cancelPenalty?.is_h_minus_24 ? 'bg-red-50 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
+                     class="rounded-2xl border p-4 text-xs leading-relaxed">
+                    <div class="flex items-center gap-2 font-bold text-sm">
+                        <span x-text="cancelPenalty?.is_h_minus_24 ? '⚠️' : 'ℹ️'"></span>
+                        <span x-text="cancelPenalty?.policy_badge"></span>
+                    </div>
+                    <p class="mt-1" x-text="cancelPenalty?.policy_description"></p>
+                </div>
+
+                {{-- Breakdown Angka --}}
+                <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 space-y-2 text-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Total Harga Booking:</span>
+                        <span class="font-bold text-gray-900" x-text="formatRupiah(cancelPenalty?.total_price)"></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Dana Terbayar:</span>
+                        <span class="font-bold text-gray-900" x-text="formatRupiah(cancelPenalty?.total_paid)"></span>
+                    </div>
+                    <div class="flex justify-between text-red-600 font-bold border-t border-gray-200/60 pt-2">
+                        <span>Denda Penalti Pembatalan (<span x-text="cancelPenalty?.penalty_percentage"></span>%):</span>
+                        <span x-text="'- ' + formatRupiah(cancelPenalty?.penalty_amount)"></span>
+                    </div>
+                    <div class="flex justify-between text-emerald-700 font-extrabold text-sm border-t border-gray-200/60 pt-2">
+                        <span>Estimasi Pengembalian (Refund):</span>
+                        <span x-text="formatRupiah(cancelPenalty?.estimated_refund)"></span>
+                    </div>
+                </div>
+
+                {{-- Form Pembatalan --}}
+                <form :action="cancelFormUrl" method="POST" @submit="cancelSubmitting = true" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label for="alasan_pembatalan" class="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                            Alasan Pembatalan (Opsional)
+                        </label>
+                        <textarea id="alasan_pembatalan"
+                                  name="alasan_pembatalan"
+                                  rows="2"
+                                  maxlength="500"
+                                  placeholder="Berikan alasan pembatalan untuk arsip venue..."
+                                  class="mt-1.5 w-full rounded-xl border-gray-300 shadow-xs text-xs focus:border-red-500 focus:ring-red-500"></textarea>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-gray-100 text-[11px] text-gray-500">
+                        Slot jadwal Anda akan otomatis <strong>dilepaskan kembali ke publik</strong> dan status diubah menjadi <strong>Dibatalkan</strong>.
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button type="button"
+                                @click="cancelModalOpen = false"
+                                class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">
+                            Batal, Simpan Jadwal
+                        </button>
+                        <button type="submit"
+                                :disabled="cancelSubmitting"
+                                class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                            <span x-show="!cancelSubmitting">Ya, Batalkan Booking</span>
+                            <span x-show="cancelSubmitting" x-cloak>Memproses...</span>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
         </div>
     </div>
 

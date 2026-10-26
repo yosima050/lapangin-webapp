@@ -13,6 +13,7 @@ use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\MidtransCallbackController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\Pelanggan\RiwayatController;
+use App\Http\Controllers\Pelanggan\BookingRescheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\HargaKhususController;
 use Illuminate\Support\Facades\Route;
@@ -158,6 +159,22 @@ Route::middleware(['auth', 'IsPelanggan'])->group(function () {
 
     Route::get('/pelanggan/booking', [RiwayatController::class, 'index'])
         ->name('pelanggan.booking.index');
+
+    // Reschedule & Auto-Penalty Cancellation (Sprint 5)
+    Route::get('/pelanggan/booking/{id}/reschedule', [BookingRescheduleController::class, 'create'])
+        ->name('pelanggan.booking.reschedule');
+
+    Route::get('/pelanggan/booking/{id}/reschedule/slots', [BookingRescheduleController::class, 'checkSlots'])
+        ->name('pelanggan.booking.reschedule.slots');
+
+    Route::post('/pelanggan/booking/{id}/reschedule', [BookingRescheduleController::class, 'store'])
+        ->name('pelanggan.booking.reschedule.store');
+
+    Route::get('/pelanggan/booking/{id}/cancel-preview', [BookingRescheduleController::class, 'cancelPreview'])
+        ->name('pelanggan.booking.cancel.preview');
+
+    Route::post('/pelanggan/booking/{id}/cancel', [BookingRescheduleController::class, 'cancel'])
+        ->name('pelanggan.booking.cancel');
 });
 
 require __DIR__.'/auth.php';
