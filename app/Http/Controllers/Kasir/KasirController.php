@@ -10,6 +10,7 @@ use App\Models\Transaksi;
 use App\Models\Perlengkapan;
 use App\Models\DetailSewaPerlengkapan;
 use App\Models\HargaKhusus;
+use App\Services\BookingAdjustmentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -1158,40 +1159,18 @@ for ($i = 0; $i < $durasi; $i++) {
 
     public function approveReschedule(
         Request $request,
-        string $id
+        string $id,
+        BookingAdjustmentService $adjustmentService
     ): RedirectResponse {
-        DB::transaction(function () use ($request, $id) {
-            $reschedule = Reschedule::with('jadwal')
-                ->lockForUpdate()
-                ->findOrFail($id);
+        $reschedule = Reschedule::findOrFail($id);
 
-            if ($reschedule->status !== 'diajukan') {
-                throw ValidationException::withMessages([
-                    'reschedule' => 'Pengajuan ini sudah diproses.',
-                ]);
-            }
-
-            if (! $reschedule->jadwal) {
-                throw ValidationException::withMessages([
-                    'jadwal' => 'Jadwal terkait tidak ditemukan.',
-                ]);
-            }
-
-            $reschedule->jadwal->update([
-                'tanggal' => $reschedule->tanggal_baru,
-                'jam_mulai' => $reschedule->jam_mulai_baru,
-                'jam_selesai' => $reschedule->jam_selesai_baru,
-                'catatan_kasir' => $request->input(
-                    'catatan',
-                    'Reschedule disetujui kasir pada '
-                    . now()->format('d/m/Y H:i')
-                ),
-            ]);
-
-            $reschedule->update([
-                'status' => 'disetujui',
-            ]);
-        }, 3);
+        $adjustmentService->approveReschedule(
+            $reschedule,
+            $request->input(
+                'catatan',
+                'Reschedule disetujui kasir pada ' . now()->format('d/m/Y H:i')
+            )
+        );
 
         return redirect()->route('kasir.reschedule')
             ->with(
@@ -1202,7 +1181,8 @@ for ($i = 0; $i < $durasi; $i++) {
 
     public function rejectReschedule(
         Request $request,
-        string $id
+        string $id,
+        BookingAdjustmentService $adjustmentService
     ): RedirectResponse {
         $reschedule = Reschedule::with('jadwal')->findOrFail($id);
 
@@ -1211,13 +1191,14 @@ for ($i = 0; $i < $durasi; $i++) {
                 ->with('warning', 'Pengajuan ini sudah diproses sebelumnya.');
         }
 
-        $reschedule->update([
-            'status' => 'ditolak',
-        ]);
-
         $namaPenyewa = $reschedule->jadwal?->pelanggan?->nama
             ?? $reschedule->jadwal?->nama_tamu
             ?? 'Penyewa';
+
+        $adjustmentService->rejectReschedule(
+            $reschedule,
+            $request->input('alasan', 'Ditolak oleh kasir arena')
+        );
 
         return redirect()->route('kasir.reschedule')
             ->with(
