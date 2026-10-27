@@ -1,0 +1,184 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "australiaeast"
+        },
+        "virtualNetworkName": {
+            "value": "vnet-australiaeast-1"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "publicIpAddressName": {
+            "value": "pip-lapangin-staging"
+        },
+        "publicIpAddressId": {
+            "value": ""
+        },
+        "publicIpAddressType": {
+            "value": "Static"
+        },
+        "publicIpAddressSku": {
+            "value": "Standard"
+        },
+        "publicIpAddressZones": {
+            "value": [
+                "1"
+            ]
+        },
+        "pipDeleteOption": {
+            "value": "Delete"
+        },
+        "networkInterfaceName": {
+            "value": "nic-lapangin-staging"
+        },
+        "enableAcceleratedNetworking": {
+            "value": true
+        },
+        "networkSecurityGroupName": {
+            "value": "nsg-lapangin-staging"
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "Allow-SSH-Port-22",
+                    "properties": {
+                        "priority": 1000,
+                        "protocol": "Tcp",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22",
+                        "description": "Akses SSH untuk remote terminal administrasi"
+                    }
+                },
+                {
+                    "name": "Allow-HTTP-Port-80",
+                    "properties": {
+                        "priority": 1010,
+                        "protocol": "Tcp",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "80",
+                        "description": "Akses HTTP untuk Nginx & tantangan ACME Let's Encrypt"
+                    }
+                },
+                {
+                    "name": "Allow-HTTPS-Port-443",
+                    "properties": {
+                        "priority": 1020,
+                        "protocol": "Tcp",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "443",
+                        "description": "Akses aman HTTPS untuk Web LapangIn & Webhook Midtrans publik"
+                    }
+                }
+            ]
+        },
+        "virtualMachineName": {
+            "value": "vm-lapangin-staging"
+        },
+        "virtualMachineComputerName": {
+            "value": "lapangin-vm"
+        },
+        "virtualMachineRG": {
+            "value": "vm-lapangin-staging_group"
+        },
+        "virtualMachineZone": {
+            "value": [
+                "1"
+            ]
+        },
+        "virtualMachineSize": {
+            "value": "Standard_B2s"
+        },
+        "osDiskType": {
+            "value": "StandardSSD_LRS"
+        },
+        "osDiskDeleteOption": {
+            "value": "Delete"
+        },
+        "nicDeleteOption": {
+            "value": "Delete"
+        },
+        "securityType": {
+            "value": "TrustedLaunch"
+        },
+        "secureBoot": {
+            "value": true
+        },
+        "vTPM": {
+            "value": true
+        },
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "adminPublicKey": {
+            "value": "<GANTI_DENGAN_SSH_PUBLIC_KEY_ANDA>"
+        },
+        "enablePeriodicAssessment": {
+            "value": "ImageDefault"
+        },
+        "hibernationEnabled": {
+            "value": false
+        },
+        "vnetLocation": {
+            "value": "australiaeast"
+        },
+        "vnetExtendedLocation": {
+            "value": {}
+        },
+        "vnetVirtualNetworkName": {
+            "value": "vnet-australiaeast-1"
+        },
+        "vnetTagsByResource": {
+            "value": {}
+        },
+        "vnetProperties": {
+            "value": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        "vnetNatGatewaysWithNewPublicIpAddress": {
+            "value": []
+        },
+        "vnetNatGatewaysWithoutNewPublicIpAddress": {
+            "value": []
+        },
+        "vnetNatGatewayPublicIpAddressesNewNames": {
+            "value": []
+        },
+        "vnetNetworkSecurityGroupsNew": {
+            "value": []
+        },
+        "vnetResourceGroupName": {
+            "value": "vm-lapangin-staging_group"
+        },
+        "vnetDeploymentName": {
+            "value": "vnet-deployment"
+        }
+    }
+}
