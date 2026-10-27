@@ -33,8 +33,8 @@
             </div>
 
             <div class="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md border border-white/10 shrink-0">
-                <div class="h-10 w-10 rounded-xl bg-[#acf847] text-[#1a146b] flex items-center justify-center font-black text-lg">
-                    ⏱️
+                <div class="h-10 w-10 rounded-xl bg-[#acf847] text-[#1a146b] flex items-center justify-center">
+                    <svg class="w-5 h-5 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Kebijakan Venue</p>
@@ -47,7 +47,7 @@
     {{-- Alert Flash Messages --}}
     @if (session('error'))
         <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800 flex items-start gap-3">
-            <span class="text-base">⚠️</span>
+            <svg class="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
             <div>{{ session('error') }}</div>
         </div>
     @endif
@@ -129,27 +129,28 @@
             {{-- Kartu Ketentuan & Kebijakan Reschedule --}}
             <div class="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-white p-5 shadow-xs space-y-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-[#1a146b] flex items-center gap-1.5">
-                    <span>📌</span> Ketentuan Reschedule
+                    <svg class="w-3.5 h-3.5 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg>
+                    <span>Ketentuan Reschedule</span>
                 </h4>
                 <ul class="text-xs text-gray-600 space-y-2 leading-relaxed">
                     <li class="flex items-start gap-2">
-                        <span class="text-emerald-600 font-bold">✓</span>
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         <span>Pengajuan hanya berlaku untuk lapangan yang sama (<strong>{{ $lapangan?->nama }}</strong>).</span>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-emerald-600 font-bold">✓</span>
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         <span>Durasi waktu sesi reschedule otomatis disamakan (<strong>{{ $durasiJam }} Jam</strong>).</span>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-emerald-600 font-bold">✓</span>
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         <span>Paling lambat pengajuan dilakukan <strong>H-1 (minimal 24 jam sebelum kickoff jadwal lama)</strong>.</span>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-emerald-600 font-bold">✓</span>
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                         <span>Slot jadwal baru yang dipilih juga wajib berjarak <strong>minimal 24 jam dari waktu saat ini</strong> (agar kasir memiliki waktu memproses persetujuan).</span>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-indigo-600 font-bold">ℹ️</span>
+                        <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
                         <span>Setelah diajukan, status jadwal akan berstatus <strong>Menunggu Persetujuan Kasir</strong>.</span>
                     </li>
                 </ul>
@@ -296,7 +297,7 @@
                                         <span class="text-xs font-extrabold" x-text="slot.jam_mulai + ' - ' + slot.jam_selesai"></span>
                                         <span class="text-[10px] mt-1 font-semibold"
                                               :class="jamMulai === slot.jam_mulai ? 'text-[#acf847]' : (slot.is_available ? 'text-emerald-700' : (slot.is_too_close ? 'text-amber-700' : 'text-gray-400'))"
-                                              x-text="slot.is_available ? (jamMulai === slot.jam_mulai ? '✓ Terpilih' : 'Tersedia') : (slot.is_too_close ? 'Mepet (<24 Jam)' : 'Terisi')">
+                                              x-text="slot.is_available ? (jamMulai === slot.jam_mulai ? 'Terpilih' : 'Tersedia') : (slot.is_too_close ? 'Mepet (<24 Jam)' : 'Terisi')">
                                         </span>
                                     </button>
                                 </template>
@@ -304,8 +305,8 @@
 
                             {{-- Selected Slot Banner --}}
                             <div x-show="jamMulai && jamSelesai" x-cloak class="mt-4 p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-base">📅</span>
+                                <div class="flex items-center gap-2.5">
+                                    <svg class="w-4 h-4 text-[#1a146b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5"/></svg>
                                     <div>
                                         <p class="font-bold text-[#1a146b]">Slot Baru Terpilih:</p>
                                         <p class="text-gray-700 font-semibold" x-text="selectedSlotLabel"></p>
@@ -348,7 +349,7 @@
                                 :disabled="!jamMulai || !tanggal"
                                 :class="(!jamMulai || !tanggal) ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-[#1a146b] hover:bg-indigo-900 cursor-pointer'"
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-xs font-bold text-white shadow-md transition">
-                            <span>🔄</span>
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                             <span>Kirim Permohonan Reschedule</span>
                         </button>
                     </div>

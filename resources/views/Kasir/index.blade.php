@@ -78,16 +78,16 @@
                 Validasi Check-in &amp; Pelunasan Kasir
             </h1>
             <p class="text-sm text-[#474651] mt-1 max-w-2xl">
-                Pindai QR Code E-Ticket pemain melalui kamera scanner atau barcode reader untuk memverifikasi reservasi dan memproses pelunasan di tempat.
+                Verifikasi reservasi pemain melalui kode booking atau token manual untuk memvalidasi check-in dan memproses pelunasan onsite.
             </p>
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white shadow-sm border border-[#e5eeff]">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#416900] animate-pulse"></span>
-                <span class="text-xs font-bold text-[#0b1c30]">Scanner USB: Ready</span>
-            </div>
-            <a href="{{ route('kasir.transaksi') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#dce9ff] hover:bg-[#c3c0ff] text-[#0b1c30] text-xs font-bold transition-all shadow-sm">
+            <a href="{{ route('kasir.scan') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#eff4ff] text-[#1a146b] text-xs font-bold transition-all border border-[#dce9ff] shadow-xs">
+                <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                <span>Buka Pemindai Kamera</span>
+            </a>
+            <a href="{{ route('kasir.transaksi') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-sm">
                 <span class="material-symbols-outlined text-base">history</span>
                 <span>Riwayat Sesi Ini</span>
             </a>
@@ -95,262 +95,202 @@
     </div>
 
     <!-- Main Workspace Split Grid (5 cols / 7 cols) -->
-    
-<style>
-    .receipt-print {
-        display: none;
-    }
+    @php
+        $mergedQueue = $antreanHariIni->concat($searchResults ?? collect())->unique('id')->values();
+        $queueData = $mergedQueue->map(function ($antrean) use ($activeBooking) {
+            $batal = in_array($antrean->status, ['dibatalkan', 'cancelled', 'rejected']);
+            $nama = $antrean->pelanggan->nama ?? $antrean->nama_tamu ?? 'Penyewa Tamu';
+            $phone = $antrean->pelanggan->no_hp ?? $antrean->no_wa_tamu ?? '-';
+            $dp = (float) $antrean->transaksis->where('status', 'berhasil')->sum('jumlah');
+            $sisa = max(0, (float) $antrean->harga_disepakati - $dp);
+            $tgl = $antrean->tanggal instanceof \Carbon\Carbon ? $antrean->tanggal : \Carbon\Carbon::parse($antrean->tanggal);
+            $lapanganNama = $antrean->lapangan->nama ?? $antrean->lapangan->kategori ?? 'Lapangan';
+            $orderIds = $antrean->transaksis->pluck('order_id')->join(' ');
+            $token = $antrean->token_manual ?: substr($antrean->kode_qr, -8);
 
-    @media print {
-        @page {
-            size: 80mm auto;
-            margin: 2mm;
-        }
+            return [
+                'id' => (string) $antrean->id,
+                'nama' => $nama,
+                'phone' => $phone,
+                'lapangan' => $lapanganNama,
+                'jam' => substr($antrean->jam_mulai, 0, 5) . ' - ' . substr($antrean->jam_selesai, 0, 5),
+                'tanggal' => $tgl->format('d M'),
+                'token' => $token,
+                'kode_qr' => $antrean->kode_qr ?? '',
+                'status' => $antrean->status,
+                'is_cancelled' => $batal,
+                'is_selected' => $activeBooking && $activeBooking->id === $antrean->id,
+                'denda' => (float) $antrean->denda_pembatalan,
+                'is_lunas' => $antrean->status_pembayaran === 'lunas_online' || $sisa == 0,
+                'sisa' => $sisa,
+                'search_text' => strtolower("{$nama} {$phone} {$token} {$antrean->kode_qr} {$lapanganNama} {$orderIds}"),
+                'url' => route('kasir.index', ['code' => $antrean->kode_qr ?: ($antrean->token_manual ?: $antrean->id)]),
+            ];
+        })->values();
+    @endphp
 
-        body * {
-            visibility: hidden !important;
-        }
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-        .receipt-print,
-        .receipt-print * {
-            visibility: visible !important;
-        }
+        <!-- LEFT COLUMN: Input Kode & Antrean (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-6" x-data="kasirSearch()">
 
-        .receipt-print {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            background: #fff !important;
-            color: #222 !important;
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-        }
-
-        .receipt-print table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .receipt-print th,
-        .receipt-print td {
-            padding: 8px 6px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .receipt-print th:last-child,
-        .receipt-print td:last-child {
-            text-align: right;
-        }
-
-        .receipt-print .receipt-total {
-            border-top: 2px solid #222;
-            margin-top: 12px;
-            padding-top: 10px;
-        }
-    }
-</style>
-
-@if ($activeBooking)
-    <div class="receipt-print">
-        <div style="text-align:center; padding-bottom:16px; border-bottom:2px solid #222;">
-            <h1 style="font-size:24px; font-weight:bold; margin:0 0 6px;">
-                LAPANGIN
-            </h1>
-            <p style="margin:0;">STRUK PEMBAYARAN SEWA LAPANGAN</p>
-            <p style="margin:5px 0 0; font-size:10px;">
-                Dicetak: {{ now()->format('d/m/Y H:i') }}
-            </p>
-        </div>
-
-        <div style="margin:16px 0; line-height:1.8;">
-            <div><strong>Kode Reservasi:</strong> {{ $bookingCode }}</div>
-            <div><strong>Pelanggan:</strong> {{ $customerName }}</div>
-            <div><strong>No. Telepon:</strong> {{ $customerPhone }}</div>
-            <div><strong>Lapangan:</strong> {{ $courtName }}</div>
-            <div>
-                <strong>Jam Sewa:</strong>
-                {{ $jamMulai }} - {{ $jamSelesai }}
-            </div>
-            <div>
-                <strong>Tanggal Reservasi:</strong>
-                {{ $activeBooking->created_at?->format('d/m/Y') ?? '-' }}
-            </div>
-        </div>
-
-        <h3 style="font-size:14px; font-weight:bold; margin:18px 0 8px;">
-            Rincian Biaya
-        </h3>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Jumlah</th>
-                    <th>Harga Satuan</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Sewa Lapangan - {{ $courtName }}</td>
-                    <td>1 sesi</td>
-                    <td>Rp {{ number_format($totalTarifLapangan, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($totalTarifLapangan, 0, ',', '.') }}</td>
-                </tr>
-
-                @foreach ($activeBooking->detailSewaPerlengkapans as $detail)
-                    <tr>
-                        <td>{{ $detail->nama_perlengkapan }}</td>
-                        <td>{{ $detail->jumlah }}</td>
-                        <td>
-                            Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}
-                        </td>
-                        <td>
-                            Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="receipt-total">
-            <div style="display:flex; justify-content:space-between; margin:8px 0;">
-                <strong>Total Keseluruhan</strong>
-                <strong>Rp {{ number_format($totalHarga, 0, ',', '.') }}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin:8px 0;">
-                <span>DP / Pembayaran Berhasil</span>
-                <span>Rp {{ number_format($dpPaid, 0, ',', '.') }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin:8px 0; font-size:15px;">
-                <strong>Sisa Tagihan</strong>
-                <strong>Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</strong>
-            </div>
-        </div>
-
-        <div style="text-align:center; margin-top:35px; padding-top:12px; border-top:1px dashed #999;">
-            <p style="font-weight:bold; margin-bottom:6px;">Terima kasih telah menggunakan LapangIn!</p>
-            <p style="font-size:10px;">Simpan struk ini sebagai bukti transaksi Anda.</p>
-        </div>
-    </div>
-@endif
-
-
-                <!-- Camera Viewfinder with Laser & Corner Accents -->
-                <div class="relative w-full h-64 rounded-2xl overflow-hidden bg-[#1c2437] flex flex-col items-center justify-center shadow-inner group">
-                    <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#acf847_1px,transparent_1px)] [background-size:16px_16px]"></div>
-
-                    <div class="relative w-48 h-48 rounded-xl flex flex-col items-center justify-center p-4">
-                        <span class="absolute top-0 left-0 w-6 h-6 border-t-[3px] border-l-[3px] border-[#acf847] rounded-tl-sm"></span>
-                        <span class="absolute top-0 right-0 w-6 h-6 border-t-[3px] border-r-[3px] border-[#acf847] rounded-tr-sm"></span>
-                        <span class="absolute bottom-0 left-0 w-6 h-6 border-b-[3px] border-l-[3px] border-[#acf847] rounded-bl-sm"></span>
-                        <span class="absolute bottom-0 right-0 w-6 h-6 border-b-[3px] border-r-[3px] border-[#acf847] rounded-br-sm"></span>
-
-                        <div class="absolute left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-[#acf847] to-transparent shadow-[0_0_12px_#acf847] animate-pulse" style="top: 50%;"></div>
-
-                        <div class="flex flex-col items-center justify-center gap-2 text-center z-10">
-                            <span class="material-symbols-outlined text-5xl text-white/30">qr_code_2</span>
-                            <p class="text-white/90 text-xs font-semibold leading-tight px-3">
-                                Arahkan QR Code E-Tiket pemain tepat pada area bidik
-                            </p>
-                            <span class="text-[11px] text-white/60">Sensor otomatis memverifikasi saat terdeteksi</span>
+            <!-- Card Pencarian Tiket / Pesanan (Satu-satunya Input Realtime) -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
+                            <span class="material-symbols-outlined text-xl">search</span>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-[#0b1c30]">Cari Tiket / Pesanan</h2>
+                            <p class="text-[11px] text-[#777682]">Menyaring langsung saat diketik (Nama, WhatsApp, Token, QR)</p>
                         </div>
                     </div>
-
-                    <div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold">
-                        <span class="material-symbols-outlined text-xs text-[#acf847]">center_focus_strong</span>
-                        <span>Autofokus 2D Aktif</span>
-                    </div>
-
-                    <div class="absolute bottom-3 inset-x-3 flex items-center justify-between">
-                        <span class="text-[11px] text-white/70 bg-black/50 px-2.5 py-1 rounded-md backdrop-blur-sm">
-                            Sensor siap mendeteksi
-                        </span>
-                        <button type="button" onclick="alert('Pilih file gambar E-Tiket untuk diunggah.');"
-                                class="flex items-center gap-1.5 text-xs font-bold text-[#acf847] bg-black/60 hover:bg-black/80 px-3 py-1 rounded-md backdrop-blur-sm transition-colors">
-                            <span class="material-symbols-outlined text-sm">upload_file</span>
-                            <span>Unggah QR</span>
+                    <template x-if="searchQuery.trim().length > 0">
+                        <button type="button" @click="clearSearch()" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#ba1a1a] hover:underline cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                            <span>Reset</span>
                         </button>
-                    </div>
+                    </template>
+                    <template x-if="searchQuery.trim().length === 0">
+                        <span class="text-[10px] text-[#777682] bg-[#eff4ff] px-2.5 py-1 rounded-lg font-mono font-bold">F2 Shortcut</span>
+                    </template>
                 </div>
 
-                <!-- Manual Booking Code Input Form (Submits to Controller) -->
-                <form method="GET" action="{{ route('kasir.index') }}" class="flex flex-col gap-2 pt-1">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-[#0b1c30]">Atau Input Kode Reservasi Manual</label>
-                        <span class="text-[10px] text-[#777682] bg-[#eff4ff] px-2 py-0.5 rounded font-mono">F2 Shortcut</span>
+                <!-- Live Search Input (Realtime Filter, 0ms latency, Tanpa Reload Halaman) -->
+                <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-xl pointer-events-none">search</span>
+                    <input type="text"
+                           x-ref="searchInput"
+                           x-model="searchQuery"
+                           @input="onInput()"
+                           @keydown.enter.prevent="selectFirst()"
+                           @keydown.window.f2.prevent="$refs.searchInput.focus()"
+                           class="w-full pl-11 pr-10 py-3 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-sm font-bold tracking-wider outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] transition-all border border-[#e5eeff]"
+                           placeholder="Ketik Nama (cth: Wildan), No. HP, Token...">
+                    
+                    <button type="button"
+                            x-show="searchQuery.trim().length > 0"
+                            @click="clearSearch()"
+                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition p-1 cursor-pointer"
+                            title="Hapus pencarian">
+                        <span class="material-symbols-outlined text-lg">cancel</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] text-[#777682] px-0.5">
+                    <div class="flex items-center gap-1.5">
+                        <template x-if="!searchQuery.trim()">
+                            <span>Ketik nama atau kode tiket untuk menyaring realtime (0ms).</span>
+                        </template>
+                        <template x-if="searchQuery.trim()">
+                            <span class="text-[#1a146b] font-semibold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs text-[#416900]">bolt</span>
+                                <span>Menyaring otomatis: "<strong x-text="searchQuery"></strong>"</span>
+                            </span>
+                        </template>
                     </div>
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-lg">search</span>
-                            <input type="text" name="code" x-model="bookingCode"
-                                   class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-sm font-bold tracking-wider outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] transition-all border border-[#e5eeff]"
-                                   placeholder="Contoh: LPGN-{{ date('Ymd') }}-8821">
-                        </div>
-                        <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0">
-                            <span class="material-symbols-outlined text-base">check</span>
-                            <span>Verifikasi</span>
-                        </button>
+                    <div x-show="isSearchingServer" class="text-blue-600 font-semibold flex items-center gap-1 text-[10px] animate-pulse">
+                        <span class="material-symbols-outlined text-xs animate-spin">refresh</span>
+                        <span>Cek database...</span>
                     </div>
-                </form>
+                </div>
             </div>
 
-            <!-- Antrean Tamu Hari Ini (Real from Database) -->
+            <!-- Daftar Antrean & Hasil Penyaringan (Tanpa Input Filter Ganda) -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[#416900] text-xl">queue</span>
-                        <h2 class="text-sm font-bold text-[#0b1c30]">Antrean Tamu Hari Ini</h2>
+                        <span class="material-symbols-outlined text-xl"
+                              :class="searchQuery.trim() ? 'text-[#1a146b]' : 'text-[#416900]'">
+                            <span x-text="searchQuery.trim() ? 'manage_search' : 'queue'"></span>
+                        </span>
+                        <div>
+                            <h2 class="text-sm font-bold text-[#0b1c30]"
+                                x-text="searchQuery.trim() ? 'Hasil Penyaringan: ' + visibleItems.length + ' Pesanan' : 'Antrean Tamu Hari Ini'">
+                            </h2>
+                        </div>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full bg-[#eff4ff] text-[#474651] text-[10px] font-bold">
-                        {{ $antreanHariIni->count() }} Terdaftar
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                          :class="searchQuery.trim() ? 'bg-[#1a146b] text-white' : 'bg-[#eff4ff] text-[#474651]'"
+                          x-text="visibleItems.length + (searchQuery.trim() ? ' Ditemukan' : ' Terdaftar')">
                     </span>
                 </div>
 
+                <!-- List of tickets filtered in real-time -->
                 <div class="flex flex-col gap-2.5">
-                    @forelse ($antreanHariIni as $antrean)
-                        @php
-                            $isSelected = $activeBooking && $activeBooking->id === $antrean->id;
-                            $antreanBatal = in_array($antrean->status, ['dibatalkan', 'cancelled', 'rejected']);
-                            $antreanNama = $antrean->pelanggan->nama ?? $antrean->nama_tamu ?? 'Penyewa Tamu';
-                            $antreanDp = (float) $antrean->transaksis->where('status', 'berhasil')->sum('jumlah');
-                            $antreanSisa = max(0, (float)$antrean->harga_disepakati - $antreanDp);
-                        @endphp
-                        <a href="{{ route('kasir.index', ['code' => $antrean->kode_qr ?? $antrean->token_manual ?? $antrean->id]) }}"
-                           class="p-3.5 rounded-xl transition-all border {{ $isSelected ? ($antreanBatal ? 'bg-[#ffdad6]/60 border-[#ba1a1a] shadow-xs' : 'bg-[#dce9ff] border-[#1a146b] shadow-xs') : ($antreanBatal ? 'bg-[#ffdad6]/30 hover:bg-[#ffdad6]/50 border-red-200/60 opacity-80' : 'bg-[#eff4ff] hover:bg-[#e5eeff] border-transparent') }} flex flex-col gap-1.5">
+                    <template x-for="item in visibleItems" :key="item.id">
+                        <a :href="item.url"
+                           class="p-3.5 rounded-xl transition-all border flex flex-col gap-1.5"
+                           :class="{
+                               'bg-[#dce9ff] border-[#1a146b] shadow-xs': item.is_selected && !item.is_cancelled,
+                               'bg-[#ffdad6]/60 border-[#ba1a1a] shadow-xs': item.is_selected && item.is_cancelled,
+                               'bg-[#ffdad6]/30 hover:bg-[#ffdad6]/50 border-red-200/60 opacity-80': !item.is_selected && item.is_cancelled,
+                               'bg-[#eff4ff] hover:bg-[#e5eeff] border-transparent': !item.is_selected && !item.is_cancelled
+                           }">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full {{ $antreanBatal ? 'bg-[#ba1a1a]' : ($isSelected ? 'bg-[#416900]' : 'bg-[#1a146b]') }}"></span>
-                                    <span class="text-xs font-bold {{ $antreanBatal ? 'text-[#ba1a1a] line-through' : 'text-[#0b1c30]' }}">{{ $antreanNama }}</span>
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          :class="{
+                                              'bg-[#ba1a1a]': item.is_cancelled,
+                                              'bg-[#416900]': item.is_selected && !item.is_cancelled,
+                                              'bg-[#1a146b]': !item.is_selected && !item.is_cancelled
+                                          }"></span>
+                                    <span class="text-xs font-bold"
+                                          :class="item.is_cancelled ? 'text-[#ba1a1a] line-through' : 'text-[#0b1c30]'"
+                                          x-text="item.nama"></span>
+                                    <span class="text-[10px] font-mono text-[#777682]" x-show="item.phone && item.phone !== '-'" x-text="'(' + item.phone + ')'"></span>
                                 </div>
-                                @if ($antreanBatal)
-                                    <span class="px-2 py-0.5 rounded-md bg-[#ba1a1a] text-white text-[10px] font-black tracking-wide">Dibatalkan</span>
-                                @elseif ($isSelected)
-                                    <span class="px-2 py-0.5 rounded-md bg-[#acf847] text-[#102000] text-[10px] font-extrabold">Dipilih</span>
-                                @elseif ($antrean->status_pembayaran === 'lunas_online' || $antreanSisa == 0)
-                                    <span class="px-2 py-0.5 rounded-md bg-white text-[#416900] text-[10px] font-bold">Lunas</span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded-md bg-[#ffdad6] text-[#ba1a1a] text-[10px] font-bold">DP 50%</span>
-                                @endif
+                                <div>
+                                    <template x-if="item.is_cancelled">
+                                        <span class="px-2 py-0.5 rounded-md bg-[#ba1a1a] text-white text-[10px] font-black tracking-wide">Dibatalkan</span>
+                                    </template>
+                                    <template x-if="!item.is_cancelled && item.is_selected">
+                                        <span class="px-2 py-0.5 rounded-md bg-[#acf847] text-[#102000] text-[10px] font-extrabold">Dipilih</span>
+                                    </template>
+                                    <template x-if="!item.is_cancelled && !item.is_selected && item.is_lunas">
+                                        <span class="px-2 py-0.5 rounded-md bg-white text-[#416900] text-[10px] font-bold">Lunas</span>
+                                    </template>
+                                    <template x-if="!item.is_cancelled && !item.is_selected && !item.is_lunas">
+                                        <span class="px-2 py-0.5 rounded-md bg-[#ffdad6] text-[#ba1a1a] text-[10px] font-bold">DP 50%</span>
+                                    </template>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span class="{{ $antreanBatal ? 'line-through text-gray-400' : '' }}">{{ substr($antrean->jam_mulai, 0, 5) }} - {{ substr($antrean->jam_selesai, 0, 5) }} ({{ $antrean->lapangan->kategori ?? 'Lapangan' }})</span>
-                                @if ($antreanBatal)
-                                    <span class="font-bold text-[#ba1a1a]">Slot Dilepas (Denda Rp {{ number_format((float) $antrean->denda_pembatalan, 0, ',', '.') }})</span>
-                                @elseif ($antreanSisa > 0)
-                                    <span class="font-bold text-[#ba1a1a]">Sisa Rp {{ number_format($antreanSisa, 0, ',', '.') }}</span>
-                                @else
+                                <span :class="item.is_cancelled ? 'line-through text-gray-400' : ''"
+                                      x-text="(item.tanggal ? item.tanggal + ', ' : '') + item.jam + ' (' + item.lapangan + ')'"></span>
+                                <template x-if="item.is_cancelled">
+                                    <span class="font-bold text-[#ba1a1a]"
+                                          x-text="item.denda > 0 ? 'Slot Dilepas (Denda Rp ' + formatRupiah(item.denda) + ')' : 'Slot Dilepas'"></span>
+                                </template>
+                                <template x-if="!item.is_cancelled && item.sisa > 0">
+                                    <span class="font-bold text-[#ba1a1a]" x-text="'Sisa Rp ' + formatRupiah(item.sisa)"></span>
+                                </template>
+                                <template x-if="!item.is_cancelled && item.sisa <= 0">
                                     <span class="font-bold text-[#416900]">Rp 0 (Lunas)</span>
-                                @endif
+                                </template>
+                            </div>
+
+                            <div class="text-[10px] font-mono text-gray-400 flex items-center justify-between">
+                                <span>Token: <strong class="text-[#1a146b]" x-text="item.token"></strong></span>
+                                <span class="text-gray-400 font-mono text-[9px]" x-show="item.kode_qr" x-text="item.kode_qr"></span>
                             </div>
                         </a>
-                    @empty
-                        <p class="text-xs text-[#777682] py-2 text-center">Belum ada antrean reservasi hari ini.</p>
-                    @endforelse
+                    </template>
+
+                    <!-- Empty State -->
+                    <div x-show="visibleItems.length === 0" class="py-8 text-center text-xs text-[#777682] space-y-2.5">
+                        <span class="material-symbols-outlined text-3xl text-gray-300">search_off</span>
+                        <p>Tidak ada tiket atau pesanan yang cocok dengan "<strong class="text-[#0b1c30]" x-text="searchQuery"></strong>".</p>
+                        <div>
+                            <button type="button" @click="clearSearch()"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#eff4ff] hover:bg-[#e5eeff] text-[#1a146b] font-bold text-xs transition cursor-pointer">
+                                <span class="material-symbols-outlined text-sm">restart_alt</span>
+                                <span>Reset & Tampilkan Semua Antrean</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Occupancy Gauge Meter -->
@@ -405,8 +345,10 @@
                     <!-- Cancelled Danger Header Banner -->
                     <div class="p-6 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white border-b-2 border-red-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
-                            <div class="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center font-black text-2xl shadow-md shrink-0">
-                                ✕
+                            <div class="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center shadow-md shrink-0">
+                                <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </div>
                             <div>
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider mb-1">
@@ -422,8 +364,11 @@
                             </div>
                         </div>
                         <div class="text-right shrink-0">
-                            <span class="text-xs font-black px-3.5 py-1.5 rounded-xl bg-white text-red-700 border border-red-200 shadow-sm">
-                                🚫 TIKET TIDAK BERLAKU
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black px-3.5 py-1.5 rounded-xl bg-white text-red-700 border border-red-200 shadow-sm">
+                                <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                                TIKET TIDAK BERLAKU
                             </span>
                         </div>
                     </div>
@@ -454,8 +399,10 @@
                         <!-- Peringatan Pembatalan Eksplisit untuk Kasir -->
                         <div class="p-4 rounded-2xl bg-red-50 border-2 border-red-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-red-900 shadow-xs">
                             <div class="flex items-start gap-3">
-                                <div class="h-10 w-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-black text-xl shrink-0 mt-0.5">
-                                    ⚠️
+                                <div class="h-10 w-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
                                 </div>
                                 <div>
                                     <h4 class="text-sm font-extrabold text-red-900">PERINGATAN KASIR: PEMESANAN TELAH DIBATALKAN</h4>
@@ -601,8 +548,10 @@
                     @if ($isCancelled)
                         <!-- Panel Dinonaktifkan Karena Batal -->
                         <div class="rounded-2xl border-2 border-dashed border-red-300 bg-red-50/70 p-6 sm:p-8 text-center space-y-4">
-                            <div class="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-black text-3xl mx-auto shadow-xs">
-                                🚫
+                            <div class="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto shadow-xs">
+                                <svg class="w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
                             </div>
                             <div class="space-y-1">
                                 <h3 class="text-lg font-headline font-black text-red-950">
@@ -789,5 +738,109 @@
     </div>
     
 </div>
+
+<script>
+function kasirSearch() {
+    return {
+        searchQuery: @js($code ?? ''),
+        localItems: @js($queueData),
+        serverResults: [],
+        isSearchingServer: false,
+        searchDebounceTimer: null,
+
+        get trimmedQuery() {
+            return (this.searchQuery || '').trim().toLowerCase();
+        },
+
+        get visibleItems() {
+            const q = this.trimmedQuery;
+            if (!q) {
+                return this.localItems;
+            }
+
+            // Realtime filter local items in 0ms
+            const matched = this.localItems.filter(item => {
+                return item.search_text && item.search_text.includes(q);
+            });
+
+            // Append extra server items not in localItems
+            const localIds = new Set(matched.map(i => i.id));
+            const extra = this.serverResults.filter(i => !localIds.has(i.id));
+
+            return [...matched, ...extra];
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.serverResults = [];
+            this.$nextTick(() => {
+                if (this.$refs.searchInput) {
+                    this.$refs.searchInput.focus();
+                }
+            });
+        },
+
+        onInput() {
+            const q = this.trimmedQuery;
+            clearTimeout(this.searchDebounceTimer);
+
+            if (q.length < 2) {
+                this.serverResults = [];
+                this.isSearchingServer = false;
+                return;
+            }
+
+            // Debounced fetch for extra results from server (300ms)
+            this.searchDebounceTimer = setTimeout(async () => {
+                this.isSearchingServer = true;
+                try {
+                    const response = await fetch(`{{ route('kasir.search') }}?q=` + encodeURIComponent(this.searchQuery.trim()), {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.serverResults = (data.results || []).map(r => ({
+                            id: String(r.id),
+                            nama: r.nama,
+                            phone: r.no_hp,
+                            lapangan: r.lapangan,
+                            jam: r.jam,
+                            tanggal: r.tanggal,
+                            token: r.token,
+                            kode_qr: r.kode_qr,
+                            status: r.status,
+                            is_cancelled: r.is_cancelled,
+                            is_selected: false,
+                            denda: r.denda || 0,
+                            is_lunas: r.is_lunas,
+                            sisa: r.sisa_tagihan,
+                            search_text: r.search_text,
+                            url: r.url
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Server search error:', err);
+                } finally {
+                    this.isSearchingServer = false;
+                }
+            }, 300);
+        },
+
+        selectFirst() {
+            const items = this.visibleItems;
+            if (items.length > 0) {
+                window.location.href = items[0].url;
+            }
+        },
+
+        formatRupiah(val) {
+            return new Intl.NumberFormat('id-ID').format(val || 0);
+        }
+    };
+}
+</script>
 
 @endsection

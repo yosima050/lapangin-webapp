@@ -124,9 +124,9 @@ class KatalogSyncAndApiTest extends TestCase
             'durasi' => 1,
         ];
 
-        // Guest is redirected to login
+        // Guest can access checkout directly (Guest Checkout Flow)
         $guestResponse = $this->get(route('checkout.index', $checkoutParams));
-        $guestResponse->assertRedirect(route('login'));
+        $guestResponse->assertStatus(200);
 
         // Admin can access checkout without 403 Forbidden
         $adminResponse = $this->actingAs($admin)->get(route('checkout.index', $checkoutParams));

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
+use App\Services\GuestAccountProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -117,8 +118,8 @@ class AuthLoginGoogle extends Controller
             'no_hp.max' => 'Nomor WhatsApp / HP maksimal 15 digit.',
         ]);
 
-        // Bersihkan format nomor HP (hanya angka)
-        $cleanPhone = preg_replace('/[^0-9]/', '', $request->no_hp);
+        // Bersihkan & normalisasi format nomor HP
+        $cleanPhone = GuestAccountProvisioner::normalizePhoneNumber($request->no_hp);
 
         if (isset($googleData['pelanggan_id'])) {
             $pelanggan = Pelanggan::find($googleData['pelanggan_id']);
@@ -147,6 +148,9 @@ class AuthLoginGoogle extends Controller
                 'email_verified_at' => now(),
             ]);
         }
+
+        // Auto-claim order tamu yang pernah dibuat dengan nomor HP ini
+        app(GuestAccountProvisioner::class)->mergeOrdersToUser($pelanggan);
 
         // Hapus session sementara Google
         session()->forget('google_complete_user');

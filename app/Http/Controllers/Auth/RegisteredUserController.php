@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
+use App\Services\GuestAccountProvisioner;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class RegisteredUserController extends Controller
         $pelanggan = Pelanggan::create([
             'nama' => $request->input('name'),
             'email' => $request->email,
-            'no_hp' => $request->input('no_hp'),
+            'no_hp' => GuestAccountProvisioner::normalizePhoneNumber($request->input('no_hp')),
             'password_hash' => Hash::make($request->password),
             'role' => 'pelanggan',
         ]);

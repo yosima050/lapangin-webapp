@@ -234,8 +234,10 @@
         {{-- Notifikasi --}}
         @if (session('success'))
             <div class="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
-                <span class="font-bold">✓</span>
-                <p class="text-sm">{{ session('success') }}</p>
+                <svg class="w-5 h-5 shrink-0 stroke-current text-green-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm font-semibold">{{ session('success') }}</p>
             </div>
         @endif
 
@@ -369,10 +371,11 @@
                                 <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                                 Belum Dibayar
                             </span>
-                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
                                   data-card-timer="{{ $jadwal->id }}"
                                   data-remaining="{{ $remainingSec }}">
-                                ⏱️ <span class="font-mono">{{ sprintf('%02d:%02d', floor($remainingSec / 60), $remainingSec % 60) }}</span>
+                                <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="font-mono">{{ sprintf('%02d:%02d', floor($remainingSec / 60), $remainingSec % 60) }}</span>
                             </span>
                         </div>
                     @endif
@@ -407,11 +410,13 @@
                             <h3 class="text-base font-bold text-gray-900 leading-snug truncate">
                                 {{ $jadwal->lapangan?->nama ?? 'Lapangan Tidak Tersedia' }}
                             </h3>
-                            <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
-                                <span>🛡️</span> {{ $jadwal->lapangan?->tipe_lantai ?? 'Standard FIFA Flooring' }}
+                            <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                                <span>{{ $jadwal->lapangan?->tipe_lantai ?? 'Standard FIFA Flooring' }}</span>
                             </p>
-                            <p class="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
-                                <span>⚙️</span> Rompi &amp; Bola Termasuk
+                            <p class="mt-0.5 text-xs text-gray-500 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>Rompi &amp; Bola Termasuk</span>
                             </p>
                         </div>
                     </div>
@@ -498,7 +503,9 @@
                                 <button type="button"
                                         @click="openPayModal('{{ $jadwal->id }}', '{{ addslashes($namaLapangan) }}', '{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}', '{{ substr((string) $jadwal->jam_mulai, 0, 5) }}', '{{ substr((string) $jadwal->jam_selesai, 0, 5) }}', {{ (float) $jadwal->harga_disepakati }}, '{{ $checkoutUrl }}', {{ $remainingSec ?? 600 }})"
                                         class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#acf847] hover:bg-[#9de03d] text-[#1a146b] px-4 py-2.5 text-xs font-black shadow-md transition cursor-pointer">
-                                    <span>💳</span>
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                    </svg>
                                     <span>Bayar Sekarang</span>
                                 </button>
                                 <a href="{{ $checkoutUrl }}"
@@ -515,34 +522,39 @@
                             <div class="grid grid-cols-2 gap-2">
                                 @if ($pendingReschedule)
                                     <a href="{{ route('pelanggan.booking.reschedule', $jadwal->id) }}"
-                                       class="inline-flex items-center justify-center gap-1 rounded-xl border border-amber-300 bg-amber-50 px-2 py-2 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition text-center leading-tight">
-                                        ⏳ Review Kasir
+                                       class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-2 py-2 text-[10px] font-bold text-amber-900 hover:bg-amber-100 transition text-center leading-tight">
+                                        <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        Review Kasir
                                     </a>
                                 @elseif ($canReschedule)
                                     <a href="{{ route('pelanggan.booking.reschedule', $jadwal->id) }}"
-                                       class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-bold text-gray-700 hover:bg-indigo-50 hover:text-[#1a146b] hover:border-indigo-200 transition">
-                                        🔄 Reschedule
+                                       class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-bold text-gray-700 hover:bg-indigo-50 hover:text-[#1a146b] hover:border-indigo-200 transition">
+                                        <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                        Reschedule
                                     </a>
                                 @else
                                     <button type="button"
                                             disabled
                                             title="{{ $isDibatalkan ? 'Jadwal telah dibatalkan' : (!empty($jadwal->checked_in_at) ? 'Tiket sudah check-in' : 'Reschedule minimal H-1 (24 jam sebelum kickoff)') }}"
-                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
-                                        🔄 Reschedule
+                                            class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
+                                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                        Reschedule
                                     </button>
                                 @endif
 
                                 @if ($canCancel)
                                     <button type="button"
                                             @click="openCancelModal('{{ $jadwal->id }}', '{{ addslashes($namaLapangan) }}', '{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}', '{{ substr((string)$jadwal->jam_mulai, 0, 5) }} - {{ substr((string)$jadwal->jam_selesai, 0, 5) }} WIB')"
-                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50/70 px-2.5 py-2 text-[11px] font-bold text-red-700 hover:bg-red-100 transition cursor-pointer">
-                                        🚫 Batalkan
+                                            class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/70 px-2.5 py-2 text-[11px] font-bold text-red-700 hover:bg-red-100 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                        Batalkan
                                     </button>
                                 @else
                                     <button type="button"
                                             disabled
-                                            class="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
-                                        🚫 Batalkan
+                                            class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-100 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold text-gray-400 cursor-not-allowed">
+                                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                        Batalkan
                                     </button>
                                 @endif
                             </div>
@@ -580,13 +592,13 @@
             <button @click="showModal = false" 
                     type="button" 
                     class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
-                ✕
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             {{-- Header Status --}}
             <div class="text-center space-y-2 pt-2">
                 <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#acf847] text-[#1a146b] shadow-xs">
-                    <span class="text-xl font-black">✓</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                 </div>
                 <div>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
@@ -619,8 +631,9 @@
                         <h3 class="text-lg sm:text-xl font-extrabold text-[#1a146b]">
                             {{ $jadwal->lapangan?->nama }}
                         </h3>
-                        <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                            ⚽ <span>{{ $jadwal->lapangan?->kategori }}</span> 
+                        <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m-9-9h18"/></svg>
+                            <span>{{ $jadwal->lapangan?->kategori }}</span> 
                             @if($jadwal->lapangan?->tipe_lantai)
                                 • <span>{{ $jadwal->lapangan?->tipe_lantai }}</span>
                             @endif
@@ -639,7 +652,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-100">
-                            <span class="text-sm">👥</span>
+                            <svg class="w-4 h-4 text-[#1a146b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-gray-800 truncate">{{ $jadwal->nama_tim ?? 'Pemain Umum' }}</p>
                             </div>
@@ -687,8 +700,11 @@
                                 <p class="text-sm font-extrabold text-[#1a146b]">Rp {{ number_format($sisaBayar, 0, ',', '.') }}</p>
                                 <p class="text-[8px] text-gray-400">(Tunai / QRIS saat check-in)</p>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                                    ✓ Lunas Tanpa Sisa
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                    <svg class="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    Lunas Tanpa Sisa
                                 </span>
                             @endif
                         </div>
@@ -728,17 +744,20 @@
                 <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}" 
                    target="_blank"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition shadow-xs">
-                    💬 Bagikan Tiket ke WhatsApp Tim
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.75 6.47 6.47 0 00.384-2.548C3.606 16.353 3 14.28 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                    <span>Bagikan Tiket ke WhatsApp Tim</span>
                 </a>
                 <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
-                    📥 Unduh Tiket PDF
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    <span>Unduh Tiket PDF</span>
                 </button>
             </div>
 
             {{-- Panduan & Protokol --}}
             <div class="pt-4 border-t border-gray-100">
-                <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-1.5 mb-3">
-                    🛡️ Panduan &amp; Protokol Hari Pertandingan
+                <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-3">
+                    <svg class="w-4 h-4 text-[#416900] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    <span>Panduan &amp; Protokol Hari Pertandingan</span>
                 </h4>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
@@ -766,8 +785,8 @@
             @if($jadwal->lapangan?->alamat || $jadwal->lapangan?->lokasi)
                 <div class="bg-indigo-50/40 p-4 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-[#1a146b] flex items-center justify-center font-bold text-sm shrink-0">
-                            📍
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-[#1a146b] flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                         </div>
                         <div>
                             <h5 class="text-xs font-extrabold text-gray-900">Petunjuk Arah Menuju Arena</h5>
@@ -813,13 +832,13 @@
                     :disabled="isProcessing"
                     type="button"
                     class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
-                ✕
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             {{-- Header Modal --}}
             <div class="flex items-start gap-3">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#acf847] text-2xl text-[#1a146b] shadow-xs">
-                    💳
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#acf847] text-[#1a146b] shadow-xs">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
                 </span>
                 <div>
                     <h3 class="text-lg font-extrabold text-[#1a146b]">
@@ -834,7 +853,7 @@
             {{-- Banner Timer 10 Menit di Modal --}}
             <div class="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3.5 text-amber-900 shadow-2xs">
                 <div class="flex items-center gap-2.5">
-                    <span class="text-xl animate-pulse">⏱️</span>
+                    <svg class="w-5 h-5 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <div>
                         <p class="text-xs font-black uppercase tracking-wide">Batas Waktu Pembayaran:</p>
                         <p class="text-[11px] text-amber-700">Slot dikunci sementara selama waktu ini</p>
@@ -947,8 +966,9 @@
                 </div>
             </div>
 
-            <p class="mt-3 text-center text-[10px] text-gray-400">
-                🔒 Pembayaran aman &amp; otomatis diverifikasi via Midtrans Snap (QRIS, VA, E-Wallet, CC).
+            <p class="mt-3 text-center text-[10px] text-gray-400 flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                <span>Pembayaran aman &amp; otomatis diverifikasi via Midtrans Snap (QRIS, VA, E-Wallet, CC).</span>
             </p>
         </div>
     </div>
@@ -973,13 +993,13 @@
                     :disabled="cancelSubmitting"
                     type="button"
                     class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
-                ✕
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             {{-- Modal Header --}}
             <div class="flex items-center gap-3">
-                <div class="h-11 w-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-black text-xl shrink-0">
-                    🚫
+                <div class="h-11 w-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                 </div>
                 <div>
                     <h3 class="text-lg font-extrabold text-gray-900">
@@ -1005,7 +1025,12 @@
                 <div :class="cancelPenalty?.is_h_minus_24 ? 'bg-red-50 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
                      class="rounded-2xl border p-4 text-xs leading-relaxed">
                     <div class="flex items-center gap-2 font-bold text-sm">
-                        <span x-text="cancelPenalty?.is_h_minus_24 ? '⚠️' : 'ℹ️'"></span>
+                        <template x-if="cancelPenalty?.is_h_minus_24">
+                            <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                        </template>
+                        <template x-if="!cancelPenalty?.is_h_minus_24">
+                            <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                        </template>
                         <span x-text="cancelPenalty?.policy_badge"></span>
                     </div>
                     <p class="mt-1" x-text="cancelPenalty?.policy_description"></p>
