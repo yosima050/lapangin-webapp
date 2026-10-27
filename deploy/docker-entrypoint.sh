@@ -8,3 +8,4 @@ fi
 
 # Jalankan command (php-fpm / queue / scheduler)
 exec "$@"
+
