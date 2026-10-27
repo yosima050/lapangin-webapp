@@ -12,12 +12,16 @@ use Tests\TestCase;
 
 class GuestCheckoutSuccessPageTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_guest_can_access_checkout_success_page_without_login(): void
     {
         $lapangan = Lapangan::firstOrCreate(
             ['nama' => 'Lapangan Test Success'],
             [
                 'kategori' => 'Futsal',
+                'jam_buka' => '07:00:00',
+                'jam_tutup' => '23:00:00',
                 'deskripsi' => 'Deskripsi Lapangan',
                 'foto' => 'lapangan/test.jpg',
             ]

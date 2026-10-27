@@ -120,6 +120,9 @@ Route::middleware(['auth', 'IsKasir'])->prefix('kasir')->name('kasir.')->group(f
     Route::get('/scan', [KasirController::class, 'scan'])
         ->name('scan');
 
+    Route::get('/search', [KasirController::class, 'searchTickets'])
+        ->name('search');
+
     Route::get('/ticket/lookup', [KasirController::class, 'lookupTicket'])
         ->name('ticket.lookup');
 

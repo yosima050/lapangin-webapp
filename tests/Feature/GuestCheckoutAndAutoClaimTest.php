@@ -90,12 +90,12 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
         $this->assertNotNull($pelanggan);
 
         // Verifikasi transaksi dan jadwal terikat ke pelanggan_id yang valid
-        $this->assertDatabaseHas('jadwals', [
-            'lapangan_id' => $this->lapangan->id,
-            'pelanggan_id' => $pelanggan->id,
-            'tanggal' => $tanggal,
-            'jam_mulai' => '10:00:00',
-        ]);
+        $jadwalRecord = Jadwal::where('lapangan_id', $this->lapangan->id)
+            ->where('pelanggan_id', $pelanggan->id)
+            ->first();
+        $this->assertNotNull($jadwalRecord);
+        $this->assertEquals($tanggal, \Carbon\Carbon::parse($jadwalRecord->tanggal)->toDateString());
+        $this->assertEquals('10:00:00', $jadwalRecord->jam_mulai);
 
         $this->assertDatabaseHas('transaksis', [
             'status' => 'pending',
@@ -261,7 +261,7 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
         ];
 
         $response = $this->withSession(['google_complete_user' => $sessionData])
-            ->post(route('auth.google.storeComplete'), [
+            ->post(route('auth.google.complete.store'), [
                 'nama' => 'Dimas Google User',
                 'no_hp' => '087788990011',
             ]);

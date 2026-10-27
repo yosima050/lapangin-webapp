@@ -197,6 +197,45 @@ class KasirCheckInFlowTest extends TestCase
     }
 
     /**
+     * Test Pencarian Tiket Real-time via Nama, No HP, dan Token Manual.
+     */
+    public function test_kasir_can_search_tickets_by_name_phone_and_token(): void
+    {
+        Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'nama_tamu' => 'Wildan Tamu Spesial',
+            'no_wa_tamu' => '081234567890',
+            'tanggal' => now()->toDateString(),
+            'jam_mulai' => '14:00:00',
+            'jam_selesai' => '16:00:00',
+            'harga_disepakati' => 120000,
+            'biaya_layanan' => 0,
+            'status_pembayaran' => 'dp_terverifikasi',
+            'status' => 'pending',
+            'kode_qr' => 'LPNG-QR-WILDAN-999',
+            'token_manual' => 'WLD999',
+            'created_at' => now(),
+        ]);
+
+        // Cari via Nama "Wildan"
+        $respName = $this->actingAs($this->kasir)->getJson(route('kasir.search', ['q' => 'Wildan']));
+        $respName->assertOk();
+        $respName->assertJsonPath('success', true);
+        $this->assertNotEmpty($respName->json('results'));
+        $this->assertSame('Wildan Tamu Spesial', $respName->json('results.0.nama'));
+
+        // Cari via No HP "081234"
+        $respPhone = $this->actingAs($this->kasir)->getJson(route('kasir.search', ['q' => '081234']));
+        $respPhone->assertOk();
+        $this->assertSame('Wildan Tamu Spesial', $respPhone->json('results.0.nama'));
+
+        // Cari via Token "WLD999"
+        $respToken = $this->actingAs($this->kasir)->getJson(route('kasir.search', ['q' => 'WLD999']));
+        $respToken->assertOk();
+        $this->assertSame('Wildan Tamu Spesial', $respToken->json('results.0.nama'));
+    }
+
+    /**
      * Test 6: Skenario Tiket Valid - Check-in berhasil dan pelunasan onsite tercatat.
      */
     public function test_kasir_can_successfully_checkin_valid_ticket_with_settlement(): void

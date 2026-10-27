@@ -26,27 +26,50 @@ class KasirController extends Controller
     public function index(Request $request): View
     {
         $lapangans = Lapangan::all();
-        $code = $request->input('code');
+        $code = trim((string) ($request->input('code') ?: $request->input('search', '')));
 
         $activeBooking = null;
+        $searchResults = collect();
 
         if (! empty($code)) {
-            $activeBooking = Jadwal::with([
+            $lowerCode = strtolower($code);
+            $searchResults = Jadwal::with([
                 'lapangan',
                 'pelanggan',
                 'transaksis',
                 'detailSewaPerlengkapans',
             ])
-                ->where(function ($query) use ($code) {
+                ->where(function ($query) use ($code, $lowerCode) {
                     $query->where('kode_qr', $code)
                         ->orWhere('token_manual', strtoupper($code))
-                        ->orWhere('token_manual', $code);
+                        ->orWhere('token_manual', $code)
+                        ->orWhereRaw('LOWER(nama_tamu) LIKE ?', ["%{$lowerCode}%"])
+                        ->orWhere('no_wa_tamu', 'LIKE', "%{$code}%")
+                        ->orWhereHas('pelanggan', function ($q) use ($lowerCode, $code) {
+                            $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lowerCode}%"])
+                              ->orWhere('no_hp', 'LIKE', "%{$code}%")
+                              ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerCode}%"]);
+                        })
+                        ->orWhereHas('transaksis', function ($q) use ($lowerCode) {
+                            $q->whereRaw('LOWER(order_id) LIKE ?', ["%{$lowerCode}%"])
+                              ->orWhereRaw('LOWER(referensi_midtrans) LIKE ?', ["%{$lowerCode}%"]);
+                        });
 
                     if (Str::isUuid($code)) {
                         $query->orWhere('id', $code);
                     }
                 })
-                ->first();
+                ->orderByDesc('tanggal')
+                ->orderBy('jam_mulai')
+                ->get();
+
+            if ($request->filled('id')) {
+                $activeBooking = $searchResults->firstWhere('id', $request->input('id'));
+            }
+
+            if (! $activeBooking) {
+                $activeBooking = $searchResults->first();
+            }
         }
 
         if (! $activeBooking) {
@@ -129,7 +152,8 @@ class KasirController extends Controller
             'occupiedSlots',
             'totalCapacitySlots',
             'code',
-            'perlengkapans'
+            'perlengkapans',
+            'searchResults'
         ));
     }
 
@@ -175,20 +199,35 @@ class KasirController extends Controller
             ], 400);
         }
 
+        $lowerSearch = strtolower($searchCode);
+
         $jadwal = Jadwal::with([
             'lapangan',
             'pelanggan',
             'transaksis',
         ])
-            ->where(function ($query) use ($searchCode) {
+            ->where(function ($query) use ($searchCode, $lowerSearch) {
                 $query->where('kode_qr', $searchCode)
                     ->orWhere('token_manual', strtoupper($searchCode))
-                    ->orWhere('token_manual', $searchCode);
+                    ->orWhere('token_manual', $searchCode)
+                    ->orWhereRaw('LOWER(nama_tamu) LIKE ?', ["%{$lowerSearch}%"])
+                    ->orWhere('no_wa_tamu', 'LIKE', "%{$searchCode}%")
+                    ->orWhereHas('pelanggan', function ($q) use ($lowerSearch, $searchCode) {
+                        $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lowerSearch}%"])
+                          ->orWhere('no_hp', 'LIKE', "%{$searchCode}%")
+                          ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearch}%"]);
+                    })
+                    ->orWhereHas('transaksis', function ($q) use ($lowerSearch) {
+                        $q->whereRaw('LOWER(order_id) LIKE ?', ["%{$lowerSearch}%"])
+                          ->orWhereRaw('LOWER(referensi_midtrans) LIKE ?', ["%{$lowerSearch}%"]);
+                    });
 
                 if (Str::isUuid($searchCode)) {
                     $query->orWhere('id', $searchCode);
                 }
             })
+            ->orderByDesc('tanggal')
+            ->orderBy('jam_mulai')
             ->first();
 
         if (! $jadwal) {
@@ -280,6 +319,90 @@ class KasirController extends Controller
                 'checked_in_at' => $jadwal->checked_in_at,
             ],
             'checkin_url' => route('kasir.checkin', $jadwal->id),
+        ]);
+    }
+
+    public function searchTickets(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->input('q', $request->input('code', '')));
+
+        if (strlen($query) < 2) {
+            return response()->json([
+                'success' => true,
+                'count' => 0,
+                'results' => [],
+            ]);
+        }
+
+        $lower = strtolower($query);
+
+        $results = Jadwal::with([
+            'lapangan',
+            'pelanggan',
+            'transaksis',
+        ])
+            ->where(function ($q) use ($query, $lower) {
+                $q->where('kode_qr', $query)
+                    ->orWhere('kode_qr', 'LIKE', "%{$query}%")
+                    ->orWhere('token_manual', strtoupper($query))
+                    ->orWhere('token_manual', 'LIKE', "%{$query}%")
+                    ->orWhereRaw('LOWER(nama_tamu) LIKE ?', ["%{$lower}%"])
+                    ->orWhere('no_wa_tamu', 'LIKE', "%{$query}%")
+                    ->orWhereHas('pelanggan', function ($pq) use ($lower, $query) {
+                        $pq->whereRaw('LOWER(nama) LIKE ?', ["%{$lower}%"])
+                            ->orWhere('no_hp', 'LIKE', "%{$query}%")
+                            ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lower}%"]);
+                    })
+                    ->orWhereHas('transaksis', function ($tq) use ($lower) {
+                        $tq->whereRaw('LOWER(order_id) LIKE ?', ["%{$lower}%"])
+                            ->orWhereRaw('LOWER(referensi_midtrans) LIKE ?', ["%{$lower}%"]);
+                    });
+
+                if (Str::isUuid($query)) {
+                    $q->orWhere('id', $query);
+                }
+            })
+            ->orderByDesc('tanggal')
+            ->orderBy('jam_mulai')
+            ->take(20)
+            ->get();
+
+        $formatted = $results->map(function ($item) {
+            $dp = (float) $item->transaksis->where('status', 'berhasil')->sum('jumlah');
+            $sisa = max(0, (float) $item->harga_disepakati - $dp);
+            $tanggalObj = $item->tanggal instanceof \Carbon\Carbon
+                ? $item->tanggal
+                : \Carbon\Carbon::parse($item->tanggal);
+
+            $nama = $item->pelanggan->nama ?? $item->nama_tamu ?? 'Penyewa Tamu';
+            $noHp = $item->pelanggan->no_hp ?? $item->no_wa_tamu ?? '-';
+            $token = $item->token_manual ?: substr($item->kode_qr, -8);
+            $lapanganNama = $item->lapangan->nama ?? $item->lapangan->kategori ?? 'Lapangan';
+
+            return [
+                'id' => $item->id,
+                'nama' => $nama,
+                'no_hp' => $noHp,
+                'token' => $token,
+                'kode_qr' => $item->kode_qr,
+                'lapangan' => $lapanganNama,
+                'tanggal' => $tanggalObj->format('d M'),
+                'jam' => substr($item->jam_mulai, 0, 5) . ' - ' . substr($item->jam_selesai, 0, 5),
+                'status' => $item->status,
+                'status_pembayaran' => $item->status_pembayaran,
+                'sisa_tagihan' => $sisa,
+                'is_cancelled' => in_array($item->status, ['dibatalkan', 'cancelled', 'rejected']),
+                'denda' => (float) $item->denda_pembatalan,
+                'is_lunas' => $item->status_pembayaran === 'lunas_online' || $sisa == 0,
+                'search_text' => strtolower("{$nama} {$noHp} {$token} {$item->kode_qr} {$lapanganNama}"),
+                'url' => route('kasir.index', ['code' => $item->kode_qr ?: ($item->token_manual ?: $item->id)]),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $formatted->count(),
+            'results' => $formatted,
         ]);
     }
 
