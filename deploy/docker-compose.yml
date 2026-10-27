@@ -1,0 +1,119 @@
+# =============================================================================
+# LapangIn — Docker Compose (Staging Environment)
+# Jalankan: docker compose -f deploy/docker-compose.yml up -d
+# =============================================================================
+# CATATAN: File ini untuk staging VPS.
+#   • Salin .env.staging ke .env sebelum menjalankan.
+#   • Volume lapangin_storage di-mount ke storage/ agar persistent.
+#   • Ganti DOMAIN dan credential sesuai VPS nyata.
+# =============================================================================
+
+services:
+
+  # ── Aplikasi Laravel (PHP 8.3-FPM) ─────────────────────────────────────────
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lapangin-app:staging
+    container_name: lapangin_app
+    restart: unless-stopped
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: "false"
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/var/www/lapangin
+      - lapangin_storage:/var/www/lapangin/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lapangin_net
+
+  # ── Nginx Web Server ─────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: lapangin_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../:/var/www/lapangin:ro
+      - lapangin_storage:/var/www/lapangin/storage:ro
+      - ./nginx.conf:/etc/nginx/conf.d/lapangin.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    depends_on:
+      - app
+    networks:
+      - lapangin_net
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: lapangin_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lapangin_db
+      POSTGRES_USER: lapangin_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - lapangin_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lapangin_user -d lapangin_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lapangin_net
+    # Jangan ekspos port DB ke publik
+    # ports:
+    #   - "5432:5432"
+
+  # ── Queue Worker (Laravel Horizon / database driver) ──────────────────────────
+  queue:
+    image: lapangin-app:staging
+    container_name: lapangin_queue
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/var/www/lapangin
+      - lapangin_storage:/var/www/lapangin/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lapangin_net
+
+  # ── Scheduler (php artisan schedule:work) ────────────────────────────────────
+  scheduler:
+    image: lapangin-app:staging
+    container_name: lapangin_scheduler
+    restart: unless-stopped
+    command: php artisan schedule:work
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/var/www/lapangin
+      - lapangin_storage:/var/www/lapangin/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lapangin_net
+
+volumes:
+  lapangin_pgdata:
+    driver: local
+  lapangin_storage:
+    driver: local
+
+networks:
+  lapangin_net:
+    driver: bridge
+
