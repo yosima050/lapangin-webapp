@@ -11,6 +11,7 @@ use App\Models\Perlengkapan;
 use App\Models\DetailSewaPerlengkapan;
 use App\Models\HargaKhusus;
 use App\Services\BookingAdjustmentService;
+use App\Services\GuestAccountProvisioner;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -875,6 +876,12 @@ for ($i = 0; $i < $durasi; $i++) {
     // Total akhir terdiri dari tarif lapangan dan perlengkapan.
     $totalTarif = $totalTarifLapangan + $totalBiayaPerlengkapan;
 
+    // Auto-provision shadow account untuk tamu walk-in berbasis nomor WhatsApp
+    $pelangganTamu = app(GuestAccountProvisioner::class)->getOrCreateGuestAccount(
+        $validated['nama_tamu'],
+        $validated['no_wa_tamu']
+    );
+
     $jadwal = DB::transaction(function () use (
         $validated,
         $tanggal,
@@ -883,14 +890,16 @@ for ($i = 0; $i < $durasi; $i++) {
         $lapangan,
         $totalTarif,
         $totalTarifLapangan,
-        $detailPerlengkapan
+        $detailPerlengkapan,
+        $pelangganTamu
     ) {
         $payFull = $validated['payType'] === 'full';
 
         $jadwal = Jadwal::create([
             'lapangan_id' => $lapangan->id,
+            'pelanggan_id' => $pelangganTamu->id,
             'nama_tamu' => $validated['nama_tamu'],
-            'no_wa_tamu' => $validated['no_wa_tamu'],
+            'no_wa_tamu' => $pelangganTamu->no_hp,
             'tanggal' => $tanggal,
             'jam_mulai' => $jamMulai,
             'jam_selesai' => $jamSelesai,

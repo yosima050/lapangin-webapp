@@ -41,12 +41,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('checkout.pay');
-    Route::get('/checkout/status/{orderId}', [CheckoutController::class, 'status'])->name('checkout.status');
-    Route::get('/checkout/check-status/{orderId}', [CheckoutController::class, 'checkStatus'])->name('checkout.checkStatus');
-    Route::post('/checkout/expire/{id}', [CheckoutController::class, 'expire'])->name('checkout.expire');
 });
+
+// Checkout Booking (Dapat diakses oleh Pelanggan terdaftar maupun Tamu Walk-in)
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('checkout.pay');
+Route::get('/checkout/success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/status/{orderId}', [CheckoutController::class, 'status'])->name('checkout.status');
+Route::get('/checkout/check-status/{orderId}', [CheckoutController::class, 'checkStatus'])->name('checkout.checkStatus');
+Route::post('/checkout/expire/{id}', [CheckoutController::class, 'expire'])->name('checkout.expire');
 
 // Halaman Admin
 Route::middleware(['auth', 'IsAdmin'])

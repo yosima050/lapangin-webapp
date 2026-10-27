@@ -3,10 +3,14 @@
         $isRegister = ($initialTab ?? null) === 'register'
             || request()->routeIs('register')
             || request()->is('*register*')
+            || (request()->filled('tab') && request('tab') === 'register')
+            || request()->filled('no_hp')
             || old('name') !== null
             || old('no_hp') !== null
             || $errors->hasAny(['name', 'no_hp', 'password_confirmation']);
         $activeTab = $isRegister ? 'register' : 'login';
+        $prefilledNoHp = old('no_hp', preg_replace('/^(\+62|62|0)/', '', request('no_hp', '')));
+        $prefilledName = old('name', request('name', ''));
     @endphp
 
     <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between"
@@ -88,9 +92,31 @@
 
                         {{-- Social Proof / Venue Stack Circles --}}
                         <div class="flex items-center -space-x-2">
-                            <span class="w-7 h-7 rounded-full bg-[#eff4ff] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#1a146b] shadow-xs">⚽</span>
-                            <span class="w-7 h-7 rounded-full bg-[#eff4ff] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#1a146b] shadow-xs">🏸</span>
-                            <span class="w-7 h-7 rounded-full bg-[#acf847] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#102000] shadow-xs">🎾</span>
+                            <span class="w-7 h-7 rounded-full bg-[#eff4ff] border-2 border-white flex items-center justify-center text-[#1a146b] shadow-xs" title="Futsal & Sepakbola">
+                                <svg class="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <polygon points="12,7 16,10 14.5,15 9.5,15 8,10" fill="currentColor" fill-opacity="0.15" />
+                                    <line x1="12" y1="7" x2="12" y2="3" />
+                                    <line x1="16" y1="10" x2="20.5" y2="8.5" />
+                                    <line x1="14.5" y1="15" x2="17.5" y2="19.5" />
+                                    <line x1="9.5" y1="15" x2="6.5" y2="19.5" />
+                                    <line x1="8" y1="10" x2="3.5" y2="8.5" />
+                                </svg>
+                            </span>
+                            <span class="w-7 h-7 rounded-full bg-[#eff4ff] border-2 border-white flex items-center justify-center text-[#1a146b] shadow-xs" title="Badminton">
+                                <svg class="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <circle cx="12" cy="9" r="6" />
+                                    <line x1="12" y1="15" x2="12" y2="21" />
+                                    <line x1="10" y1="18" x2="14" y2="18" />
+                                    <path d="M8 9h8M12 5v8" stroke-dasharray="1 1" />
+                                </svg>
+                            </span>
+                            <span class="w-7 h-7 rounded-full bg-[#acf847] border-2 border-white flex items-center justify-center text-[#102000] shadow-xs" title="Tenis">
+                                <svg class="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" stroke-width="1.8">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M12 3a9 9 0 010 18M12 3a9 9 0 000 18" />
+                                </svg>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -359,7 +385,7 @@
                                         id="register_name"
                                         type="text"
                                         name="name"
-                                        value="{{ old('name') }}"
+                                        value="{{ $prefilledName }}"
                                         required
                                         autocomplete="name"
                                         placeholder="contoh: Budi Santoso"
@@ -423,7 +449,7 @@
                                         id="register_no_hp"
                                         type="text"
                                         name="no_hp"
-                                        value="{{ old('no_hp') }}"
+                                        value="{{ $prefilledNoHp }}"
                                         required
                                         autocomplete="tel"
                                         placeholder="812-3456-7890"
@@ -538,7 +564,7 @@
                                 </label>
                             </div>
 
-                            {{-- 7. Tombol Submit (⚡ Daftar) --}}
+                            {{-- 7. Tombol Submit (Daftar) --}}
                             <button
                                 type="submit"
                                 class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"

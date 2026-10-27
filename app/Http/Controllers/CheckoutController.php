@@ -6,6 +6,7 @@ use App\Jobs\BatalBookingOtomatis;
 use App\Models\Jadwal;
 use App\Models\Lapangan;
 use App\Models\Transaksi;
+use App\Services\GuestAccountProvisioner;
 use App\Services\PaymentService;
 use App\Models\HargaKhusus;
 use Carbon\Carbon;
@@ -143,15 +144,81 @@ class CheckoutController extends Controller
             return response()->json([
                 'status' => 'not_found',
                 'is_paid' => false,
-                'redirect_url' => route('pelanggan.booking.index'),
+                'redirect_url' => route('home'),
             ], 404);
         }
 
+        $isPaid = in_array($transaksi->status, ['berhasil', 'lunas'], true);
+
         return response()->json([
             'status' => $transaksi->status,
-            'is_paid' => in_array($transaksi->status, ['berhasil', 'lunas'], true),
-            'redirect_url' => route('pelanggan.booking.index', ['status' => 'success']),
+            'is_paid' => $isPaid,
+            'redirect_url' => route('checkout.success', ['orderId' => $transaksi->order_id ?: $orderId]),
         ]);
+    }
+
+    /**
+     * Halaman Sukses Publik & E-Tiket Masuk (dapat diakses tamu tanpa login).
+     */
+    public function success(string $orderId, PaymentService $paymentService): View
+    {
+        $query = Transaksi::with(['jadwal.lapangan', 'jadwal.pelanggan'])
+            ->where('order_id', $orderId)
+            ->orWhere('referensi_midtrans', $orderId);
+
+        if (Str::isUuid($orderId)) {
+            $query->orWhere('id', $orderId);
+        }
+
+        $transaksi = $query->firstOrFail();
+
+        // Sinkronisasi status pembayaran dengan Midtrans jika masih pending
+        if ($transaksi->status === 'pending') {
+            $paymentService->syncStatus($transaksi);
+            $transaksi->refresh();
+        }
+
+        $jadwal = $transaksi->jadwal;
+
+        // Pastikan kode_qr dan token_manual terisi
+        if ($jadwal) {
+            $dirty = false;
+            if (empty($jadwal->kode_qr)) {
+                $jadwal->kode_qr = 'LPNG-QR-'.strtoupper(Str::random(12)).'-'.time();
+                $dirty = true;
+            }
+            if (empty($jadwal->token_manual) || !preg_match('/^[A-Z0-9]{6}$/', $jadwal->token_manual)) {
+                do {
+                    $token = strtoupper(Str::random(6));
+                } while (Jadwal::where('token_manual', $token)->where('id', '!=', $jadwal->id)->exists());
+
+                $jadwal->token_manual = $token;
+                $dirty = true;
+            }
+            if ($dirty) {
+                $jadwal->save();
+            }
+        }
+
+        // Tentukan nama & nomor WhatsApp pemesan
+        $namaPemesan = $jadwal?->nama_tamu ?: ($jadwal?->pelanggan?->nama ?? 'Tamu Lapangan');
+        $noHpPemesan = $jadwal?->no_wa_tamu ?: ($jadwal?->pelanggan?->no_hp ?? '');
+
+        $totalHarga = (float) ($jadwal?->harga_disepakati ?? 0);
+        $nominalTerbayar = (float) $transaksi->jumlah;
+        $isFull = ($transaksi->jenis === 'full' || $nominalTerbayar >= $totalHarga);
+        $sisaBayar = max(0, $totalHarga - $nominalTerbayar);
+
+        return view('checkout.success', compact(
+            'transaksi',
+            'jadwal',
+            'namaPemesan',
+            'noHpPemesan',
+            'totalHarga',
+            'nominalTerbayar',
+            'isFull',
+            'sisaBayar'
+        ));
     }
 
     /**
@@ -162,6 +229,23 @@ class CheckoutController extends Controller
         Jadwal::autoCancelExpiredPendingBookings();
 
         $user = Auth::user();
+
+        // Jika checkout oleh tamu tanpa login, auto-provision akun bayangan via No. WhatsApp
+        if (! $user) {
+            $guestData = $request->validate([
+                'nama' => 'required|string|max:100',
+                'no_hp' => 'required|string|max:20',
+                'email' => 'nullable|email',
+            ]);
+
+            $provisioner = app(GuestAccountProvisioner::class);
+            $user = $provisioner->getOrCreateGuestAccount(
+                $guestData['nama'],
+                $guestData['no_hp'],
+                $guestData['email'] ?? null
+            );
+        }
+
         $tipeBayar = $request->input('tipe_bayar', 'dp');
         if (! in_array($tipeBayar, ['dp', 'full'], true)) {
             $tipeBayar = 'dp';
@@ -172,7 +256,15 @@ class CheckoutController extends Controller
             $jadwalId = $request->input('jadwal_id') ?: $request->input('booking_id');
             $jadwal = Jadwal::with('lapangan')->find($jadwalId);
 
-            if ($jadwal && $jadwal->pelanggan_id === $user->id) {
+            if ($jadwal && ($jadwal->pelanggan_id === $user->id || empty($jadwal->pelanggan_id))) {
+                if (empty($jadwal->pelanggan_id)) {
+                    $jadwal->update([
+                        'pelanggan_id' => $user->id,
+                        'nama_tamu' => $user->nama,
+                        'no_wa_tamu' => $user->no_hp,
+                    ]);
+                }
+
                 // Periksa apakah batas waktu 10 menit telah kedaluwarsa
                 $createdAt = Carbon::parse($jadwal->created_at);
                 if ($jadwal->status === 'dibatalkan' || $createdAt->lte(now()->subMinutes(10))) {
@@ -288,6 +380,8 @@ class CheckoutController extends Controller
             $jadwal = Jadwal::create([
                 'lapangan_id' => $details['lapangan']->id,
                 'pelanggan_id' => $user->id,
+                'nama_tamu' => $user->nama,
+                'no_wa_tamu' => $user->no_hp,
                 'tanggal' => $data['tanggal'],
                 'jam_mulai' => $details['mulai']->format('H:i:s'),
                 'jam_selesai' => $selesaiFormatted,

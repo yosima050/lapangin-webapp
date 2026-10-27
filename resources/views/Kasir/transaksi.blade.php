@@ -153,7 +153,7 @@
                 </div>
             </div>
 
-            <button type="button" @click="alert('✅ Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
+            <button type="button" @click="alert('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
                     class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-base text-[#acf847]">lock_clock</span>
                 <span>Tutup Shift &amp; Cetak Berita Acara</span>

@@ -25,12 +25,20 @@
     {{-- Alert Notifikasi Status --}}
     @if (session('status') === 'profile-updated')
         <div class="flex items-center gap-3 p-4 rounded-2xl bg-[#dcfce7] border border-[#bbf7d0] text-[#166534] text-xs sm:text-sm font-bold shadow-xs">
-            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-white">✓</span>
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-white">
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </span>
             Profil Anda berhasil diperbarui.
         </div>
     @elseif (session('status') === 'password-updated')
         <div class="flex items-center gap-3 p-4 rounded-2xl bg-[#dcfce7] border border-[#bbf7d0] text-[#166534] text-xs sm:text-sm font-bold shadow-xs">
-            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-white">✓</span>
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-white">
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </span>
             Kata sandi Anda berhasil diperbarui.
         </div>
     @endif

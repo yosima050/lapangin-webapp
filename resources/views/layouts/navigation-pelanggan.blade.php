@@ -63,8 +63,8 @@
             <div class="hidden lg:flex items-center gap-4 ml-auto">
 
                 {{-- Location Badge --}}
-                <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700">
-                    <span class="text-[#416900]">📍</span>
+                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700">
+                    <svg class="w-3.5 h-3.5 text-[#416900]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                     <span>Malang</span>
                 </div>
 
@@ -164,8 +164,8 @@
                 :aria-expanded="mobileMenuOpen"
                 aria-label="Buka menu navigasi"
             >
-                <span x-show="!mobileMenuOpen" class="text-2xl leading-none">☰</span>
-                <span x-show="mobileMenuOpen" x-cloak class="text-2xl leading-none">✕</span>
+                <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
         </div>

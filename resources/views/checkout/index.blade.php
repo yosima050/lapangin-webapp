@@ -11,7 +11,9 @@
         <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5">
             <div class="flex flex-wrap items-center gap-3 text-sm">
                 <div class="flex items-center gap-2 text-[#416900]">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#416900] text-white">✓</span>
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#416900] text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </span>
                     <span class="text-gray-500 line-through">Pilih Jadwal</span>
                 </div>
 
@@ -57,8 +59,8 @@
         {{-- Banner Timer 10 Menit & Row Locking Slot Sementara --}}
         <div id="countdown-banner" class="mb-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5 shadow-sm">
             <div class="flex items-center gap-3.5">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white text-xl shadow-xs animate-pulse">
-                    ⏱️
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
@@ -95,7 +97,9 @@
                 <section class="rounded-2xl border border-[#e8edfa] bg-white p-5 shadow-sm sm:p-6">
                     <div class="mb-5 flex items-center justify-between gap-3">
                         <h2 class="flex items-center gap-2 text-lg font-bold text-[#0b1c30]">
-                            <span class="text-xl text-[#1a146b]">♙</span>
+                            <span class="flex h-6 w-6 items-center justify-center rounded-md bg-[#eff4ff] text-[#1a146b]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                            </span>
                             Informasi Pemesan
                         </h2>
 
@@ -109,18 +113,28 @@
                             <p class="text-xs font-bold uppercase tracking-wide text-[#474651]">
                                 Nama Pemesan
                             </p>
-                            <p class="mt-2 break-words font-bold text-[#0b1c30]">
-                                {{ $pelanggan?->nama ?? $pelanggan?->name ?? 'Belum tersedia' }}
-                            </p>
+                            @if($pelanggan)
+                                <p class="mt-2 break-words font-bold text-[#0b1c30]">
+                                    {{ $pelanggan->nama ?? $pelanggan->name ?? 'Belum tersedia' }}
+                                </p>
+                            @else
+                                <input type="text" id="guest_nama" name="guest_nama" placeholder="Contoh: Budi Santoso"
+                                    class="mt-1.5 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b1c30] placeholder-gray-400 focus:border-[#416900] focus:outline-none focus:ring-1 focus:ring-[#416900]" required>
+                            @endif
                         </div>
 
                         <div class="rounded-xl bg-[#eff4ff] p-4">
                             <p class="text-xs font-bold uppercase tracking-wide text-[#474651]">
                                 Nomor WhatsApp
                             </p>
-                            <p class="mt-2 break-words font-bold text-[#0b1c30]">
-                                {{ $pelanggan?->no_hp ?? $pelanggan?->no_telp ?? 'Belum tersedia' }}
-                            </p>
+                            @if($pelanggan)
+                                <p class="mt-2 break-words font-bold text-[#0b1c30]">
+                                    {{ $pelanggan->no_hp ?? $pelanggan->no_telp ?? 'Belum tersedia' }}
+                                </p>
+                            @else
+                                <input type="tel" id="guest_no_hp" name="guest_no_hp" placeholder="Contoh: 08123456789"
+                                    class="mt-1.5 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b1c30] placeholder-gray-400 focus:border-[#416900] focus:outline-none focus:ring-1 focus:ring-[#416900]" required>
+                            @endif
                         </div>
 
                         <div class="rounded-xl bg-[#eff4ff] p-4 sm:col-span-2">
@@ -210,8 +224,8 @@
                     {{-- Card Informasi Midtrans Snap --}}
                     <div class="rounded-xl border border-[#dce9ff] bg-[#f8faff] p-5">
                         <div class="flex items-start gap-3">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1a146b] text-xl text-[#acf847] shadow-xs">
-                                💳
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1a146b] text-[#acf847] shadow-xs">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
                             </span>
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -236,8 +250,8 @@
                         {{-- Channel Pembayaran --}}
                         <div class="mt-4 grid gap-3 sm:grid-cols-2">
                             <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-base text-[#1a146b] font-bold">
-                                    ▦
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 13.5h3.75v3.75H13.5V13.5zM17.25 17.25h3v3h-3v-3z"/></svg>
                                 </span>
                                 <div class="min-w-0">
                                     <p class="text-xs font-bold text-[#0b1c30]">QRIS &amp; E-Wallet</p>
@@ -246,8 +260,8 @@
                             </div>
 
                             <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-base text-[#1a146b] font-bold">
-                                    🏦
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.5m-15 10.5V10.5m-1.5 10.5h18"/></svg>
                                 </span>
                                 <div class="min-w-0">
                                     <p class="text-xs font-bold text-[#0b1c30]">Virtual Account / VA</p>
@@ -256,8 +270,8 @@
                             </div>
 
                             <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-base text-[#1a146b] font-bold">
-                                    💳
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
                                 </span>
                                 <div class="min-w-0">
                                     <p class="text-xs font-bold text-[#0b1c30]">Kartu Kredit / Debit</p>
@@ -266,8 +280,8 @@
                             </div>
 
                             <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-base text-[#1a146b] font-bold">
-                                    ⚡
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
                                 </span>
                                 <div class="min-w-0">
                                     <p class="text-xs font-bold text-[#0b1c30]">Verifikasi Otomatis</p>
@@ -433,7 +447,7 @@
                         {{-- Timer Reminder Pill di Sidebar --}}
                         <div class="mt-4 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/90 px-3.5 py-2.5 text-xs text-amber-900">
                             <div class="flex items-center gap-2">
-                                <span class="text-base animate-pulse">⏱️</span>
+                                <svg class="w-4 h-4 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span class="font-bold">Sisa Waktu Bayar:</span>
                             </div>
                             <span id="sidebar-countdown" class="font-mono font-extrabold text-amber-900">
@@ -455,12 +469,65 @@
                 </section>
 
                 <div class="mt-4 flex items-center justify-center gap-2 text-xs text-[#777682]">
-                    <span aria-hidden="true">🔒</span>
+                    <svg class="w-3.5 h-3.5 text-[#777682] inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
                     Detail booking Lapangin
                 </div>
             </aside>
         </div>
     </main>
+
+    {{-- Modal Pop-up Custom Bertema LapangIn --}}
+    <div id="theme-alert-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <!-- Backdrop Blur -->
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onclick="closeNotificationModal()"></div>
+
+        <!-- Modal Dialog Card -->
+        <div class="relative w-full max-w-sm sm:max-w-md transform overflow-hidden rounded-3xl bg-white p-6 sm:p-7 text-center shadow-2xl border border-[#e5eeff] transition-all z-10 animate-in fade-in zoom-in-95">
+            <!-- Close Button (X) -->
+            <button type="button" onclick="closeNotificationModal()"
+                    class="absolute right-4 top-4 p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition">
+                <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Dynamic Icon Container -->
+            <div class="mx-auto mb-4 flex items-center justify-center">
+                <!-- Warning Icon -->
+                <div id="theme-alert-icon-warning" class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shadow-xs">
+                    <svg class="w-7 h-7 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <!-- Error Icon -->
+                <div id="theme-alert-icon-error" class="hidden w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shadow-xs">
+                    <svg class="w-7 h-7 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <!-- Info Icon -->
+                <div id="theme-alert-icon-info" class="hidden w-14 h-14 rounded-2xl bg-indigo-50 text-[#1a146b] border border-indigo-200 flex items-center justify-center shadow-xs">
+                    <svg class="w-7 h-7 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Title & Message -->
+            <h3 id="theme-alert-title" class="text-base sm:text-lg font-black text-[#0b1c30] mb-2 font-headline">
+                Perhatian
+            </h3>
+            <p id="theme-alert-message" class="text-xs sm:text-sm text-[#474651] leading-relaxed mb-6 font-medium">
+                Pesan notifikasi
+            </p>
+
+            <!-- Action Button -->
+            <button type="button" id="theme-alert-btn" onclick="closeNotificationModal()"
+                    class="w-full py-3.5 px-6 rounded-xl bg-[#1a146b] hover:bg-[#130d52] active:scale-[0.99] text-white font-headline font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer">
+                Mengerti &amp; Lengkapi Data
+            </button>
+        </div>
+    </div>
 </div>
 
 {{-- Integrasi Script Midtrans Snap SDK & Timer Countdown 10 Menit --}}
@@ -470,6 +537,63 @@
     const totalHarga = {{ (float) $totalHarga }};
     const nominalDp = {{ (float) $nominalDp }};
     window.currentTipeBayar = "{{ $tipeBayar }}";
+    window.currentModalCallback = null;
+
+    window.showNotificationModal = function({
+        title = 'Perhatian',
+        message = '',
+        type = 'warning',
+        confirmText = 'Mengerti',
+        onConfirm = null
+    }) {
+        const modal = document.getElementById('theme-alert-modal');
+        const titleEl = document.getElementById('theme-alert-title');
+        const msgEl = document.getElementById('theme-alert-message');
+        const iconWarning = document.getElementById('theme-alert-icon-warning');
+        const iconError = document.getElementById('theme-alert-icon-error');
+        const iconInfo = document.getElementById('theme-alert-icon-info');
+        const btn = document.getElementById('theme-alert-btn');
+
+        if (!modal) {
+            alert(message);
+            if (typeof onConfirm === 'function') onConfirm();
+            return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl) msgEl.textContent = message;
+        if (btn) btn.textContent = confirmText;
+
+        if (iconWarning) iconWarning.classList.add('hidden');
+        if (iconError) iconError.classList.add('hidden');
+        if (iconInfo) iconInfo.classList.add('hidden');
+
+        if (type === 'error' && iconError) {
+            iconError.classList.remove('hidden');
+        } else if (type === 'info' && iconInfo) {
+            iconInfo.classList.remove('hidden');
+        } else if (iconWarning) {
+            iconWarning.classList.remove('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        window.currentModalCallback = onConfirm;
+    };
+
+    window.closeNotificationModal = function() {
+        const modal = document.getElementById('theme-alert-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        if (typeof window.currentModalCallback === 'function') {
+            const cb = window.currentModalCallback;
+            window.currentModalCallback = null;
+            cb();
+        }
+    };
 
     function formatRupiah(num) {
         return 'Rp' + new Intl.NumberFormat('id-ID').format(num);
@@ -665,6 +789,56 @@
             const buttonText = document.getElementById('pay-button-text') || payButton;
             const originalText = buttonText.innerText;
 
+            const isGuest = {{ $pelanggan ? 'false' : 'true' }};
+            let guestNama = '';
+            let guestNoHp = '';
+
+            if (isGuest) {
+                const elNama = document.getElementById('guest_nama');
+                const elNoHp = document.getElementById('guest_no_hp');
+                guestNama = elNama ? elNama.value.trim() : '';
+                guestNoHp = elNoHp ? elNoHp.value.trim() : '';
+
+                if (elNama) {
+                    elNama.addEventListener('input', function() {
+                        elNama.classList.remove('!border-rose-500', 'ring-2', 'ring-rose-200');
+                    }, { once: true });
+                }
+                if (elNoHp) {
+                    elNoHp.addEventListener('input', function() {
+                        elNoHp.classList.remove('!border-rose-500', 'ring-2', 'ring-rose-200');
+                    }, { once: true });
+                }
+
+                if (!guestNama) {
+                    if (elNama) elNama.classList.add('!border-rose-500', 'ring-2', 'ring-rose-200');
+                    showNotificationModal({
+                        title: 'Nama Pemesan Belum Diisi',
+                        message: 'Silakan masukkan Nama Pemesan terlebih dahulu untuk mencetak e-tiket dan reservasi.',
+                        type: 'warning',
+                        confirmText: 'Lengkapi Nama Pemesan',
+                        onConfirm: function() {
+                            elNama?.focus();
+                        }
+                    });
+                    return;
+                }
+
+                if (!guestNoHp) {
+                    if (elNoHp) elNoHp.classList.add('!border-rose-500', 'ring-2', 'ring-rose-200');
+                    showNotificationModal({
+                        title: 'Nomor WhatsApp Belum Diisi',
+                        message: 'Silakan masukkan Nomor WhatsApp aktif untuk verifikasi dan konfirmasi booking Anda.',
+                        type: 'warning',
+                        confirmText: 'Lengkapi Nomor WhatsApp',
+                        onConfirm: function() {
+                            elNoHp?.focus();
+                        }
+                    });
+                    return;
+                }
+            }
+
             payButton.disabled = true;
             payButton.classList.add('opacity-70', 'cursor-not-allowed');
             buttonText.innerText = 'Memproses Pembayaran...';
@@ -683,7 +857,9 @@
                     durasi: {{ $durasi }},
                     tipe_bayar: window.currentTipeBayar,
                     jadwal_id: "{{ $jadwalId ?? '' }}",
-                    booking_id: "{{ $bookingId ?? ($jadwalId ?? '') }}"
+                    booking_id: "{{ $bookingId ?? ($jadwalId ?? '') }}",
+                    nama: guestNama || "{{ $pelanggan?->nama ?? '' }}",
+                    no_hp: guestNoHp || "{{ $pelanggan?->no_hp ?? '' }}"
                 })
             })
             .then(function (response) {
@@ -701,7 +877,12 @@
                 }
 
                 if (typeof window.snap === 'undefined') {
-                    alert("Midtrans Snap SDK tidak berhasil dimuat. Pastikan koneksi internet aktif.");
+                    showNotificationModal({
+                        title: 'Koneksi Midtrans Terputus',
+                        message: 'Midtrans Snap SDK tidak berhasil dimuat. Pastikan koneksi internet Anda aktif.',
+                        type: 'error',
+                        confirmText: 'Coba Lagi'
+                    });
                     payButton.disabled = false;
                     payButton.classList.remove('opacity-70', 'cursor-not-allowed');
                     buttonText.innerText = originalText;
@@ -710,13 +891,20 @@
 
                 window.snap.pay(snapToken, {
                     onSuccess: function(result) {
-                        window.location.href = "{{ route('pelanggan.booking.index') }}?status=success";
+                        const oid = (result && result.order_id) ? result.order_id : data.order_id;
+                        window.location.href = "{{ url('/checkout/success') }}/" + encodeURIComponent(oid);
                     },
                     onPending: function(result) {
-                        window.location.href = "{{ route('pelanggan.booking.index') }}?status=pending";
+                        const oid = (result && result.order_id) ? result.order_id : data.order_id;
+                        window.location.href = "{{ url('/checkout/success') }}/" + encodeURIComponent(oid) + "?status=pending";
                     },
                     onError: function(result) {
-                        alert("Pembayaran gagal, silakan coba kembali.");
+                        showNotificationModal({
+                            title: 'Pembayaran Belum Berhasil',
+                            message: 'Pembayaran tidak berhasil diselesaikan. Silakan coba kembali atau gunakan metode bayar lain.',
+                            type: 'error',
+                            confirmText: 'Tutup'
+                        });
                         payButton.disabled = false;
                         payButton.classList.remove('opacity-70', 'cursor-not-allowed');
                         buttonText.innerText = originalText;
@@ -730,7 +918,12 @@
                 });
             })
             .catch(function (error) {
-                alert(error.message || 'Terjadi kesalahan sistem, silakan coba kembali.');
+                showNotificationModal({
+                    title: 'Terjadi Kendala Sistem',
+                    message: error.message || 'Terjadi kesalahan sistem, silakan coba kembali beberapa saat lagi.',
+                    type: 'error',
+                    confirmText: 'Tutup'
+                });
                 payButton.disabled = false;
                 payButton.classList.remove('opacity-70', 'cursor-not-allowed');
                 buttonText.innerText = originalText;

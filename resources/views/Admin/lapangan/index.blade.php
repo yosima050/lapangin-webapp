@@ -232,8 +232,12 @@
                 </div>
             </div>
         @empty
-            <div class="bg-white rounded-2xl p-12 text-center text-[#777682] border border-[#e5eeff]">
-                <p class="text-3xl mb-2">🏟️</p>
+            <div class="bg-white rounded-2xl p-12 text-center text-[#777682] border border-[#e5eeff] flex flex-col items-center">
+                <div class="w-12 h-12 mb-3 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009 9.35c.66 0 1.28-.213 1.785-.578a3.002 3.002 0 004.43 0c.505.365 1.125.578 1.785.578 1.002 0 1.897-.49 2.45-1.246.33.284.757.456 1.22.456H21" />
+                    </svg>
+                </div>
                 <p class="font-bold text-[#0b1c30]">Belum Ada Data Lapangan</p>
                 <a href="{{ route('admin.lapangan.create') }}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#1a146b] text-white rounded-xl text-xs font-bold">
                     Tambah Lapangan Baru
@@ -299,7 +303,7 @@
                     </div>
 
                     <!-- Form Inputs -->
-                    <form class="flex flex-col gap-4 text-xs" @submit.prevent="alert('✅ Perubahan tarif master untuk ' + selectedCourt + ' berhasil disimpan!'); drawerOpen = false;">
+                    <form class="flex flex-col gap-4 text-xs" @submit.prevent="alert('Perubahan tarif master untuk ' + selectedCourt + ' berhasil disimpan!'); drawerOpen = false;">
                         <div>
                             <span class="font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider block mb-2">
                                 1. TARIF WEEKDAY (SENIN – JUMAT)
