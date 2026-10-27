@@ -20,6 +20,7 @@ services:
       - ../.env
     volumes:
       - ../:/var/www/lapangin
+      - /var/www/lapangin/vendor
       - lapangin_storage:/var/www/lapangin/storage
     depends_on:
       db:
@@ -78,6 +79,7 @@ services:
       - ../.env
     volumes:
       - ../:/var/www/lapangin
+      - /var/www/lapangin/vendor
       - lapangin_storage:/var/www/lapangin/storage
     depends_on:
       db:
@@ -100,6 +102,7 @@ services:
       - ../.env
     volumes:
       - ../:/var/www/lapangin
+      - /var/www/lapangin/vendor
       - lapangin_storage:/var/www/lapangin/storage
     depends_on:
       db:
