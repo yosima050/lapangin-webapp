@@ -98,22 +98,45 @@
                     <tbody class="divide-y divide-[#eff4ff]">
                         @forelse ($transaksis as $trx)
                             @php
-                                $trxCode = $trx->jadwal?->kode_qr ?? $trx->jadwal?->token_manual ?? substr($trx->id, 0, 8);
+                                $trxCode = $trx->order_id ?: ($trx->jadwal?->kode_qr ?: ($trx->jadwal?->token_manual ?: 'TRX-' . strtoupper(substr($trx->id, 0, 8))));
                                 $trxNama = $trx->jadwal?->pelanggan?->nama ?? $trx->jadwal?->nama_tamu ?? 'Penyewa Tamu';
                                 $trxCourt = $trx->jadwal?->lapangan?->nama ?? 'Lapangan';
                                 $isCash = $trx->metode === 'tunai';
+                                $jenisLabel = match($trx->jenis) {
+                                    'dp' => 'DP (50%)',
+                                    'pelunasan' => 'Pelunasan',
+                                    'full' => 'Lunas Full',
+                                    default => ucfirst($trx->jenis ?? 'Pembayaran'),
+                                };
                             @endphp
                             <tr class="hover:bg-[#eff4ff]/50 transition-colors">
-                                <td class="px-4 py-3 font-mono font-bold text-[#1a146b]">{{ $trxCode }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="font-mono font-bold text-[#1a146b]">{{ $trxCode }}</div>
+                                    @if ($trx->jadwal?->token_manual && $trx->jadwal?->token_manual !== $trxCode)
+                                        <div class="text-[10px] text-[#777682] font-mono">Token: {{ $trx->jadwal->token_manual }}</div>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 font-bold text-[#0b1c30]">{{ $trxNama }}</td>
                                 <td class="px-4 py-3 text-[#474651]">{{ $trxCourt }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-0.5 rounded {{ $isCash ? 'bg-[#eff4ff] text-[#1a146b]' : 'bg-[#dce9ff] text-[#1a146b]' }} font-bold text-[10px]">
-                                        {{ $isCash ? 'Tunai' : 'Online' }}
-                                    </span>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="px-2 py-0.5 rounded {{ $isCash ? 'bg-[#eff4ff] text-[#1a146b]' : 'bg-[#dce9ff] text-[#1a146b]' }} font-bold text-[10px]">
+                                            {{ $isCash ? 'Tunai' : 'Online' }}
+                                        </span>
+                                        <span class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-semibold text-[9px]">
+                                            {{ $jenisLabel }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 font-bold text-[#0b1c30]">Rp {{ number_format($trx->jumlah, 0, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right text-[#777682]">{{ $trx->dibayar_pada ? $trx->dibayar_pada->format('H:i') . ' WIB' : '-' }}</td>
+                                <td class="px-4 py-3 text-right">
+                                    @if ($trx->dibayar_pada)
+                                        <div class="font-bold text-[#0b1c30]">{{ $trx->dibayar_pada->format('H:i') }} WIB</div>
+                                        <div class="text-[10px] text-[#777682]">{{ $trx->dibayar_pada->format('d/m/Y') }}</div>
+                                    @else
+                                        <span class="text-[#777682]">-</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>

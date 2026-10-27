@@ -1356,11 +1356,13 @@ for ($i = 0; $i < $durasi; $i++) {
     {
         $lapangans = Lapangan::all();
 
+        // Hanya tampilkan transaksi yang berhasil (penerimaan kas valid untuk rekonsiliasi)
         $transaksis = Transaksi::with([
             'jadwal.lapangan',
             'jadwal.pelanggan',
         ])
-            ->latest('dibayar_pada')
+            ->where('status', 'berhasil')
+            ->orderByRaw('dibayar_pada DESC NULLS LAST')
             ->get();
 
         $totalTunai = Transaksi::where('metode', 'tunai')
