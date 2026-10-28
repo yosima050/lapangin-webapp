@@ -1,199 +1,217 @@
 # Dokumen Skenario UAT — LapangIn
-**Versi:** 1.0 | **Sprint:** 5 | **Tanggal:** 27 Oktober 2026
-**Prepared by:** Tim LapangIn PBL
+**Platform Reservasi & Manajemen Venue Olahraga Multi-Court Terintegrasi**
+
+- **Versi Dokumen:** 2.0 (Staging & Production Release)
+- **Sprint:** 5 & Deployment Final
+- **Tanggal:** 28 Oktober 2026
+- **Lingkungan Pengujian (Staging):** `https://lapangin.australiaeast.cloudapp.azure.com`
+- **Penyusun:** Tim Pengembang LapangIn PBL
 
 ---
 
 ## Daftar Isi
-1. [Lingkup Pengujian](#lingkup-pengujian)
-2. [Akun Pengujian](#akun-pengujian)
-3. [Skenario per Role](#skenario-per-role)
-4. [Edge Case & Keamanan](#edge-case--keamanan)
-5. [Checklist Pre-Deploy](#checklist-pre-deploy)
+1. [Lingkup Pengujian & Baseline Arsitektur](#1-lingkup-pengujian--baseline-arsitektur)
+2. [Matriks Kredensial Akun Pengujian](#2-matriks-kredensial-akun-pengujian)
+3. [Skenario Pengujian per Role](#3-skenario-pengujian-per-role)
+   - [A. Role: Pelanggan (Online Web)](#a-role-pelanggan-online-web)
+   - [B. Role: Kasir (POS & Check-In Onsite)](#b-role-kasir-pos--check-in-onsite)
+   - [C. Role: Venue Manager / Administrator](#c-role-venue-manager--administrator)
+4. [Skenario Edge Case, Keamanan & Validasi Waktu](#4-skenario-edge-case-keamanan--validasi-waktu)
+5. [Checklist Kesiapan Staging & Demo Dosen](#5-checklist-kesiapan-staging--demo-dosen)
 
 ---
 
-## Lingkup Pengujian
+## 1. Lingkup Pengujian & Baseline Arsitektur
 
-Dokumen ini mencakup skenario **User Acceptance Testing (UAT)** untuk seluruh alur utama aplikasi LapangIn yang siap diuji di lingkungan staging (Cloud VPS dengan HTTPS aktif).
+Dokumen ini mencakup skenario **User Acceptance Testing (UAT)** menyeluruh untuk memverifikasi fungsionalitas, keamanan, dan keandalan sistem aplikasi LapangIn pada infrastruktur Staging Azure Cloud VPS dengan protokol HTTPS penuh.
 
-### Acceptance Criteria Utama
-- ✅ Aplikasi dapat diakses via HTTPS dengan SSL valid
-- ✅ Database PostgreSQL terhubung dan semua migrasi berjalan
-- ✅ Webhook Midtrans Sandbox berhasil menembak URL domain staging
-- ✅ Seluruh pengujian otomatis `php artisan test` lulus 100%
-- ✅ Semua fitur berjalan sesuai skenario di dokumen ini
+### Acceptance Criteria Utama Sistem
+- ✅ **Akses Aman HTTPS:** Akses domain staging menggunakan sertifikat SSL Let's Encrypt aktif dengan HTTP/2.
+- ✅ **Nginx Security Headers:** Content Security Policy (CSP) dan Permissions-Policy Camera (`camera=(self)`) aktif dan mengizinkan scanner QR browser serta Midtrans Snap SDK.
+- ✅ **Pemesanan Online Wajib Akun:** Pemesanan online pada website mengharuskan pengguna memiliki akun terdaftar; tamu tanpa login otomatis diarahkan mendaftar dengan penyimpanan state pemesanan (*intended URL*).
+- ✅ **Guest Checkout Khusus Kasir:** Tamu *walk-in* tanpa akun dilayani langsung di kasir venue dengan *auto-provision shadow account*, yang otomatis terklaim (*auto-claim*) saat tamu mendaftar akun resmi.
+- ✅ **Validasi Slot Waktu Masa Lalu:** Slot jam untuk hari ini yang telah lewat dari waktu sekarang otomatis dinonaktifkan (*disabled*, status "Lewat Jam").
+- ✅ **Katalog & Modul Perlengkapan:** Filter kategori, carousel tanggal 7 hari, stepper modul sewa perlengkapan (rompi, bola), dan pilihan skema pembayaran DP 50% vs Lunas 100%.
+- ✅ **Turnstile & Check-In Onsite:** Validasi QR Code via kamera kasir, token manual 6-karakter, dan kalkulator pelunasan onsite instan.
+- ✅ **Integritas Pengujian Otomatis:** Seluruh 134 pengujian unit/fitur (`php artisan test`) lulus 100% tanpa kegagalan.
 
 ---
 
-## Akun Pengujian
+## 2. Matriks Kredensial Akun Pengujian
 
 > [!IMPORTANT]
-> Buat akun berikut di environment staging sebelum memulai UAT. Gunakan seeder atau buat manual via panel admin.
+> Gunakan kredensial berikut untuk melakukan pengujian di lingkungan Staging. Pastikan database telah dimigrasikan dan diisi data seeder.
 
-| Role | Email | Password | Keterangan |
-|------|-------|----------|------------|
-| Admin | `admin@lapangin.staging` | `Admin@123!` | Akses penuh sistem |
-| Kasir | `kasir@lapangin.staging` | `Kasir@123!` | POS & Check-in |
-| Pelanggan 1 | `andi@lapangin.staging` | `Pelanggan@123!` | Pengujian booking utama |
-| Pelanggan 2 | `budi@lapangin.staging` | `Pelanggan@123!` | Pengujian konflik slot |
-
----
-
-## Skenario per Role
-
-### 👤 Role: Pelanggan
-
-#### UAT-PENG-01: Registrasi & Login
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka `https://lapangin.example.com/register` | Halaman registrasi tampil dengan HTTPS |
-| 2 | Isi nama, email baru, no. HP, password | Form tervalidasi |
-| 3 | Submit registrasi | Redirect ke dashboard pelanggan |
-| 4 | Logout, lalu login ulang | Login berhasil, sesi aktif |
-
-#### UAT-PENG-02: Booking Online dengan Pembayaran DP
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Login sebagai Pelanggan 1 | Dashboard pelanggan tampil |
-| 2 | Buka katalog lapangan | Daftar lapangan tampil dengan harga |
-| 3 | Pilih lapangan, pilih tanggal +5 hari, pilih slot 10:00-11:00 | Ringkasan booking tampil |
-| 4 | Pilih metode "DP Online via Midtrans" | Redirect ke Midtrans Snap |
-| 5 | Selesaikan pembayaran sandbox (gunakan kartu test Midtrans) | Webhook diterima, status DP terverifikasi |
-| 6 | Cek halaman riwayat booking | Status: `dp_terverifikasi` |
-| 7 | Buka e-tiket | QR code dan token 6 karakter tampil |
-
-#### UAT-PENG-03: Reschedule Jadwal (H-24 Jam)
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka detail booking dari UAT-PENG-02 | Tombol "Ajukan Reschedule" tampil |
-| 2 | Klik "Ajukan Reschedule" | Halaman pilih jadwal pengganti tampil |
-| 3 | Pilih tanggal +7 hari, pilih slot 14:00-15:00 | Slot ditampilkan sebagai "Tersedia" |
-| 4 | Isi alasan, submit | Status reschedule: `diajukan`, menunggu kasir |
-| 5 | Coba pilih slot hari ini atau besok pagi (< 24 jam) | Slot bertanda "Mepet (<24 Jam)", tidak bisa dipilih |
-
-#### UAT-PENG-04: Pembatalan dengan Penalti
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka booking yang kickoff-nya > 24 jam | Tombol "Batalkan" tampil dengan info penalti 10% |
-| 2 | Konfirmasi pembatalan | Status: `dibatalkan`, denda = 10% harga |
-| 3 | Buat booking baru untuk kickoff < 24 jam dari sekarang | Booking berhasil |
-| 4 | Batalkan booking tersebut | Info penalti: "Hangus DP (H < 24 Jam)", denda = 50% |
+| Role Pengguna | Alamat Email | Kata Sandi | Deskripsi & Hak Akses |
+|---|---|---|---|
+| **Administrator** | `admin@lapangin.staging` | `Admin@123!` | Akses penuh dashboard analitik, tarif master, tarif khusus, akun kasir, dan cetak PDF rekapitulasi. |
+| **Kasir Venue** | `kasir@lapangin.staging` | `Kasir@123!` | Akses operasional POS meja resepsionis, scanner kamera QR code, token manual, walk-in order, dan approval reschedule. |
+| **Pelanggan Utama** | `dimas@lapangin.staging` | `Pelanggan@123!` | Akun terdaftar aktif untuk pengujian alur booking online, penambahan perlengkapan, pembayaran DP/lunas, dan reschedule. |
+| **Pelanggan Sekunder** | `budi@lapangin.staging` | `Pelanggan@123!` | Akun terdaftar pengujian skenario konflik jadwal (double booking prevention) dan auto-claim nomor WhatsApp. |
+| **Tamu Walk-In (Guest)** | *(Tanpa Akun Awal)* | *(Auto-Provision)* | Pengujian alur guest walk-in kasir dengan No. WhatsApp `081288889999` dan klaim riwayat saat registrasi susulan. |
 
 ---
 
-### 🖥️ Role: Kasir
+## 3. Skenario Pengujian per Role
 
-#### UAT-KASIR-01: Scan QR Check-In
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Login sebagai Kasir | Dashboard kasir tampil |
-| 2 | Buka halaman Scanner QR | Kamera browser aktif |
-| 3 | Scan QR code dari e-tiket Pelanggan 1 | Identitas penyewa tampil, tombol Check-in aktif |
-| 4 | Klik "Konfirmasi Check-in" | Tiket ter-stamped, waktu check-in tercatat WIB |
-| 5 | Scan tiket yang sama kembali | Pesan: "Sudah check-in sebelumnya" |
-| 6 | Scan tiket yang dibatalkan | Pesan error merah: tiket tidak valid / dibatalkan |
+### A. Role: Pelanggan (Online Web)
 
-#### UAT-KASIR-02: Input Token Manual
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Di halaman scanner, gunakan input "Token Manual 6 Karakter" | Field input tampil |
-| 2 | Masukkan token dari e-tiket | Data penyewa tampil |
-| 3 | Masukkan token acak yang tidak ada | Error 422, pesan jelas |
+#### UAT-PENG-01: Autentikasi Pengguna & Tampilan Sandi
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka halaman autentikasi `https://lapangin.australiaeast.cloudapp.azure.com/login` | - | Tampil single-card auth dengan tab *Masuk ke Akun* dan *Daftar Akun Baru*. | [ ] |
+| 2 | Masukkan kata sandi pada form login | `Pelanggan@123!` | Karakter kata sandi tersembunyi (*masked bullet* secara default). | [ ] |
+| 3 | Klik ikon mata (toggle intip sandi) | - | Karakter kata sandi terlihat jelas, klik ulang menyembunyikan sandi kembali. | [ ] |
+| 4 | Klik tab "Daftar Akun Baru" | - | Berpindah ke form registrasi secara mulus tanpa tumpang tindih visual. | [ ] |
+| 5 | Isi form registrasi dengan No. WhatsApp berawalan `08` atau `+62` | `081234567890` | Nomor dinormalisasi otomatis ke format standar dan registrasi berhasil. | [ ] |
 
-#### UAT-KASIR-03: Walk-in Order (Booking Langsung)
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka halaman "Buat Walk-in" | Form booking kasir tampil |
-| 2 | Pilih lapangan, tanggal +2 hari, slot 16:00-17:00 (kosong) | Slot tersedia dikonfirmasi |
-| 3 | Isi nama penyewa, no. HP, metode bayar "Tunai" | Form valid |
-| 4 | Submit | Booking dibuat, status `terverifikasi`, `lunas_kasir` |
-| 5 | Coba buat walk-in di slot yang sama | Error: slot sudah terisi |
+#### UAT-PENG-02: Eksplorasi Katalog & Pemilihan Lapangan
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Jelajahi Lapangan* / Katalog | - | Menampilkan daftar lapangan lengkap dengan foto, badge tarif weekday/weekend, dan fasilitas. | [ ] |
+| 2 | Klik tombol filter kategori cabang olahraga | Badminton / Futsal | Katalog langsung memfilter lapangan sesuai kategori yang dipilih. | [ ] |
+| 3 | Periksa pemilih tanggal katalog | Tanggal kemarin | Tanggal sebelum hari ini dinonaktifkan (`min="hari ini"`), tidak bisa dipilih. | [ ] |
+| 4 | Klik salah satu kartu lapangan | Lapangan 1 (Vinyl) | Masuk ke halaman detail lapangan dengan tampilan 2 kolom modern. | [ ] |
+| 5 | Periksa header kartu detail lapangan | - | Header bersih dan lapang (cluster switcher lapangan tidak ada), terdapat tombol **"← Kembali ke Katalog"**. | [ ] |
 
-#### UAT-KASIR-04: Review Reschedule
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka tab "Pengajuan Reschedule" | Daftar pengajuan status `diajukan` tampil |
-| 2 | Klik "Setujui" pada pengajuan dari UAT-PENG-03 | Jadwal berubah ke waktu baru, status `disetujui` |
-| 3 | Buat pengajuan reschedule baru, lalu klik "Tolak" | Status `ditolak`, jadwal asli tidak berubah |
+#### UAT-PENG-03: Deteksi Slot Waktu Masa Lalu (Minor Fix Jam Hari Ini)
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Di halaman detail lapangan, pilih tanggal **Hari Ini** | `now()->toDateString()` | Menampilkan pengelompokan Sesi Siang/Sore (13:00-17:00) dan Malam Prime Time (18:00-23:00). | [ ] |
+| 2 | Periksa slot jam yang telah lewat dari waktu jam saat ini | Cth: jam sekarang 20:00, periksa slot 14:00 atau 19:00 | Slot berstatus **"Lewat Jam"**, berikon jam dinding, teks dicoret, dan **tidak dapat diklik / dipilih**. | [ ] |
+| 3 | Periksa slot jam masa depan untuk hari ini | Cth: slot 21:00 atau 22:00 | Slot berstatus **"Tersedia"** dengan indikator hijau dan dapat diklik. | [ ] |
+| 4 | Klik tanggal besok pada carousel 7 hari | Besok (`+1 hari`) | Seluruh jam operasional dari pagi hingga malam berstatus "Tersedia". | [ ] |
 
-#### UAT-KASIR-05: Indikator Booking Dibatalkan
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka daftar jadwal di kasir | Booking yang dibatalkan tampil banner merah "DIBATALKAN" |
-| 2 | Lihat detail booking dibatalkan | Form check-in/pembayaran dinonaktifkan (disabled) |
+#### UAT-PENG-04: Kebijakan Pemesanan Online Wajib Akun (Intended Redirect)
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka website dalam mode *Incognito* / belum login | Mode Tamu (Guest) | Header menampilkan tombol "Masuk / Daftar Akun". | [ ] |
+| 2 | Pilih lapangan, tanggal besok, dan slot jam yang tersedia | 2 Jam Sesi | Ringkasan pemesanan menghitung tarif durasi secara real-time. | [ ] |
+| 3 | Periksa banner edukatif di atas tombol booking | - | Tampil pesan: *"Pemesanan online memerlukan akun terdaftar. Anda akan diarahkan ke pendaftaran akun..."*. | [ ] |
+| 4 | Klik tombol "Lanjut ke Pemesanan" | - | Sistem mengarahkan tamu ke halaman pendaftaran (`register`) dengan pesan info instruktif. | [ ] |
+| 5 | Selesaikan registrasi atau login pada tab Masuk | Akun baru / terdaftar | Sistem secara otomatis mengembalikan pengguna (*intended redirect*) langsung ke halaman checkout dengan rincian jadwal yang tetap utuh. | [ ] |
 
----
+#### UAT-PENG-05: Modul Perlengkapan & Pembayaran Midtrans Snap (DP vs Lunas)
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Di halaman detail/checkout, tentukan perlengkapan tambahan | +2 Rompi Tanding, +1 Bola FIFA | Total harga bertambah otomatis sesuai harga sewa perlengkapan. | [ ] |
+| 2 | Pilih skema pembayaran **Bayar DP 50%** | DP 50% (Rekomendasi) | Rincian menampilkan nominal DP yang harus dibayar sekarang dan sisa 50% yang dibayar di kasir venue. | [ ] |
+| 3 | Klik tombol bayar DP | - | Pop-up Midtrans Snap terbuka dengan total nominal tagihan DP. | [ ] |
+| 4 | Lakukan pembayaran sandbox (Virtual Account / QRIS) | Simulator Midtrans | Pembayaran sukses, webhook diterima, halaman dialihkan ke halaman E-Tiket Sukses. | [ ] |
+| 5 | Periksa E-Tiket yang diterbitkan | - | Menampilkan QR Code check-in, Token Manual 6-Karakter, status `dp_terverifikasi`, dan catatan sisa tagihan kasir. | [ ] |
 
-### 🔧 Role: Admin
-
-#### UAT-ADMIN-01: Laporan Rekonsiliasi
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Login sebagai Admin | Dashboard admin tampil dengan statistik |
-| 2 | Buka menu "Laporan Rekonsiliasi" | Tabel pendapatan per lapangan tampil |
-| 3 | Filter berdasarkan rentang tanggal | Data terfilter sesuai |
-| 4 | Klik "Export PDF" | File PDF terunduh dengan tanda tangan kepala venue |
-
-#### UAT-ADMIN-02: Manajemen Tarif Khusus
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka menu "Tarif Khusus" | Daftar tarif khusus per lapangan tampil |
-| 2 | Buat tarif khusus untuk lapangan tertentu pada tanggal tertentu | Tarif tersimpan |
-| 3 | Pelanggan booking di tanggal tersebut | Harga menggunakan tarif khusus |
-
-#### UAT-ADMIN-03: Manajemen Akun Kasir
-| # | Langkah | Hasil yang Diharapkan |
-|---|---------|----------------------|
-| 1 | Buka menu "Akun Kasir" | Daftar akun kasir tampil |
-| 2 | Tambah akun kasir baru | Akun tersimpan dengan role `kasir` |
-| 3 | Login dengan akun kasir baru | Akses kasir berfungsi normal |
+#### UAT-PENG-06: Reschedule & Pembatalan dengan Penalti
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Riwayat Booking*, klik tiket yang memiliki jadwal > 24 jam | Booking H-3 | Tombol "Ajukan Reschedule" dan "Batalkan Booking" aktif. | [ ] |
+| 2 | Klik "Ajukan Reschedule" | Tanggal baru (+5 hari) | Sistem menampilkan slot kosong untuk tanggal pengganti; pengajuan terkirim dengan status `diajukan`. | [ ] |
+| 3 | Uji pembatalan dengan jadwal kickoff > 24 jam | Pembatalan H > 24 Jam | Tampil konfirmasi penalti 10%; setelah dikonfirmasi status menjadi `dibatalkan` dengan denda 10%. | [ ] |
+| 4 | Uji pembatalan dengan jadwal kickoff < 24 jam | Pembatalan H < 24 Jam | Sistem menampilkan peringatan penalti 50% (DP Hangus). | [ ] |
 
 ---
 
-## Edge Case & Keamanan
+### B. Role: Kasir (POS & Check-In Onsite)
 
-| ID | Skenario | Hasil yang Diharapkan |
-|----|----------|----------------------|
-| SEC-01 | Akses `/admin` tanpa login | Redirect ke halaman login |
-| SEC-02 | Pelanggan akses URL `/kasir/scan` | HTTP 403 Forbidden |
-| SEC-03 | Kasir akses URL `/admin/laporan` | HTTP 403 Forbidden |
-| SEC-04 | Pelanggan buka e-tiket milik orang lain via URL langsung | HTTP 403 Forbidden |
-| SEC-05 | Request webhook Midtrans tanpa signature key valid | HTTP 403 / ditolak |
-| SEC-06 | Double booking via dua tab browser bersamaan | Salah satu gagal, error 422 |
-| SEC-07 | Upload file gambar lapangan > 10 MB | Error validasi ukuran file |
-| TZ-01 | Cek waktu pembatalan tercatat di catatan kasir | Harus dalam format WIB (GMT+7) |
-| TZ-02 | Cek waktu check-in tersimpan | Harus dalam format WIB (GMT+7) |
-| MOB-01 | Akses e-tiket via smartphone | Layout responsif, QR code terbaca |
-| MOB-02 | Akses halaman kasir via tablet | Layout kasir terbaca dan fungsional |
+#### UAT-KASIR-01: Scanner QR Code Check-in via Kamera Browser
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Login sebagai Kasir (`kasir@lapangin.staging`) | - | Masuk ke antarmuka terminal meja kasir venue. | [ ] |
+| 2 | Buka menu *Scan QR Tiket* via HTTPS | - | Browser meminta izin akses kamera; setelah diizinkan, video stream kamera aktif tanpa error CSP/Permissions. | [ ] |
+| 3 | Arahkan kamera ke QR Code E-Tiket Pelanggan | QR Code E-Tiket | Kamera memindai instan, data pesanan dan identitas penyewa muncul di layar. | [ ] |
+| 4 | Klik tombol "Konfirmasi Check-in" | - | Tiket tervalidasi, stempel waktu check-in (WIB) tersimpan di database. | [ ] |
+| 5 | Lakukan scan ulang pada tiket yang sama | Tiket sudah check-in | Sistem menolak dengan pesan peringatan: *"Tiket telah melakukan check-in sebelumnya"*. | [ ] |
+| 6 | Lakukan scan pada tiket yang statusnya dibatalkan | Tiket dibatalkan | Sistem menolak dengan banner merah: *"Tiket tidak valid / telah dibatalkan"*. | [ ] |
+
+#### UAT-KASIR-02: Validasi Token Manual & Pelunasan Onsite
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Check-in & Validasi* kasir | - | Menampilkan pencarian antrean hari ini dan form input token manual. | [ ] |
+| 2 | Masukkan 6 karakter token manual e-tiket pelanggan | Cth: `A1B2C3` | Data reservasi yang cocok langsung ditampilkan. | [ ] |
+| 3 | Jika tiket berstatus DP 50%, periksa modul pelunasan kasir | Sisa: Rp 90.000 | Tampil form pelunasan dengan metode Tunai / QRIS. | [ ] |
+| 4 | Pilih Tunai, ketik uang diterima | Diterima: Rp 100.000 | Kalkulator otomatis menghitung kembalian: Rp 10.000. | [ ] |
+| 5 | Klik "Validasi Check-in & Pelunasan" | - | Status pembayaran diperbarui menjadi `lunas_kasir`, transaksi selesai tercatat. | [ ] |
+
+#### UAT-KASIR-03: Pemesanan Walk-In & Auto-Provision Akun Tamu
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Di meja kasir, buka menu *Jadwal & Walk-in* | - | Tampil matriks ketersediaan slot hari ini dan form walk-in order. | [ ] |
+| 2 | Input walk-in untuk tamu yang **belum memiliki akun** | Nama: Budi Santoso, WA: `081288889999` | Kasir memilih slot dan skema pembayaran tunai. | [ ] |
+| 3 | Simpan reservasi walk-in | - | Transaksi berhasil, jadwal terverifikasi, dan sistem otomatis membuatkan *shadow account* untuk nomor tersebut. | [ ] |
+| 4 | Input walk-in untuk tamu yang **sudah punya akun di web** | No. WA: `081233334444` (Akun Dimas) | Kasir menyimpan walk-in. Sistem otomatis mencocokkan nomor dan menyambungkan booking ke akun Dimas tanpa membuat user baru. | [ ] |
+
+#### UAT-KASIR-04: Auto-Claim Riwayat Pemesanan oleh Tamu Walk-In
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Tamu walk-in membuka website LapangIn di kemudian hari | Tamu dari UAT-KASIR-03 | Tamu mengakses menu pendaftaran (`/register`). | [ ] |
+| 2 | Tamu mendaftar akun resmi menggunakan nomor WhatsApp yang sama | No. WA: `081288889999` | Registrasi berhasil, akun resmi baru aktif. | [ ] |
+| 3 | Tamu membuka menu *Riwayat Booking* di akun barunya | - | Seluruh riwayat reservasi dan e-tiket yang pernah dibuatkan oleh kasir otomatis terhubung dan tampil di daftar booking! | [ ] |
+
+#### UAT-KASIR-05: Review Pengajuan Reschedule Jadwal
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Approval Reschedule* di panel kasir | - | Menampilkan daftar permohonan reschedule yang diajukan pelanggan. | [ ] |
+| 2 | Periksa rincian: jadwal lama vs usulan jadwal baru | - | Rincian lapangan, tanggal pengganti, dan alasan tampil lengkap. | [ ] |
+| 3 | Klik tombol "Setujui Permintaan" | - | Jadwal lama dipindahkan ke slot baru, status berubah menjadi `disetujui`, dan e-tiket pelanggan otomatis diperbarui. | [ ] |
 
 ---
 
-## Checklist Pre-Deploy
+### C. Role: Venue Manager / Administrator
 
-### Server & Infrastruktur
-- [ ] VPS provisioned (Ubuntu 22.04 LTS, min. 2 vCPU, 4 GB RAM)
-- [ ] Docker & Docker Compose terinstall
-- [ ] Domain diarahkan ke IP VPS (A record DNS aktif)
-- [ ] SSL Let's Encrypt berhasil diterbitkan (`certbot --nginx`)
-- [ ] UFW firewall aktif: port 22, 80, 443 saja
-- [ ] Fail2ban aktif untuk SSH brute-force protection
+#### UAT-ADMIN-01: Dashboard Analitik & Monitoring Okupansi
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Login sebagai Administrator (`admin@lapangin.staging`) | - | Dashboard admin menampilkan metrik total pendapatan, tingkat okupansi slot, dan jumlah reservasi aktif. | [ ] |
+| 2 | Periksa grafik tren pendapatan per lapangan | - | Grafik menampilkan visualisasi performa seluruh lapangan (futsal, badminton, mini soccer). | [ ] |
 
-### Aplikasi
-- [ ] `.env` di-populate dari `deploy/.env.staging` (semua `<GANTI_INI>` terisi)
-- [ ] `php artisan key:generate` dijalankan
-- [ ] `php artisan migrate --force` berjalan tanpa error
-- [ ] `php artisan optimize` dijalankan (cache config/route/view)
-- [ ] `storage/` writable oleh `www-data`
-- [ ] `php artisan storage:link` dijalankan
+#### UAT-ADMIN-02: Laporan Rekonsiliasi Finansial & Cetak PDF
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Laporan Rekonsiliasi* | - | Tabel rekapitulasi transaksi online vs kasir tampil terstruktur. | [ ] |
+| 2 | Filter laporan berdasarkan rentang tanggal dan metode bayar | Bulan Berjalan | Data tabel memperbarui angka subtotal dan total pendapatan bersih. | [ ] |
+| 3 | Klik tombol "Export Laporan PDF" | - | Mengunduh berkas PDF resmi rekapitulasi pendapatan lengkap dengan kop surat dan kolom tanda tangan penanggung jawab venue. | [ ] |
 
-### Integrasi
-- [ ] Midtrans Notification URL diset ke `https://lapangin.example.com/midtrans/webhook`
-- [ ] Test webhook manual dari dashboard Midtrans Sandbox → respons 200 OK
-- [ ] Google OAuth redirect URI diperbarui ke domain staging
+#### UAT-ADMIN-03: Konfigurasi Tarif Khusus & Jadwal Operasional
+| No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
+|:--:|---|---|---|:--:|
+| 1 | Buka menu *Tarif Khusus* | - | Tampil daftar kebijakan harga per jam untuk tanggal/event tertentu. | [ ] |
+| 2 | Tambah tarif khusus untuk hari libur nasional mendatang | Tanggal Libur, Tarif: Rp 220.000 | Tarif tersimpan dan otomatis menjadi acuan kalkulasi harga saat pelanggan memilih tanggal tersebut. | [ ] |
+| 3 | Buka menu *Kelola Lapangan* | - | Admin dapat mengubah jam operasional, foto lapangan, dan inventaris perlengkapan tambahan. | [ ] |
 
-### Pengujian
-- [ ] `php artisan test` — semua test pass (0 failures)
-- [ ] Seluruh skenario UAT di dokumen ini telah dijalankan dan diceklis
-- [ ] Demo dosen dapat dilakukan di URL staging yang aktif
+---
 
+## 4. Skenario Edge Case, Keamanan & Validasi Waktu
+
+| Kode ID | Skenario Pengujian Edge Case | Kondisi & Tindakan | Hasil yang Diharapkan | Status |
+|:---:|---|---|---|:---:|
+| **SEC-01** | Akses unauthorized endpoint kasir & admin | Pelanggan/tamu mencoba membuka URL `/admin/*` atau `/kasir/*` | Sistem memblokir dengan status **HTTP 403 Forbidden** atau mengalihkan ke login. | [ ] |
+| **SEC-02** | Pemesanan slot masa lalu melalui manipulasi URL | Request GET `/checkout?jam_mulai=08:00` pada hari ini pukul 14:00 | Sistem memvalidasi dan menolak dengan status **422 Unprocessable Content** (*Jam sewa sudah lewat*). | [ ] |
+| **SEC-03** | Pembayaran slot masa lalu via API payload | Request POST `/checkout/pay` dengan jam mulai di masa lalu | Ditolak dengan respon JSON error 422 (*Jam sewa sudah lewat dari waktu saat ini*). | [ ] |
+| **SEC-04** | Concurrency / Double Booking Prevention | Dua pengguna memesan slot dan lapangan yang sama pada detik bersamaan | Hanya satu pesanan yang berhasil; pesanan kedua dibatalkan dengan notifikasi slot telah terisi. | [ ] |
+| **SEC-05** | Auto-Cancel Pending Booking Timeout | Pesanan dibuat namun tidak dibayar dalam 10 menit | Background job membatalkan jadwal otomatis (`status = dibatalkan`), slot kembali tersedia untuk orang lain. | [ ] |
+| **SEC-06** | Validasi Keamanan Signature Midtrans Webhook | Notifikasi webhook palsu tanpa signature key Midtrans yang valid | Ditolak oleh server dengan kode HTTP 403/400, status pembayaran tidak berubah. | [ ] |
+| **SEC-07** | Keamanan Permissions Policy Kamera Nginx | Pemuatan scanner kasir pada HTTPS staging | Header Nginx `Permissions-Policy: camera=(self)` aktif; kamera dapat diakses tanpa hambatan browser policy. | [ ] |
+| **SEC-08** | Standarisasi Zona Waktu Transaksi & Check-in | Pencatatan log transaksi, denda pembatalan, dan stempel check-in | Seluruh stempel waktu konsisten tercatat dalam format **WIB (Asia/Jakarta, GMT+7)**. | [ ] |
+
+---
+
+## 5. Checklist Kesiapan Staging & Demo Dosen
+
+### A. Infrastruktur & Keamanan Server Azure VPS
+- [x] Host Staging aktif di Azure Cloud VPS (`lapangin.australiaeast.cloudapp.azure.com`).
+- [x] Docker Container Nginx, PHP 8.4-FPM, dan PostgreSQL berjalan stabil (*healthy*).
+- [x] Sertifikat SSL Let's Encrypt aktif dan diperbarui otomatis via Certbot.
+- [x] Konfigurasi Content Security Policy (CSP) dan Permissions Policy Camera teruji aktif.
+- [x] UFW Firewall membatasi akses publik hanya pada port 22 (SSH), 80 (HTTP), dan 443 (HTTPS).
+
+### B. Aplikasi & Database
+- [x] Environment `.env` terkonfigurasi dengan `APP_ENV=production` dan `APP_DEBUG=false`.
+- [x] Kunci enkripsi aplikasi `APP_KEY` terkonfigurasi.
+- [x] Migrasi tabel database dan master data lapangan telah dijalankan.
+- [x] Seluruh aset frontend terkompilasi optimal via Vite production build (`public/build`).
+- [x] Seluruh cache aplikasi dioptimasi (`php artisan optimize`).
+
+### C. Pembayaran & Pengujian
+- [x] Midtrans Server Key & Client Key Sandbox terhubung dengan kredensial aktif.
+- [x] Midtrans Webhook Notification URL terdaftar dan merespon 200 OK.
+- [x] Seluruh test suite pengujian otomatis (`php artisan test`) lulus 100% (**134 tests, 614 assertions, 0 failures**).
+- [x] Skenario UAT siap diperagakan secara live untuk penilaian dosen dan penguji.
