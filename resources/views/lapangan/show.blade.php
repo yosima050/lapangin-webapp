@@ -193,15 +193,13 @@
                             </div>
                         </div>
 
-                        {{-- Court Switcher Pills --}}
-                        <div class="flex flex-wrap items-center gap-2">
-                            @foreach ($semuaLapangan as $itemLap)
-                                <a href="{{ route('katalog.show', ['id' => $itemLap->id, 'tanggal' => $tanggalDipilih]) }}"
-                                   class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $itemLap->id === $lapangan->id ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200' }}">
-                                    <span class="material-symbols-outlined text-sm">{{ $itemLap->id === $lapangan->id ? 'sports_soccer' : 'grid_view' }}</span>
-                                    <span>{{ $itemLap->nama }}</span>
-                                </a>
-                            @endforeach
+                        {{-- Tombol Kembali ke Katalog (Area Atas Bersih) --}}
+                        <div class="shrink-0 self-start sm:self-center">
+                            <a href="{{ route('katalog.index') }}"
+                               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 transition shadow-2xs">
+                                <span class="material-symbols-outlined text-base text-gray-500">arrow_back</span>
+                                <span>Kembali ke Katalog</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -280,12 +278,14 @@
                                     <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
                                         <div class="flex items-center gap-1">
                                             <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
-                                            <span class="material-symbols-outlined text-xs">lock</span>
+                                            <span class="material-symbols-outlined text-xs">{{ $slot['status'] === 'lewat_jam' ? 'schedule' : 'lock' }}</span>
                                         </div>
                                         <span class="text-[10px] text-gray-400">
                                             {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
                                         </span>
-                                        <span class="text-[10px] font-semibold text-gray-400">Terisi</span>
+                                        <span class="text-[10px] font-semibold text-gray-400">
+                                            {{ $slot['status'] === 'lewat_jam' ? 'Lewat Jam' : 'Terisi' }}
+                                        </span>
                                     </div>
                                 @endif
                             @endforeach
@@ -334,12 +334,14 @@
                                     <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
                                         <div class="flex items-center gap-1">
                                             <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
-                                            <span class="material-symbols-outlined text-xs">lock</span>
+                                            <span class="material-symbols-outlined text-xs">{{ $slot['status'] === 'lewat_jam' ? 'schedule' : 'lock' }}</span>
                                         </div>
                                         <span class="text-[10px] text-gray-400">
                                             {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
                                         </span>
-                                        <span class="text-[10px] font-semibold text-gray-400">Terisi</span>
+                                        <span class="text-[10px] font-semibold text-gray-400">
+                                            {{ $slot['status'] === 'lewat_jam' ? 'Lewat Jam' : 'Terisi' }}
+                                        </span>
                                     </div>
                                 @endif
                             @endforeach
@@ -351,7 +353,7 @@
                     <div class="flex flex-wrap items-center gap-6 pt-3 border-t border-gray-100 text-xs text-gray-500">
                         <div class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-gray-200"></span>
-                            <span>Terisi / Tidak Tersedia</span>
+                            <span>Terisi / Lewat Jam</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
@@ -592,6 +594,13 @@
                         <input type="hidden" name="jam_mulai" :value="earliestSlot.substring(0, 5)">
                         <input type="hidden" name="durasi" :value="durationHours">
                         <input type="hidden" name="tipe_bayar" :value="paymentScheme">
+
+                        @guest
+                            <div class="mb-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-snug flex items-start gap-2">
+                                <span class="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
+                                <span>Pemesanan online memerlukan akun terdaftar. Anda akan diarahkan ke pendaftaran akun sebelum menyelesaikan pesanan.</span>
+                            </div>
+                        @endguest
 
                         <button type="submit"
                                 :disabled="selectedSlots.length === 0"

@@ -29,6 +29,11 @@ class JadwalService
         $jamTutup = $this->parseTime($lapangan->jam_tutup);
         $slots = [];
 
+        $now = Carbon::now();
+        $isToday = $tanggal === $now->toDateString();
+        $isPastDate = $tanggal < $now->toDateString();
+        $currentTime = $now->format('H:i');
+
         for ($slotMulai = $jamBuka->copy(); $slotMulai->lt($jamTutup); $slotMulai->addHour()) {
             $slotSelesai = $slotMulai->copy()->addHour();
 
@@ -43,16 +48,28 @@ class JadwalService
                 return $slotMulai->lt($jadwalSelesai) && $slotSelesai->gt($jadwalMulai);
             });
 
+            $slotMulaiStr = $slotMulai->format('H:i');
+            $isPastSlot = $isPastDate || ($isToday && $slotMulaiStr <= $currentTime);
+
             $status = $jadwalCocok === null
                 ? 'tersedia'
                 : $this->resolveStatus($jadwalCocok);
 
+            if ($isPastSlot) {
+                if ($status === 'tersedia') {
+                    $status = 'lewat_jam';
+                }
+                $isTersedia = false;
+            } else {
+                $isTersedia = ($status === 'tersedia');
+            }
+
             $slots[] = [
-                'jam_mulai' => $slotMulai->format('H:i'),
+                'jam_mulai' => $slotMulaiStr,
                 'jam_selesai' => $slotSelesai->format('H:i'),
-                'jam_label' => $slotMulai->format('H:i').' - '.$slotSelesai->format('H:i'),
+                'jam_label' => $slotMulaiStr.' - '.$slotSelesai->format('H:i'),
                 'status' => $status,
-                'is_tersedia' => $status === 'tersedia',
+                'is_tersedia' => $isTersedia,
                 'jadwal_id' => $jadwalCocok?->id,
                 'nama_penyewa' => $jadwalCocok?->nama_tamu,
             ];

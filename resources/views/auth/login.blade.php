@@ -350,6 +350,14 @@
                             </p>
                         </div>
 
+                        {{-- Session Status --}}
+                        @if (session('status'))
+                            <div class="mb-5 p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-semibold text-[#1a146b] flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">info</span>
+                                <span>{{ session('status') }}</span>
+                            </div>
+                        @endif
+
                         <div class="mb-5">
                             <a href="{{ route('auth.google') }}"
                                class="w-full py-3 px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-headline font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-3 group">

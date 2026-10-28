@@ -65,4 +65,33 @@ class JadwalServiceTest extends TestCase
         $this->assertTrue($result['slots'][2]['is_tersedia']);
         $this->assertTrue($result['slots'][3]['is_tersedia']);
     }
+
+    public function test_it_marks_past_slots_as_lewat_jam_for_today(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-28 14:30:00'));
+
+        $lapangan = Lapangan::forceCreate([
+            'nama' => 'Lapangan Test Past Slots',
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00:00',
+            'jam_tutup' => '18:00:00',
+            'created_at' => now(),
+        ]);
+
+        $today = Carbon::now()->toDateString();
+        $result = (new JadwalService)->getSlotStatus($lapangan->id, $today);
+
+        // Slot 08:00, 09:00, 10:00, 11:00, 12:00, 13:00, 14:00 (<= 14:30) harus lewat_jam
+        foreach ($result['slots'] as $slot) {
+            if ($slot['jam_mulai'] <= '14:30') {
+                $this->assertSame('lewat_jam', $slot['status'], "Slot {$slot['jam_mulai']} harus berstatus lewat_jam");
+                $this->assertFalse($slot['is_tersedia'], "Slot {$slot['jam_mulai']} tidak boleh tersedia");
+            } else {
+                $this->assertSame('tersedia', $slot['status'], "Slot {$slot['jam_mulai']} harus tersedia");
+                $this->assertTrue($slot['is_tersedia'], "Slot {$slot['jam_mulai']} harus tersedia");
+            }
+        }
+
+        Carbon::setTestNow();
+    }
 }

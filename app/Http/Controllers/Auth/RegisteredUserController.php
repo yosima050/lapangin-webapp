@@ -50,6 +50,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($pelanggan);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }

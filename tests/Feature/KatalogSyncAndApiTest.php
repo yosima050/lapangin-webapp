@@ -119,14 +119,14 @@ class KatalogSyncAndApiTest extends TestCase
 
         $checkoutParams = [
             'lapangan_id' => $this->lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => now()->addDay()->toDateString(),
             'jam_mulai' => '09:00',
             'durasi' => 1,
         ];
 
-        // Guest can access checkout directly (Guest Checkout Flow)
+        // Guest is redirected to register (Online checkout requires an account)
         $guestResponse = $this->get(route('checkout.index', $checkoutParams));
-        $guestResponse->assertStatus(200);
+        $guestResponse->assertRedirect(route('register'));
 
         // Admin can access checkout without 403 Forbidden
         $adminResponse = $this->actingAs($admin)->get(route('checkout.index', $checkoutParams));

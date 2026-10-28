@@ -21,8 +21,15 @@ class CheckoutController extends Controller
     /**
      * Tampilkan halaman checkout dan rincian harga sewa lapangan.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
+        // 1. Pemesanan online hanya dapat dilakukan oleh pelanggan yang memiliki akun
+        if (! Auth::check()) {
+            session()->put('url.intended', $request->fullUrl());
+
+            return redirect()->route('register')->with('status', 'Silakan daftar akun terlebih dahulu atau masuk untuk melakukan pemesanan.');
+        }
+
         Jadwal::autoCancelExpiredPendingBookings();
 
         $data = $request->validate([
@@ -32,6 +39,15 @@ class CheckoutController extends Controller
             'durasi' => 'required|integer|min:1|max:4',
             'tipe_bayar' => 'nullable|string|in:dp,full',
         ]);
+
+        // 2. Validasi slot waktu: jika hari ini, jam mulai tidak boleh sudah lewat dari jam sekarang
+        $now = Carbon::now();
+        $isToday = $data['tanggal'] === $now->toDateString();
+        $currentTime = $now->format('H:i');
+
+        if ($data['tanggal'] < $now->toDateString() || ($isToday && $data['jam_mulai'] <= $currentTime)) {
+            abort(422, 'Jam sewa yang dipilih sudah lewat dari waktu saat ini.');
+        }
 
         $tipeBayar = $request->input('tipe_bayar', 'dp');
         if (! in_array($tipeBayar, ['dp', 'full'], true)) {
@@ -228,22 +244,31 @@ class CheckoutController extends Controller
     {
         Jadwal::autoCancelExpiredPendingBookings();
 
+        // 1. Pemesanan online hanya dapat dilakukan oleh pengguna yang telah login / memiliki akun
+        if (! Auth::check()) {
+            return response()->json([
+                'status' => 'unauthenticated',
+                'message' => 'Pemesanan online hanya dapat dilakukan oleh pelanggan yang memiliki akun. Silakan daftar atau masuk terlebih dahulu.',
+                'redirect_url' => route('register'),
+            ], 401);
+        }
+
         $user = Auth::user();
 
-        // Jika checkout oleh tamu tanpa login, auto-provision akun bayangan via No. WhatsApp
-        if (! $user) {
-            $guestData = $request->validate([
-                'nama' => 'required|string|max:100',
-                'no_hp' => 'required|string|max:20',
-                'email' => 'nullable|email',
-            ]);
+        // 2. Validasi slot waktu: jika hari ini, jam mulai tidak boleh sudah lewat dari jam sekarang
+        if ($request->filled('tanggal') && $request->filled('jam_mulai')) {
+            $now = Carbon::now();
+            $reqTanggal = $request->input('tanggal');
+            $reqJamMulai = substr((string) $request->input('jam_mulai'), 0, 5);
+            $isToday = $reqTanggal === $now->toDateString();
+            $currentTime = $now->format('H:i');
 
-            $provisioner = app(GuestAccountProvisioner::class);
-            $user = $provisioner->getOrCreateGuestAccount(
-                $guestData['nama'],
-                $guestData['no_hp'],
-                $guestData['email'] ?? null
-            );
+            if ($reqTanggal < $now->toDateString() || ($isToday && $reqJamMulai <= $currentTime)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Jam sewa yang dipilih sudah lewat dari waktu saat ini.',
+                ], 422);
+            }
         }
 
         $tipeBayar = $request->input('tipe_bayar', 'dp');

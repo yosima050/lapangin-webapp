@@ -50,34 +50,64 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
     }
 
     /**
-     * AC 1: Pengguna tamu (Walk-In) dapat menyelesaikan proses pembayaran Midtrans tanpa registrasi manual
-     * karena sistem otomatis membuatkan record pelanggan berbasis nomor WhatsApp.
+     * Tamu tanpa akun tidak dapat checkout online dan otomatis diarahkan ke register.
      */
-    public function test_guest_can_checkout_and_auto_provision_shadow_account(): void
+    public function test_unauthenticated_guest_cannot_checkout_online_and_is_redirected_to_register(): void
     {
-        $mockPaymentService = Mockery::mock(PaymentService::class);
-        $mockPaymentService->shouldReceive('createSnapToken')
-            ->once()
-            ->andReturn('dummy-snap-token-guest-123');
-        $this->app->instance(PaymentService::class, $mockPaymentService);
+        $tanggal = Carbon::tomorrow()->toDateString();
+
+        $indexResponse = $this->get(route('checkout.index', [
+            'lapangan_id' => $this->lapangan->id,
+            'tanggal' => $tanggal,
+            'jam_mulai' => '10:00',
+            'durasi' => 1,
+        ]));
+
+        $indexResponse->assertRedirect(route('register'));
+        $indexResponse->assertSessionHas('status');
+
+        $payResponse = $this->postJson(route('checkout.pay'), [
+            'lapangan_id' => $this->lapangan->id,
+            'tanggal' => $tanggal,
+            'jam_mulai' => '10:00',
+            'durasi' => 1,
+            'tipe_bayar' => 'dp',
+            'nama' => 'Budi Guest',
+            'no_hp' => '081234567891',
+        ]);
+
+        $payResponse->assertStatus(401);
+        $payResponse->assertJson([
+            'status' => 'unauthenticated',
+        ]);
+    }
+
+    /**
+     * AC 1: Kasir melayani walk-in untuk tamu tanpa akun dan otomatis membuatkan shadow account.
+     */
+    public function test_kasir_can_walkin_checkout_and_auto_provision_shadow_account(): void
+    {
+        $kasir = Pelanggan::create([
+            'nama' => 'Kasir Staf',
+            'email' => 'kasir@lapangin.com',
+            'no_hp' => '081299990001',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'kasir',
+        ]);
 
         $tanggal = Carbon::tomorrow()->toDateString();
 
-        $response = $this->postJson(route('checkout.pay'), [
+        $response = $this->actingAs($kasir)->post(route('kasir.walkin.store'), [
+            'nama_tamu' => 'Budi Santoso',
+            'no_wa_tamu' => '081234567891',
             'lapangan_id' => $this->lapangan->id,
             'tanggal' => $tanggal,
             'jam_mulai' => '10:00',
             'durasi' => 2,
-            'tipe_bayar' => 'dp',
-            'nama' => 'Budi Santoso',
-            'no_hp' => '081234567891',
+            'payType' => 'full',
         ]);
 
-        $response->assertOk();
-        $response->assertJson([
-            'status' => 'success',
-            'snap_token' => 'dummy-snap-token-guest-123',
-        ]);
+        $response->assertRedirect();
 
         // Verifikasi record pelanggan (shadow account) otomatis dibuat
         $this->assertDatabaseHas('pelanggans', [
@@ -89,18 +119,61 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
         $pelanggan = Pelanggan::where('no_hp', '081234567891')->first();
         $this->assertNotNull($pelanggan);
 
-        // Verifikasi transaksi dan jadwal terikat ke pelanggan_id yang valid
+        // Verifikasi jadwal terikat ke pelanggan_id yang valid
         $jadwalRecord = Jadwal::where('lapangan_id', $this->lapangan->id)
             ->where('pelanggan_id', $pelanggan->id)
             ->first();
         $this->assertNotNull($jadwalRecord);
-        $this->assertEquals($tanggal, \Carbon\Carbon::parse($jadwalRecord->tanggal)->toDateString());
+        $this->assertEquals($tanggal, Carbon::parse($jadwalRecord->tanggal)->toDateString());
         $this->assertEquals('10:00:00', $jadwalRecord->jam_mulai);
+    }
 
-        $this->assertDatabaseHas('transaksis', [
-            'status' => 'pending',
-            'metode' => 'online',
+    /**
+     * Bila pelanggan sudah punya akun di aplikasi, walk-in kasir langsung terhubung ke akun tersebut.
+     */
+    public function test_kasir_walkin_attaches_to_existing_customer_if_already_has_account(): void
+    {
+        $kasir = Pelanggan::create([
+            'nama' => 'Kasir Staf 2',
+            'email' => 'kasir2@lapangin.com',
+            'no_hp' => '081299990002',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'kasir',
         ]);
+
+        // Pelanggan sudah memiliki akun terdaftar sebelumnya
+        $existingCustomer = Pelanggan::create([
+            'nama' => 'Andi Member Tetap',
+            'email' => 'andi.member@example.com',
+            'no_hp' => '089876543210',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'pelanggan',
+        ]);
+
+        $tanggal = Carbon::tomorrow()->toDateString();
+
+        // Kasir melayani walkin dengan nomor HP pelanggan terdaftar tersebut
+        $response = $this->actingAs($kasir)->post(route('kasir.walkin.store'), [
+            'nama_tamu' => 'Andi Member Tetap',
+            'no_wa_tamu' => '089876543210',
+            'lapangan_id' => $this->lapangan->id,
+            'tanggal' => $tanggal,
+            'jam_mulai' => '13:00',
+            'durasi' => 1,
+            'payType' => 'full',
+        ]);
+
+        $response->assertRedirect();
+
+        // Jumlah record di tabel pelanggans untuk nomor ini harus tetap 1 (tidak duplikat)
+        $this->assertEquals(1, Pelanggan::where('no_hp', '089876543210')->count());
+
+        // Jadwal langsung terhubung ke akun pelanggan terdaftar
+        $jadwal = Jadwal::where('lapangan_id', $this->lapangan->id)
+            ->where('pelanggan_id', $existingCustomer->id)
+            ->first();
+        $this->assertNotNull($jadwal);
+        $this->assertEquals($existingCustomer->id, $jadwal->pelanggan_id);
     }
 
     /**
@@ -109,44 +182,44 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
      */
     public function test_system_does_not_duplicate_guest_record_on_repeated_orders(): void
     {
-        $mockPaymentService = Mockery::mock(PaymentService::class);
-        $mockPaymentService->shouldReceive('createSnapToken')
-            ->twice()
-            ->andReturn('dummy-snap-token-repeated');
-        $this->app->instance(PaymentService::class, $mockPaymentService);
+        $kasir = Pelanggan::create([
+            'nama' => 'Kasir Staf 3',
+            'email' => 'kasir3@lapangin.com',
+            'no_hp' => '081299990003',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'kasir',
+        ]);
 
         $tanggal = Carbon::tomorrow()->toDateString();
 
         // Pesanan Pertama
-        $this->postJson(route('checkout.pay'), [
+        $this->actingAs($kasir)->post(route('kasir.walkin.store'), [
+            'nama_tamu' => 'Andi Walkin',
+            'no_wa_tamu' => '089876543211',
             'lapangan_id' => $this->lapangan->id,
             'tanggal' => $tanggal,
             'jam_mulai' => '13:00',
             'durasi' => 1,
-            'tipe_bayar' => 'full',
-            'nama' => 'Andi Walkin',
-            'no_hp' => '089876543210',
-        ])->assertOk();
+            'payType' => 'full',
+        ]);
 
-        $initialCount = Pelanggan::where('no_hp', '089876543210')->count();
-        $this->assertEquals(1, $initialCount);
+        $this->assertEquals(1, Pelanggan::where('no_hp', '089876543211')->count());
 
         // Pesanan Kedua dengan nomor WhatsApp sama (meskipun diawali +62 atau format variasi)
-        $this->postJson(route('checkout.pay'), [
+        $this->actingAs($kasir)->post(route('kasir.walkin.store'), [
+            'nama_tamu' => 'Andi Walkin',
+            'no_wa_tamu' => '6289876543211',
             'lapangan_id' => $this->lapangan->id,
             'tanggal' => $tanggal,
             'jam_mulai' => '15:00',
             'durasi' => 1,
-            'tipe_bayar' => 'full',
-            'nama' => 'Andi Walkin',
-            'no_hp' => '6289876543210',
-        ])->assertOk();
+            'payType' => 'full',
+        ]);
 
         // Jumlah record di tabel pelanggans untuk nomor ini harus tetap 1 (tidak duplikat)
-        $finalCount = Pelanggan::where('no_hp', '089876543210')->count();
-        $this->assertEquals(1, $finalCount);
+        $this->assertEquals(1, Pelanggan::where('no_hp', '089876543211')->count());
 
-        $pelanggan = Pelanggan::where('no_hp', '089876543210')->first();
+        $pelanggan = Pelanggan::where('no_hp', '089876543211')->first();
 
         // Kedua jadwal harus terhubung ke pelanggan_id yang sama
         $this->assertEquals(2, Jadwal::where('pelanggan_id', $pelanggan->id)->count());
