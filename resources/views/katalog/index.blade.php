@@ -14,7 +14,7 @@
     class="min-h-screen bg-[#f8f9ff] text-[#0b1c30]"
 >
     {{-- Hero --}}
-  <section class="px-4 sm:px-6 lg:px-8 pt-28 pb-8">
+  <section class="px-4 sm:px-6 lg:px-8 pt-8 pb-8">
         <div class="max-w-7xl mx-auto">
 
 

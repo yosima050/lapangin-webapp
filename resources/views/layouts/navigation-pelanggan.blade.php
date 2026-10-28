@@ -108,7 +108,6 @@
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95"
                             class="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-gray-100 shadow-xl py-2 z-50 text-xs"
-                            style="display: none;"
                         >
                             <div class="px-4 py-2.5 border-b border-gray-100">
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Akun Masuk</p>

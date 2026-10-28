@@ -251,6 +251,7 @@
                                     </span>
                                     <input
                                         id="login_password"
+                                        type="password"
                                         :type="showPassword ? 'text' : 'password'"
                                         name="password"
                                         required
@@ -480,6 +481,7 @@
                                     </span>
                                     <input
                                         id="register_password"
+                                        type="password"
                                         :type="showPassword ? 'text' : 'password'"
                                         name="password"
                                         required
@@ -519,6 +521,7 @@
                                     </span>
                                     <input
                                         id="register_password_confirmation"
+                                        type="password"
                                         :type="showPasswordConfirm ? 'text' : 'password'"
                                         name="password_confirmation"
                                         required

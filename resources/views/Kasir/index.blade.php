@@ -280,7 +280,7 @@
                     </template>
 
                     <!-- Empty State -->
-                    <div x-show="visibleItems.length === 0" class="py-8 text-center text-xs text-[#777682] space-y-2.5">
+                    <div x-show="visibleItems.length === 0" x-cloak class="py-8 text-center text-xs text-[#777682] space-y-2.5">
                         <span class="material-symbols-outlined text-3xl text-gray-300">search_off</span>
                         <p>Tidak ada tiket atau pesanan yang cocok dengan "<strong class="text-[#0b1c30]" x-text="searchQuery"></strong>".</p>
                         <div>
@@ -740,7 +740,7 @@
 </div>
 
 <script>
-function kasirSearch() {
+window.kasirSearch = function kasirSearch() {
     return {
         searchQuery: @js($code ?? ''),
         localItems: @js($queueData),
@@ -840,6 +840,14 @@ function kasirSearch() {
             return new Intl.NumberFormat('id-ID').format(val || 0);
         }
     };
+};
+
+if (window.Alpine) {
+    Alpine.data('kasirSearch', window.kasirSearch);
+} else {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('kasirSearch', window.kasirSearch);
+    });
 }
 </script>
 

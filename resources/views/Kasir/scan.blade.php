@@ -400,8 +400,8 @@
 
 </div>
 
-<!-- Pustaka JavaScript html5-qrcode -->
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- Pustaka JavaScript html5-qrcode (Lokal 'self' untuk kehandalan tanpa dependensi CDN) -->
+<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 
 <!-- Script Scanner LapangIn POS Kasir -->
 <script src="{{ asset('js/kasir-scanner.js') }}"></script>
