@@ -7,6 +7,12 @@
 }
 
 /* Defensive Icon Size Safeguards */
+svg.w-3, svg.h-3, svg.size-3 {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+    min-width: 0.75rem;
+    min-height: 0.75rem;
+}
 svg.w-3\.5, svg.h-3\.5, svg.size-3\.5 {
     width: 0.875rem !important;
     height: 0.875rem !important;
@@ -30,5 +36,29 @@ svg.w-6, svg.h-6, svg.size-6 {
     height: 1.5rem !important;
     min-width: 1.5rem;
     min-height: 1.5rem;
+}
+svg.w-7, svg.h-7, svg.size-7 {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+}
+svg.w-8, svg.h-8, svg.size-8 {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem;
+    min-height: 2rem;
+}
+svg.w-10, svg.h-10, svg.size-10 {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+svg.w-12, svg.h-12, svg.size-12 {
+    width: 3rem !important;
+    height: 3rem !important;
+    min-width: 3rem;
+    min-height: 3rem;
 }
 
