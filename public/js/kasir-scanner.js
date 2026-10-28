@@ -152,7 +152,15 @@ class KasirScanner {
             }
         } catch (err) {
             console.warn('Gagal membaca perangkat kamera:', err);
-            this.updateCameraStatus('Izin Kamera Ditolak / Tidak Ditemukan', 'offline');
+            const isPermissionDenied = err.name === 'NotAllowedError'
+                || String(err).includes('NotAllowedError')
+                || String(err).includes('Permission denied');
+            if (isPermissionDenied) {
+                this.updateCameraStatus('Izin Kamera Diblokir', 'offline');
+                this.showNotification('Izin kamera diblokir browser. Klik ikon Gembok di bilah URL, ubah Kamera ke "Izinkan", lalu refresh.', 'error');
+            } else {
+                this.updateCameraStatus('Kamera Tidak Ditemukan', 'offline');
+            }
         }
     }
 
@@ -196,8 +204,34 @@ class KasirScanner {
             if (this.btnStop) this.btnStop.classList.remove('hidden');
         } catch (err) {
             console.error('Error saat memulai scanner:', err);
-            this.updateCameraStatus('Kamera Nonaktif', 'offline');
-            this.showNotification('Tidak dapat mengakses kamera: ' + (err.message || err), 'error');
+            this.updateCameraStatus('Izin Kamera Diblokir', 'offline');
+
+            const isPermissionDenied = err.name === 'NotAllowedError'
+                || String(err).includes('NotAllowedError')
+                || String(err).includes('Permission denied');
+
+            if (isPermissionDenied) {
+                this.showNotification('Izin kamera diblokir browser. Klik ikon Gembok di bilah URL, ubah Kamera ke "Izinkan", lalu refresh.', 'error');
+                const readerElem = document.getElementById(this.readerContainerId);
+                if (readerElem) {
+                    readerElem.innerHTML = `
+                        <div class="p-6 text-center flex flex-col items-center justify-center gap-3 bg-red-50 text-red-900 rounded-2xl border border-red-200">
+                            <span class="material-symbols-outlined text-4xl text-red-600">videocam_off</span>
+                            <div class="space-y-1">
+                                <h3 class="font-bold text-sm">Izin Akses Kamera Ditolak Browser</h3>
+                                <p class="text-xs text-red-700 max-w-sm">
+                                    Browser memblokir kamera untuk domain ini. Klik ikon <strong>Gembok 🔒</strong> di sebelah kiri alamat web URL (address bar), ubah <strong>Camera</strong> menjadi <strong>Allow (Izinkan)</strong>, lalu muat ulang halaman.
+                                </p>
+                            </div>
+                            <button type="button" onclick="location.reload()" class="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition">
+                                Muat Ulang Halaman
+                            </button>
+                        </div>
+                    `;
+                }
+            } else {
+                this.showNotification('Tidak dapat mengakses kamera: ' + (err.message || err), 'error');
+            }
         }
     }
 

@@ -129,6 +129,118 @@
         })->values();
     @endphp
 
+    <script>
+    window.kasirSearch = function kasirSearch() {
+        return {
+            searchQuery: @js($code ?? ''),
+            localItems: @js($queueData),
+            serverResults: [],
+            isSearchingServer: false,
+            searchDebounceTimer: null,
+
+            get trimmedQuery() {
+                return (this.searchQuery || '').trim().toLowerCase();
+            },
+
+            get visibleItems() {
+                const q = this.trimmedQuery;
+                if (!q) {
+                    return this.localItems;
+                }
+
+                // Realtime filter local items in 0ms
+                const matched = this.localItems.filter(item => {
+                    return item.search_text && item.search_text.includes(q);
+                });
+
+                // Append extra server items not in localItems
+                const localIds = new Set(matched.map(i => i.id));
+                const extra = this.serverResults.filter(i => !localIds.has(i.id));
+
+                return [...matched, ...extra];
+            },
+
+            clearSearch() {
+                this.searchQuery = '';
+                this.serverResults = [];
+                this.$nextTick(() => {
+                    if (this.$refs.searchInput) {
+                        this.$refs.searchInput.focus();
+                    }
+                });
+            },
+
+            onInput() {
+                const q = this.trimmedQuery;
+                clearTimeout(this.searchDebounceTimer);
+
+                if (q.length < 2) {
+                    this.serverResults = [];
+                    this.isSearchingServer = false;
+                    return;
+                }
+
+                // Debounced fetch for extra results from server (300ms)
+                this.searchDebounceTimer = setTimeout(async () => {
+                    this.isSearchingServer = true;
+                    try {
+                        const response = await fetch(`{{ route('kasir.search') }}?q=` + encodeURIComponent(this.searchQuery.trim()), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.serverResults = (data.results || []).map(r => ({
+                                id: String(r.id),
+                                nama: r.nama,
+                                phone: r.no_hp,
+                                lapangan: r.lapangan,
+                                jam: r.jam,
+                                tanggal: r.tanggal,
+                                token: r.token,
+                                kode_qr: r.kode_qr,
+                                status: r.status,
+                                is_cancelled: r.is_cancelled,
+                                is_selected: false,
+                                denda: r.denda || 0,
+                                is_lunas: r.is_lunas,
+                                sisa: r.sisa_tagihan,
+                                search_text: r.search_text,
+                                url: r.url
+                            }));
+                        }
+                    } catch (err) {
+                        console.error('Server search error:', err);
+                    } finally {
+                        this.isSearchingServer = false;
+                    }
+                }, 300);
+            },
+
+            selectFirst() {
+                const items = this.visibleItems;
+                if (items.length > 0) {
+                    window.location.href = items[0].url;
+                }
+            },
+
+            formatRupiah(val) {
+                return new Intl.NumberFormat('id-ID').format(val || 0);
+            }
+        };
+    };
+
+    if (window.Alpine) {
+        Alpine.data('kasirSearch', window.kasirSearch);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('kasirSearch', window.kasirSearch);
+        });
+    }
+    </script>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
         <!-- LEFT COLUMN: Input Kode & Antrean (5 cols) -->
@@ -190,7 +302,7 @@
                             </span>
                         </template>
                     </div>
-                    <div x-show="isSearchingServer" class="text-blue-600 font-semibold flex items-center gap-1 text-[10px] animate-pulse">
+                    <div x-show="isSearchingServer" style="display: none;" class="text-blue-600 font-semibold flex items-center gap-1 text-[10px] animate-pulse">
                         <span class="material-symbols-outlined text-xs animate-spin">refresh</span>
                         <span>Cek database...</span>
                     </div>
@@ -219,6 +331,35 @@
 
                 <!-- List of tickets filtered in real-time -->
                 <div class="flex flex-col gap-2.5">
+                    @if(count($queueData) > 0)
+                        {{-- Fallback Server-Side Rendered (Tampil seketika sebelum Alpine hydrated) --}}
+                        <div x-show="false" class="flex flex-col gap-2.5">
+                            @foreach($queueData as $fallback)
+                                <a href="{{ $fallback['url'] }}"
+                                   class="p-3.5 rounded-xl border flex flex-col gap-1.5 {{ $fallback['is_selected'] ? 'bg-[#dce9ff] border-[#1a146b]' : 'bg-[#eff4ff] border-transparent' }}">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full {{ $fallback['is_selected'] ? 'bg-[#416900]' : 'bg-[#1a146b]' }}"></span>
+                                            <span class="text-xs font-bold text-[#0b1c30]">{{ $fallback['nama'] }}</span>
+                                            @if($fallback['phone'] && $fallback['phone'] !== '-')
+                                                <span class="text-[10px] font-mono text-[#777682]">({{ $fallback['phone'] }})</span>
+                                            @endif
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $fallback['is_lunas'] ? 'bg-white text-[#416900]' : 'bg-[#ffdad6] text-[#ba1a1a]' }}">
+                                            {{ $fallback['is_lunas'] ? 'Lunas' : 'DP 50%' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs text-[#474651]">
+                                        <span>{{ ($fallback['tanggal'] ? $fallback['tanggal'] . ', ' : '') . $fallback['jam'] }} ({{ $fallback['lapangan'] }})</span>
+                                        <span class="font-bold {{ $fallback['is_lunas'] ? 'text-[#416900]' : 'text-[#ba1a1a]' }}">
+                                            {{ $fallback['is_lunas'] ? 'Rp 0 (Lunas)' : 'Sisa Rp ' . number_format($fallback['sisa'], 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <template x-for="item in visibleItems" :key="item.id">
                         <a :href="item.url"
                            class="p-3.5 rounded-xl transition-all border flex flex-col gap-1.5"
@@ -280,7 +421,7 @@
                     </template>
 
                     <!-- Empty State -->
-                    <div x-show="visibleItems.length === 0" x-cloak class="py-8 text-center text-xs text-[#777682] space-y-2.5">
+                    <div x-show="visibleItems.length === 0" x-cloak style="display: none;" class="py-8 text-center text-xs text-[#777682] space-y-2.5">
                         <span class="material-symbols-outlined text-3xl text-gray-300">search_off</span>
                         <p>Tidak ada tiket atau pesanan yang cocok dengan "<strong class="text-[#0b1c30]" x-text="searchQuery"></strong>".</p>
                         <div>
@@ -738,117 +879,5 @@
     </div>
     
 </div>
-
-<script>
-window.kasirSearch = function kasirSearch() {
-    return {
-        searchQuery: @js($code ?? ''),
-        localItems: @js($queueData),
-        serverResults: [],
-        isSearchingServer: false,
-        searchDebounceTimer: null,
-
-        get trimmedQuery() {
-            return (this.searchQuery || '').trim().toLowerCase();
-        },
-
-        get visibleItems() {
-            const q = this.trimmedQuery;
-            if (!q) {
-                return this.localItems;
-            }
-
-            // Realtime filter local items in 0ms
-            const matched = this.localItems.filter(item => {
-                return item.search_text && item.search_text.includes(q);
-            });
-
-            // Append extra server items not in localItems
-            const localIds = new Set(matched.map(i => i.id));
-            const extra = this.serverResults.filter(i => !localIds.has(i.id));
-
-            return [...matched, ...extra];
-        },
-
-        clearSearch() {
-            this.searchQuery = '';
-            this.serverResults = [];
-            this.$nextTick(() => {
-                if (this.$refs.searchInput) {
-                    this.$refs.searchInput.focus();
-                }
-            });
-        },
-
-        onInput() {
-            const q = this.trimmedQuery;
-            clearTimeout(this.searchDebounceTimer);
-
-            if (q.length < 2) {
-                this.serverResults = [];
-                this.isSearchingServer = false;
-                return;
-            }
-
-            // Debounced fetch for extra results from server (300ms)
-            this.searchDebounceTimer = setTimeout(async () => {
-                this.isSearchingServer = true;
-                try {
-                    const response = await fetch(`{{ route('kasir.search') }}?q=` + encodeURIComponent(this.searchQuery.trim()), {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.serverResults = (data.results || []).map(r => ({
-                            id: String(r.id),
-                            nama: r.nama,
-                            phone: r.no_hp,
-                            lapangan: r.lapangan,
-                            jam: r.jam,
-                            tanggal: r.tanggal,
-                            token: r.token,
-                            kode_qr: r.kode_qr,
-                            status: r.status,
-                            is_cancelled: r.is_cancelled,
-                            is_selected: false,
-                            denda: r.denda || 0,
-                            is_lunas: r.is_lunas,
-                            sisa: r.sisa_tagihan,
-                            search_text: r.search_text,
-                            url: r.url
-                        }));
-                    }
-                } catch (err) {
-                    console.error('Server search error:', err);
-                } finally {
-                    this.isSearchingServer = false;
-                }
-            }, 300);
-        },
-
-        selectFirst() {
-            const items = this.visibleItems;
-            if (items.length > 0) {
-                window.location.href = items[0].url;
-            }
-        },
-
-        formatRupiah(val) {
-            return new Intl.NumberFormat('id-ID').format(val || 0);
-        }
-    };
-};
-
-if (window.Alpine) {
-    Alpine.data('kasirSearch', window.kasirSearch);
-} else {
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('kasirSearch', window.kasirSearch);
-    });
-}
-</script>
 
 @endsection

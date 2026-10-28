@@ -126,35 +126,37 @@
             <div class="lg:col-span-6 flex justify-center w-full">
                 <div class="w-full max-w-lg bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
 
-                    {{-- Top Tabs Segmented Control (Smooth Client-Side Switch without Full Reload) --}}
+                    {{-- Top Tabs Segmented Control (Smooth Client-Side Switch with Native Link Fallback) --}}
                     <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-6 border border-[#dce9ff]">
-                        <button
-                            type="button"
-                            @click="switchTab('login')"
+                        <a
+                            href="{{ route('login') }}"
+                            @click.prevent="switchTab('login')"
                             :class="tab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer"
+                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span x-show="tab === 'login'" class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                            <span x-show="tab === 'login'" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
                             <span class="material-symbols-outlined text-base">login</span>
                             <span>Masuk ke Akun</span>
-                        </button>
+                        </a>
 
-                        <button
-                            type="button"
-                            @click="switchTab('register')"
+                        <a
+                            href="{{ route('register') }}"
+                            @click.prevent="switchTab('register')"
                             :class="tab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer"
+                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span x-show="tab === 'register'" class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                            <span x-show="tab === 'register'" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
                             <span class="material-symbols-outlined text-base">person_add</span>
                             <span>Daftar Akun Baru</span>
-                        </button>
+                        </a>
                     </div>
 
                     {{-- ======================================================== --}}
                     {{-- TAB 1: FORM LOGIN --}}
                     {{-- ======================================================== --}}
                     <div x-show="tab === 'login'"
+                         x-cloak
+                         @if($activeTab !== 'login') style="display: none;" @endif
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-1"
                          x-transition:enter-end="opacity-100 translate-y-0">
@@ -315,12 +317,12 @@
                         <div class="mt-6 pt-5 border-t border-gray-100 text-center">
                             <p class="text-xs text-gray-500">
                                 Belum punya akun LapangIn?
-                                <button
-                                    type="button"
-                                    @click="switchTab('register')"
+                                <a
+                                    href="{{ route('register') }}"
+                                    @click.prevent="switchTab('register')"
                                     class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     Daftar Sekarang ↗
-                                </button>
+                                </a>
                             </p>
                         </div>
                     </div>
@@ -329,10 +331,11 @@
                     {{-- TAB 2: FORM REGISTER --}}
                     {{-- ======================================================== --}}
                     <div x-show="tab === 'register'"
+                         x-cloak
+                         @if($activeTab !== 'register') style="display: none;" @endif
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-cloak>
+                         x-transition:enter-end="opacity-100 translate-y-0">
 
                         <div class="mb-5">
                             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider mb-2">
@@ -581,12 +584,12 @@
                         <div class="mt-6 pt-5 border-t border-gray-100 text-center">
                             <p class="text-xs text-gray-500">
                                 Sudah memiliki akun LapangIn?
-                                <button
-                                    type="button"
-                                    @click="switchTab('login')"
+                                <a
+                                    href="{{ route('login') }}"
+                                    @click.prevent="switchTab('login')"
                                     class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     Masuk Sekarang ↗
-                                </button>
+                                </a>
                             </p>
                         </div>
                     </div>

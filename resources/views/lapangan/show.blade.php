@@ -1,171 +1,630 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Lapangan - ' . $lapangan->nama)
+@section('title', $lapangan->nama . ' - Reservasi Online LapangIn')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+@php
+    $selectedDateCarbon = \Carbon\Carbon::parse($tanggalDipilih)->startOfDay();
+    $today = now()->startOfDay();
 
-    {{-- Tombol Kembali --}}
-    <a href="{{ route('katalog.index') }}"
-       class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-indigo-700 transition">
-        ← Kembali ke Katalog
-    </a>
+    // Generate 7 hari kalender
+    $datesCarousel = [];
+    for ($i = 0; $i < 7; $i++) {
+        $cDate = $today->copy()->addDays($i);
+        $datesCarousel[] = [
+            'date_str' => $cDate->toDateString(),
+            'day_num' => $cDate->format('d'),
+            'day_name' => $cDate->translatedFormat('D'),
+            'month_name' => $cDate->translatedFormat('M'),
+            'label_top' => $i === 0 ? 'HARI INI' : ($i === 1 ? 'BESOK' : strtoupper($cDate->translatedFormat('D'))),
+            'is_selected' => $cDate->toDateString() === $tanggalDipilih,
+        ];
+    }
 
-    {{-- Informasi Lapangan --}}
-    <div class="grid gap-8 lg:grid-cols-2 items-start">
+    // Kelompokkan slot siang (sebelum 18:00) dan malam prime time (>= 18:00)
+    $slotsSiang = [];
+    $slotsMalam = [];
 
-        {{-- Gambar Lapangan Asli dari Storage / URL --}}
-        <div class="relative overflow-hidden rounded-3xl bg-gray-900 shadow-md h-80 sm:h-96">
-            <img
-                src="{{ $lapangan->foto_url }}"
-                alt="{{ $lapangan->nama }}"
-                class="h-full w-full object-cover transition duration-300 hover:scale-105"
-                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($lapangan->nama) }}&background=1a146b&color=acf847&size=512';"
-            >
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-            <span class="absolute top-4 left-4 px-3.5 py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-xs font-bold shadow-sm uppercase tracking-wider">
+    foreach ($jadwalData['slots'] as $slot) {
+        $jamHour = (int) substr($slot['jam_mulai'], 0, 2);
+        if ($jamHour < 18) {
+            $slotsSiang[] = $slot;
+        } else {
+            $slotsMalam[] = $slot;
+        }
+    }
+
+    // Tentukan estimasi harga dasar
+    $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
+    $baseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
+    $primeRate = (float) ($baseRate + 40000);
+@endphp
+
+<div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16"
+     x-data="{
+         selectedSlots: [],
+         selectedDate: '{{ $tanggalDipilih }}',
+         paymentScheme: 'dp',
+         equipments: {{ Js::from($perlengkapans->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama, 'harga' => (float)$p->harga, 'qty' => 0])) }},
+         baseRate: {{ $baseRate }},
+         primeRate: {{ $primeRate }},
+
+         toggleSlot(slot) {
+             if (!slot.is_tersedia) return;
+             const index = this.selectedSlots.findIndex(s => s.jam_mulai === slot.jam_mulai);
+             if (index > -1) {
+                 this.selectedSlots.splice(index, 1);
+             } else {
+                 if (this.selectedSlots.length >= 4) {
+                     alert('Maksimal pemesanan sekaligus adalah 4 jam.');
+                     return;
+                 }
+                 this.selectedSlots.push(slot);
+                 this.selectedSlots.sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
+             }
+         },
+
+         isSlotSelected(slot) {
+             return this.selectedSlots.some(s => s.jam_mulai === slot.jam_mulai);
+         },
+
+         get durationHours() {
+             return Math.max(1, this.selectedSlots.length);
+         },
+
+         get earliestSlot() {
+             return this.selectedSlots.length > 0 ? this.selectedSlots[0].jam_mulai : '19:00';
+         },
+
+         get latestSlotEnd() {
+             if (this.selectedSlots.length === 0) return '21:00';
+             return this.selectedSlots[this.selectedSlots.length - 1].jam_selesai;
+         },
+
+         get timeRangeLabel() {
+             if (this.selectedSlots.length === 0) return 'Pilih slot jam main di kiri';
+             const start = this.earliestSlot.substring(0, 5);
+             const end = this.latestSlotEnd.substring(0, 5);
+             return `${start} - ${end} WIB`;
+         },
+
+         get courtTotalFee() {
+             if (this.selectedSlots.length === 0) {
+                 return this.baseRate * 2; // Default preview 2 jam
+             }
+             let sum = 0;
+             this.selectedSlots.forEach(slot => {
+                 const hour = parseInt(slot.jam_mulai.substring(0, 2), 10);
+                 sum += (hour >= 18 ? this.primeRate : this.baseRate);
+             });
+             return sum;
+         },
+
+         get equipmentTotalFee() {
+             return this.equipments.reduce((acc, curr) => acc + (curr.harga * curr.qty), 0);
+         },
+
+         get grandTotal() {
+             return this.courtTotalFee + this.equipmentTotalFee;
+         },
+
+         get dpAmount() {
+             return Math.round(this.grandTotal * 0.5);
+         },
+
+         get remainingAmount() {
+             return this.grandTotal - this.dpAmount;
+         },
+
+         get payableAmount() {
+             return this.paymentScheme === 'dp' ? this.dpAmount : this.grandTotal;
+         },
+
+         changeQty(eqId, delta) {
+             const item = this.equipments.find(e => e.id === eqId);
+             if (item) {
+                 item.qty = Math.max(0, item.qty + delta);
+             }
+         },
+
+         formatRp(val) {
+             return 'Rp' + new Intl.NumberFormat('id-ID').format(val || 0);
+         }
+     }">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+        {{-- 1. Breadcrumbs --}}
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
+            <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">home</span>
+                <span>Beranda</span>
+            </a>
+            <span>/</span>
+            <a href="{{ route('katalog.index', ['kategori' => $lapangan->kategori]) }}" class="hover:text-[#1a146b]">
                 {{ $lapangan->kategori }}
-            </span>
-        </div>
+            </a>
+            <span>/</span>
+            <span class="text-gray-900 font-bold truncate">{{ $lapangan->nama }}</span>
+        </nav>
 
-        {{-- Detail & Spesifikasi Lapangan --}}
-        <div class="flex flex-col justify-center">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-bold">
-                    <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
-                    Arena Aktif &amp; Terverifikasi
-                </span>
-                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-                    <svg class="w-3.5 h-3.5 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    <span>5.0 Rating Pelanggan</span>
-                </span>
-            </div>
+        {{-- 2. Main Two-Column Split Grid --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <h1 class="text-3xl font-extrabold tracking-tight text-[#1a146b] sm:text-4xl">
-                {{ $lapangan->nama }}
-            </h1>
+            {{-- ======================================================== --}}
+            {{-- LEFT COLUMN: Arena Details, Date Carousel, Slots & Addons --}}
+            {{-- ======================================================== --}}
+            <div class="lg:col-span-8 flex flex-col gap-8">
 
-            <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-                {{ $lapangan->deskripsi ?: 'Fasilitas arena olahraga berstandar turnamen, dilengkapi pencahayaan optimal dan sistem pemeliharaan berkala untuk kenyamanan bertanding.' }}
-            </p>
+                {{-- Venue Header Card --}}
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
+                                    TERVERIFIKASI
+                                </span>
+                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-gray-500">
+                                    <span class="material-symbols-outlined text-sm text-[#416900]">verified</span>
+                                    <span>Standard AFC Flooring</span>
+                                </span>
+                            </div>
 
-            {{-- Skema Tarif Master dari Database --}}
-            <div class="mt-5 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 grid grid-cols-2 gap-4">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Tarif Dasar Weekday</span>
-                    <p class="text-lg font-extrabold text-[#1a146b] mt-0.5">
-                        Rp {{ number_format($hargaWeekday ?? 120000, 0, ',', '.') }}
-                        <span class="text-xs font-normal text-gray-500">/jam</span>
-                    </p>
-                    <span class="text-[11px] text-gray-500">Senin – Jumat</span>
-                </div>
-                <div class="border-l border-indigo-200/80 pl-4">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Tarif Dasar Weekend</span>
-                    <p class="text-lg font-extrabold text-[#416900] mt-0.5">
-                        Rp {{ number_format($hargaWeekend ?? 200000, 0, ',', '.') }}
-                        <span class="text-xs font-normal text-gray-500">/jam</span>
-                    </p>
-                    <span class="text-[11px] text-[#416900] font-medium">Sabtu, Minggu &amp; Libur</span>
-                </div>
-            </div>
+                            <h1 class="text-2xl sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight">
+                                {{ $lapangan->nama }}
+                            </h1>
 
-            <div class="mt-4 flex items-center gap-2 text-xs text-gray-600">
-                <span class="material-symbols-outlined text-base text-[#1a146b]">schedule</span>
-                <span>Jam Operasional: <strong>{{ substr($lapangan->jam_buka, 0, 5) }} – {{ substr($lapangan->jam_tutup, 0, 5) }} WIB</strong></span>
-            </div>
+                            <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                                <span>{{ $lapangan->deskripsi ?: 'Arena futsal, badminton, dan multisport resmi dengan standar pencahayaan turnamen.' }}</span>
+                            </p>
 
-            <div class="mt-5 flex flex-wrap gap-2">
-                <span class="rounded-xl bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">Fasilitas Indoor</span>
-                <span class="rounded-xl bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">Parkir Mobil Luas</span>
-                <span class="rounded-xl bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">Bisa DP 50%</span>
-                <span class="rounded-xl bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">Loker &amp; Ruang Ganti</span>
-            </div>
-        </div>
-    </div>
-
-    {{-- Form Filter Tanggal --}}
-    <div class="mt-12 pt-8 border-t border-gray-200">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-[#1a146b]">
-                    Pilih Jadwal Main
-                </h2>
-                <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                    Klik slot jam yang bertanda <span class="font-bold text-green-600">Tersedia</span> untuk langsung melakukan reservasi atau checkout.
-                </p>
-            </div>
-
-            <form method="GET" action="{{ route('katalog.show', $lapangan->id) }}" class="flex items-center gap-2">
-                <label for="tanggal" class="text-xs font-bold text-gray-700">Tanggal:</label>
-                <input
-                    id="tanggal"
-                    type="date"
-                    name="tanggal"
-                    value="{{ $tanggalDipilih }}"
-                    onchange="this.form.submit()"
-                    class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200"
-                >
-            </form>
-        </div>
-    </div>
-
-    {{-- Pilih Jam --}}
-    <div class="mt-8">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">Ketersediaan Slot Jam (60 Menit)</h3>
-            <div class="flex items-center gap-4 text-xs font-semibold">
-                <div class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                    <span class="text-gray-700">Tersedia</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-full bg-red-400"></span>
-                    <span class="text-gray-700">Penuh / Dipesan</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Grid Jam Dinamis --}}
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            @forelse ($jadwalData['slots'] as $slot)
-                @if ($slot['is_tersedia'])
-                    {{-- Tombol Tersedia -> Link Langsung ke Checkout Booking --}}
-                    <a
-                        href="{{ route('checkout.index', [
-                            'lapangan_id' => $lapangan->id,
-                            'tanggal' => $tanggalDipilih,
-                            'jam_mulai' => $slot['jam_mulai'],
-                            'durasi' => 1
-                        ]) }}"
-                        class="group rounded-2xl border-2 border-green-500 bg-green-50/80 p-4 text-center transition hover:bg-green-100 hover:shadow-md block"
-                    >
-                        <div class="font-bold text-green-900 group-hover:text-green-950 text-sm">
-                            {{ $slot['jam_label'] }}
+                            {{-- Tarif Resmi Terverifikasi --}}
+                            <div class="mt-3.5 flex flex-wrap items-center gap-3 text-xs">
+                                <div class="px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200">
+                                    <span class="text-gray-500">Tarif Weekday:</span>
+                                    <strong class="text-[#1a146b] ml-1">Rp {{ number_format($hargaWeekday ?? 125000, 0, ',', '.') }}</strong>
+                                </div>
+                                <div class="px-3 py-1.5 rounded-xl bg-[#eaf7d8] border border-[#acf847]/60">
+                                    <span class="text-[#416900]">Tarif Weekend:</span>
+                                    <strong class="text-[#102000] ml-1">Rp {{ number_format($hargaWeekend ?? 175000, 0, ',', '.') }}</strong>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-green-700 uppercase tracking-wider">
-                            <span>Pilih Slot</span>
-                            <span>→</span>
-                        </div>
-                    </a>
-                @else
-                    {{-- Tombol Penuh/Dibooking --}}
-                    <div
-                        class="cursor-not-allowed rounded-2xl border border-gray-200 bg-gray-100/90 p-4 text-center opacity-75"
-                    >
-                        <div class="font-bold text-gray-500 text-sm">
-                            {{ $slot['jam_label'] }}
-                        </div>
-                        <div class="mt-1.5 text-[11px] font-bold text-red-600 uppercase tracking-wider">
-                            {{ $slot['status'] }}
+
+                        {{-- Court Switcher Pills --}}
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach ($semuaLapangan as $itemLap)
+                                <a href="{{ route('katalog.show', ['id' => $itemLap->id, 'tanggal' => $tanggalDipilih]) }}"
+                                   class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $itemLap->id === $lapangan->id ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200' }}">
+                                    <span class="material-symbols-outlined text-sm">{{ $itemLap->id === $lapangan->id ? 'sports_soccer' : 'grid_view' }}</span>
+                                    <span>{{ $itemLap->nama }}</span>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
-                @endif
-            @empty
-                <div class="col-span-full py-8 text-center bg-gray-50 rounded-2xl border border-gray-200 text-gray-500 text-sm">
-                    Tidak ada slot jadwal yang tersedia pada tanggal ini.
                 </div>
-            @endforelse
+
+                {{-- Pilih Tanggal Main (7-Day Carousel) --}}
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-xl text-[#1a146b]">calendar_month</span>
+                            <h2 class="text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-400">
+                            {{ $selectedDateCarbon->translatedFormat('F Y') }}
+                        </span>
+                    </div>
+
+                    {{-- Horizontal 7-Day Date Buttons --}}
+                    <div class="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
+                        @foreach ($datesCarousel as $d)
+                            <a href="{{ route('katalog.show', ['id' => $lapangan->id, 'tanggal' => $d['date_str']]) }}"
+                               class="flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl transition border {{ $d['is_selected'] ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                <span class="text-[10px] font-black tracking-wider uppercase {{ $d['is_selected'] ? 'text-[#acf847]' : 'text-gray-400' }}">
+                                    {{ $d['label_top'] }}
+                                </span>
+                                <span class="text-xl font-headline font-black my-1">
+                                    {{ $d['day_num'] }}
+                                </span>
+                                <div class="flex items-center gap-1 text-[11px] font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $d['is_selected'] ? 'bg-[#acf847]' : 'bg-[#416900]' }}"></span>
+                                    <span>{{ $d['day_name'] }}</span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Grouping Sesi Jam Booking --}}
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-6">
+
+                    {{-- Sesi Siang & Sore --}}
+                    @if(count($slotsSiang) > 0)
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#416900]"></span>
+                                <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Siang &amp; Sore</h3>
+                                <span class="text-xs text-gray-400 font-mono">13:00 – 17:00</span>
+                            </div>
+                            <span class="text-xs font-bold text-gray-600">
+                                {{ 'Rp' . number_format($baseRate, 0, ',', '.') }} / jam
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            @foreach ($slotsSiang as $slot)
+                                @if ($slot['is_tersedia'])
+                                    <button type="button"
+                                            @click="toggleSlot({{ Js::from($slot) }})"
+                                            :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
+                                            class="py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-headline font-black text-sm tracking-tight">
+                                                {{ substr($slot['jam_mulai'], 0, 5) }}
+                                            </span>
+                                            <span class="w-2 h-2 rounded-full" :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                        </div>
+                                        <span class="text-[10px]" :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-white/80' : 'text-gray-400'">
+                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
+                                        </span>
+                                        <span class="text-[10px] font-bold mt-0.5"
+                                              :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-[#acf847]' : 'text-emerald-600'"
+                                              x-text="isSlotSelected({{ Js::from($slot) }}) ? 'DIPILIH' : 'Tersedia'">
+                                        </span>
+                                    </button>
+                                @else
+                                    <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
+                                            <span class="material-symbols-outlined text-xs">lock</span>
+                                        </div>
+                                        <span class="text-[10px] text-gray-400">
+                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
+                                        </span>
+                                        <span class="text-[10px] font-semibold text-gray-400">Terisi</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Sesi Malam Prime Time --}}
+                    @if(count($slotsMalam) > 0)
+                    <div class="pt-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between mb-3.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#1a146b]"></span>
+                                <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Malam Prime Time</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider">
+                                    ⚡ PALING FAVORIT
+                                </span>
+                            </div>
+                            <span class="text-xs font-bold text-[#1a146b]">
+                                {{ 'Rp' . number_format($primeRate, 0, ',', '.') }} / jam
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            @foreach ($slotsMalam as $slot)
+                                @if ($slot['is_tersedia'])
+                                    <button type="button"
+                                            @click="toggleSlot({{ Js::from($slot) }})"
+                                            :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
+                                            class="py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-headline font-black text-sm tracking-tight">
+                                                {{ substr($slot['jam_mulai'], 0, 5) }}
+                                            </span>
+                                            <span class="w-2 h-2 rounded-full" :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                        </div>
+                                        <span class="text-[10px]" :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-white/80' : 'text-gray-400'">
+                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
+                                        </span>
+                                        <span class="text-[10px] font-bold mt-0.5"
+                                              :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-[#acf847]' : 'text-emerald-600'"
+                                              x-text="isSlotSelected({{ Js::from($slot) }}) ? 'DIPILIH' : 'Tersedia'">
+                                        </span>
+                                    </button>
+                                @else
+                                    <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
+                                            <span class="material-symbols-outlined text-xs">lock</span>
+                                        </div>
+                                        <span class="text-[10px] text-gray-400">
+                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
+                                        </span>
+                                        <span class="text-[10px] font-semibold text-gray-400">Terisi</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Slot Legend Status --}}
+                    <div class="flex flex-wrap items-center gap-6 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-gray-200"></span>
+                            <span>Terisi / Tidak Tersedia</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span>Tersedia</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#1a146b]"></span>
+                            <span class="font-bold text-[#1a146b]">Dipilih Anda (<span x-text="selectedSlots.length"></span> Jam)</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- 4. MODUL SEWA PERLENGKAPAN TAMBAHAN (Sesuai Permintaan) --}}
+                {{-- ======================================================== --}}
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-5">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-xl text-[#416900]">sports_score</span>
+                                <h2 class="text-base font-headline font-bold text-[#0b1c30]">Modul Sewa Perlengkapan Tambahan</h2>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">
+                                Tambahkan rompi tanding, bola resmi FIFA, atau perlengkapan lainnya ke dalam pesanan Anda.
+                            </p>
+                        </div>
+                        <span class="text-xs font-bold text-[#416900] bg-[#eaf7d8] px-3 py-1 rounded-full">
+                            Opsional
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @forelse ($perlengkapans as $p)
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#1a146b]/40 transition flex items-center justify-between gap-3 shadow-xs">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
+                                        @if($p->gambar)
+                                            <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-[#1a146b]">
+                                                <span class="material-symbols-outlined text-2xl">sports_soccer</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-[#0b1c30]">{{ $p->nama }}</h4>
+                                        <p class="text-[11px] text-[#416900] font-extrabold mt-0.5">
+                                            Rp{{ number_format((float)$p->harga, 0, ',', '.') }} <span class="text-gray-400 font-normal">/sesi</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- Quantity Stepper Control --}}
+                                <div class="flex items-center gap-2 bg-[#eff4ff] p-1 rounded-xl border border-[#dce9ff]"
+                                     x-data="{ item: equipments.find(e => e.id === '{{ $p->id }}') }">
+                                    <button type="button"
+                                            @click="changeQty('{{ $p->id }}', -1)"
+                                            class="w-7 h-7 rounded-lg bg-white hover:bg-gray-100 text-[#0b1c30] flex items-center justify-center font-bold text-sm shadow-xs transition">
+                                        –
+                                    </button>
+                                    <span class="w-6 text-center text-xs font-headline font-black text-[#1a146b]"
+                                          x-text="item ? item.qty : 0">0</span>
+                                    <button type="button"
+                                            @click="changeQty('{{ $p->id }}', 1)"
+                                            class="w-7 h-7 rounded-lg bg-[#1a146b] hover:bg-[#2b248a] text-white flex items-center justify-center font-bold text-sm shadow-xs transition">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full py-4 text-center text-xs text-gray-400 bg-gray-50 rounded-xl">
+                                Tidak ada perlengkapan tambahan yang tersedia saat ini.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- Fasilitas Venue --}}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#1a146b] shrink-0">
+                            <span class="material-symbols-outlined text-xl">shower</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-[#0b1c30]">Fasilitas Lengkap</h4>
+                            <p class="text-[11px] text-gray-500">Shower, Kantin &amp; Ruang Ganti</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#416900] shrink-0">
+                            <span class="material-symbols-outlined text-xl">bolt</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-[#0b1c30]">Instan Konfirmasi</h4>
+                            <p class="text-[11px] text-gray-500">Langsung tercatat di kasir venue</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <span class="material-symbols-outlined text-xl">local_parking</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-[#0b1c30]">Parkir Luas</h4>
+                            <p class="text-[11px] text-gray-500">Kapasitas 40+ mobil &amp; motor</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- ======================================================== --}}
+            {{-- RIGHT COLUMN: Sticky Order Summary & Booking Checkout --}}
+            {{-- ======================================================== --}}
+            <div class="lg:col-span-4 sticky top-24">
+                <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
+
+                    {{-- Summary Header --}}
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                            RINGKASAN PEMESANAN
+                        </span>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div class="w-12 h-12 rounded-xl bg-gray-900 overflow-hidden shrink-0 border border-gray-200">
+                                <img src="{{ $lapangan->foto_url }}" alt="{{ $lapangan->nama }}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-headline font-bold text-[#0b1c30] truncate">
+                                    {{ $lapangan->nama }}
+                                </h3>
+                                <p class="text-xs text-gray-500 truncate">
+                                    {{ $lapangan->kategori }} • Standard AFC
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Schedule Summary Meta --}}
+                    <div class="p-4 rounded-2xl bg-[#eff4ff] border border-[#dce9ff] flex flex-col gap-2.5 text-xs">
+                        <div class="flex items-center justify-between text-gray-600">
+                            <span class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_today</span>
+                                <span>Tanggal:</span>
+                            </span>
+                            <strong class="text-gray-900">{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}</strong>
+                        </div>
+
+                        <div class="flex items-center justify-between text-gray-600">
+                            <span class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                <span>Slot Waktu:</span>
+                            </span>
+                            <strong class="text-gray-900" x-text="timeRangeLabel"></strong>
+                        </div>
+
+                        <div class="flex items-center justify-between text-gray-600">
+                            <span class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
+                                <span>Durasi Total:</span>
+                            </span>
+                            <strong class="text-[#1a146b]" x-text="durationHours + ' Jam Sesi'"></strong>
+                        </div>
+                    </div>
+
+                    {{-- Cost Breakdown --}}
+                    <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
+                        <div class="flex items-center justify-between">
+                            <span>Sesi Sewa Lapangan (<span x-text="durationHours"></span> jam):</span>
+                            <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
+                        </div>
+
+                        <template x-if="equipmentTotalFee > 0">
+                            <div class="flex items-center justify-between text-emerald-700 font-medium">
+                                <span>Sewa Perlengkapan Tambahan:</span>
+                                <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
+                            </div>
+                        </template>
+
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1">
+                                <span>Biaya Layanan &amp; Pemeliharaan</span>
+                                <span class="material-symbols-outlined text-xs text-gray-400">info</span>
+                            </span>
+                            <span class="font-bold text-[#416900] uppercase text-[10px]">GRATIS</span>
+                        </div>
+
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <div class="flex items-center justify-between text-sm font-headline">
+                            <span class="font-bold text-gray-900">Total Biaya Sewa:</span>
+                            <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
+                        </div>
+                    </div>
+
+                    {{-- Payment Scheme Selector --}}
+                    <div class="flex flex-col gap-2.5 pt-1">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                            PILIHAN SKEMA PEMBAYARAN
+                        </span>
+
+                        <label class="p-3.5 rounded-2xl border transition cursor-pointer flex flex-col gap-1"
+                               :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/40 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="scheme" value="dp" x-model="paymentScheme" class="text-[#416900] focus:ring-[#acf847]">
+                                    <span class="text-xs font-bold text-gray-900">Bayar DP 50%</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md bg-[#acf847] text-[#102000] text-[10px] font-black uppercase tracking-wider">
+                                    Rekomendasi
+                                </span>
+                            </div>
+                            <div class="flex items-baseline justify-between pl-6 mt-1">
+                                <span class="text-base font-headline font-black text-[#416900]" x-text="formatRp(dpAmount)"></span>
+                                <span class="text-[10px] text-gray-500">Sisa dibayar di kasir venue</span>
+                            </div>
+                        </label>
+
+                        <label class="p-3.5 rounded-2xl border transition cursor-pointer flex flex-col gap-1"
+                               :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-indigo-50/50 ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="scheme" value="full" x-model="paymentScheme" class="text-[#1a146b] focus:ring-[#1a146b]">
+                                    <span class="text-xs font-bold text-gray-900">Bayar Lunas (100%)</span>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline justify-between pl-6 mt-1">
+                                <span class="text-base font-headline font-black text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
+                                <span class="text-[10px] text-gray-500">Main langsung tanpa kasir</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    {{-- Checkout Submit Form --}}
+                    <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="pt-1">
+                        <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
+                        <input type="hidden" name="tanggal" value="{{ $tanggalDipilih }}">
+                        <input type="hidden" name="jam_mulai" :value="earliestSlot.substring(0, 5)">
+                        <input type="hidden" name="durasi" :value="durationHours">
+                        <input type="hidden" name="tipe_bayar" :value="paymentScheme">
+
+                        <button type="submit"
+                                :disabled="selectedSlots.length === 0"
+                                class="w-full py-4 px-6 rounded-2xl font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer"
+                                :class="selectedSlots.length > 0 ? 'bg-[#416900] hover:bg-[#315000] text-white shadow-emerald-700/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+                            <span class="material-symbols-outlined text-lg">check_circle</span>
+                            <span x-text="selectedSlots.length === 0 ? 'Pilih Jam Terlebih Dahulu' : (paymentScheme === 'dp' ? 'Lanjut ke Pembayaran DP (' + formatRp(dpAmount) + ')' : 'Lanjut ke Pembayaran Lunas (' + formatRp(grandTotal) + ')')"></span>
+                        </button>
+                    </form>
+
+                    {{-- Lock Reassurance Box --}}
+                    <div class="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-2.5 text-gray-500 text-[11px] leading-snug">
+                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">lock_clock</span>
+                        <span>Slot otomatis terkunci aman selama 10 menit saat Anda menekan tombol lanjut ke checkout.</span>
+                    </div>
+
+                    {{-- Helpline Note --}}
+                    <div class="text-center pt-1 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">support_agent</span>
+                            <span>Butuh bantuan jadwal?</span>
+                        </span>
+                        <a href="https://wa.me/{{ config('app.support_whatsapp', '6281234567890') }}" target="_blank" class="font-bold text-[#1a146b] hover:underline">
+                            Hubungi CS
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
+
     </div>
+
 </div>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\JadwalService;
 use App\Models\Lapangan;
+use App\Models\Perlengkapan;
 
 class KatalogController extends Controller
 {
@@ -157,12 +158,17 @@ class KatalogController extends Controller
             ->where('jenis_hari', 'weekend')
             ->first()?->harga;
 
+        $perlengkapans = Perlengkapan::where('is_active', true)->get();
+        $semuaLapangan = Lapangan::all();
+
         return view('lapangan.show', [
             'lapangan' => $lapangan,
             'jadwalData' => $jadwalData,
             'tanggalDipilih' => $tanggal,
             'hargaWeekday' => $hargaWeekday,
             'hargaWeekend' => $hargaWeekend,
+            'perlengkapans' => $perlengkapans,
+            'semuaLapangan' => $semuaLapangan,
         ]);
     }
 }
