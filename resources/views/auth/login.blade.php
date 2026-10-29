@@ -129,23 +129,23 @@
                     {{-- Top Tabs Segmented Control (Smooth Client-Side Switch with Native Link Fallback) --}}
                     <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-6 border border-[#dce9ff]">
                         <a
+                            id="btn-tab-login"
                             href="{{ route('login') }}"
-                            @click.prevent="switchTab('login')"
-                            :class="tab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
+                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span x-show="tab === 'login'" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
+                            <span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
                             <span class="material-symbols-outlined text-base">login</span>
                             <span>Masuk ke Akun</span>
                         </a>
 
                         <a
+                            id="btn-tab-register"
                             href="{{ route('register') }}"
-                            @click.prevent="switchTab('register')"
-                            :class="tab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold'"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
+                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span x-show="tab === 'register'" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
+                            <span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
                             <span class="material-symbols-outlined text-base">person_add</span>
                             <span>Daftar Akun Baru</span>
                         </a>
@@ -154,12 +154,9 @@
                     {{-- ======================================================== --}}
                     {{-- TAB 1: FORM LOGIN --}}
                     {{-- ======================================================== --}}
-                    <div x-show="tab === 'login'"
-                         x-cloak
-                         @if($activeTab !== 'login') style="display: none;" @endif
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
+                    <div id="pane-tab-login"
+                         class="{{ $activeTab === 'login' ? '' : 'hidden' }}"
+                         @if($activeTab !== 'login') style="display: none;" @endif>
 
                         <div class="mb-5">
                             <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
@@ -319,7 +316,7 @@
                                 Belum punya akun LapangIn?
                                 <a
                                     href="{{ route('register') }}"
-                                    @click.prevent="switchTab('register')"
+                                    onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
                                     class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     Daftar Sekarang ↗
                                 </a>
@@ -330,12 +327,9 @@
                     {{-- ======================================================== --}}
                     {{-- TAB 2: FORM REGISTER --}}
                     {{-- ======================================================== --}}
-                    <div x-show="tab === 'register'"
-                         x-cloak
-                         @if($activeTab !== 'register') style="display: none;" @endif
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
+                    <div id="pane-tab-register"
+                         class="{{ $activeTab === 'register' ? '' : 'hidden' }}"
+                         @if($activeTab !== 'register') style="display: none;" @endif>
 
                         <div class="mb-5">
                             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider mb-2">
@@ -594,7 +588,7 @@
                                 Sudah memiliki akun LapangIn?
                                 <a
                                     href="{{ route('login') }}"
-                                    @click.prevent="switchTab('login')"
+                                    onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
                                     class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     Masuk Sekarang ↗
                                 </a>
@@ -617,6 +611,65 @@
                 </a>
             </p>
         </footer>
+
+        <script>
+            window.switchAuthTab = function(target, e) {
+                if (e && e.preventDefault) e.preventDefault();
+                const isLogin = target === 'login';
+                const loginPane = document.getElementById('pane-tab-login');
+                const registerPane = document.getElementById('pane-tab-register');
+                const btnLogin = document.getElementById('btn-tab-login');
+                const btnRegister = document.getElementById('btn-tab-register');
+                const dotLogin = document.getElementById('dot-tab-login');
+                const dotRegister = document.getElementById('dot-tab-register');
+
+                if (loginPane) {
+                    if (isLogin) {
+                        loginPane.classList.remove('hidden');
+                        loginPane.style.display = '';
+                    } else {
+                        loginPane.classList.add('hidden');
+                        loginPane.style.display = 'none';
+                    }
+                }
+                if (registerPane) {
+                    if (isLogin) {
+                        registerPane.classList.add('hidden');
+                        registerPane.style.display = 'none';
+                    } else {
+                        registerPane.classList.remove('hidden');
+                        registerPane.style.display = '';
+                    }
+                }
+
+                if (btnLogin && btnRegister) {
+                    if (isLogin) {
+                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
+                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        if (dotLogin) dotLogin.classList.remove('hidden');
+                        if (dotRegister) dotRegister.classList.add('hidden');
+                    } else {
+                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
+                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        if (dotRegister) dotRegister.classList.remove('hidden');
+                        if (dotLogin) dotLogin.classList.add('hidden');
+                    }
+                }
+
+                const url = isLogin ? '{{ route('login') }}' : '{{ route('register') }}';
+                if (window.history && window.history.pushState) {
+                    window.history.pushState({ tab: target }, '', url);
+                }
+            };
+
+            window.addEventListener('popstate', function() {
+                if (window.location.pathname.includes('register')) {
+                    window.switchAuthTab('register');
+                } else {
+                    window.switchAuthTab('login');
+                }
+            });
+        </script>
 
     </div>
 </x-guest-layout>

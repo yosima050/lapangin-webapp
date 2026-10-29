@@ -101,7 +101,7 @@
                             id="tanggal"
                             name="tanggal"
                             type="date"
-                            min="{{ now()->toDateString() }}"
+                            min="{{ now('Asia/Jakarta')->toDateString() }}"
                             value="{{ $tanggal }}"
                             onchange="this.form.submit()"
                             class="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#acf847]"
