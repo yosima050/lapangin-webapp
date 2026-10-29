@@ -374,10 +374,10 @@ class KasirController extends Controller
                 ? $item->tanggal
                 : \Carbon\Carbon::parse($item->tanggal);
 
-            $nama = $item->pelanggan->nama ?? $item->nama_tamu ?? 'Penyewa Tamu';
-            $noHp = $item->pelanggan->no_hp ?? $item->no_wa_tamu ?? '-';
+            $nama = $item->pelanggan?->nama ?? $item->nama_tamu ?? 'Penyewa Tamu';
+            $noHp = $item->pelanggan?->no_hp ?? $item->no_wa_tamu ?? '-';
             $token = $item->token_manual ?: substr($item->kode_qr, -8);
-            $lapanganNama = $item->lapangan->nama ?? $item->lapangan->kategori ?? 'Lapangan';
+            $lapanganNama = $item->lapangan?->nama ?? $item->lapangan?->kategori ?? 'Lapangan';
 
             return [
                 'id' => $item->id,

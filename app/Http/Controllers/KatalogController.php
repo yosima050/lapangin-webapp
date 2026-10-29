@@ -18,13 +18,18 @@ class KatalogController extends Controller
 
     public function index(Request $request)
     {
+        $todayWib = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+
         $validated = $request->validate([
             'kategori' => ['nullable', 'string'],
-            'tanggal' => ['nullable', 'date_format:Y-m-d'],
+            'tanggal' => ['nullable', 'date'],
         ]);
 
         $kategori = $validated['kategori'] ?? $request->query('kategori');
-        $tanggal = !empty($validated['tanggal']) ? $validated['tanggal'] : now()->toDateString();
+        $rawTanggal = !empty($validated['tanggal']) ? $validated['tanggal'] : $todayWib;
+
+        // Cegah pemilihan tanggal kemarin / lampau
+        $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
 
         $query = Lapangan::with('hargaMasters');
 
@@ -142,8 +147,9 @@ class KatalogController extends Controller
         // Ambil data lapangan dari database beserta master tarif
         $lapangan = Lapangan::with('hargaMasters')->findOrFail($id);
 
-        // Ambil tanggal dari request (default: hari ini)
-        $tanggal = $request->query('tanggal', now()->toDateString());
+        $todayWib = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+        $rawTanggal = $request->query('tanggal', $todayWib);
+        $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
 
         // Ambil status ketersediaan jam dari JadwalService
         $jadwalData = $this->jadwalService->getSlotStatus((string) $id, $tanggal);

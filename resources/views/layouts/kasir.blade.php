@@ -4,7 +4,10 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Kasir POS - LapangIn')</title>
+    <title>@yield('title', 'Kasir POS • LapangIn')</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -61,11 +64,18 @@
 
             <!-- Navigation Links -->
             <nav class="flex flex-col gap-1.5 mt-1">
+                <!-- Pemindai Hardware & Struk Thermal POS -->
+                <a href="{{ route('kasir.checkin.index') }}"
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.checkin.*') || request()->routeIs('kasir.struk') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
+                    <span class="material-symbols-outlined text-[20px]">barcode_scanner</span>
+                    <span>Scanner &amp; Struk POS</span>
+                </a>
+
                 <!-- Pemindai Kamera QR Tiket (Sprint 4) -->
                 <a href="{{ route('kasir.scan') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.scan') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
-                    <span>Scan QR Tiket</span>
+                    <span>Scan Kamera QR</span>
                 </a>
 
                 <!-- 1. Check-in & Validasi -->
