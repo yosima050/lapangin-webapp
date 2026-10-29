@@ -47,7 +47,9 @@ class CheckinController extends Controller
 
         $lapangans = Lapangan::all();
 
-        return view('kasir.checkin', compact(
+        $viewName = view()->exists('Kasir.checkin') ? 'Kasir.checkin' : 'kasir.checkin';
+
+        return view($viewName, compact(
             'recentCheckIns',
             'pendingToday',
             'totalCheckInToday',
@@ -267,7 +269,9 @@ class CheckinController extends Controller
         $uangDiterima = session('cash_received', $pelunasanBayar);
         $kembalian = session('cash_change', 0);
 
-        return view('kasir.struk', compact(
+        $viewName = view()->exists('Kasir.struk') ? 'Kasir.struk' : 'kasir.struk';
+
+        return view($viewName, compact(
             'jadwal',
             'totalHarga',
             'dpTerbayar',
