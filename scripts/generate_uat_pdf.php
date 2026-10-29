@@ -203,7 +203,7 @@ $html = <<<'HTML'
     <table class="meta-table">
         <tr>
             <td class="label">Lingkungan Staging</td>
-            <td><strong>https://lapangin.australiaeast.cloudapp.azure.com</strong></td>
+            <td><strong>https://lapangin.biz.id</strong></td>
             <td class="label">Protokol Keamanan</td>
             <td>HTTPS / TLS 1.3 (Let's Encrypt, HTTP/2, CSP &amp; Camera Policy)</td>
         </tr>
@@ -831,7 +831,7 @@ $html = <<<'HTML'
         <tbody>
             <tr>
                 <td><strong>Infrastruktur Azure VPS</strong></td>
-                <td>Domain <code>lapangin.australiaeast.cloudapp.azure.com</code> aktif via HTTPS (Let's Encrypt), Docker container Nginx, App PHP 8.4-FPM, dan PostgreSQL healthy. Firewall UFW aktif port 22, 80, 443.</td>
+                <td>Domain <code>lapangin.biz.id</code> aktif via HTTPS (Let's Encrypt), Docker container Nginx, App PHP 8.4-FPM, dan PostgreSQL healthy. Firewall UFW aktif port 22, 80, 443.</td>
                 <td class="checkbox-cell" style="color: #166534; font-weight: bold;">[x] LULUS</td>
             </tr>
             <tr>

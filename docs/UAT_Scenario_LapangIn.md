@@ -1,10 +1,10 @@
 # Dokumen Skenario UAT — LapangIn
 **Platform Reservasi & Manajemen Venue Olahraga Multi-Court Terintegrasi**
 
-- **Versi Dokumen:** 2.0 (Staging & Production Release)
+- **Versi Dokumen:** 2.1 (Custom Domain Production-Ready)
 - **Sprint:** 5 & Deployment Final
-- **Tanggal:** 28 Oktober 2026
-- **Lingkungan Pengujian (Staging):** `https://lapangin.australiaeast.cloudapp.azure.com`
+- **Tanggal:** 29 Oktober 2026
+- **Lingkungan Pengujian (Production / Staging):** `https://lapangin.biz.id`
 - **Penyusun:** Tim Pengembang LapangIn PBL
 
 ---
@@ -59,7 +59,7 @@ Dokumen ini mencakup skenario **User Acceptance Testing (UAT)** menyeluruh untuk
 #### UAT-PENG-01: Autentikasi Pengguna & Tampilan Sandi
 | No | Langkah Pengujian | Data Uji | Hasil yang Diharapkan | Status |
 |:--:|---|---|---|:--:|
-| 1 | Buka halaman autentikasi `https://lapangin.australiaeast.cloudapp.azure.com/login` | - | Tampil single-card auth dengan tab *Masuk ke Akun* dan *Daftar Akun Baru*. | [ ] |
+| 1 | Buka halaman autentikasi `https://lapangin.biz.id/login` | - | Tampil single-card auth dengan tab *Masuk ke Akun* dan *Daftar Akun Baru*. | [ ] |
 | 2 | Masukkan kata sandi pada form login | `Pelanggan@123!` | Karakter kata sandi tersembunyi (*masked bullet* secara default). | [ ] |
 | 3 | Klik ikon mata (toggle intip sandi) | - | Karakter kata sandi terlihat jelas, klik ulang menyembunyikan sandi kembali. | [ ] |
 | 4 | Klik tab "Daftar Akun Baru" | - | Berpindah ke form registrasi secara mulus tanpa tumpang tindih visual. | [ ] |
@@ -197,7 +197,7 @@ Dokumen ini mencakup skenario **User Acceptance Testing (UAT)** menyeluruh untuk
 ## 5. Checklist Kesiapan Staging & Demo Dosen
 
 ### A. Infrastruktur & Keamanan Server Azure VPS
-- [x] Host Staging aktif di Azure Cloud VPS (`lapangin.australiaeast.cloudapp.azure.com`).
+- [x] Host Staging aktif di Azure Cloud VPS (`lapangin.biz.id`).
 - [x] Docker Container Nginx, PHP 8.4-FPM, dan PostgreSQL berjalan stabil (*healthy*).
 - [x] Sertifikat SSL Let's Encrypt aktif dan diperbarui otomatis via Certbot.
 - [x] Konfigurasi Content Security Policy (CSP) dan Permissions Policy Camera teruji aktif.
