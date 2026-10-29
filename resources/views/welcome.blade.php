@@ -50,49 +50,26 @@
                         Kategori:
                     </span>
 
-                    <button
-                        type="button"
-                        @click="sport = 'Semua'"
-                        :class="sport === 'Semua'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Semua <span class="opacity-70">({{ count($katalog) }})</span>
-                    </button>
+                    @php
+                        $currentKategori = request('kategori', 'Semua');
+                    @endphp
 
-                    <button
-                        type="button"
-                        @click="sport = 'Futsal'"
-                        :class="sport === 'Futsal'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
+                    <a
+                        href="{{ route('katalog.index', ['kategori' => 'Semua', 'tanggal' => $tanggal]) }}"
+                        class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center gap-1 {{ $currentKategori === 'Semua' ? 'bg-[#1a146b] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}"
                     >
-                        Futsal
-                    </button>
+                        <span>Semua</span>
+                        <span class="opacity-70">({{ count($katalog) }})</span>
+                    </a>
 
-                    <button
-                        type="button"
-                        @click="sport = 'Badminton'"
-                        :class="sport === 'Badminton'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Badminton
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="sport = 'Mini Soccer'"
-                        :class="sport === 'Mini Soccer'
-                            ? 'bg-[#1a146b] text-white'
-                            : 'bg-white text-gray-700 border border-gray-200'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition"
-                    >
-                        Mini Soccer
-                    </button>
+                    @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->unique()) as $kat)
+                        <a
+                            href="{{ route('katalog.index', ['kategori' => $kat, 'tanggal' => $tanggal]) }}"
+                            class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center {{ $currentKategori === $kat ? 'bg-[#1a146b] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}"
+                        >
+                            {{ $kat }}
+                        </a>
+                    @endforeach
 
                 </div>
 
@@ -115,6 +92,7 @@
                             id="tanggal"
                             name="tanggal"
                             type="date"
+                            min="{{ now('Asia/Jakarta')->toDateString() }}"
                             value="{{ $tanggal }}"
                             onchange="this.form.submit()"
                             class="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#acf847]"
