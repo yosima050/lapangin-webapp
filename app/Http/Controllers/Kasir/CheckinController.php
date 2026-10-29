@@ -227,9 +227,15 @@ class CheckinController extends Controller
             'kasir',
             'detailSewaPerlengkapans',
         ])
-        ->where('id', $id)
-        ->orWhere('kode_qr', $id)
-        ->orWhere('token_manual', strtoupper($id))
+        ->where(function ($query) use ($id) {
+            $query->where('kode_qr', $id)
+                ->orWhere('token_manual', strtoupper($id))
+                ->orWhere('token_manual', $id);
+
+            if (\Illuminate\Support\Str::isUuid($id)) {
+                $query->orWhere('id', $id);
+            }
+        })
         ->firstOrFail();
 
         $totalHarga = (float) $jadwal->harga_disepakati;
