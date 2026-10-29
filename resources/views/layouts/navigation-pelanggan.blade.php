@@ -19,8 +19,15 @@
             <div class="hidden lg:flex items-center gap-7 ml-10">
 
                 <a
+                    href="{{ route('home') }}"
+                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('home') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                >
+                    Beranda
+                </a>
+
+                <a
                     href="{{ route('katalog.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors {{ (request()->routeIs('katalog.*') || request()->routeIs('home') || request()->is('/')) && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Jelajahi Lapangan
                 </a>
@@ -184,8 +191,15 @@
             <div class="flex flex-col gap-1.5">
 
                 <a
+                    href="{{ route('home') }}"
+                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('home') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                >
+                    Beranda
+                </a>
+
+                <a
                     href="{{ route('katalog.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ (request()->routeIs('katalog.*') || request()->routeIs('home') || request()->is('/')) && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                 >
                     Jelajahi Lapangan
                 </a>
