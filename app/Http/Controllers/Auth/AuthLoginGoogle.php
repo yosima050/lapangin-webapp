@@ -13,9 +13,18 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthLoginGoogle extends Controller
 {
+    protected function getGoogleRedirectUrl(): string
+    {
+        $rawUrl = config('services.google.redirect')
+            ?: (rtrim((string) config('app.url'), '/') . '/auth/google/callback');
+
+        return preg_replace('#(?<!:)//+#', '/', (string) $rawUrl);
+    }
+
     public function google_redirect()
     {
         return Socialite::driver('google')
+            ->redirectUrl($this->getGoogleRedirectUrl())
             ->with(['prompt' => 'select_account'])
             ->redirect();
     }
@@ -28,7 +37,9 @@ class AuthLoginGoogle extends Controller
         }
 
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')
+                ->redirectUrl($this->getGoogleRedirectUrl())
+                ->user();
         } catch (\Exception $e) {
             return redirect()->route('login')->withErrors([
                 'email' => 'Proses masuk dengan Google dibatalkan atau sesi telah kedaluwarsa. Silakan coba kembali.',
