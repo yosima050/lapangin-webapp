@@ -31,6 +31,34 @@
             background: #c8c5d3;
             border-radius: 9999px;
         }
+
+        /* Print Safeguard: Sembunyikan elemen dashboard & sidebar jika tidak sengaja diprint */
+        @media print {
+            aside,
+            header,
+            nav,
+            button,
+            .print\:hidden,
+            .no-print,
+            #scanner-loading-spinner,
+            #scanner-toast {
+                display: none !important;
+            }
+
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .pl-72 {
+                padding-left: 0 !important;
+            }
+
+            main {
+                padding-top: 0 !important;
+                background: #ffffff !important;
+            }
+        }
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

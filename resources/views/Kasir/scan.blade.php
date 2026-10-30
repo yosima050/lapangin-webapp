@@ -233,7 +233,14 @@
                             </div>
                             <div class="flex items-center justify-between text-xs text-[#474651]">
                                 <span>{{ $item->lapangan->nama ?? 'Lapangan' }} • {{ substr($item->jam_mulai, 0, 5) }} WIB</span>
-                                <span class="font-mono text-[11px] text-[#1a146b] font-bold">{{ $item->token_manual ?: substr($item->id, 0, 8) }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-[11px] text-[#1a146b] font-bold">{{ $item->token_manual ?: substr($item->id, 0, 8) }}</span>
+                                    <a href="{{ route('kasir.struk', $item->id) }}" target="_blank"
+                                       class="px-2 py-0.5 rounded-md bg-white hover:bg-gray-50 border border-gray-200 text-[10px] font-bold text-[#1a146b] flex items-center gap-0.5 shadow-2xs">
+                                        <span class="material-symbols-outlined text-[12px]">print</span>
+                                        <span>Struk</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @empty
@@ -370,6 +377,11 @@
 
                     <!-- Modal Action Buttons -->
                     <div class="pt-2 flex items-center justify-end gap-3 border-t border-[#eff4ff]">
+                        <a id="modal-btn-print-struk" href="#" target="_blank"
+                           class="hidden px-5 py-3 rounded-xl bg-[#1a146b] hover:bg-[#25207c] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">receipt_long</span>
+                            <span>Cetak Struk Thermal</span>
+                        </a>
                         <button type="button" data-close-modal class="px-5 py-3 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold transition-colors">
                             Tutup
                         </button>
