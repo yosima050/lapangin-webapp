@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :title="'LapangIn'">
     @php
         $isRegister = ($initialTab ?? null) === 'register'
             || request()->routeIs('register')
@@ -377,7 +377,19 @@
                         </div>
 
                         {{-- Registration Form --}}
-                        <form method="POST" action="{{ route('register') }}" class="space-y-4">
+                        <form method="POST" action="{{ route('register') }}" class="space-y-4"
+                              x-data="{
+                                  submitting: false,
+                                  regPassword: '',
+                                  regPasswordConfirm: '',
+                                  get passwordTooShort() {
+                                      return this.regPassword.length > 0 && this.regPassword.length < 8;
+                                  },
+                                  get passwordMismatch() {
+                                      return this.regPasswordConfirm.length > 0 && this.regPassword !== this.regPasswordConfirm;
+                                  }
+                              }"
+                              @submit="if(passwordTooShort || passwordMismatch) { $event.preventDefault(); return false; } submitting = true">
                             @csrf
 
                             {{-- 1. Nama Lengkap --}}
@@ -495,6 +507,8 @@
                                         type="password"
                                         :type="showPassword ? 'text' : 'password'"
                                         name="password"
+                                        x-model="regPassword"
+                                        minlength="8"
                                         required
                                         autocomplete="new-password"
                                         placeholder="Minimal 8 karakter"
@@ -512,8 +526,15 @@
                                     </button>
                                 </div>
 
-                                @if ($activeTab === 'register' && $errors->has('password'))
+                                <template x-if="passwordTooShort">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <span>Kata sandi minimal harus 8 karakter.</span>
+                                    </p>
+                                </template>
+
+                                @if ($activeTab === 'register' && $errors->has('password'))
+                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordTooShort">
                                         <span class="material-symbols-outlined text-sm">error</span>
                                         <span>{{ $errors->first('password') }}</span>
                                     </p>
@@ -535,6 +556,8 @@
                                         type="password"
                                         :type="showPasswordConfirm ? 'text' : 'password'"
                                         name="password_confirmation"
+                                        x-model="regPasswordConfirm"
+                                        minlength="8"
                                         required
                                         autocomplete="new-password"
                                         placeholder="Ulangi kata sandi"
@@ -552,8 +575,15 @@
                                     </button>
                                 </div>
 
-                                @if ($activeTab === 'register' && $errors->has('password_confirmation'))
+                                <template x-if="passwordMismatch">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <span>Konfirmasi kata sandi tidak cocok.</span>
+                                    </p>
+                                </template>
+
+                                @if ($activeTab === 'register' && $errors->has('password_confirmation'))
+                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordMismatch">
                                         <span class="material-symbols-outlined text-sm">error</span>
                                         <span>{{ $errors->first('password_confirmation') }}</span>
                                     </p>
@@ -581,10 +611,24 @@
                             {{-- 7. Tombol Submit (Daftar) --}}
                             <button
                                 type="submit"
-                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+                                :disabled="submitting"
+                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                             >
-                                <span class="material-symbols-outlined text-base text-[#acf847]">bolt</span>
-                                <span>Daftar Akun Sekarang</span>
+                                <template x-if="!submitting">
+                                    <span class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-base text-[#acf847]">bolt</span>
+                                        <span>Daftar Akun Sekarang</span>
+                                    </span>
+                                </template>
+                                <template x-if="submitting">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
+                                        <span>Memproses &amp; Mengirim OTP...</span>
+                                    </span>
+                                </template>
                             </button>
                         </form>
 
