@@ -20,7 +20,9 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\Kasir\CheckinController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [KatalogController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return view('pages.landing');
+})->name('home');
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 Route::get('/jadwal', [KatalogController::class, 'index'])->name('jadwal.index');

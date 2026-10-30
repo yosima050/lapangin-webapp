@@ -17,12 +17,6 @@
   <section class="px-4 sm:px-6 lg:px-8 pt-8 pb-8">
         <div class="max-w-7xl mx-auto">
 
-
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 mb-5 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-bold">
-                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
-                {{ count($katalog) }} Venue Siap Pakai
-            </div>
-
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1a146b] max-w-3xl">
                 Temukan Arena
                 <span class="text-[#416900]">
