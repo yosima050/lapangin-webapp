@@ -188,138 +188,151 @@ class KasirController extends Controller
         Request $request,
         ?string $code = null
     ): JsonResponse {
-        $searchCode = trim(
-            (string) ($code ?? $request->input('code', ''))
-        );
+        try {
+            $searchCode = trim(
+                (string) ($code ?? $request->input('code', ''))
+            );
 
-        if ($searchCode === '') {
+            if ($searchCode === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode QR atau token manual wajib diisi.',
+                ], 400);
+            }
+
+            $lowerSearch = strtolower($searchCode);
+
+            $jadwal = Jadwal::with([
+                'lapangan',
+                'pelanggan',
+                'transaksis',
+            ])
+                ->where(function ($query) use ($searchCode, $lowerSearch) {
+                    $query->where('kode_qr', $searchCode)
+                        ->orWhere('token_manual', strtoupper($searchCode))
+                        ->orWhere('token_manual', $searchCode)
+                        ->orWhereRaw('LOWER(nama_tamu) LIKE ?', ["%{$lowerSearch}%"])
+                        ->orWhere('no_wa_tamu', 'LIKE', "%{$searchCode}%")
+                        ->orWhereHas('pelanggan', function ($q) use ($lowerSearch, $searchCode) {
+                            $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lowerSearch}%"])
+                              ->orWhere('no_hp', 'LIKE', "%{$searchCode}%")
+                              ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearch}%"]);
+                        })
+                        ->orWhereHas('transaksis', function ($q) use ($lowerSearch) {
+                            $q->whereRaw('LOWER(order_id) LIKE ?', ["%{$lowerSearch}%"])
+                              ->orWhereRaw('LOWER(referensi_midtrans) LIKE ?', ["%{$lowerSearch}%"]);
+                        });
+
+                    if (Str::isUuid($searchCode)) {
+                        $query->orWhere('id', $searchCode);
+                    }
+                })
+                ->orderByDesc('tanggal')
+                ->orderBy('jam_mulai')
+                ->first();
+
+            if (! $jadwal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tiket tidak ditemukan. Periksa kode QR atau token manual.',
+                ], 404);
+            }
+
+            $isCancelled = $jadwal->isCancelled();
+
+            // Tiket dianggap duplikat jika sudah check-in atau status selesai
+            $isDuplicate = $jadwal->checked_in_at !== null
+                || $jadwal->status === 'selesai';
+
+            $today = now()->toDateString();
+            $tanggalCarbon = $jadwal->tanggal instanceof \Carbon\Carbon
+                ? $jadwal->tanggal
+                : ($jadwal->tanggal ? \Carbon\Carbon::parse($jadwal->tanggal) : null);
+
+            $isExpired = $tanggalCarbon ? ($tanggalCarbon->toDateString() < $today) : false;
+
+            $allowedPaymentStatuses = [
+                'dp_terverifikasi',
+                'lunas_online',
+                'belum_bayar',
+                'lunas_kasir',
+            ];
+
+            $isPaymentStatusValid = in_array(
+                $jadwal->status_pembayaran,
+                $allowedPaymentStatuses,
+                true
+            );
+
+            $isValid = ! $isCancelled
+                && ! $isDuplicate
+                && ! $isExpired
+                && $isPaymentStatusValid;
+
+            $totalHarga = (float) $jadwal->harga_disepakati;
+
+            $dpPaid = (float) $jadwal->transaksis
+                ->where('status', 'berhasil')
+                ->sum('jumlah');
+
+            $sisaTagihan = max(0, $totalHarga - $dpPaid);
+
+            if ($isCancelled) {
+                $statusLabel = 'Tiket Dibatalkan';
+            } elseif ($isDuplicate) {
+                $statusLabel = 'Tiket Sudah Digunakan (Duplikat)';
+            } elseif ($isExpired) {
+                $statusLabel = 'Tiket Kedaluwarsa';
+            } elseif (! $isPaymentStatusValid) {
+                $statusLabel = 'Status Tiket Tidak Valid';
+            } else {
+                $statusLabel = 'Tiket Valid';
+            }
+
+            return response()->json([
+                'success' => true,
+                'is_valid' => $isValid,
+                'is_cancelled' => $isCancelled,
+                'is_duplicate' => $isDuplicate,
+                'is_expired' => $isExpired,
+                'status_label' => $statusLabel,
+                'jadwal' => [
+                    'id' => $jadwal->id,
+                    'kode_qr' => $jadwal->kode_qr,
+                    'token_manual' => $jadwal->token_manual,
+                    'nama_penyewa' => $jadwal->pelanggan?->nama
+                        ?? $jadwal->nama_tamu
+                        ?? 'Penyewa',
+                    'no_hp' => $jadwal->pelanggan?->no_hp
+                        ?? $jadwal->no_wa_tamu
+                        ?? '-',
+                    'nama_lapangan' => $jadwal->lapangan?->nama ?? '-',
+                    'kategori' => $jadwal->lapangan?->kategori ?? '-',
+                    'tanggal' => $tanggalCarbon ? $tanggalCarbon->format('d M Y') : '-',
+                    'tanggal_raw' => $tanggalCarbon ? $tanggalCarbon->toDateString() : '-',
+                    'jam_mulai' => substr($jadwal->jam_mulai, 0, 5),
+                    'jam_selesai' => substr($jadwal->jam_selesai, 0, 5),
+                    'total_harga' => $totalHarga,
+                    'dp_paid' => $dpPaid,
+                    'sisa_tagihan' => $sisaTagihan,
+                    'status_pembayaran' => $jadwal->status_pembayaran,
+                    'status' => $jadwal->status,
+                    'catatan_kasir' => $jadwal->catatan_kasir,
+                    'checked_in_at' => $jadwal->checked_in_at,
+                ],
+                'checkin_url' => route('kasir.checkin', $jadwal->id),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Kasir lookupTicket error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'code' => $code ?? $request->input('code'),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Kode QR atau token manual wajib diisi.',
-            ], 400);
+                'message' => 'Terjadi kesalahan sistem saat memproses tiket: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $lowerSearch = strtolower($searchCode);
-
-        $jadwal = Jadwal::with([
-            'lapangan',
-            'pelanggan',
-            'transaksis',
-        ])
-            ->where(function ($query) use ($searchCode, $lowerSearch) {
-                $query->where('kode_qr', $searchCode)
-                    ->orWhere('token_manual', strtoupper($searchCode))
-                    ->orWhere('token_manual', $searchCode)
-                    ->orWhereRaw('LOWER(nama_tamu) LIKE ?', ["%{$lowerSearch}%"])
-                    ->orWhere('no_wa_tamu', 'LIKE', "%{$searchCode}%")
-                    ->orWhereHas('pelanggan', function ($q) use ($lowerSearch, $searchCode) {
-                        $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lowerSearch}%"])
-                          ->orWhere('no_hp', 'LIKE', "%{$searchCode}%")
-                          ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearch}%"]);
-                    })
-                    ->orWhereHas('transaksis', function ($q) use ($lowerSearch) {
-                        $q->whereRaw('LOWER(order_id) LIKE ?', ["%{$lowerSearch}%"])
-                          ->orWhereRaw('LOWER(referensi_midtrans) LIKE ?', ["%{$lowerSearch}%"]);
-                    });
-
-                if (Str::isUuid($searchCode)) {
-                    $query->orWhere('id', $searchCode);
-                }
-            })
-            ->orderByDesc('tanggal')
-            ->orderBy('jam_mulai')
-            ->first();
-
-        if (! $jadwal) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tiket tidak ditemukan. Periksa kode QR atau token manual.',
-            ], 404);
-        }
-
-        $isCancelled = $jadwal->isCancelled();
-
-        // Tiket dianggap duplikat jika sudah check-in
-        // atau status jadwal sudah selesai.
-        // Status lunas_kasir saja tidak berarti sudah check-in.
-        $isDuplicate = $jadwal->checked_in_at !== null
-            || $jadwal->status === 'selesai';
-
-        $today = now()->toDateString();
-
-        $isExpired = $jadwal->tanggal->toDateString() < $today;
-
-        $allowedPaymentStatuses = [
-            'dp_terverifikasi',
-            'lunas_online',
-            'belum_bayar',
-            'lunas_kasir',
-        ];
-
-        $isPaymentStatusValid = in_array(
-            $jadwal->status_pembayaran,
-            $allowedPaymentStatuses,
-            true
-        );
-
-        $isValid = ! $isCancelled
-            && ! $isDuplicate
-            && ! $isExpired
-            && $isPaymentStatusValid;
-
-        $totalHarga = (float) $jadwal->harga_disepakati;
-
-        $dpPaid = (float) $jadwal->transaksis
-            ->where('status', 'berhasil')
-            ->sum('jumlah');
-
-        $sisaTagihan = max(0, $totalHarga - $dpPaid);
-
-        if ($isCancelled) {
-            $statusLabel = 'Tiket Dibatalkan';
-        } elseif ($isDuplicate) {
-            $statusLabel = 'Tiket Sudah Digunakan (Duplikat)';
-        } elseif ($isExpired) {
-            $statusLabel = 'Tiket Kedaluwarsa';
-        } elseif (! $isPaymentStatusValid) {
-            $statusLabel = 'Status Tiket Tidak Valid';
-        } else {
-            $statusLabel = 'Tiket Valid';
-        }
-
-        return response()->json([
-            'success' => true,
-            'is_valid' => $isValid,
-            'is_cancelled' => $isCancelled,
-            'is_duplicate' => $isDuplicate,
-            'is_expired' => $isExpired,
-            'status_label' => $statusLabel,
-            'jadwal' => [
-                'id' => $jadwal->id,
-                'kode_qr' => $jadwal->kode_qr,
-                'token_manual' => $jadwal->token_manual,
-                'nama_penyewa' => $jadwal->pelanggan->nama
-                    ?? $jadwal->nama_tamu
-                    ?? 'Penyewa',
-                'no_hp' => $jadwal->pelanggan->no_hp
-                    ?? $jadwal->no_wa_tamu
-                    ?? '-',
-                'nama_lapangan' => $jadwal->lapangan->nama ?? '-',
-                'kategori' => $jadwal->lapangan->kategori ?? '-',
-                'tanggal' => $jadwal->tanggal->format('d M Y'),
-                'tanggal_raw' => $jadwal->tanggal->toDateString(),
-                'jam_mulai' => substr($jadwal->jam_mulai, 0, 5),
-                'jam_selesai' => substr($jadwal->jam_selesai, 0, 5),
-                'total_harga' => $totalHarga,
-                'dp_paid' => $dpPaid,
-                'sisa_tagihan' => $sisaTagihan,
-                'status_pembayaran' => $jadwal->status_pembayaran,
-                'status' => $jadwal->status,
-                'catatan_kasir' => $jadwal->catatan_kasir,
-                'checked_in_at' => $jadwal->checked_in_at,
-            ],
-            'checkin_url' => route('kasir.checkin', $jadwal->id),
-        ]);
     }
 
     public function searchTickets(Request $request): JsonResponse
@@ -374,10 +387,10 @@ class KasirController extends Controller
                 ? $item->tanggal
                 : \Carbon\Carbon::parse($item->tanggal);
 
-            $nama = $item->pelanggan->nama ?? $item->nama_tamu ?? 'Penyewa Tamu';
-            $noHp = $item->pelanggan->no_hp ?? $item->no_wa_tamu ?? '-';
+            $nama = $item->pelanggan?->nama ?? $item->nama_tamu ?? 'Penyewa Tamu';
+            $noHp = $item->pelanggan?->no_hp ?? $item->no_wa_tamu ?? '-';
             $token = $item->token_manual ?: substr($item->kode_qr, -8);
-            $lapanganNama = $item->lapangan->nama ?? $item->lapangan->kategori ?? 'Lapangan';
+            $lapanganNama = $item->lapangan?->nama ?? $item->lapangan?->kategori ?? 'Lapangan';
 
             return [
                 'id' => $item->id,
@@ -446,9 +459,11 @@ class KasirController extends Controller
                     ];
                 }
 
-                if (
-                    $jadwal->tanggal->toDateString() < now()->toDateString()
-                ) {
+                $tanggalCheckin = $jadwal->tanggal instanceof \Carbon\Carbon
+                    ? $jadwal->tanggal
+                    : ($jadwal->tanggal ? \Carbon\Carbon::parse($jadwal->tanggal) : null);
+
+                if ($tanggalCheckin && $tanggalCheckin->toDateString() < now()->toDateString()) {
                     return [
                         'error' => 'expired',
                         'message' => 'Tiket kedaluwarsa.',
@@ -546,9 +561,9 @@ class KasirController extends Controller
                 $sisaTagihan = max(0, $totalHarga - $sudahDibayar);
 
 
-                $metode = $request->input('metode', 'tunai');
+                $metode = strtolower((string) $request->input('metode', 'tunai'));
 
-                if (! in_array($metode, ['cash', 'tunai', 'online'], true)) {
+                if (! in_array($metode, ['cash', 'tunai', 'online', 'debit', 'qris'], true)) {
                     throw ValidationException::withMessages([
                         'metode' => 'Metode pembayaran tidak valid.',
                     ]);
@@ -639,6 +654,21 @@ class KasirController extends Controller
             }
 
             throw $exception;
+        } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::error('Kasir checkin error: ' . $exception->getMessage(), [
+                'trace' => $exception->getTraceAsString(),
+                'id' => $id,
+            ]);
+
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'system_error',
+                    'message' => 'Gagal memproses check-in: ' . $exception->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat check-in: ' . $exception->getMessage());
         }
 
         if (isset($result['error'])) {
@@ -659,7 +689,7 @@ class KasirController extends Controller
         $jadwal = $result['jadwal'];
         $jumlahBayar = $result['jumlah_bayar'];
 
-        $namaPenyewa = $jadwal->pelanggan->nama
+        $namaPenyewa = $jadwal->pelanggan?->nama
             ?? $jadwal->nama_tamu
             ?? 'Penyewa';
 

@@ -58,8 +58,8 @@
                 @endauth
 
                 <a
-                    href="{{ route('home') }}#kontak"
-                    class="py-2 text-sm font-semibold text-gray-600 hover:text-[#1a146b] transition-colors"
+                    href="{{ route('bantuan') }}"
+                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('bantuan') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Pusat Bantuan
                 </a>
@@ -229,8 +229,8 @@
                     @endif
 
                     <a
-                        href="{{ route('home') }}#kontak"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        href="{{ route('bantuan') }}"
+                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                     >
                         Pusat Bantuan
                     </a>
@@ -252,8 +252,8 @@
 
                 @guest
                     <a
-                        href="{{ route('home') }}#kontak"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        href="{{ route('bantuan') }}"
+                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                     >
                         Pusat Bantuan
                     </a>

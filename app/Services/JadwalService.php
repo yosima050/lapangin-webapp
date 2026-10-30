@@ -29,7 +29,7 @@ class JadwalService
         $jamTutup = $this->parseTime($lapangan->jam_tutup);
         $slots = [];
 
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Jakarta');
         $isToday = $tanggal === $now->toDateString();
         $isPastDate = $tanggal < $now->toDateString();
         $currentTime = $now->format('H:i');
@@ -113,6 +113,6 @@ class JadwalService
 
     private function parseTime(mixed $time): Carbon
     {
-        return Carbon::createFromFormat('H:i', substr((string) $time, 0, 5));
+        return Carbon::createFromFormat('H:i', substr((string) $time, 0, 5), 'Asia/Jakarta');
     }
 }

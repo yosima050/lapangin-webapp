@@ -16,6 +16,8 @@ use App\Http\Controllers\Pelanggan\RiwayatController;
 use App\Http\Controllers\Pelanggan\BookingRescheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\HargaKhususController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\Kasir\CheckinController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,6 +26,13 @@ Route::get('/', function () {
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 Route::get('/jadwal', [KatalogController::class, 'index'])->name('jadwal.index');
+
+// Informasi Publik & Bantuan
+Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');
+Route::get('/bantuan', [PageController::class, 'bantuan'])->name('bantuan');
+Route::get('/kebijakan-reschedule', [PageController::class, 'kebijakanReschedule'])->name('kebijakan.reschedule');
+Route::get('/syarat-ketentuan', [PageController::class, 'syaratKetentuan'])->name('syarat.ketentuan');
+Route::get('/kebijakan-privasi', [PageController::class, 'kebijakanPrivasi'])->name('kebijakan.privasi');
 
 Route::get('/dashboard', function () {
     $role = auth()->user()->role;
@@ -117,6 +126,16 @@ Route::middleware(['auth', 'IsAdmin'])
 Route::middleware(['auth', 'IsKasir'])->prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/', [KasirController::class, 'index'])
         ->name('index');
+
+    // Pemindai Barcode / QR Code Hardware (HID) & Cetak Struk Thermal
+    Route::get('/checkin', [CheckinController::class, 'index'])
+        ->name('checkin.index');
+
+    Route::post('/checkin/process', [CheckinController::class, 'process'])
+        ->name('checkin.process');
+
+    Route::get('/struk/{id}', [CheckinController::class, 'struk'])
+        ->name('struk');
 
     // Pemindai Kamera QR Code & Lookup Tiket (Sprint 4)
     Route::get('/scan', [KasirController::class, 'scan'])

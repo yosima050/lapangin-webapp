@@ -132,6 +132,7 @@
     <script>
     window.kasirSearch = function kasirSearch() {
         return {
+            isAlpineReady: true,
             searchQuery: @js($code ?? ''),
             localItems: @js($queueData),
             serverResults: [],
@@ -333,7 +334,7 @@
                 <div class="flex flex-col gap-2.5">
                     @if(count($queueData) > 0)
                         {{-- Fallback Server-Side Rendered (Tampil seketika sebelum Alpine hydrated) --}}
-                        <div x-show="false" class="flex flex-col gap-2.5">
+                        <div x-show="!isAlpineReady" class="flex flex-col gap-2.5">
                             @foreach($queueData as $fallback)
                                 <a href="{{ $fallback['url'] }}"
                                    class="p-3.5 rounded-xl border flex flex-col gap-1.5 {{ $fallback['is_selected'] ? 'bg-[#dce9ff] border-[#1a146b]' : 'bg-[#eff4ff] border-transparent' }}">
