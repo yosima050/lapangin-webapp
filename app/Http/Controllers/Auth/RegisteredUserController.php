@@ -85,4 +85,28 @@ class RegisteredUserController extends Controller
         return redirect()->route('register.otp.show')
             ->with('status', 'Kode verifikasi telah dikirimkan ke email Anda.');
     }
+
+    /**
+     * Pengecekan real-time ketersediaan email tanpa reload halaman.
+     */
+    public function checkEmail(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $email = strtolower(trim((string) $request->input('email')));
+
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Format alamat email tidak valid.',
+            ]);
+        }
+
+        $exists = Pelanggan::where('email', $email)->exists();
+
+        return response()->json([
+            'available' => ! $exists,
+            'message' => $exists
+                ? 'Alamat email ini sudah terdaftar. Silakan masuk atau gunakan email lain.'
+                : 'Email dapat digunakan.',
+        ]);
+    }
 }

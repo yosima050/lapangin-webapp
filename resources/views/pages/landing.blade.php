@@ -12,11 +12,6 @@
                 
                 {{-- Hero Copy --}}
                 <div class="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1a146b]/10 text-[#1a146b] text-xs sm:text-sm font-semibold tracking-wide">
-                        <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
-                        Platform Reservasi Olahraga No. 1
-                    </div>
-
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-headline font-black text-[#1a146b] tracking-tight leading-[1.15]">
                         Booking Lapangan Olahraga <span class="text-[#416900]">Cepat, Mudah,</span> dan Terjadwal
                     </h1>
@@ -78,22 +73,10 @@
                                 />
                                 <div class="absolute inset-0 bg-gradient-to-t from-[#1a146b]/80 via-transparent to-black/20"></div>
 
-                                {{-- Floating Badge Info --}}
-                                <div class="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-[#1a146b] text-xs font-bold shadow">
-                                    <span class="material-symbols-outlined text-sm text-[#416900]">verified</span>
-                                    Fasilitas Terverifikasi
-                                </div>
-
                                 <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-white/95 backdrop-blur-md shadow-lg border border-white/60">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Ketersediaan Lapangan</p>
-                                            <p class="text-sm font-headline font-bold text-[#1a146b]">Vinyl Indoor Pro AFC</p>
-                                        </div>
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#416900]/15 text-[#416900] text-xs font-bold">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
-                                            Slot Terbuka
-                                        </span>
+                                    <div>
+                                        <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Ketersediaan Lapangan</p>
+                                        <p class="text-sm font-headline font-bold text-[#1a146b]">Vinyl Indoor Pro AFC</p>
                                     </div>
                                 </div>
                             </div>

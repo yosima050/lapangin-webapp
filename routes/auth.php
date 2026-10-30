@@ -28,6 +28,9 @@ Route::middleware('guest')->group(function () {
     Route::post('register/resend-otp', [RegisterOtpController::class, 'resend'])
         ->name('register.otp.resend');
 
+    Route::post('register/check-email', [RegisteredUserController::class, 'checkEmail'])
+        ->name('register.check-email');
+
     Route::get('/auth/google/redirect', [AuthLoginGoogle::class, 'google_redirect'])
         ->name('auth.google');
     Route::get('/auth/google/callback', [AuthLoginGoogle::class, 'google_callback'])

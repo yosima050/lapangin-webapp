@@ -47,11 +47,6 @@
             <div class="lg:hidden">
                 <x-application-logo />
             </div>
-
-            <div class="hidden sm:flex items-center gap-2 text-xs font-semibold text-gray-500">
-                <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
-                <span>Sistem Reservasi Aktif 24/7</span>
-            </div>
         </div>
 
         {{-- Main Content Grid: 2 Columns on Desktop, Centered on Mobile --}}
@@ -82,14 +77,7 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     </div>
 
-                    <div class="p-4 bg-white flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
-                            <span class="text-xs font-black uppercase tracking-wider text-[#416900]">
-                                ARENA TERKONEKSI
-                            </span>
-                        </div>
-
+                    <div class="p-4 bg-white flex items-center justify-end">
                         {{-- Social Proof / Venue Stack Circles --}}
                         <div class="flex items-center -space-x-2">
                             <span class="w-7 h-7 rounded-full bg-[#eff4ff] border-2 border-white flex items-center justify-center text-[#1a146b] shadow-xs" title="Futsal & Sepakbola">
@@ -317,8 +305,9 @@
                                 <a
                                     href="{{ route('register') }}"
                                     onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
-                                    class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
-                                    Daftar Sekarang ↗
+                                    class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
+                                    <span>Daftar Sekarang</span>
+                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
                                 </a>
                             </p>
                         </div>
@@ -332,10 +321,6 @@
                          @if($activeTab !== 'register') style="display: none;" @endif>
 
                         <div class="mb-5">
-                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider mb-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
-                                <span>SATU AKUN SELURUH LAPANGAN</span>
-                            </div>
                             <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
                                 Daftar Akun Baru
                             </h2>
@@ -374,6 +359,10 @@
                         <form method="POST" action="{{ route('register') }}" class="space-y-4"
                               x-data="{
                                   submitting: false,
+                                  regEmail: '{{ old('name') ? old('email') : '' }}',
+                                  emailError: '',
+                                  isCheckingEmail: false,
+                                  emailAvailable: true,
                                   regPassword: '',
                                   regPasswordConfirm: '',
                                   get passwordTooShort() {
@@ -381,9 +370,36 @@
                                   },
                                   get passwordMismatch() {
                                       return this.regPasswordConfirm.length > 0 && this.regPassword !== this.regPasswordConfirm;
+                                  },
+                                  async checkEmailAvailability() {
+                                      const email = this.regEmail.trim();
+                                      if (!email || !email.includes('@')) {
+                                          this.emailError = '';
+                                          this.emailAvailable = true;
+                                          return;
+                                      }
+                                      this.isCheckingEmail = true;
+                                      try {
+                                          const response = await fetch('{{ route('register.check-email') }}', {
+                                              method: 'POST',
+                                              headers: {
+                                                  'Content-Type': 'application/json',
+                                                  'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
+                                                  'Accept': 'application/json'
+                                              },
+                                              body: JSON.stringify({ email: email })
+                                          });
+                                          const data = await response.json();
+                                          this.emailAvailable = data.available;
+                                          this.emailError = data.available ? '' : data.message;
+                                      } catch (err) {
+                                          console.error('Gagal mengecek email:', err);
+                                      } finally {
+                                          this.isCheckingEmail = false;
+                                      }
                                   }
                               }"
-                              @submit="if(passwordTooShort || passwordMismatch) { $event.preventDefault(); return false; } submitting = true">
+                              @submit="if(passwordTooShort || passwordMismatch || !emailAvailable) { $event.preventDefault(); return false; } submitting = true">
                             @csrf
 
                             {{-- 1. Nama Lengkap --}}
@@ -428,7 +444,8 @@
                                     <span class="text-[11px] text-gray-400">Untuk E-Tiket &amp; Notifikasi</span>
                                 </div>
 
-                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
+                                <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition"
+                                     :class="emailError ? '!border-red-500 !bg-red-50/30' : ''">
                                     <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
                                         mail
                                     </span>
@@ -436,16 +453,33 @@
                                         id="register_email"
                                         type="email"
                                         name="email"
+                                        x-model="regEmail"
+                                        @blur="checkEmailAvailability()"
+                                        @input="emailError = ''; emailAvailable = true;"
                                         value="{{ old('name') ? old('email') : '' }}"
                                         required
                                         autocomplete="username"
                                         placeholder="contoh: budi@email.com"
-                                        class="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
+                                        class="w-full pl-11 pr-10 py-3 bg-transparent text-sm text-gray-900 font-medium placeholder-gray-400 outline-none border-none focus:ring-0"
                                     >
+                                    <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center" x-show="isCheckingEmail">
+                                        <svg class="animate-spin h-4 w-4 text-[#1a146b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
+                                    </div>
                                 </div>
 
-                                @if ($activeTab === 'register' && $errors->has('email'))
+                                {{-- Real-time Email Availability Warning --}}
+                                <template x-if="emailError">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <span x-text="emailError"></span>
+                                    </p>
+                                </template>
+
+                                @if ($activeTab === 'register' && $errors->has('email'))
+                                    <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!emailError">
                                         <span class="material-symbols-outlined text-sm">error</span>
                                         <span>{{ $errors->first('email') }}</span>
                                     </p>
@@ -633,8 +667,9 @@
                                 <a
                                     href="{{ route('login') }}"
                                     onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
-                                    class="font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
-                                    Masuk Sekarang ↗
+                                    class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
+                                    <span>Masuk Sekarang</span>
+                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
                                 </a>
                             </p>
                         </div>
