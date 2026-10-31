@@ -32,13 +32,15 @@ class PaymentService
      * Buat Snap Token melalui Midtrans Snap API.
      *
      * @param  mixed  $customerDetails
+     * @param  array  $itemDetails
+     * @param  array  $enabledPayments
      */
-    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = []): string
+    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = [], array $enabledPayments = []): string
     {
         $this->initMidtrans();
 
-        // Caching: gunakan snap_token yang sudah ada jika belum expired/terbayar
-        if (! empty($transaksi->snap_token) && ($transaksi->status === 'pending' || empty($transaksi->status))) {
+        // Caching: gunakan snap_token yang sudah ada jika belum expired/terbayar dan tidak sedang memfilter metode spesifik
+        if (empty($enabledPayments) && ! empty($transaksi->snap_token) && ($transaksi->status === 'pending' || empty($transaksi->status))) {
             return $transaksi->snap_token;
         }
 
@@ -95,6 +97,10 @@ class PaymentService
             ],
             'item_details' => $itemDetails,
         ];
+
+        if (! empty($enabledPayments)) {
+            $params['enabled_payments'] = $enabledPayments;
+        }
 
         $snapToken = Snap::getSnapToken($params);
 

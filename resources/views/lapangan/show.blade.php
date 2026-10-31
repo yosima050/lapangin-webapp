@@ -235,6 +235,14 @@
             <span class="text-gray-900 font-bold truncate">{{ $lapangan->nama }}</span>
         </nav>
 
+        {{-- Flash Error Message (jika diarahkan karena jam lewat) --}}
+        @if (session('error'))
+            <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-sm flex items-center gap-3 shadow-xs">
+                <span class="material-symbols-outlined text-xl text-amber-600 shrink-0">schedule</span>
+                <span class="font-semibold">{{ session('error') }}</span>
+            </div>
+        @endif
+
         {{-- 2. Main Two-Column Split Grid --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 

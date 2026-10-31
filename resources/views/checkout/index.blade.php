@@ -148,178 +148,201 @@
                     </div>
                 </section>
 
-                @php
-                    $currentParams = request()->all();
-                    $dpUrl = route('checkout.index', array_merge($currentParams, ['tipe_bayar' => 'dp']));
-                    $fullUrl = route('checkout.index', array_merge($currentParams, ['tipe_bayar' => 'full']));
-                @endphp
-
-                {{-- Metode Pembayaran & Pilihan Skema --}}
+                {{-- PILIHAN METODE PEMBAYARAN (DIRECT CHANNEL SELECTION) --}}
                 <section class="rounded-2xl border border-[#e8edfa] bg-white p-5 shadow-sm sm:p-6">
-                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-                        <h2 class="flex items-center gap-2 text-lg font-bold text-[#0b1c30]">
-                            <span class="text-xl text-[#1a146b]">▣</span>
-                            Pilih Skema &amp; Metode Pembayaran
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-[#0b1c30]">
+                            <svg class="h-5 w-5 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Pilih Metode Pembayaran
                         </h2>
-
-                        <span id="section-badge-tipe" class="rounded-full bg-[#acf847] px-3 py-1 text-xs font-bold text-[#304f00]">
-                            {{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}
+                        <span class="rounded-full bg-[#eff4ff] px-2.5 py-1 text-[11px] font-bold text-[#1a146b]">
+                            Instan &amp; Otomatis
                         </span>
                     </div>
 
-                    {{-- Selector Tipe Pembayaran (Radio Card Interaktif Tanpa Reload) --}}
-                    <div class="mb-5">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-[#474651] mb-2.5">
-                            Pilih Tipe Pembayaran
-                        </label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {{-- Opsi A: DP 50% --}}
-                            <button type="button"
-                                    id="card-tipe-dp"
-                                    onclick="setTipeBayar('dp')"
-                                    class="text-left w-full relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
-                                <div class="flex items-center justify-between">
-                                    <span id="label-tipe-dp" class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                        Bayar DP (50%)
-                                    </span>
-                                    <span id="radio-tipe-dp" class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
-                                        @if($tipeBayar === 'dp')
-                                            <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
-                                        @endif
-                                    </span>
-                                </div>
-                                <p class="mt-2 text-lg font-extrabold text-[#0b1c30]">
-                                    Rp{{ number_format($nominalDp, 0, ',', '.') }}
-                                </p>
-                                <p class="mt-1 text-xs leading-5 text-[#474651]">
-                                    Bayar uang muka Rp{{ number_format($nominalDp, 0, ',', '.') }}, sisa dilunasi di meja kasir saat datang.
-                                </p>
-                            </button>
+                    <p class="mb-5 text-xs text-[#474651]">
+                        Pilih metode pembayaran langsung di bawah ini. Saat menekan tombol Bayar, Anda akan langsung diarahkan ke instruksi pembayaran yang dipilih.
+                    </p>
 
-                            {{-- Opsi B: Bayar Lunas 100% --}}
-                            <button type="button"
-                                    id="card-tipe-full"
-                                    onclick="setTipeBayar('full')"
-                                    class="text-left w-full relative flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-sm ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
-                                <div class="flex items-center justify-between">
-                                    <span id="label-tipe-full" class="text-xs font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                        Bayar Lunas (100%)
-                                    </span>
-                                    <span id="radio-tipe-full" class="h-4 w-4 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
-                                        @if($tipeBayar === 'full')
-                                            <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
-                                        @endif
-                                    </span>
+                    <div class="space-y-3" id="accordion-payment-methods">
+
+                        {{-- 1. QRIS (Semua E-Wallet & Mobile Banking) --}}
+                        <div class="overflow-hidden rounded-xl border-2 border-[#1a146b] bg-white transition-all shadow-xs" id="method-box-qris">
+                            <label class="flex cursor-pointer items-center justify-between p-4 bg-[#eff4ff]/60 hover:bg-[#eff4ff] transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="qris" checked onchange="selectPaymentMethod('qris')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-bold text-[#0b1c30]">QRIS (GoPay, OVO, Dana, ShopeePay, BCA)</span>
+                                            <span class="rounded bg-[#acf847] px-2 py-0.5 text-[10px] font-black text-[#284200] uppercase tracking-wider">Populer</span>
+                                        </div>
+                                        <p class="text-xs text-[#474651] mt-0.5">Scan kode QR langsung dari aplikasi e-wallet atau m-banking apa saja</p>
+                                    </div>
                                 </div>
-                                <p class="mt-2 text-lg font-extrabold text-[#0b1c30]">
-                                    Rp{{ number_format($totalHarga, 0, ',', '.') }}
-                                </p>
-                                <p class="mt-1 text-xs leading-5 text-[#416900] font-semibold">
-                                    Bayar lunas Rp{{ number_format($totalHarga, 0, ',', '.') }}, langsung terverifikasi tanpa antre kasir.
-                                </p>
-                            </button>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black tracking-wider text-slate-800">QRIS</span>
+                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
+                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
+                                </div>
+                            </label>
                         </div>
+
+                        {{-- 2. Virtual Account BCA --}}
+                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bca_va">
+                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="bca_va" onchange="selectPaymentMethod('bca_va')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <span class="text-sm font-bold text-[#0b1c30]">BCA Virtual Account</span>
+                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via myBCA, BCA Mobile, KlikBCA, atau ATM BCA</p>
+                                    </div>
+                                </div>
+                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#0060af] tracking-wider shrink-0">BCA</span>
+                            </label>
+                        </div>
+
+                        {{-- 3. Virtual Account Mandiri --}}
+                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-mandiri_va">
+                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="mandiri_va" onchange="selectPaymentMethod('mandiri_va')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <span class="text-sm font-bold text-[#0b1c30]">Mandiri Bill Payment / VA</span>
+                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via Livin' by Mandiri, Internet Banking, atau ATM</p>
+                                    </div>
+                                </div>
+                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#003d79] tracking-wider shrink-0">MANDIRI</span>
+                            </label>
+                        </div>
+
+                        {{-- 4. Virtual Account BNI --}}
+                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bni_va">
+                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="bni_va" onchange="selectPaymentMethod('bni_va')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <span class="text-sm font-bold text-[#0b1c30]">BNI Virtual Account</span>
+                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via BNI Mobile Banking, Internet Banking, atau ATM BNI</p>
+                                    </div>
+                                </div>
+                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#e05828] tracking-wider shrink-0">BNI</span>
+                            </label>
+                        </div>
+
+                        {{-- 5. Virtual Account BRI --}}
+                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bri_va">
+                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="bri_va" onchange="selectPaymentMethod('bri_va')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <span class="text-sm font-bold text-[#0b1c30]">BRI Virtual Account (BRIVA)</span>
+                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via BRImo, Internet Banking, atau ATM BRI</p>
+                                    </div>
+                                </div>
+                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#00529c] tracking-wider shrink-0">BRI</span>
+                            </label>
+                        </div>
+
+                        {{-- 6. Kartu Kredit / Debit --}}
+                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-credit_card">
+                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="selected_metode" value="credit_card" onchange="selectPaymentMethod('credit_card')"
+                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <div>
+                                        <span class="text-sm font-bold text-[#0b1c30]">Kartu Kredit / Debit Online</span>
+                                        <p class="text-xs text-[#474651] mt-0.5">Visa, Mastercard, JCB, American Express 3D Secure</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
+                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
+                                </div>
+                            </label>
+                        </div>
+
                     </div>
-
-                    {{-- Card Informasi Midtrans Snap --}}
-                    <div class="rounded-xl border border-[#dce9ff] bg-[#f8faff] p-5">
-                        <div class="flex items-start gap-3">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1a146b] text-[#acf847] shadow-xs">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
-                            </span>
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="font-bold text-[#1a146b] text-base">
-                                        Metode Pembayaran Tersedia via Midtrans Snap
-                                    </h3>
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-[#dcfce7] px-2.5 py-0.5 text-xs font-semibold text-[#166534]">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#22c55e]"></span>
-                                        Aktif &amp; Terverifikasi
-                                    </span>
-                                </div>
-                                <p class="mt-1 text-xs leading-5 text-[#474651]">
-                                    (QRIS GoPay/ShopeePay, Transfer Virtual Account BCA/BRI/BNI/Mandiri, Kartu Kredit)
-                                </p>
-                            </div>
-                        </div>
-
-                        <p class="mt-4 text-sm leading-6 text-[#474651]">
-                            Saat Anda menekan tombol <strong class="text-[#1a146b]">Bayar Sekarang</strong>, modal pop-up resmi Midtrans Snap akan muncul di layar. Anda dapat memilih salah satu kanal pembayaran instan berikut:
-                        </p>
-
-                        {{-- Channel Pembayaran --}}
-                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                            <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 13.5h3.75v3.75H13.5V13.5zM17.25 17.25h3v3h-3v-3z"/></svg>
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="text-xs font-bold text-[#0b1c30]">QRIS &amp; E-Wallet</p>
-                                    <p class="truncate text-[11px] text-[#777682]">GoPay, ShopeePay, OVO, Dana</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.5m-15 10.5V10.5m-1.5 10.5h18"/></svg>
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="text-xs font-bold text-[#0b1c30]">Virtual Account / VA</p>
-                                    <p class="truncate text-[11px] text-[#777682]">BCA, BRI, BNI, Mandiri, Permata</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="text-xs font-bold text-[#0b1c30]">Kartu Kredit / Debit</p>
-                                    <p class="truncate text-[11px] text-[#777682]">Visa, Mastercard, JCB</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3 rounded-xl border border-[#e5eeff] bg-white p-3.5 shadow-2xs">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="text-xs font-bold text-[#0b1c30]">Verifikasi Otomatis</p>
-                                    <p class="truncate text-[11px] text-[#777682]">E-Tiket &amp; Kode QR terbit seketika</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Rincian Nominal yang Dibayar dalam Card --}}
-                        <div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-white p-4 border border-[#e5eeff]">
-                            <div>
-                                <p class="text-xs font-bold text-[#0b1c30]">
-                                    Nominal yang Harus Dibayar (<span id="snap-nominal-label">{{ $tipeBayar === 'full' ? '100% Lunas' : '50% DP' }}</span>)
-                                </p>
-                                <p id="snap-nominal-sub" class="mt-0.5 text-[11px] text-[#777682]">
-                                    {{ $tipeBayar === 'full' ? 'Pembayaran lunas online penuh via Midtrans Snap' : 'Pembayaran awal uang muka via Midtrans Snap' }}
-                                </p>
-                            </div>
-
-                            <span id="snap-nominal-val" class="shrink-0 text-right font-extrabold text-base text-[#1a146b]">
-                                Rp{{ number_format($nominalBayar, 0, ',', '.') }}
-                            </span>
-                        </div>
-                    </div>
+                </section>
                 </section>
             </div>
 
-            {{-- KOLOM KANAN: RINGKASAN --}}
+            {{-- KOLOM KANAN: RINGKASAN & PEMILIHAN TIPE BAYAR --}}
             <aside class="lg:sticky lg:top-6 lg:col-span-5">
                 <section class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
 
                     <div class="px-5 py-5 sm:px-6">
-                        <h2 class="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-[#416900]">
-                            <span class="h-2 w-2 rounded-full bg-[#416900]"></span>
-                            Ringkasan Booking
-                        </h2>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-[#416900]">
+                                <span class="h-2 w-2 rounded-full bg-[#416900]"></span>
+                                Ringkasan Booking
+                            </h2>
+                            <span id="section-badge-tipe" class="rounded-full bg-[#acf847] px-3 py-1 text-xs font-bold text-[#304f00]">
+                                {{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}
+                            </span>
+                        </div>
 
-                        <div class="mt-5 rounded-xl bg-[#eff4ff] p-4">
+                        {{-- Pilihan Tipe Pembayaran (Disatukan dalam Card Ringkasan) --}}
+                        <div class="mb-5">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-[#474651] mb-2.5">
+                                Pilih Tipe Pembayaran
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                {{-- Opsi A: DP 50% --}}
+                                <button type="button"
+                                        id="card-tipe-dp"
+                                        onclick="setTipeBayar('dp')"
+                                        class="text-left w-full relative flex flex-col p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                                    <div class="flex items-center justify-between">
+                                        <span id="label-tipe-dp" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
+                                            Bayar DP (50%)
+                                        </span>
+                                        <span id="radio-tipe-dp" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
+                                            @if($tipeBayar === 'dp')
+                                                <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <p class="mt-1 text-base font-extrabold text-[#0b1c30]">
+                                        Rp{{ number_format($nominalDp, 0, ',', '.') }}
+                                    </p>
+                                    <p class="mt-0.5 text-[10px] leading-snug text-[#474651]">
+                                        Sisa dilunasi di kasir venue
+                                    </p>
+                                </button>
+
+                                {{-- Opsi B: Bayar Lunas 100% --}}
+                                <button type="button"
+                                        id="card-tipe-full"
+                                        onclick="setTipeBayar('full')"
+                                        class="text-left w-full relative flex flex-col p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                                    <div class="flex items-center justify-between">
+                                        <span id="label-tipe-full" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
+                                            Bayar Lunas (100%)
+                                        </span>
+                                        <span id="radio-tipe-full" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
+                                            @if($tipeBayar === 'full')
+                                                <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <p class="mt-1 text-base font-extrabold text-[#0b1c30]">
+                                        Rp{{ number_format($totalHarga, 0, ',', '.') }}
+                                    </p>
+                                    <p class="mt-0.5 text-[10px] leading-snug text-[#416900] font-semibold">
+                                        Main langsung tanpa kasir
+                                    </p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl bg-[#eff4ff] p-4">
                             <p class="text-xs font-bold uppercase tracking-wide text-[#474651]">
                                 Lapangan pilihan
                             </p>
@@ -537,7 +560,33 @@
     const totalHarga = {{ (float) $totalHarga }};
     const nominalDp = {{ (float) $nominalDp }};
     window.currentTipeBayar = "{{ $tipeBayar }}";
+    window.selectedPaymentMethod = 'qris';
     window.currentModalCallback = null;
+
+    window.selectPaymentMethod = function(method) {
+        window.selectedPaymentMethod = method;
+        const boxes = document.querySelectorAll('#accordion-payment-methods > div');
+        boxes.forEach(box => {
+            box.classList.remove('border-2', 'border-[#1a146b]', 'shadow-xs');
+            box.classList.add('border-[#e8edfa]');
+            const label = box.querySelector('label');
+            if (label) {
+                label.classList.remove('bg-[#eff4ff]/60');
+            }
+        });
+
+        const activeBox = document.getElementById('method-box-' + method);
+        if (activeBox) {
+            activeBox.classList.remove('border-[#e8edfa]');
+            activeBox.classList.add('border-2', 'border-[#1a146b]', 'shadow-xs');
+            const label = activeBox.querySelector('label');
+            if (label) {
+                label.classList.add('bg-[#eff4ff]/60');
+            }
+            const radio = activeBox.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        }
+    };
 
     window.showNotificationModal = function({
         title = 'Perhatian',
@@ -856,6 +905,7 @@
                     jam_mulai: "{{ $jamMulai }}",
                     durasi: {{ $durasi }},
                     tipe_bayar: window.currentTipeBayar,
+                    metode_bayar: window.selectedPaymentMethod || 'qris',
                     jadwal_id: "{{ $jadwalId ?? '' }}",
                     booking_id: "{{ $bookingId ?? ($jadwalId ?? '') }}",
                     nama: guestNama || "{{ $pelanggan?->nama ?? '' }}",
