@@ -148,128 +148,309 @@
                     </div>
                 </section>
 
-                {{-- PILIHAN METODE PEMBAYARAN (DIRECT CHANNEL SELECTION) --}}
+                {{-- PILIHAN METODE PEMBAYARAN (ACCORDION DENGAN GRID CHANNEL PERSIS CONTOH GAMBAR) --}}
                 <section class="rounded-2xl border border-[#e8edfa] bg-white p-5 shadow-sm sm:p-6">
                     <div class="mb-4 flex items-center justify-between">
-                        <h2 class="flex items-center gap-2 text-base font-extrabold text-[#0b1c30]">
-                            <svg class="h-5 w-5 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                            Pilih Metode Pembayaran
-                        </h2>
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1a146b] text-xs font-black text-[#acf847]">
+                                2
+                            </span>
+                            <h2 class="text-base font-extrabold text-[#0b1c30]">
+                                Pilih Metode Pembayaran
+                            </h2>
+                        </div>
                         <span class="rounded-full bg-[#eff4ff] px-2.5 py-1 text-[11px] font-bold text-[#1a146b]">
-                            Instan &amp; Otomatis
+                            Verifikasi Otomatis
                         </span>
                     </div>
 
                     <p class="mb-5 text-xs text-[#474651]">
-                        Pilih metode pembayaran langsung di bawah ini. Saat menekan tombol Bayar, Anda akan langsung diarahkan ke instruksi pembayaran yang dipilih.
+                        Pilih kategori pembayaran di bawah ini. Klik kategori untuk membuka pilihan bank atau e-wallet.
                     </p>
 
-                    <div class="space-y-3" id="accordion-payment-methods">
+                    <div class="space-y-3.5" id="accordion-payment-methods">
 
-                        {{-- 1. QRIS (Semua E-Wallet & Mobile Banking) --}}
-                        <div class="overflow-hidden rounded-xl border-2 border-[#1a146b] bg-white transition-all shadow-xs" id="method-box-qris">
-                            <label class="flex cursor-pointer items-center justify-between p-4 bg-[#eff4ff]/60 hover:bg-[#eff4ff] transition">
+                        {{-- 1. QRIS (All E-Wallet & Mobile Banking) --}}
+                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-qris">
+                            {{-- Header Accordion --}}
+                            <button type="button" onclick="togglePaymentGroup('qris')"
+                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
                                 <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="qris" checked onchange="selectPaymentMethod('qris')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
+                                        QR
+                                    </span>
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <span class="text-sm font-bold text-[#0b1c30]">QRIS (GoPay, OVO, Dana, ShopeePay, BCA)</span>
-                                            <span class="rounded bg-[#acf847] px-2 py-0.5 text-[10px] font-black text-[#284200] uppercase tracking-wider">Populer</span>
+                                            <span class="text-sm font-extrabold text-[#0b1c30]">QRIS (Semua E-Wallet & M-Banking)</span>
+                                            <span class="rounded bg-[#acf847] px-1.5 py-0.5 text-[9px] font-black uppercase text-[#304f00]">Best Choice</span>
                                         </div>
-                                        <p class="text-xs text-[#474651] mt-0.5">Scan kode QR langsung dari aplikasi e-wallet atau m-banking apa saja</p>
+                                        <p class="text-xs text-[#777682] mt-0.5">GoPay, ShopeePay, OVO, Dana, LinkAja, BCA, dll</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black tracking-wider text-slate-800">QRIS</span>
-                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
-                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black tracking-wider text-slate-800">QRIS</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
+                                    </div>
+                                    <svg id="chevron-qris" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
-                            </label>
+                            </button>
+
+                            {{-- Sub-items Grid --}}
+                            <div id="content-qris" class="p-4 pt-1 border-t border-gray-100">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                                    {{-- Sub Card: QRIS Instant --}}
+                                    <div onclick="selectPaymentChannel('qris', 'QRIS Universal')"
+                                         id="channel-box-qris"
+                                         class="payment-channel-card cursor-pointer rounded-xl border-2 border-[#1a146b] bg-[#eff4ff] p-3.5 transition flex items-center justify-between shadow-xs">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center font-black text-xs text-slate-900 shadow-2xs">
+                                                QRIS
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">QRIS Universal</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Diverifikasi Otomatis</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                            <span class="inline-block mt-0.5 text-[10px] text-gray-500">Scan via m-Banking/E-Wallet</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- 2. Virtual Account BCA --}}
-                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bca_va">
-                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                        {{-- 2. Virtual Account (BCA, Mandiri, BNI, BRI, Permata, dll) --}}
+                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-va">
+                            {{-- Header Accordion --}}
+                            <button type="button" onclick="togglePaymentGroup('va')"
+                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
                                 <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="bca_va" onchange="selectPaymentMethod('bca_va')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
+                                        VA
+                                    </span>
                                     <div>
-                                        <span class="text-sm font-bold text-[#0b1c30]">BCA Virtual Account</span>
-                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via myBCA, BCA Mobile, KlikBCA, atau ATM BCA</p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-extrabold text-[#0b1c30]">Virtual Account (Transfer Bank)</span>
+                                            <span class="rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-800">Otomatis 24 Jam</span>
+                                        </div>
+                                        <p class="text-xs text-[#777682] mt-0.5">BCA, Mandiri, BRI, BNI, Permata &amp; ATM Lainnya</p>
                                     </div>
                                 </div>
-                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#0060af] tracking-wider shrink-0">BCA</span>
-                            </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#0060af]">BCA</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#003d79]">MANDIRI</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#00529c]">BRI</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#e05828]">BNI</span>
+                                    </div>
+                                    <svg id="chevron-va" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </button>
+
+                            {{-- Sub-items Grid --}}
+                            <div id="content-va" class="p-4 pt-1 border-t border-gray-100">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                                    {{-- BCA VA --}}
+                                    <div onclick="selectPaymentChannel('bca_va', 'BCA Virtual Account')"
+                                         id="channel-box-bca_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#0060af]">BCA</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BCA Virtual Account</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Mandiri VA --}}
+                                    <div onclick="selectPaymentChannel('mandiri_va', 'Mandiri Virtual Account')"
+                                         id="channel-box-mandiri_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#003d79]">MANDIRI</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Mandiri Bill Payment</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- BRI VA --}}
+                                    <div onclick="selectPaymentChannel('bri_va', 'BRI Virtual Account')"
+                                         id="channel-box-bri_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#00529c]">BRI</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BRI (BRIVA)</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- BNI VA --}}
+                                    <div onclick="selectPaymentChannel('bni_va', 'BNI Virtual Account')"
+                                         id="channel-box-bni_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#e05828]">BNI</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BNI Virtual Account</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Permata VA --}}
+                                    <div onclick="selectPaymentChannel('permata_va', 'Permata Virtual Account')"
+                                         id="channel-box-permata_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#1a7f37]">PERMATA</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Permata VA</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- ATM Bersama / Prima (Other VA) --}}
+                                    <div onclick="selectPaymentChannel('other_va', 'ATM Bersama / Prima')"
+                                         id="channel-box-other_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#304f00]">ATM BERSAMA</span>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Bank Lainnya (Prima)</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- 3. Virtual Account Mandiri --}}
-                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-mandiri_va">
-                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                        {{-- 3. E-Wallet Langsung (GoPay & ShopeePay App) --}}
+                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-ewallet">
+                            {{-- Header Accordion --}}
+                            <button type="button" onclick="togglePaymentGroup('ewallet')"
+                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
                                 <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="mandiri_va" onchange="selectPaymentMethod('mandiri_va')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
+                                        EW
+                                    </span>
                                     <div>
-                                        <span class="text-sm font-bold text-[#0b1c30]">Mandiri Bill Payment / VA</span>
-                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via Livin' by Mandiri, Internet Banking, atau ATM</p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-extrabold text-[#0b1c30]">E-Wallet Langsung</span>
+                                            <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">Buka Aplikasi</span>
+                                        </div>
+                                        <p class="text-xs text-[#777682] mt-0.5">GoPay Apps, GoPay Later &amp; ShopeePay</p>
                                     </div>
                                 </div>
-                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#003d79] tracking-wider shrink-0">MANDIRI</span>
-                            </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
+                                    </div>
+                                    <svg id="chevron-ewallet" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </button>
+
+                            {{-- Sub-items Grid --}}
+                            <div id="content-ewallet" class="p-4 pt-1 border-t border-gray-100 hidden">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                                    {{-- GoPay --}}
+                                    <div onclick="selectPaymentChannel('gopay', 'GoPay')"
+                                         id="channel-box-gopay"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-black text-sky-600 shadow-2xs">GOPAY</span>
+                                            <div>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">GoPay / GoPay Later</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Buka Otomatis Aplikasi</p>
+                                            </div>
+                                        </div>
+                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                    </div>
+
+                                    {{-- ShopeePay --}}
+                                    <div onclick="selectPaymentChannel('shopeepay', 'ShopeePay')"
+                                         id="channel-box-shopeepay"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-black text-orange-500 shadow-2xs">SHOPEE</span>
+                                            <div>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">ShopeePay / SPayLater</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Buka Otomatis Aplikasi</p>
+                                            </div>
+                                        </div>
+                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- 4. Virtual Account BNI --}}
-                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bni_va">
-                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
+                        {{-- 4. Kartu Kredit / Debit --}}
+                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-cc">
+                            {{-- Header Accordion --}}
+                            <button type="button" onclick="togglePaymentGroup('cc')"
+                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
                                 <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="bni_va" onchange="selectPaymentMethod('bni_va')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
+                                        CC
+                                    </span>
                                     <div>
-                                        <span class="text-sm font-bold text-[#0b1c30]">BNI Virtual Account</span>
-                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via BNI Mobile Banking, Internet Banking, atau ATM BNI</p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-extrabold text-[#0b1c30]">Kartu Kredit &amp; Debit Online</span>
+                                            <span class="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold text-violet-800">3D Secure</span>
+                                        </div>
+                                        <p class="text-xs text-[#777682] mt-0.5">Visa, Mastercard, JCB, American Express</p>
                                     </div>
                                 </div>
-                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#e05828] tracking-wider shrink-0">BNI</span>
-                            </label>
-                        </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
+                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-emerald-700">JCB</span>
+                                    </div>
+                                    <svg id="chevron-cc" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </button>
 
-                        {{-- 5. Virtual Account BRI --}}
-                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-bri_va">
-                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
-                                <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="bri_va" onchange="selectPaymentMethod('bri_va')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
-                                    <div>
-                                        <span class="text-sm font-bold text-[#0b1c30]">BRI Virtual Account (BRIVA)</span>
-                                        <p class="text-xs text-[#474651] mt-0.5">Bayar via BRImo, Internet Banking, atau ATM BRI</p>
+                            {{-- Sub-items Grid --}}
+                            <div id="content-cc" class="p-4 pt-1 border-t border-gray-100 hidden">
+                                <div class="grid grid-cols-1 gap-3 mt-2">
+                                    {{-- Credit Card Channel Card --}}
+                                    <div onclick="selectPaymentChannel('credit_card', 'Kartu Kredit / Debit')"
+                                         id="channel-box-credit_card"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1">
+                                                <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
+                                                <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">Semua Kartu Kredit / Debit Visa &amp; Mastercard</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Proteksi OTP 3D Secure</p>
+                                            </div>
+                                        </div>
+                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
-                                <span class="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs font-black text-[#00529c] tracking-wider shrink-0">BRI</span>
-                            </label>
-                        </div>
-
-                        {{-- 6. Kartu Kredit / Debit --}}
-                        <div class="overflow-hidden rounded-xl border border-[#e8edfa] bg-white transition-all hover:border-[#1a146b]" id="method-box-credit_card">
-                            <label class="flex cursor-pointer items-center justify-between p-4 hover:bg-[#eff4ff]/40 transition">
-                                <div class="flex items-center gap-3">
-                                    <input type="radio" name="selected_metode" value="credit_card" onchange="selectPaymentMethod('credit_card')"
-                                           class="h-4 w-4 text-[#1a146b] focus:ring-[#1a146b] border-gray-300">
-                                    <div>
-                                        <span class="text-sm font-bold text-[#0b1c30]">Kartu Kredit / Debit Online</span>
-                                        <p class="text-xs text-[#474651] mt-0.5">Visa, Mastercard, JCB, American Express 3D Secure</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
-                                    <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
-                                </div>
-                            </label>
+                            </div>
                         </div>
 
                     </div>
-                </section>
                 </section>
             </div>
 
@@ -561,30 +742,41 @@
     const nominalDp = {{ (float) $nominalDp }};
     window.currentTipeBayar = "{{ $tipeBayar }}";
     window.selectedPaymentMethod = 'qris';
+    window.selectedPaymentLabel = 'QRIS Universal';
     window.currentModalCallback = null;
 
-    window.selectPaymentMethod = function(method) {
-        window.selectedPaymentMethod = method;
-        const boxes = document.querySelectorAll('#accordion-payment-methods > div');
-        boxes.forEach(box => {
-            box.classList.remove('border-2', 'border-[#1a146b]', 'shadow-xs');
-            box.classList.add('border-[#e8edfa]');
-            const label = box.querySelector('label');
-            if (label) {
-                label.classList.remove('bg-[#eff4ff]/60');
-            }
+    // Toggle Accordion Group (Buka / Tutup dropdown per kategori)
+    window.togglePaymentGroup = function(groupId) {
+        const content = document.getElementById('content-' + groupId);
+        const chevron = document.getElementById('chevron-' + groupId);
+        if (!content) return;
+
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+            content.classList.remove('hidden');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+    };
+
+    // Pilih spesifik Channel Pembayaran di dalam Grid/Accordion
+    window.selectPaymentChannel = function(methodCode, methodLabel) {
+        window.selectedPaymentMethod = methodCode;
+        window.selectedPaymentLabel = methodLabel;
+
+        // Reset styling semua sub-card channel
+        document.querySelectorAll('.payment-channel-card').forEach(card => {
+            card.classList.remove('border-2', 'border-[#1a146b]', 'bg-[#eff4ff]', 'shadow-xs', 'ring-1', 'ring-[#1a146b]');
+            card.classList.add('border-[#e8edfa]', 'bg-white');
         });
 
-        const activeBox = document.getElementById('method-box-' + method);
-        if (activeBox) {
-            activeBox.classList.remove('border-[#e8edfa]');
-            activeBox.classList.add('border-2', 'border-[#1a146b]', 'shadow-xs');
-            const label = activeBox.querySelector('label');
-            if (label) {
-                label.classList.add('bg-[#eff4ff]/60');
-            }
-            const radio = activeBox.querySelector('input[type="radio"]');
-            if (radio) radio.checked = true;
+        // Highlight kartu channel yang dipilih
+        const activeCard = document.getElementById('channel-box-' + methodCode);
+        if (activeCard) {
+            activeCard.classList.remove('border-[#e8edfa]', 'bg-white');
+            activeCard.classList.add('border-2', 'border-[#1a146b]', 'bg-[#eff4ff]', 'shadow-xs', 'ring-1', 'ring-[#1a146b]');
         }
     };
 
@@ -757,7 +949,12 @@
                 : 'Sisa tagihan dibayarkan di kasir. Pastikan pembayaran DP sudah terverifikasi sebelum menggunakan e-tiket.';
         }
 
-        // 5. Teks Tombol Bayar Sekarang
+        // 5. Update nominal di setiap kartu channel pembayaran
+        document.querySelectorAll('.channel-nominal-display').forEach(el => {
+            el.textContent = formatRupiah(nominal);
+        });
+
+        // 6. Teks Tombol Bayar Sekarang
         const payText = document.getElementById('pay-button-text');
         if (payText) payText.textContent = `Bayar Sekarang (${formatRupiah(nominal)})`;
     };
