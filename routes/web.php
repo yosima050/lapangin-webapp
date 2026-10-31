@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PegawaiController;
 use App\Http\Controllers\Admin\PerlengkapanController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CekJadwalController;
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\MidtransCallbackController;
@@ -25,7 +26,7 @@ Route::get('/', function () {
 })->name('home');
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
-Route::get('/jadwal', [KatalogController::class, 'index'])->name('jadwal.index');
+Route::get('/jadwal', [CekJadwalController::class, 'index'])->name('jadwal.index');
 
 // Informasi Publik & Bantuan
 Route::get('/kontak', [PageController::class, 'kontak'])->name('kontak');

@@ -69,20 +69,20 @@
          },
 
          get durationHours() {
-             return Math.max(1, this.selectedSlots.length);
+             return this.selectedSlots.length;
          },
 
          get earliestSlot() {
-             return this.selectedSlots.length > 0 ? this.selectedSlots[0].jam_mulai : '19:00';
+             return this.selectedSlots.length > 0 ? this.selectedSlots[0].jam_mulai : null;
          },
 
          get latestSlotEnd() {
-             if (this.selectedSlots.length === 0) return '21:00';
+             if (this.selectedSlots.length === 0) return null;
              return this.selectedSlots[this.selectedSlots.length - 1].jam_selesai;
          },
 
          get timeRangeLabel() {
-             if (this.selectedSlots.length === 0) return 'Pilih slot jam main di kiri';
+             if (this.selectedSlots.length === 0) return 'Belum memilih slot jam main';
              const start = this.earliestSlot.substring(0, 5);
              const end = this.latestSlotEnd.substring(0, 5);
              return `${start} - ${end} WIB`;
@@ -90,7 +90,7 @@
 
          get courtTotalFee() {
              if (this.selectedSlots.length === 0) {
-                 return this.baseRate * 2; // Default preview 2 jam
+                 return 0;
              }
              let sum = 0;
              this.selectedSlots.forEach(slot => {
@@ -515,7 +515,7 @@
                                 <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
                                 <span>Durasi Total:</span>
                             </span>
-                            <strong class="text-[#1a146b]" x-text="durationHours + ' Jam Sesi'"></strong>
+                            <strong class="text-[#1a146b]" x-text="durationHours > 0 ? (durationHours + ' Jam Sesi') : '-'"></strong>
                         </div>
                     </div>
 
@@ -523,7 +523,7 @@
                     <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
                         <div class="flex items-center justify-between">
                             <span>Sesi Sewa Lapangan (<span x-text="durationHours"></span> jam):</span>
-                            <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
+                            <span class="font-bold text-gray-900" x-text="selectedSlots.length > 0 ? formatRp(courtTotalFee) : 'Rp0'"></span>
                         </div>
 
                         <template x-if="equipmentTotalFee > 0">
@@ -591,7 +591,7 @@
                     <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="pt-1">
                         <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
                         <input type="hidden" name="tanggal" value="{{ $tanggalDipilih }}">
-                        <input type="hidden" name="jam_mulai" :value="earliestSlot.substring(0, 5)">
+                        <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
                         <input type="hidden" name="durasi" :value="durationHours">
                         <input type="hidden" name="tipe_bayar" :value="paymentScheme">
 
