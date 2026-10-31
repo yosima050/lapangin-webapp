@@ -49,29 +49,30 @@
                         $currentKategori = request('kategori', 'Semua');
                     @endphp
 
-                    <a
-                        href="{{ route('katalog.index', ['kategori' => 'Semua', 'tanggal' => $tanggal]) }}"
+                    <button
+                        type="button"
                         @click="sport = 'Semua'"
                         :class="sport === 'Semua'
                             ? 'bg-[#1a146b] text-white shadow-sm'
                             : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center gap-1 {{ $currentKategori === 'Semua' ? 'bg-[#1a146b] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}"
+                        class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center cursor-pointer"
                     >
-                        <span>Semua</span>
-                        <span class="opacity-70">({{ count($katalog) }})</span>
-                    </a>
+                        Semua
+                    </button>
 
-                    @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->unique()) as $kat)
-                        <a
-                            href="{{ route('katalog.index', ['kategori' => $kat, 'tanggal' => $tanggal]) }}"
-                            @click="sport = '{{ $kat }}'"
-                            :class="sport === '{{ $kat }}'
-                                ? 'bg-[#1a146b] text-white shadow-sm'
-                                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
-                            class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center {{ $currentKategori === $kat ? 'bg-[#1a146b] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}"
-                        >
-                            {{ $kat }}
-                        </a>
+                    @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->filter()->unique()) as $kat)
+                        @if(filled($kat))
+                            <button
+                                type="button"
+                                @click="sport = '{{ $kat }}'"
+                                :class="sport === '{{ $kat }}'
+                                    ? 'bg-[#1a146b] text-white shadow-sm'
+                                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+                                class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center cursor-pointer"
+                            >
+                                {{ $kat }}
+                            </button>
+                        @endif
                     @endforeach
 
                 </div>

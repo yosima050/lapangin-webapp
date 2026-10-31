@@ -43,7 +43,11 @@ class CekJadwalController extends Controller
         }
 
         $lapangans = $query->orderBy('nama')->get();
-        $kategoriList = Lapangan::distinct()->whereNotNull('kategori')->orderBy('kategori')->pluck('kategori');
+        $kategoriList = Lapangan::distinct()
+            ->whereNotNull('kategori')
+            ->where('kategori', '!=', '')
+            ->orderBy('kategori')
+            ->pluck('kategori');
         $allLapangans = Lapangan::orderBy('nama')->get(['id', 'nama', 'kategori']);
 
         // Generate 7 hari cepat navigasi kalender

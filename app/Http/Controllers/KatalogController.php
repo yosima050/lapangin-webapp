@@ -31,14 +31,13 @@ class KatalogController extends Controller
         // Cegah pemilihan tanggal kemarin / lampau
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
 
-        $query = Lapangan::with('hargaMasters');
-
-        if ($kategori && $kategori !== 'Semua') {
-            $query->where('kategori', $kategori);
-        }
-
-        $lapangan = $query->get();
-        $kategoriList = Lapangan::distinct()->whereNotNull('kategori')->orderBy('kategori')->pluck('kategori');
+        // Ambil semua lapangan agar filter Alpine.js di browser instan tanpa reload
+        $lapangan = Lapangan::with('hargaMasters')->get();
+        $kategoriList = Lapangan::distinct()
+            ->whereNotNull('kategori')
+            ->where('kategori', '!=', '')
+            ->orderBy('kategori')
+            ->pluck('kategori');
 
         $dataKatalog = $lapangan->map(function ($item) use ($tanggal) {
             $slotData = $this->jadwalService->getSlotStatus((string) $item->id, $tanggal);
