@@ -647,6 +647,7 @@ class KasirController extends Controller
                         'lapangan',
                         'pelanggan',
                         'transaksis',
+                        'detailSewaPerlengkapans',
                     ]),
                     'jumlah_bayar' => $jumlahBayar,
                 ];

@@ -200,7 +200,7 @@
                 <span class="font-bold uppercase text-[8px] text-gray-600">Sewa Perlengkapan:</span>
                 @foreach($jadwal->detailSewaPerlengkapans as $item)
                     <div class="flex justify-between">
-                        <span>{{ $item->perlengkapan?->nama ?? 'Alat' }} (x{{ $item->jumlah }})</span>
+                        <span>{{ $item->nama_perlengkapan ?? 'Alat' }} (x{{ $item->jumlah }})</span>
                         <span>Rp{{ number_format((float)$item->subtotal, 0, ',', '.') }}</span>
                     </div>
                 @endforeach
