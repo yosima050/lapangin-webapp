@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+﻿@extends('layouts.kasir')
 
 @section('title', 'Validasi Check-in & Pelunasan Kasir - LapangIn')
 
@@ -28,13 +28,23 @@
     totalDue: {{ $initialDue }},
     paymentMethod: 'cash',
     bookingCode: '{{ $bookingCode }}',
-    notes: '',
+     notes: '',
     confirmed: false,
+
+    equipmentQty: @js($perlengkapans->mapWithKeys(fn ($item) => [$item->id => 0])),
+    equipmentPrices: @js($perlengkapans->mapWithKeys(fn ($item) => [$item->id => (float) $item->harga])),
+
+    get equipmentTotal() {
+        return Object.keys(this.equipmentQty).reduce((total, id) => {
+            return total + (Number(this.equipmentQty[id]) || 0) * (Number(this.equipmentPrices[id]) || 0);
+        }, 0);
+    },
+
     get changeAmount() {
         return Math.max(0, this.receivedAmount - this.totalDue);
     },
     formatRupiah(val) {
-        return new Intl.NumberFormat('id-ID').format(val);
+    return new Intl.NumberFormat('id-ID').format(val);
     }
 }">
     <!-- Flash Notifications -->
@@ -273,14 +283,15 @@
                 <!-- Live Search Input (Realtime Filter, 0ms latency, Tanpa Reload Halaman) -->
                 <div class="relative">
                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-xl pointer-events-none">search</span>
-                    <input type="text"
-                           x-ref="searchInput"
-                           x-model="searchQuery"
-                           @input="onInput()"
-                           @keydown.enter.prevent="selectFirst()"
-                           @keydown.window.f2.prevent="$refs.searchInput.focus()"
-                           class="w-full pl-11 pr-10 py-3 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-sm font-bold tracking-wider outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] transition-all border border-[#e5eeff]"
-                           placeholder="Ketik Nama (cth: Wildan), No. HP, Token...">
+                    <input
+                    x-ref="searchInput"
+                    type="text"
+                    x-model="searchQuery"
+                    @input="onInput()"
+                    @keydown.enter.prevent="selectFirst()"
+                    placeholder="Cari nama, nomor WhatsApp, token, atau kode QR..."
+                    class="w-full pl-11 pr-10 py-3 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] border border-[#e5eeff] transition-all"
+                >
                     
                     <button type="button"
                             x-show="searchQuery.trim().length > 0"
@@ -830,16 +841,23 @@
                                                     </p>
                                                 </div>
 
-                                                <input
-                                                    type="number"
-                                                    name="perlengkapan[{{ $perlengkapan->id }}]"
-                                                    min="0"
-                                                    max="20"
-                                                    value="0"
-                                                    class="w-20 rounded-lg border border-[#dce9ff] bg-white px-2 py-2 text-sm"
-                                                >
+                                            <input
+                                                type="number"
+                                                name="perlengkapan[{{ $perlengkapan->id }}]"
+                                                x-model.number="equipmentQty['{{ $perlengkapan->id }}']"
+                                                min="0"
+                                                max="20"
+                                                value="0"
+                                                class="w-20 rounded-lg border border-[#dce9ff] bg-white px-2 py-2 text-sm"
+                                            >
                                             </div>
                                         @endforeach
+                                          <div class="mt-3 flex items-center justify-between border-t border-[#dce9ff] pt-3 text-sm font-bold text-[#0b1c30]">
+                                            <span>Total Tambahan Perlengkapan</span>
+                                            <span>
+                                                Rp <span x-text="new Intl.NumberFormat('id-ID').format(equipmentTotal)">0</span>
+                                            </span>
+                                        </div>
                                     </div>
                                 @endif
 
