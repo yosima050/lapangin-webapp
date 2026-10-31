@@ -3,44 +3,67 @@
 @section('title', 'Cek Jadwal Lapangan - LapangIn')
 
 @section('content')
-<div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16">
+<div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16"
+     x-data="{
+         selectedKategori: '{{ $kategori }}',
+         selectedLapangan: '{{ $selectedLapanganId ?? '' }}',
+         activeDate: '{{ $tanggal }}',
+         matrix: {{ Js::from($matrix) }},
+         totalTersedia: {{ $totalSlotTersedia }},
+         totalBooked: {{ $totalSlotDibooking }},
 
-    {{-- Header Banner --}}
-    <section class="bg-gradient-to-r from-[#1a146b] via-[#221c88] to-[#1a146b] text-white pt-8 pb-12 px-4 sm:px-6 lg:px-8 shadow-sm">
+         filterMatrix() {
+             return this.matrix.filter(row => {
+                 const matchKategori = (this.selectedKategori === 'Semua' || !this.selectedKategori || row.lapangan.kategori === this.selectedKategori);
+                 const matchLapangan = (!this.selectedLapangan || row.lapangan.id === this.selectedLapangan);
+                 return matchKategori && matchLapangan;
+             });
+         },
+
+         countFilteredTersedia() {
+             return this.filterMatrix().reduce((acc, row) => acc + (row.tersedia_count || 0), 0);
+         },
+
+         countFilteredBooked() {
+             return this.filterMatrix().reduce((acc, row) => acc + (row.booked_count || 0), 0);
+         }
+     }">
+
+    {{-- Hero Section (Selaras dengan Katalog Lapangan) --}}
+    <section class="px-4 sm:px-6 lg:px-8 pt-8 pb-8">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#acf847]/20 border border-[#acf847]/40 text-[#acf847] text-xs font-bold uppercase tracking-wider mb-3">
-                    <span class="w-2 h-2 rounded-full bg-[#acf847] animate-pulse"></span>
-                    Jadwal Realtime Matriks
-                </div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                    Cek Ketersediaan Lapangan
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1a146b] max-w-3xl">
+                    Cek Ketersediaan
+                    <span class="text-[#416900]">
+                        Lapangan
+                    </span>
                 </h1>
-                <p class="mt-2 text-sm sm:text-base text-gray-200 max-w-2xl leading-relaxed">
-                    Pantau ketersediaan jam seperti bioskop. Pilih slot jam yang kosong (hijau) untuk langsung reservasi lapangan.
+                <p class="mt-4 max-w-2xl text-sm sm:text-base leading-7 text-gray-600">
+                    Pantau ketersediaan slot jam setiap venue secara transparan. Klik slot jam hijau untuk langsung memesan tiket.
                 </p>
             </div>
 
             {{-- Summary Stats Pills --}}
             <div class="flex flex-wrap items-center gap-3">
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/15 min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-semibold text-gray-300 block">Slot Kosong</span>
-                    <span class="text-2xl font-extrabold text-[#acf847]">{{ $totalSlotTersedia }}</span>
+                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Slot Kosong</span>
+                    <span class="text-2xl font-black text-[#416900]" x-text="countFilteredTersedia()">{{ $totalSlotTersedia }}</span>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/15 min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-semibold text-gray-300 block">Terisi</span>
-                    <span class="text-2xl font-extrabold text-red-300">{{ $totalSlotDibooking }}</span>
+                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Terisi</span>
+                    <span class="text-2xl font-black text-rose-600" x-text="countFilteredBooked()">{{ $totalSlotDibooking }}</span>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/15 min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-semibold text-gray-300 block">Total Venue</span>
-                    <span class="text-2xl font-extrabold text-white">{{ count($matrix) }}</span>
+                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Venue Tampil</span>
+                    <span class="text-2xl font-black text-[#1a146b]" x-text="filterMatrix().length">{{ count($matrix) }}</span>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Main Filter & Date Carousel --}}
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+    {{-- Main Filter & Date Carousel (Lega, Bersih & Elegan) --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 sm:p-5">
             <div class="flex flex-col gap-5">
 
@@ -90,59 +113,59 @@
                     </form>
                 </div>
 
-                {{-- Baris 2: Filter Kategori & Filter Spesifik Lapangan --}}
+                {{-- Baris 2: Filter Kategori & Filter Spesifik Lapangan (Instan Client-side) --}}
                 <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                    {{-- Kategori Badges --}}
+                    {{-- Kategori Badges (Instan 0 ms) --}}
                     <div class="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
                         <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Kategori:</span>
 
-                        <a
-                            href="{{ route('jadwal.index', array_merge(request()->query(), ['kategori' => 'Semua'])) }}"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1 {{ $kategori === 'Semua' ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                        <button
+                            type="button"
+                            @click="selectedKategori = 'Semua'"
+                            :class="selectedKategori === 'Semua' ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                         >
-                            Semua Kategori
-                        </a>
+                            Semua
+                        </button>
 
                         @foreach ($kategoriList as $kat)
-                            <a
-                                href="{{ route('jadwal.index', array_merge(request()->query(), ['kategori' => $kat])) }}"
-                                class="px-3.5 py-1.5 rounded-full text-xs font-bold transition {{ $kategori === $kat ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
-                            >
-                                {{ $kat }}
-                            </a>
+                            @if(filled($kat))
+                                <button
+                                    type="button"
+                                    @click="selectedKategori = '{{ $kat }}'"
+                                    :class="selectedKategori === '{{ $kat }}' ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer"
+                                >
+                                    {{ $kat }}
+                                </button>
+                            @endif
                         @endforeach
                     </div>
 
-                    {{-- Dropdown Pilih Lapangan Spesifik --}}
-                    <form method="GET" action="{{ route('jadwal.index') }}" class="flex items-center gap-2 flex-shrink-0">
-                        @if(request('kategori'))
-                            <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                        @endif
-                        <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-                        
+                    {{-- Dropdown Pilih Lapangan Spesifik (Instan 0 ms) --}}
+                    <div class="flex items-center gap-2 flex-shrink-0">
                         <select
-                            name="lapangan_id"
-                            onchange="this.form.submit()"
+                            x-model="selectedLapangan"
                             class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#acf847]"
                         >
                             <option value="">-- Semua Lapangan --</option>
                             @foreach ($allLapangans as $al)
-                                <option value="{{ $al->id }}" {{ $selectedLapanganId === (string)$al->id ? 'selected' : '' }}>
+                                <option value="{{ $al->id }}">
                                     {{ $al->nama }} ({{ $al->kategori }})
                                 </option>
                             @endforeach
                         </select>
 
-                        @if($selectedLapanganId)
-                            <a
-                                href="{{ route('jadwal.index', ['tanggal' => $tanggal, 'kategori' => $kategori]) }}"
-                                class="p-2 text-gray-400 hover:text-red-500 transition rounded-lg"
-                                title="Reset filter lapangan"
-                            >
-                                <span class="material-symbols-outlined text-sm">close</span>
-                            </a>
-                        @endif
-                    </form>
+                        <button
+                            type="button"
+                            x-show="selectedLapangan !== ''"
+                            @click="selectedLapangan = ''"
+                            class="p-2 text-gray-400 hover:text-red-500 transition rounded-lg"
+                            title="Reset filter lapangan"
+                        >
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -212,7 +235,11 @@
                         $lap = $row['lapangan'];
                         $slots = $row['slots'];
                     @endphp
-                    <div class="bg-white rounded-2xl border border-gray-150 shadow-xs hover:shadow-md transition-shadow overflow-hidden">
+                    <div
+                        x-show="(selectedKategori === 'Semua' || !selectedKategori || '{{ $lap->kategori }}' === selectedKategori) && (!selectedLapangan || '{{ $lap->id }}' === selectedLapangan)"
+                        x-transition
+                        class="bg-white rounded-2xl border border-gray-150 shadow-xs hover:shadow-md transition-shadow overflow-hidden"
+                    >
                         {{-- Header Bar Lapangan --}}
                         <div class="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-3">
@@ -268,7 +295,7 @@
 
                                     @if ($isTersedia)
                                         <a
-                                            href="{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal]) }}"
+                                            href="{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal, 'jam' => $slot['jam_mulai']]) }}"
                                             class="group relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 border-[#acf847] bg-[#f7fee7] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] transition transform hover:-translate-y-0.5 hover:shadow-md cursor-pointer text-center"
                                             title="Slot Kosong: {{ $slot['jam_label'] }} (Klik untuk Booking)"
                                         >

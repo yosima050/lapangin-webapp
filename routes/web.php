@@ -22,7 +22,7 @@ use App\Http\Controllers\Kasir\CheckinController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('pages.landing');
+    $lapangans = \App\Models\Lapangan::all(); return view('pages.landing', compact('lapangans'));
 })->name('home');
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');

@@ -38,11 +38,23 @@
     $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
     $baseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
     $primeRate = (float) ($baseRate + 40000);
+    // Auto-select slot jika dikirim lewat parameter query 'jam' dari Cek Jadwal
+    $initialSelectedSlots = [];
+    $paramJam = request('jam');
+    if ($paramJam) {
+        $cleanJam = substr($paramJam, 0, 5);
+        foreach ($jadwalData['slots'] as $s) {
+            if (substr($s['jam_mulai'], 0, 5) === $cleanJam && !empty($s['is_tersedia'])) {
+                $initialSelectedSlots[] = $s;
+                break;
+            }
+        }
+    }
 @endphp
 
 <div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16"
      x-data="{
-         selectedSlots: [],
+         selectedSlots: {{ Js::from($initialSelectedSlots) }},
          selectedDate: '{{ $tanggalDipilih }}',
          formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
          monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
@@ -235,17 +247,6 @@
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
-                                    TERVERIFIKASI
-                                </span>
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-gray-500">
-                                    <span class="material-symbols-outlined text-sm text-[#416900]">verified</span>
-                                    <span>Standard AFC Flooring</span>
-                                </span>
-                            </div>
-
                             <h1 class="text-2xl sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight">
                                 {{ $lapangan->nama }}
                             </h1>
