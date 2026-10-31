@@ -209,9 +209,49 @@ class KatalogController extends Controller
             ]);
         }
 
-        // Ambil data perlengkapan dan list lapangan hanya jika request awal (non-ajax)
         $perlengkapans = Perlengkapan::where('is_active', true)->get();
         $semuaLapangan = Lapangan::all();
+
+        // Precompute jadwal 7 hari ke depan agar client bisa render instan tanpa loading
+        $initialDaysCache = [];
+        foreach ($datesCarousel as $d) {
+            $cDateStr = $d['date_str'];
+            $cDateCarbon = \Carbon\Carbon::parse($cDateStr)->startOfDay();
+            $cIsWeekend = in_array($cDateCarbon->dayOfWeek, [0, 6]);
+            $cBaseRate = (float) ($cIsWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
+            $cPrimeRate = (float) ($cBaseRate + 40000);
+
+            if ($cDateStr === $tanggal) {
+                $initialDaysCache[$cDateStr] = [
+                    'slotsSiang' => $slotsSiang,
+                    'slotsMalam' => $slotsMalam,
+                    'formattedDate' => $cDateCarbon->translatedFormat('l, d F Y'),
+                    'monthYear' => $cDateCarbon->translatedFormat('F Y'),
+                    'baseRate' => $cBaseRate,
+                    'primeRate' => $cPrimeRate,
+                ];
+            } else {
+                $cSlotData = $this->jadwalService->getSlotStatus((string) $id, $cDateStr);
+                $cSlotsSiang = [];
+                $cSlotsMalam = [];
+                foreach ($cSlotData['slots'] as $s) {
+                    $jamH = (int) substr($s['jam_mulai'], 0, 2);
+                    if ($jamH < 18) {
+                        $cSlotsSiang[] = $s;
+                    } else {
+                        $cSlotsMalam[] = $s;
+                    }
+                }
+                $initialDaysCache[$cDateStr] = [
+                    'slotsSiang' => $cSlotsSiang,
+                    'slotsMalam' => $cSlotsMalam,
+                    'formattedDate' => $cDateCarbon->translatedFormat('l, d F Y'),
+                    'monthYear' => $cDateCarbon->translatedFormat('F Y'),
+                    'baseRate' => $cBaseRate,
+                    'primeRate' => $cPrimeRate,
+                ];
+            }
+        }
 
         return view('lapangan.show', [
             'lapangan' => $lapangan,
@@ -226,6 +266,7 @@ class KatalogController extends Controller
             'slotsMalam' => $slotsMalam,
             'baseRate' => $baseRate,
             'primeRate' => $primeRate,
+            'initialDaysCache' => $initialDaysCache,
         ]);
     }
 }

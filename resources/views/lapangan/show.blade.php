@@ -54,17 +54,7 @@
          slotsSiang: {{ Js::from($slotsSiang) }},
          slotsMalam: {{ Js::from($slotsMalam) }},
          isLoadingSlots: false,
-         slotsCache: {
-             '{{ $tanggalDipilih }}': {
-                 slotsSiang: {{ Js::from($slotsSiang) }},
-                 slotsMalam: {{ Js::from($slotsMalam) }},
-                 datesCarousel: {{ Js::from($datesCarousel) }},
-                 formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
-                 monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
-                 baseRate: {{ $baseRate }},
-                 primeRate: {{ $primeRate }}
-             }
-         },
+         slotsCache: {{ Js::from($initialDaysCache) }},
 
          async changeDate(newDate) {
              if (this.selectedDate === newDate) return;
@@ -98,7 +88,6 @@
                  const cached = this.slotsCache[newDate];
                  this.slotsSiang = cached.slotsSiang;
                  this.slotsMalam = cached.slotsMalam;
-                 this.datesCarousel = cached.datesCarousel;
                  this.formattedDate = cached.formattedDate;
                  this.monthYear = cached.monthYear;
                  this.baseRate = cached.baseRate;
@@ -304,23 +293,25 @@
 
                     {{-- Horizontal 7-Day Date Buttons (SPA Reactive tanpa reload) --}}
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
-                        <template x-for="d in datesCarousel" :key="d.date_str">
+                        @foreach ($datesCarousel as $d)
                             <button type="button"
-                                    @click="changeDate(d.date_str)"
+                                    @click="changeDate('{{ $d['date_str'] }}')"
                                     class="flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl transition border cursor-pointer"
-                                    :class="selectedDate === d.date_str ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
+                                    :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
                                 <span class="text-[10px] font-black tracking-wider uppercase"
-                                      :class="selectedDate === d.date_str ? 'text-[#acf847]' : 'text-gray-400'"
-                                      x-text="d.label_top">
+                                      :class="selectedDate === '{{ $d['date_str'] }}' ? 'text-[#acf847]' : 'text-gray-400'">
+                                    {{ $d['label_top'] }}
                                 </span>
-                                <span class="text-xl font-headline font-black my-1" x-text="d.day_num"></span>
+                                <span class="text-xl font-headline font-black my-1">
+                                    {{ $d['day_num'] }}
+                                </span>
                                 <div class="flex items-center gap-1 text-[11px] font-bold">
                                     <span class="w-1.5 h-1.5 rounded-full"
-                                          :class="selectedDate === d.date_str ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
-                                    <span x-text="d.day_name"></span>
+                                          :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                    <span>{{ $d['day_name'] }}</span>
                                 </div>
                             </button>
-                        </template>
+                        @endforeach
                     </div>
                 </div>
 
