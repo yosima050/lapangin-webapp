@@ -529,13 +529,19 @@
                     <!-- Verified Top Header Banner -->
                     <div class="p-6 bg-[#eff4ff] border-b border-[#e5eeff] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-3.5">
-                            <div class="w-10 h-10 rounded-full bg-[#acf847] flex items-center justify-center text-[#102000] shadow-sm">
+                            <div class="w-10 h-10 rounded-full {{ $activeBooking?->checked_in_at ? 'bg-emerald-100 text-emerald-800' : 'bg-[#acf847] text-[#102000]' }} flex items-center justify-center shadow-sm">
                                 <span class="material-symbols-outlined text-2xl font-bold">verified</span>
                             </div>
                             <div>
-                                <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#acf847] text-[#102000] text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
-                                    KODE VALID TERKONFIRMASI
-                                </span>
+                                @if ($activeBooking?->checked_in_at)
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
+                                        SUDAH CHECK-IN • {{ \Carbon\Carbon::parse($activeBooking->checked_in_at)->timezone('Asia/Jakarta')->format('H:i') }} WIB
+                                    </span>
+                                @else
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#acf847] text-[#102000] text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
+                                        KODE VALID TERKONFIRMASI
+                                    </span>
+                                @endif
                                 <div class="text-xl font-headline font-extrabold text-[#0b1c30] tracking-tight">
                                     {{ $bookingCode }}
                                 </div>
@@ -813,6 +819,25 @@
                                    class="w-full px-4 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-xs outline-none focus:bg-white focus:ring-2 focus:ring-[#acf847] border border-[#e5eeff] transition-all">
                         </div>
 
+                        @if ($activeBooking && $activeBooking->checked_in_at)
+                            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-2xl">verified</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">Pemesanan Sudah Check-in</h4>
+                                        <p class="text-[11px] text-emerald-800 mt-0.5">Divalidasi pada {{ \Carbon\Carbon::parse($activeBooking->checked_in_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }} WIB.</p>
+                                    </div>
+                                </div>
+                                <a href="{{ route('kasir.struk', $activeBooking->id) }}" target="_blank"
+                                   class="px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#25207c] text-white text-xs font-bold flex items-center gap-2 shadow-xs transition">
+                                    <span class="material-symbols-outlined text-base">receipt_long</span>
+                                    <span>Cetak Ulang Struk Thermal</span>
+                                </a>
+                            </div>
+                        @endif
+
                         <!-- Action Buttons -->
                         <div class="pt-3 flex flex-col gap-3">
                             @if ($activeBooking)
@@ -875,11 +900,19 @@
                             @endif
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                               <button type="button" onclick="window.print()"
-                                        class="print:hidden py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
-                                    <span class="material-symbols-outlined text-lg">print</span>
-                                    <span>Cetak Struk Pembayaran</span>
-                                </button>
+                                @if($activeBooking)
+                                    <a href="{{ route('kasir.struk', $activeBooking->id) }}" target="_blank"
+                                       class="print:hidden py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#25207c] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-xs">
+                                        <span class="material-symbols-outlined text-lg">receipt_long</span>
+                                        <span>Cetak Struk Thermal (58/80mm)</span>
+                                    </a>
+                                @else
+                                    <button type="button" disabled
+                                            class="print:hidden py-3 px-4 rounded-xl bg-[#eff4ff] text-gray-400 text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] cursor-not-allowed">
+                                        <span class="material-symbols-outlined text-lg">print</span>
+                                        <span>Cetak Struk Pembayaran</span>
+                                    </button>
+                                @endif
                                 <button type="button" onclick="alert('Bukti pembayaran telah dikirim ke nomor WhatsApp {{ $customerPhone }}')"
                                         class="py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
                                     <span class="material-symbols-outlined text-lg text-[#416900]">chat</span>

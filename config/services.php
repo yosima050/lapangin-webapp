@@ -37,7 +37,9 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI', config('app.url').'/auth/google/callback'),
+        'redirect' => env('GOOGLE_REDIRECT_URI')
+            ? preg_replace('#(?<!:)//+#', '/', (string) env('GOOGLE_REDIRECT_URI'))
+            : rtrim((string) (config('app.url') ?? env('APP_URL', 'http://localhost:8000')), '/') . '/auth/google/callback',
     ],
 
     'midtrans' => [

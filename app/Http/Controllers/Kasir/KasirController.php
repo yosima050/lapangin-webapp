@@ -569,43 +569,51 @@ class KasirController extends Controller
                     ]);
                 }
 
-                $jumlahBayar = $request->has('jumlah')
+                $inputJumlah = $request->has('jumlah')
                     ? $request->input('jumlah')
                     : $sisaTagihan;
 
                 if (
-                    ! is_numeric($jumlahBayar)
-                    || ! is_finite((float) $jumlahBayar)
+                    ! is_numeric($inputJumlah)
+                    || ! is_finite((float) $inputJumlah)
                 ) {
                     throw ValidationException::withMessages([
                         'jumlah' => 'Nominal pembayaran harus berupa angka yang valid.',
                     ]);
                 }
 
-                $jumlahBayar = (float) $jumlahBayar;
+                $uangDiterima = (float) $inputJumlah;
 
-                if (
-                    $jumlahBayar < 0
-                    || $jumlahBayar > $sisaTagihan
-                ) {
+                if ($uangDiterima < 0) {
                     throw ValidationException::withMessages([
-                        'jumlah' => 'Nominal pembayaran tidak boleh negatif atau melebihi sisa tagihan.',
+                        'jumlah' => 'Nominal pembayaran tidak boleh negatif.',
                     ]);
                 }
 
-                // Jika masih ada tagihan, pelunasan harus menutup
+                // Jika masih ada tagihan, uang diterima harus menutup
                 // seluruh sisa tagihan sebelum check-in berhasil.
                 if (
                     $sisaTagihan > 0
-                    && $jumlahBayar < $sisaTagihan
+                    && $uangDiterima < $sisaTagihan
                 ) {
                     throw ValidationException::withMessages([
                         'jumlah' => 'Pembayaran harus melunasi seluruh sisa tagihan sebelum check-in.',
                     ]);
                 }
 
+                $jumlahBayar = $sisaTagihan;
+                $kembalian = max(0, $uangDiterima - $sisaTagihan);
+
+                // Simpan info pembayaran kasir ke session untuk ditampilkan pada struk thermal
+                session([
+                    'cash_received' => $uangDiterima,
+                    'cash_change' => $kembalian,
+                ]);
+
                 // Hindari membuat transaksi dengan nominal nol.
                 if ($sisaTagihan > 0) {
+                    $orderIdPelunasan = 'LPNG-KSR-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(5));
+
                     Transaksi::create([
                         'jadwal_id' => $jadwal->id,
                         'jenis' => 'pelunasan',
@@ -617,6 +625,8 @@ class KasirController extends Controller
                         ) ? 'tunai' : 'online',
                         'status' => 'berhasil',
                         'dibayar_pada' => now(),
+                        'order_id' => $orderIdPelunasan,
+                        'referensi_midtrans' => $orderIdPelunasan,
                     ]);
                 }
 
@@ -709,15 +719,12 @@ class KasirController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $successMessage,
+                'redirect_url' => route('kasir.struk', $jadwal->id),
                 'jadwal' => $jadwal,
             ]);
         }
 
-        return redirect()->route('kasir.index', [
-            'code' => $jadwal->kode_qr
-                ?? $jadwal->token_manual
-                ?? $jadwal->id,
-        ])->with('success', $successMessage);
+        return redirect()->route('kasir.struk', $jadwal->id)->with('success', $successMessage);
     }
 
     public function jadwal(Request $request): View

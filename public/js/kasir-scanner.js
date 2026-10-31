@@ -369,6 +369,17 @@ class KasirScanner {
             amountInput.value = j.sisa_tagihan ?? 0;
         }
 
+        // Setup Cetak Struk Thermal Button
+        const btnPrintStruk = document.getElementById('modal-btn-print-struk');
+        if (btnPrintStruk) {
+            if (j.id) {
+                btnPrintStruk.href = `/kasir/struk/${j.id}`;
+                btnPrintStruk.classList.remove('hidden');
+            } else {
+                btnPrintStruk.classList.add('hidden');
+            }
+        }
+
         // Setup Warning Box & Status Badges
         const statusBadge = document.getElementById('modal-status-badge');
         const warningContainer = document.getElementById('modal-warning-container');

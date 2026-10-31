@@ -92,7 +92,8 @@
                             <th class="px-4 py-3">Lapangan</th>
                             <th class="px-4 py-3">Metode</th>
                             <th class="px-4 py-3">Nominal</th>
-                            <th class="px-4 py-3 rounded-r-xl text-right">Waktu</th>
+                            <th class="px-4 py-3 text-right">Waktu</th>
+                            <th class="px-4 py-3 rounded-r-xl text-center print:hidden">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#eff4ff]">
@@ -137,10 +138,21 @@
                                         <span class="text-[#777682]">-</span>
                                     @endif
                                 </td>
+                                <td class="px-4 py-3 text-center print:hidden">
+                                    @if ($trx->jadwal_id)
+                                        <a href="{{ route('kasir.struk', $trx->jadwal_id) }}" target="_blank"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] hover:bg-[#1a146b] text-[#1a146b] hover:text-white text-[11px] font-bold border border-[#dce9ff] transition-colors shadow-2xs">
+                                            <span class="material-symbols-outlined text-sm">receipt_long</span>
+                                            <span>Struk</span>
+                                        </a>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-[#777682]">
+                                <td colspan="7" class="px-4 py-6 text-center text-[#777682]">
                                     Belum ada transaksi tercatat dalam database.
                                 </td>
                             </tr>

@@ -16,7 +16,7 @@
 
     @vite(['resources/css/app.css'])
 
-    <style>
+    <style id="dynamic-page-style">
         /* Standar POS Thermal Paper Styling */
         @page {
             size: 58mm auto;
@@ -98,11 +98,18 @@
     {{-- Screen Action Header (Hidden when printing) --}}
     <div class="no-print w-full max-w-sm mb-6 flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <a href="{{ route('kasir.checkin.index') }}"
-               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
-                <span>Kembali ke Scanner</span>
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('kasir.index') }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition">
+                    <span class="material-symbols-outlined text-base">desktop_windows</span>
+                    <span>Meja Kasir</span>
+                </a>
+                <a href="{{ route('kasir.checkin.index') }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition">
+                    <span class="material-symbols-outlined text-base">barcode_scanner</span>
+                    <span>Scanner</span>
+                </a>
+            </div>
 
             <div class="flex items-center gap-2">
                 <button type="button"
@@ -261,15 +268,36 @@
             const paper = document.getElementById('receipt-paper');
             const btn58 = document.getElementById('btn-58mm');
             const btn80 = document.getElementById('btn-80mm');
+            const dynamicStyle = document.getElementById('dynamic-page-style');
 
             if (size === '80mm') {
                 paper.className = paper.className.replace('w-[58mm] max-w-[58mm]', 'w-[80mm] max-w-[80mm]');
                 btn80.className = 'px-2.5 py-1 text-xs font-bold rounded-lg bg-[#1a146b] text-white shadow-xs';
                 btn58.className = 'px-2.5 py-1 text-xs font-bold rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50';
+                if (dynamicStyle) {
+                    dynamicStyle.innerHTML = `
+                        @page { size: 80mm auto; margin: 0mm; }
+                        @media print {
+                            html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; font-family: 'JetBrains Mono', monospace, -apple-system, sans-serif !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .no-print { display: none !important; }
+                            .thermal-container { width: 76mm !important; max-width: 76mm !important; padding: 2mm !important; box-shadow: none !important; border: none !important; margin: 0 auto !important; }
+                        }
+                    `;
+                }
             } else {
                 paper.className = paper.className.replace('w-[80mm] max-w-[80mm]', 'w-[58mm] max-w-[58mm]');
                 btn58.className = 'px-2.5 py-1 text-xs font-bold rounded-lg bg-[#1a146b] text-white shadow-xs';
                 btn80.className = 'px-2.5 py-1 text-xs font-bold rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50';
+                if (dynamicStyle) {
+                    dynamicStyle.innerHTML = `
+                        @page { size: 58mm auto; margin: 0mm; }
+                        @media print {
+                            html, body { width: 58mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; font-family: 'JetBrains Mono', monospace, -apple-system, sans-serif !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .no-print { display: none !important; }
+                            .thermal-container { width: 54mm !important; max-width: 54mm !important; padding: 2mm !important; box-shadow: none !important; border: none !important; margin: 0 auto !important; }
+                        }
+                    `;
+                }
             }
         }
 
