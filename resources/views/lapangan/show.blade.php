@@ -541,7 +541,7 @@
             {{-- ======================================================== --}}
             {{-- RIGHT COLUMN: Sticky Order Summary & Booking Checkout --}}
             {{-- ======================================================== --}}
-            <div class="lg:col-span-4 sticky top-24">
+            <div class="lg:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
                 <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
 
                     {{-- Summary Header --}}
