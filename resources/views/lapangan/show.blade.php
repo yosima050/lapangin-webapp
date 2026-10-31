@@ -44,10 +44,96 @@
      x-data="{
          selectedSlots: [],
          selectedDate: '{{ $tanggalDipilih }}',
+         formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
+         monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
          paymentScheme: 'dp',
          equipments: {{ Js::from($perlengkapans->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama, 'harga' => (float)$p->harga, 'qty' => 0])) }},
          baseRate: {{ $baseRate }},
          primeRate: {{ $primeRate }},
+         datesCarousel: {{ Js::from($datesCarousel) }},
+         slotsSiang: {{ Js::from($slotsSiang) }},
+         slotsMalam: {{ Js::from($slotsMalam) }},
+         isLoadingSlots: false,
+         slotsCache: {
+             '{{ $tanggalDipilih }}': {
+                 slotsSiang: {{ Js::from($slotsSiang) }},
+                 slotsMalam: {{ Js::from($slotsMalam) }},
+                 datesCarousel: {{ Js::from($datesCarousel) }},
+                 formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
+                 monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
+                 baseRate: {{ $baseRate }},
+                 primeRate: {{ $primeRate }}
+             }
+         },
+
+         async changeDate(newDate) {
+             if (this.selectedDate === newDate) return;
+             this.selectedDate = newDate;
+             this.selectedSlots = []; // reset pilihan slot saat tanggal berganti
+
+             // Update status tombol carousel langsung secara instan (optimistic UI)
+             const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+             const parts = newDate.split('-');
+             if (parts.length === 3) {
+                 const dObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                 const dayOfWeek = dayNames[dObj.getDay()];
+                 const dayNum = String(dObj.getDate()).padStart(2, '0');
+                 const monthName = monthNames[dObj.getMonth()];
+                 this.formattedDate = `${dayOfWeek}, ${dayNum} ${monthName} ${dObj.getFullYear()}`;
+                 this.monthYear = `${monthName} ${dObj.getFullYear()}`;
+             }
+
+             this.datesCarousel.forEach(d => {
+                 d.is_selected = (d.date_str === newDate);
+             });
+
+             // Update URL query param tanpa reload halaman
+             const newUrl = new URL(window.location.href);
+             newUrl.searchParams.set('tanggal', newDate);
+             window.history.pushState({}, '', newUrl.toString());
+
+             // Jika data tanggal sudah ada di cache lokal, render INSTAN tanpa tunggu network
+             if (this.slotsCache[newDate]) {
+                 const cached = this.slotsCache[newDate];
+                 this.slotsSiang = cached.slotsSiang;
+                 this.slotsMalam = cached.slotsMalam;
+                 this.datesCarousel = cached.datesCarousel;
+                 this.formattedDate = cached.formattedDate;
+                 this.monthYear = cached.monthYear;
+                 this.baseRate = cached.baseRate;
+                 this.primeRate = cached.primeRate;
+                 return;
+             }
+
+             // Ambil dari server
+             this.isLoadingSlots = true;
+             try {
+                 const res = await fetch(`{{ route('katalog.show', ['id' => $lapangan->id]) }}?tanggal=${newDate}`, {
+                     headers: {
+                         'X-Requested-With': 'XMLHttpRequest',
+                         'Accept': 'application/json'
+                     }
+                 });
+                 if (res.ok) {
+                     const data = await res.json();
+                     this.slotsSiang = data.slotsSiang;
+                     this.slotsMalam = data.slotsMalam;
+                     this.datesCarousel = data.datesCarousel;
+                     this.formattedDate = data.formattedDate;
+                     this.monthYear = data.monthYear;
+                     this.baseRate = data.baseRate;
+                     this.primeRate = data.primeRate;
+
+                     // Simpan ke cache agar saat diklik ulang instan 0 milidetik
+                     this.slotsCache[newDate] = data;
+                 }
+             } catch (err) {
+                 console.error('Gagal mengambil jadwal:', err);
+             } finally {
+                 this.isLoadingSlots = false;
+             }
+         },
 
          toggleSlot(slot) {
              if (!slot.is_tersedia) return;
@@ -211,91 +297,94 @@
                             <span class="material-symbols-outlined text-xl text-[#1a146b]">calendar_month</span>
                             <h2 class="text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
                         </div>
-                        <span class="text-xs font-semibold text-gray-400">
+                        <span class="text-xs font-semibold text-gray-400" x-text="monthYear">
                             {{ $selectedDateCarbon->translatedFormat('F Y') }}
                         </span>
                     </div>
 
-                    {{-- Horizontal 7-Day Date Buttons --}}
+                    {{-- Horizontal 7-Day Date Buttons (SPA Reactive tanpa reload) --}}
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
-                        @foreach ($datesCarousel as $d)
-                            <a href="{{ route('katalog.show', ['id' => $lapangan->id, 'tanggal' => $d['date_str']]) }}"
-                               class="flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl transition border {{ $d['is_selected'] ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50' }}">
-                                <span class="text-[10px] font-black tracking-wider uppercase {{ $d['is_selected'] ? 'text-[#acf847]' : 'text-gray-400' }}">
-                                    {{ $d['label_top'] }}
+                        <template x-for="d in datesCarousel" :key="d.date_str">
+                            <button type="button"
+                                    @click="changeDate(d.date_str)"
+                                    class="flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl transition border cursor-pointer"
+                                    :class="selectedDate === d.date_str ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
+                                <span class="text-[10px] font-black tracking-wider uppercase"
+                                      :class="selectedDate === d.date_str ? 'text-[#acf847]' : 'text-gray-400'"
+                                      x-text="d.label_top">
                                 </span>
-                                <span class="text-xl font-headline font-black my-1">
-                                    {{ $d['day_num'] }}
-                                </span>
+                                <span class="text-xl font-headline font-black my-1" x-text="d.day_num"></span>
                                 <div class="flex items-center gap-1 text-[11px] font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $d['is_selected'] ? 'bg-[#acf847]' : 'bg-[#416900]' }}"></span>
-                                    <span>{{ $d['day_name'] }}</span>
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="selectedDate === d.date_str ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                    <span x-text="d.day_name"></span>
                                 </div>
-                            </a>
-                        @endforeach
+                            </button>
+                        </template>
                     </div>
                 </div>
 
                 {{-- Grouping Sesi Jam Booking --}}
-                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-6">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-6 relative">
+                    {{-- Loading Bar Tipis Halus saat ganti tanggal --}}
+                    <div x-show="isLoadingSlots"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="absolute inset-x-0 top-0 h-1 bg-[#acf847] overflow-hidden rounded-t-3xl z-20">
+                        <div class="w-full h-full bg-[#1a146b] animate-pulse"></div>
+                    </div>
 
                     {{-- Sesi Siang & Sore --}}
-                    @if(count($slotsSiang) > 0)
-                    <div>
+                    <div x-show="slotsSiang.length > 0">
                         <div class="flex items-center justify-between mb-3.5">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#416900]"></span>
                                 <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Siang &amp; Sore</h3>
                                 <span class="text-xs text-gray-400 font-mono">13:00 – 17:00</span>
                             </div>
-                            <span class="text-xs font-bold text-gray-600">
-                                {{ 'Rp' . number_format($baseRate, 0, ',', '.') }} / jam
-                            </span>
+                            <span class="text-xs font-bold text-gray-600" x-text="formatRp(baseRate) + ' / jam'"></span>
                         </div>
 
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            @foreach ($slotsSiang as $slot)
-                                @if ($slot['is_tersedia'])
-                                    <button type="button"
-                                            @click="toggleSlot({{ Js::from($slot) }})"
-                                            :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                            class="py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-headline font-black text-sm tracking-tight">
-                                                {{ substr($slot['jam_mulai'], 0, 5) }}
+                            <template x-for="slot in slotsSiang" :key="slot.jam_mulai">
+                                <div>
+                                    <template x-if="slot.is_tersedia">
+                                        <button type="button"
+                                                @click="toggleSlot(slot)"
+                                                :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
+                                                class="w-full py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-headline font-black text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                            </div>
+                                            <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[10px] font-bold mt-0.5"
+                                                  :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
+                                                  x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">
                                             </span>
-                                            <span class="w-2 h-2 rounded-full" :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="!slot.is_tersedia">
+                                        <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="material-symbols-outlined text-xs" x-text="slot.status === 'lewat_jam' ? 'schedule' : 'lock'"></span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
                                         </div>
-                                        <span class="text-[10px]" :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-white/80' : 'text-gray-400'">
-                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
-                                        </span>
-                                        <span class="text-[10px] font-bold mt-0.5"
-                                              :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-[#acf847]' : 'text-emerald-600'"
-                                              x-text="isSlotSelected({{ Js::from($slot) }}) ? 'DIPILIH' : 'Tersedia'">
-                                        </span>
-                                    </button>
-                                @else
-                                    <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
-                                            <span class="material-symbols-outlined text-xs">{{ $slot['status'] === 'lewat_jam' ? 'schedule' : 'lock' }}</span>
-                                        </div>
-                                        <span class="text-[10px] text-gray-400">
-                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
-                                        </span>
-                                        <span class="text-[10px] font-semibold text-gray-400">
-                                            {{ $slot['status'] === 'lewat_jam' ? 'Lewat Jam' : 'Terisi' }}
-                                        </span>
-                                    </div>
-                                @endif
-                            @endforeach
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                     </div>
-                    @endif
 
                     {{-- Sesi Malam Prime Time --}}
-                    @if(count($slotsMalam) > 0)
-                    <div class="pt-4 border-t border-gray-100">
+                    <div x-show="slotsMalam.length > 0" class="pt-4 border-t border-gray-100">
                         <div class="flex items-center justify-between mb-3.5">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#1a146b]"></span>
@@ -304,50 +393,42 @@
                                     ⚡ PALING FAVORIT
                                 </span>
                             </div>
-                            <span class="text-xs font-bold text-[#1a146b]">
-                                {{ 'Rp' . number_format($primeRate, 0, ',', '.') }} / jam
-                            </span>
+                            <span class="text-xs font-bold text-[#1a146b]" x-text="formatRp(primeRate) + ' / jam'"></span>
                         </div>
 
                         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                            @foreach ($slotsMalam as $slot)
-                                @if ($slot['is_tersedia'])
-                                    <button type="button"
-                                            @click="toggleSlot({{ Js::from($slot) }})"
-                                            :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                            class="py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-headline font-black text-sm tracking-tight">
-                                                {{ substr($slot['jam_mulai'], 0, 5) }}
+                            <template x-for="slot in slotsMalam" :key="slot.jam_mulai">
+                                <div>
+                                    <template x-if="slot.is_tersedia">
+                                        <button type="button"
+                                                @click="toggleSlot(slot)"
+                                                :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
+                                                class="w-full py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-headline font-black text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                            </div>
+                                            <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[10px] font-bold mt-0.5"
+                                                  :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
+                                                  x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">
                                             </span>
-                                            <span class="w-2 h-2 rounded-full" :class="isSlotSelected({{ Js::from($slot) }}) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="!slot.is_tersedia">
+                                        <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="material-symbols-outlined text-xs" x-text="slot.status === 'lewat_jam' ? 'schedule' : 'lock'"></span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
                                         </div>
-                                        <span class="text-[10px]" :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-white/80' : 'text-gray-400'">
-                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
-                                        </span>
-                                        <span class="text-[10px] font-bold mt-0.5"
-                                              :class="isSlotSelected({{ Js::from($slot) }}) ? 'text-[#acf847]' : 'text-emerald-600'"
-                                              x-text="isSlotSelected({{ Js::from($slot) }}) ? 'DIPILIH' : 'Tersedia'">
-                                        </span>
-                                    </button>
-                                @else
-                                    <div class="py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-bold text-sm line-through">{{ substr($slot['jam_mulai'], 0, 5) }}</span>
-                                            <span class="material-symbols-outlined text-xs">{{ $slot['status'] === 'lewat_jam' ? 'schedule' : 'lock' }}</span>
-                                        </div>
-                                        <span class="text-[10px] text-gray-400">
-                                            {{ substr($slot['jam_mulai'], 0, 5) }} - {{ substr($slot['jam_selesai'], 0, 5) }}
-                                        </span>
-                                        <span class="text-[10px] font-semibold text-gray-400">
-                                            {{ $slot['status'] === 'lewat_jam' ? 'Lewat Jam' : 'Terisi' }}
-                                        </span>
-                                    </div>
-                                @endif
-                            @endforeach
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                     </div>
-                    @endif
 
                     {{-- Slot Legend Status --}}
                     <div class="flex flex-wrap items-center gap-6 pt-3 border-t border-gray-100 text-xs text-gray-500">
@@ -499,7 +580,7 @@
                                 <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_today</span>
                                 <span>Tanggal:</span>
                             </span>
-                            <strong class="text-gray-900">{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}</strong>
+                            <strong class="text-gray-900" x-text="formattedDate"></strong>
                         </div>
 
                         <div class="flex items-center justify-between text-gray-600">
@@ -590,7 +671,7 @@
                     {{-- Checkout Submit Form --}}
                     <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="pt-1">
                         <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
-                        <input type="hidden" name="tanggal" value="{{ $tanggalDipilih }}">
+                        <input type="hidden" name="tanggal" :value="selectedDate">
                         <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
                         <input type="hidden" name="durasi" :value="durationHours">
                         <input type="hidden" name="tipe_bayar" :value="paymentScheme">
