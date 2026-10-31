@@ -41,12 +41,13 @@ class CheckoutController extends Controller
         ]);
 
         // 2. Validasi slot waktu: jika hari ini, jam mulai tidak boleh sudah lewat dari jam sekarang
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Jakarta');
         $isToday = $data['tanggal'] === $now->toDateString();
         $currentTime = $now->format('H:i');
 
         if ($data['tanggal'] < $now->toDateString() || ($isToday && $data['jam_mulai'] <= $currentTime)) {
-            abort(422, 'Jam sewa yang dipilih sudah lewat dari waktu saat ini.');
+            return redirect()->route('katalog.show', ['id' => $data['lapangan_id'], 'tanggal' => $data['tanggal']])
+                ->with('error', 'Jam sewa yang dipilih (' . $data['jam_mulai'] . ' WIB) sudah lewat dari waktu saat ini. Silakan pilih slot jam yang masih tersedia.');
         }
 
         $tipeBayar = $request->input('tipe_bayar', 'dp');
@@ -176,7 +177,7 @@ class CheckoutController extends Controller
     /**
      * Halaman Sukses Publik & E-Tiket Masuk (dapat diakses tamu tanpa login).
      */
-    public function success(string $orderId, PaymentService $paymentService): View
+    public function success(string $orderId, PaymentService $paymentService): View|\Illuminate\Http\RedirectResponse
     {
         $query = Transaksi::with(['jadwal.lapangan', 'jadwal.pelanggan'])
             ->where('order_id', $orderId)
@@ -192,6 +193,17 @@ class CheckoutController extends Controller
         if ($transaksi->status === 'pending') {
             $paymentService->syncStatus($transaksi);
             $transaksi->refresh();
+        }
+
+        // Jika transaksi masih pending atau belum berhasil dibayar, jangan terbitkan e-tiket!
+        if ($transaksi->status === 'pending' || $transaksi->status === 'menunggu_pembayaran') {
+            return redirect()->route('pelanggan.riwayat')
+                ->with('info', 'Pembayaran untuk pesanan ' . $transaksi->order_id . ' masih berstatus pending. Silakan selesaikan pembayaran sesuai instruksi.');
+        }
+
+        if ($transaksi->status === 'gagal' || $transaksi->status === 'dibatalkan') {
+            return redirect()->route('pelanggan.riwayat')
+                ->with('error', 'Pembayaran untuk pesanan ' . $transaksi->order_id . ' telah kedaluwarsa atau dibatalkan.');
         }
 
         $jadwal = $transaksi->jadwal;
@@ -276,6 +288,22 @@ class CheckoutController extends Controller
             $tipeBayar = 'dp';
         }
 
+        // Metode pembayaran spesifik (opsional dari UI direct payment)
+        $metodeBayar = $request->input('metode_bayar');
+        $channelPayments = match ($metodeBayar) {
+            'qris' => ['gopay', 'shopeepay'],
+            'gopay' => ['gopay'],
+            'shopeepay' => ['shopeepay'],
+            'bca_va' => ['bca_va'],
+            'bni_va' => ['bni_va'],
+            'bri_va' => ['bri_va'],
+            'mandiri_va' => ['echannel'],
+            'permata_va' => ['permata_va'],
+            'other_va' => ['other_va'],
+            'credit_card' => ['credit_card'],
+            default => []
+        };
+
         // Jika request membawa jadwal_id atau booking_id
         if ($request->filled('jadwal_id') || $request->filled('booking_id')) {
             $jadwalId = $request->input('jadwal_id') ?: $request->input('booking_id');
@@ -337,7 +365,7 @@ class CheckoutController extends Controller
                     ],
                 ];
 
-                $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails);
+                $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
 
                 return response()->json([
                     'status' => 'success',
@@ -454,7 +482,7 @@ class CheckoutController extends Controller
             ],
         ];
 
-        $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails);
+        $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
 
         return response()->json([
             'status' => 'success',

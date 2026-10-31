@@ -15,26 +15,26 @@
                 <x-application-logo />
             </a>
 
-            {{-- Navigasi Desktop --}}
-            <div class="hidden lg:flex items-center gap-7 ml-10">
+            {{-- Navigasi Desktop (Posisi Tengah Seimbang & Proporsional ke Kanan) --}}
+            <div class="hidden lg:flex items-center gap-8 xl:gap-11 mx-auto">
 
                 <a
                     href="{{ route('home') }}"
-                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('home') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Beranda
                 </a>
 
                 <a
                     href="{{ route('katalog.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Jelajahi Lapangan
                 </a>
 
                 <a
                     href="{{ route('jadwal.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('jadwal.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('jadwal.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Cek Jadwal
                 </a>
@@ -43,23 +43,16 @@
                     @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
                         <a
                             href="{{ route('pelanggan.booking.index') }}"
-                            class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                            class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                         >
                             Riwayat Booking
-                        </a>
-
-                        <a
-                            href="{{ route('pelanggan.dashboard') }}"
-                            class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('pelanggan.dashboard') || request()->routeIs('profile.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
-                        >
-                            Profil Saya
                         </a>
                     @endif
                 @endauth
 
                 <a
                     href="{{ route('bantuan') }}"
-                    class="py-2 text-sm font-semibold transition-colors {{ request()->routeIs('bantuan') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('bantuan') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
                 >
                     Pusat Bantuan
                 </a>
@@ -218,13 +211,6 @@
                             class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                         >
                             Riwayat Booking
-                        </a>
-
-                        <a
-                            href="{{ route('pelanggan.dashboard') }}"
-                            class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('pelanggan.dashboard') || request()->routeIs('profile.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                        >
-                            Profil Saya
                         </a>
                     @endif
 

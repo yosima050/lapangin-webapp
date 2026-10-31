@@ -32,21 +32,12 @@ class PaymentService
      * Buat Snap Token melalui Midtrans Snap API.
      *
      * @param  mixed  $customerDetails
+     * @param  array  $itemDetails
+     * @param  array  $enabledPayments
      */
-    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = []): string
+    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = [], array $enabledPayments = []): string
     {
         $this->initMidtrans();
-
-        // Caching: gunakan snap_token yang sudah ada jika belum expired/terbayar
-        if (! empty($transaksi->snap_token) && ($transaksi->status === 'pending' || empty($transaksi->status))) {
-            return $transaksi->snap_token;
-        }
-
-        // Pastikan order_id unik terisi
-        if (empty($transaksi->order_id)) {
-            $transaksi->order_id = 'LPNG-'.date('Ymd').'-'.strtoupper(Str::random(6));
-            $transaksi->save();
-        }
 
         $grossAmount = (int) round((float) $transaksi->jumlah);
 
@@ -83,26 +74,60 @@ class PaymentService
             ];
         }
 
-        $params = [
-            'transaction_details' => [
-                'order_id' => $transaksi->order_id,
-                'gross_amount' => $grossAmount,
-            ],
-            'customer_details' => [
-                'first_name' => $firstName,
-                'email' => $email,
-                'phone' => $phone,
-            ],
-            'item_details' => $itemDetails,
-        ];
+        // Fungsi internal untuk request snap token
+        $requestSnap = function (string $orderId) use ($grossAmount, $firstName, $email, $phone, $itemDetails, $enabledPayments) {
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $grossAmount,
+                ],
+                'customer_details' => [
+                    'first_name' => $firstName,
+                    'email' => $email,
+                    'phone' => $phone,
+                ],
+                'item_details' => $itemDetails,
+            ];
 
-        $snapToken = Snap::getSnapToken($params);
+            if (! empty($enabledPayments)) {
+                $params['enabled_payments'] = $enabledPayments;
+            }
 
-        // Simpan snap_token ke record transaksi di database untuk caching/reusable payment attempt
-        $transaksi->snap_token = $snapToken;
-        $transaksi->save();
+            return Snap::getSnapToken($params);
+        };
 
-        return $snapToken;
+        // Pastikan order_id terisi
+        if (empty($transaksi->order_id)) {
+            $transaksi->order_id = 'LPNG-'.date('Ymd').'-'.strtoupper(Str::random(6));
+            $transaksi->referensi_midtrans = $transaksi->order_id;
+            $transaksi->save();
+        }
+
+        try {
+            $snapToken = $requestSnap($transaksi->order_id);
+            $transaksi->snap_token = $snapToken;
+            $transaksi->save();
+
+            return $snapToken;
+        } catch (\Exception $e) {
+            // Jika Midtrans menolak karena order_id sudah digunakan di transaksi pending/gagal sebelumnya
+            if (str_contains(strtolower($e->getMessage()), 'order_id') || str_contains(strtolower($e->getMessage()), 'sudah digunakan') || str_contains(strtolower($e->getMessage()), 'has been used')) {
+                // Generate order_id baru yang fresh untuk transaksi ini
+                $newOrderId = 'LPNG-'.date('Ymd').'-'.strtoupper(Str::random(6));
+                $transaksi->order_id = $newOrderId;
+                $transaksi->referensi_midtrans = $newOrderId;
+                $transaksi->snap_token = null;
+                $transaksi->save();
+
+                $snapToken = $requestSnap($newOrderId);
+                $transaksi->snap_token = $snapToken;
+                $transaksi->save();
+
+                return $snapToken;
+            }
+
+            throw $e;
+        }
     }
 
     /**

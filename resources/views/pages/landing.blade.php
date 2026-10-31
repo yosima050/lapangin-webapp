@@ -55,31 +55,156 @@
                     </div>
                 </div>
 
-                {{-- Hero Visual / Illustration --}}
-                <div class="lg:col-span-5 relative w-full">
+                                {{-- Hero Visual / Dynamic Banner Carousel (Ala Gelora / Ganesha Tanah Mas) --}}
+                @php
+                    $carouselSlides = [
+                        [
+                            'nama' => 'Lapangan 1 - Vinyl Pro (Futsal Indoor)',
+                            'kategori' => 'Futsal',
+                            'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+                            'url' => route('katalog.index'),
+                        ],
+                        [
+                            'nama' => 'Lapangan 2 - Interlock Premium (Futsal & Basket)',
+                            'kategori' => 'Futsal & Basket',
+                            'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
+                            'url' => route('katalog.index'),
+                        ],
+                        [
+                            'nama' => 'Badminton Court 1 & 2 (Karpet Yonex)',
+                            'kategori' => 'Badminton',
+                            'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',
+                            'url' => route('katalog.index'),
+                        ],
+                    ];
+
+                    if (isset($lapangans) && $lapangans->isNotEmpty()) {
+                        $dbSlides = [];
+                        foreach ($lapangans as $l) {
+                            $dbSlides[] = [
+                                'nama' => $l->nama,
+                                'kategori' => $l->kategori ?? 'Sports Arena',
+                                'foto' => $l->foto_url,
+                                'url' => route('katalog.show', $l->id),
+                            ];
+                        }
+                        if (!empty($dbSlides)) {
+                            $carouselSlides = $dbSlides;
+                        }
+                    }
+                @endphp
+
+                <div class="lg:col-span-5 relative w-full"
+                     x-data="{
+                        currentSlide: 0,
+                        totalSlides: {{ count($carouselSlides) }},
+                        timer: null,
+                        init() {
+                            this.timer = setInterval(() => {
+                                this.next();
+                            }, 5000);
+                        },
+                        next() {
+                            this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+                        },
+                        prev() {
+                            this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+                        }
+                     }"
+                     @mouseenter="clearInterval(timer)"
+                     @mouseleave="timer = setInterval(() => next(), 5000)">
+
                     <div class="relative mx-auto max-w-md lg:max-w-none">
-                        {{-- Background Accent Blobs --}}
-                        <div class="absolute -top-8 -right-8 w-64 h-64 bg-[#acf847]/30 rounded-full blur-3xl pointer-events-none"></div>
-                        <div class="absolute -bottom-8 -left-8 w-64 h-64 bg-[#1a146b]/15 rounded-full blur-3xl pointer-events-none"></div>
+                        {{-- Background Accent Glow --}}
+                        <div class="absolute -top-6 -right-6 w-60 h-60 bg-[#acf847]/30 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute -bottom-6 -left-6 w-60 h-60 bg-[#1a146b]/20 rounded-full blur-3xl pointer-events-none"></div>
 
-                        {{-- Main Visual Container --}}
-                        <div class="relative rounded-3xl overflow-hidden border border-white/80 shadow-2xl bg-white p-3">
-                            <div class="relative h-72 sm:h-84 rounded-2xl overflow-hidden bg-gray-900 group">
-                                <img
-                                    src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1000&q=80"
-                                    alt="Arena Olahraga LapangIn"
-                                    class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                                    loading="lazy"
-                                />
-                                <div class="absolute inset-0 bg-gradient-to-t from-[#1a146b]/80 via-transparent to-black/20"></div>
+                        {{-- Main Billboard Container --}}
+                        <div class="relative rounded-3xl overflow-hidden border border-white/80 shadow-2xl bg-gray-950 group select-none">
+                            <div class="relative w-full overflow-hidden" style="height: 380px; min-height: 380px;">
 
-                                <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-white/95 backdrop-blur-md shadow-lg border border-white/60">
-                                    <div>
-                                        <p class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Ketersediaan Lapangan</p>
-                                        <p class="text-sm font-headline font-bold text-[#1a146b]">Vinyl Indoor Pro AFC</p>
+                                @foreach ($carouselSlides as $idx => $slide)
+                                    <div x-show="currentSlide === {{ $idx }}"
+                                         x-transition:enter="transition ease-out duration-500"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-300"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute inset-0 w-full h-full"
+                                         style="{{ $idx > 0 ? 'display: none;' : '' }}">
+
+                                        {{-- Image Background --}}
+                                        <img src="{{ $slide['foto'] }}"
+                                             alt="{{ $slide['nama'] }}"
+                                             class="w-full h-full object-cover object-center filter brightness-[0.78] contrast-[1.05]"
+                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80';">
+
+                                        {{-- Dark Vignette Gradient --}}
+                                        <div class="absolute inset-0 bg-gradient-to-t from-[#0e0a40]/95 via-[#1a146b]/40 to-black/30"></div>
+
+                                        {{-- Header Brand Badge Overlay (Kiri Atas) --}}
+                                        <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+                                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1a146b]/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-black tracking-wider uppercase shadow-sm">
+                                                <span class="w-2 h-2 rounded-full bg-[#acf847] animate-pulse"></span>
+                                                <span class="text-white">{{ $slide['kategori'] }}</span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Center Billboard Content (Posisi Tengah Elegan) --}}
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
+                                            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-headline font-black text-white tracking-tight drop-shadow-[0_4px_14px_rgba(10,5,50,0.95)] leading-tight max-w-sm">
+                                                {{ $slide['nama'] }}
+                                            </h3>
+
+                                            <a href="{{ $slide['url'] }}"
+                                               class="mt-6 inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#acf847] hover:bg-[#9de837] text-[#102000] font-headline font-black text-xs shadow-lg shadow-[#acf847]/30 hover:shadow-[#acf847]/50 border border-[#bbf968] transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
+                                                <span>Cek jadwal dan booking disini!</span>
+                                                <span class="material-symbols-outlined text-sm font-black">arrow_forward</span>
+                                            </a>
+                                        </div>
+
+                                        {{-- Watermark Pojok Kanan Bawah --}}
+                                        <div class="absolute bottom-4 right-4 z-10 pointer-events-none opacity-80 hidden sm:block text-right">
+                                            <span class="text-[10px] font-black tracking-widest text-white/90 uppercase block drop-shadow-md">
+                                                MAIN MAKIN
+                                            </span>
+                                            <span class="text-xs font-black tracking-wider text-[#acf847] uppercase block drop-shadow-md -mt-1">
+                                                MUDAH!
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
+                                @endforeach
+
+                                {{-- Slider Navigation Arrow Buttons --}}
+                                <button type="button"
+                                        @click="prev()"
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
+                                        title="Slide Sebelumnya">
+                                    <span class="material-symbols-outlined text-base">chevron_left</span>
+                                </button>
+
+                                <button type="button"
+                                        @click="next()"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
+                                        title="Slide Selanjutnya">
+                                    <span class="material-symbols-outlined text-base">chevron_right</span>
+                                </button>
                             </div>
+
+                            {{-- Slider Pagination Dots (Bawah) --}}
+                            <div class="py-2.5 bg-black/80 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-2">
+                                @foreach ($carouselSlides as $idx => $slide)
+                                    <button type="button"
+                                            @click="currentSlide = {{ $idx }}"
+                                            class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                            :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-2 bg-white/40 hover:bg-white/70'">
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
                         </div>
                     </div>
                 </div>
