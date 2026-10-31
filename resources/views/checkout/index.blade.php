@@ -1142,8 +1142,20 @@
                         window.location.href = "{{ url('/checkout/success') }}/" + encodeURIComponent(oid);
                     },
                     onPending: function(result) {
-                        const oid = (result && result.order_id) ? result.order_id : data.order_id;
-                        window.location.href = "{{ url('/checkout/success') }}/" + encodeURIComponent(oid) + "?status=pending";
+                        // Jangan langsung anggap sukses atau arahkan ke tiket berhasil jika user belum membayar!
+                        payButton.disabled = false;
+                        payButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                        buttonText.innerText = originalText;
+
+                        showNotificationModal({
+                            title: 'Menunggu Pembayaran',
+                            message: 'Instruksi pembayaran telah diterbitkan oleh Midtrans. Silakan selesaikan pembayaran Anda sebelum batas waktu berakhir.',
+                            type: 'info',
+                            confirmText: 'Lihat Riwayat Booking',
+                            onConfirm: function() {
+                                window.location.href = "{{ route('pelanggan.riwayat') }}";
+                            }
+                        });
                     },
                     onError: function(result) {
                         showNotificationModal({

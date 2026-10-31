@@ -177,7 +177,7 @@ class CheckoutController extends Controller
     /**
      * Halaman Sukses Publik & E-Tiket Masuk (dapat diakses tamu tanpa login).
      */
-    public function success(string $orderId, PaymentService $paymentService): View
+    public function success(string $orderId, PaymentService $paymentService): View|\Illuminate\Http\RedirectResponse
     {
         $query = Transaksi::with(['jadwal.lapangan', 'jadwal.pelanggan'])
             ->where('order_id', $orderId)
@@ -193,6 +193,17 @@ class CheckoutController extends Controller
         if ($transaksi->status === 'pending') {
             $paymentService->syncStatus($transaksi);
             $transaksi->refresh();
+        }
+
+        // Jika transaksi masih pending atau belum berhasil dibayar, jangan terbitkan e-tiket!
+        if ($transaksi->status === 'pending' || $transaksi->status === 'menunggu_pembayaran') {
+            return redirect()->route('pelanggan.riwayat')
+                ->with('info', 'Pembayaran untuk pesanan ' . $transaksi->order_id . ' masih berstatus pending. Silakan selesaikan pembayaran sesuai instruksi.');
+        }
+
+        if ($transaksi->status === 'gagal' || $transaksi->status === 'dibatalkan') {
+            return redirect()->route('pelanggan.riwayat')
+                ->with('error', 'Pembayaran untuk pesanan ' . $transaksi->order_id . ' telah kedaluwarsa atau dibatalkan.');
         }
 
         $jadwal = $transaksi->jadwal;
