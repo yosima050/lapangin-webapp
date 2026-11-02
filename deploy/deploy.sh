@@ -41,10 +41,12 @@ else
 fi
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_DIR="/var/backups/lapangin/${ENV_TARGET}"
+# Simpan backup di dalam direktori proyek agar tidak membutuhkan hak akses root
+BACKUP_DIR="${APP_DIR}/storage/backups/${ENV_TARGET}"
 
 # Pastikan folder target dan backup ada (Idempoten: mkdir -p tidak akan error jika sudah ada)
 mkdir -p "${APP_DIR}"
+mkdir -p "${BACKUP_DIR}" 2>/dev/null || BACKUP_DIR="/tmp/lapangin_backups/${ENV_TARGET}"
 mkdir -p "${BACKUP_DIR}"
 
 cd "${APP_DIR}"

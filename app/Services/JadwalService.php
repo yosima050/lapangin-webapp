@@ -35,17 +35,6 @@ class JadwalService
         $baseDate = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
         $isWeekend = in_array($baseDate->dayOfWeek, [0, 6], true);
 
-        // Cek master harga tanggal khusus (jika ada)
-        $hargaMasterKhusus = $lapangan->hargaMasters
-            ->filter(function ($hm) use ($tanggal) {
-                if (! $hm->tanggal_khusus) {
-                    return false;
-                }
-                $tglStr = is_string($hm->tanggal_khusus) ? substr($hm->tanggal_khusus, 0, 10) : $hm->tanggal_khusus->toDateString();
-
-                return $tglStr === $tanggal;
-            });
-
         $hargaWeekday = $lapangan->hargaMasters
             ->whereNull('tanggal_khusus')
             ->where('jenis_hari', 'weekday')
@@ -105,8 +94,7 @@ class JadwalService
                 $isTersedia = ($status === 'tersedia');
             }
 
-            // Hitung harga slot:
-            // Prioritas 1: Aturan HargaKhusus aktif
+            // Hitung harga slot: cek apakah ada HargaKhusus aktif yang mencakup jam ini
             $customPrice = $hargaKhususAktif->first(function (HargaKhusus $hk) use ($baseDate, $slotMulai, $slotSelesai): bool {
                 $hkMulai = $baseDate->copy()->setTimeFromTimeString(substr($hk->jam_mulai, 0, 5));
                 $hkSelesaiStr = substr($hk->jam_selesai, 0, 5);
@@ -117,31 +105,10 @@ class JadwalService
                 return $slotMulai->gte($hkMulai) && $slotSelesai->lte($hkSelesai);
             });
 
-            // Prioritas 2: Master tarif dengan tanggal_khusus
-            $masterKhusus = null;
-            if ($customPrice === null && $hargaMasterKhusus->isNotEmpty()) {
-                $masterKhusus = $hargaMasterKhusus->first(function ($hm) use ($baseDate, $slotMulai, $slotSelesai): bool {
-                    if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                        return true;
-                    }
-                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
-                    $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                    $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
-
-                    return $slotMulai->gte($hmMulai) && $slotSelesai->lte($hmSelesai);
-                });
-            }
-
             if ($customPrice !== null) {
                 $slotHarga = (float) $customPrice->harga;
                 $isHargaKhusus = true;
                 $keteranganHarga = $customPrice->keterangan ?: 'Harga Khusus';
-            } elseif ($masterKhusus !== null) {
-                $slotHarga = (float) $masterKhusus->harga;
-                $isHargaKhusus = true;
-                $keteranganHarga = 'Tarif Khusus Tanggal';
             } else {
                 $hour = (int) $slotMulai->format('H');
                 $slotHarga = (float) ($hour >= 18 ? $defaultPrimeRate : $defaultBaseRate);
@@ -173,7 +140,7 @@ class JadwalService
                 'jam_tutup' => $jamTutup->format('H:i'),
             ],
             'slots' => $slots,
-            'has_harga_khusus' => $hargaKhususAktif->isNotEmpty() || $hargaMasterKhusus->isNotEmpty(),
+            'has_harga_khusus' => $hargaKhususAktif->isNotEmpty(),
             'harga_termurah' => count($slots) > 0 ? collect($slots)->min('harga') : $defaultBaseRate,
             'base_rate' => $defaultBaseRate,
             'prime_rate' => $defaultPrimeRate,
