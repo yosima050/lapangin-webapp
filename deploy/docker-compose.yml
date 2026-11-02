@@ -65,7 +65,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lapangin_net
+      lapangin_net:
+        aliases:
+          - db
+          - prod_db
+          - lapangin_db
 
   # ── Queue Worker ─────────────────────────────────────────────────────────────
   queue:
