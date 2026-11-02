@@ -101,6 +101,7 @@ echo "[6/8] Menjalankan migrasi database & symlink storage..."
 # Tunggu db healthy
 echo "      Menunggu koneksi database PostgreSQL siap..."
 sleep 4
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan key:generate --if-missing 2>/dev/null || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
 
 # Symlink storage (Idempoten)
