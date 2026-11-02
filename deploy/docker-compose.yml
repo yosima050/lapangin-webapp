@@ -38,6 +38,7 @@ services:
       - "443:443"
     volumes:
       - ../:/var/www/lapangin:ro
+      - /var/www/lapangin-staging:/var/www/lapangin-staging:ro
       - lapangin_storage:/var/www/lapangin/storage:ro
       - ./nginx.conf:/etc/nginx/conf.d/lapangin.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -120,4 +121,5 @@ volumes:
 
 networks:
   lapangin_net:
+    name: lapangin_net
     driver: bridge

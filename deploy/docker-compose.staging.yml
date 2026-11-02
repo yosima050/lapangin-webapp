@@ -28,9 +28,9 @@ services:
         condition: service_healthy
     networks:
       - lapangin_staging_net
+      - lapangin_net
 
-  # ── Nginx Web Server Staging ───────────────────────────────────────────────
-  # Port 8080: Memungkinkan pengujian instan tanpa bentrok dengan Production (Port 80/443)
+  # ── Nginx Web Server Staging (Port 8080 untuk tes langsung via port) ───────
   nginx:
     image: nginx:1.27-alpine
     container_name: lapangin_staging_nginx
@@ -114,10 +114,12 @@ services:
 networks:
   lapangin_staging_net:
     driver: bridge
+  lapangin_net:
+    name: lapangin_net
+    external: true
 
 volumes:
   lapangin_staging_pgdata:
     driver: local
   lapangin_staging_storage:
     driver: local
-
