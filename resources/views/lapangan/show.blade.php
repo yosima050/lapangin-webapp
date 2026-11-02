@@ -58,7 +58,8 @@
          selectedDate: '{{ $tanggalDipilih }}',
          formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
          monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
-         paymentScheme: 'dp',
+         paymentScheme: 'full',
+         showSchemeAccordion: false,
          equipments: {{ Js::from($perlengkapans->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama, 'harga' => (float)$p->harga, 'qty' => 0])) }},
          baseRate: {{ $baseRate }},
          primeRate: {{ $primeRate }},
@@ -548,9 +549,9 @@
             </div>
 
             {{-- ======================================================== --}}
-            {{-- RIGHT COLUMN: Sticky Order Summary & Booking Checkout --}}
+            {{-- RIGHT COLUMN: Sticky Order Summary & Booking Checkout (Desktop Only) --}}
             {{-- ======================================================== --}}
-            <div class="lg:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
+            <div class="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
                 <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
 
                     {{-- Summary Header --}}
@@ -668,7 +669,7 @@
                         </label>
                     </div>
 
-                    {{-- Checkout Submit Form --}}
+                    {{-- Checkout Submit Form (Desktop) --}}
                     <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="pt-1">
                         <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
                         <input type="hidden" name="tanggal" :value="selectedDate">
@@ -686,9 +687,9 @@
                         <button type="submit"
                                 :disabled="selectedSlots.length === 0"
                                 class="w-full py-4 px-6 rounded-2xl font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer"
-                                :class="selectedSlots.length > 0 ? 'bg-[#416900] hover:bg-[#315000] text-white shadow-emerald-700/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-                            <span class="material-symbols-outlined text-lg">check_circle</span>
-                            <span x-text="selectedSlots.length === 0 ? 'Pilih Jam Terlebih Dahulu' : (paymentScheme === 'dp' ? 'Lanjut ke Pembayaran DP (' + formatRp(dpAmount) + ')' : 'Lanjut ke Pembayaran Lunas (' + formatRp(grandTotal) + ')')"></span>
+                                :class="selectedSlots.length > 0 ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+                            <span>Lanjut ke Pembayaran</span>
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
                         </button>
                     </form>
 
@@ -715,6 +716,124 @@
         </div>
 
     </div>
+
+    {{-- ========================================================================= --}}
+    {{-- MOBILE / SMALL SCREEN STICKY BOTTOM BAR (GOPAY GAMES STYLE + ACCORDION) --}}
+    {{-- ========================================================================= --}}
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-2xl transition-all duration-300 ease-out">
+        
+        {{-- Accordion Drawer Pilihan Skema Pembayaran (Gopay Style Warna Toska Kontras Tinggi) --}}
+        <div class="bg-[#00708f] text-white transition-all overflow-hidden"
+             :class="showSchemeAccordion ? 'max-h-[500px]' : 'max-h-12'">
+            
+            {{-- Header Accordion Buka/Tutup --}}
+            <button type="button"
+                    @click="showSchemeAccordion = !showSchemeAccordion"
+                    class="w-full h-12 px-4 flex items-center justify-between text-xs font-bold bg-[#00708f] text-white hover:bg-[#005e78] transition cursor-pointer">
+                <div class="flex items-center gap-2 text-white">
+                    <span class="material-symbols-outlined text-base text-[#acf847]">payments</span>
+                    <span class="text-xs font-bold text-white tracking-wide"
+                          x-text="paymentScheme === 'full' ? 'Skema Pembayaran: Bayar Lunas (100%)' : 'Skema Pembayaran: Bayar DP 50%'"></span>
+                </div>
+                <div class="flex items-center gap-1.5 text-white/95">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-white" x-text="showSchemeAccordion ? 'Tutup' : 'Ubah'"></span>
+                    <span class="material-symbols-outlined text-base transition-transform duration-200 text-white"
+                          :class="showSchemeAccordion ? 'rotate-180' : ''">expand_more</span>
+                </div>
+            </button>
+
+            {{-- Isi Accordion yang Bisa Dibuka/Tutup --}}
+            <div x-show="showSchemeAccordion"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="p-4 space-y-3 bg-[#f8f9ff] text-[#0b1c30] border-t border-cyan-800/40">
+
+                {{-- Opsi 1: Bayar Lunas 100% (Default Awal) --}}
+                <label @click="paymentScheme = 'full'; showSchemeAccordion = false"
+                       class="p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between gap-3 shadow-xs"
+                       :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="mobile_scheme" value="full" x-model="paymentScheme" class="w-4 h-4 text-[#1a146b] focus:ring-[#1a146b]">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-[#0b1c30]">Bayar Lunas (100%)</span>
+                                <span class="px-1.5 py-0.5 rounded bg-blue-100 text-[#1a146b] text-[9px] font-black uppercase">Utama</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Langsung main tanpa antre di kasir</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-black text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
+                </label>
+
+                {{-- Opsi 2: Bayar DP 50% --}}
+                <label @click="paymentScheme = 'dp'; showSchemeAccordion = false"
+                       class="p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between gap-3 shadow-xs"
+                       :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/60 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="mobile_scheme" value="dp" x-model="paymentScheme" class="w-4 h-4 text-[#416900] focus:ring-[#acf847]">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-[#0b1c30]">Bayar DP 50%</span>
+                                <span class="px-1.5 py-0.5 rounded bg-[#acf847] text-[#102000] text-[9px] font-black uppercase">Fleksibel</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Sisa dilunasi di kasir venue saat tiba</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-black text-[#416900]" x-text="formatRp(dpAmount)"></span>
+                </label>
+
+            </div>
+        </div>
+
+        {{-- Bottom Action Bar --}}
+        <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="max-w-xl mx-auto flex items-center justify-between gap-3 px-4 py-3 pb-safe bg-white">
+            <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
+            <input type="hidden" name="tanggal" :value="selectedDate">
+            <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
+            <input type="hidden" name="durasi" :value="durationHours">
+            <input type="hidden" name="tipe_bayar" :value="paymentScheme">
+
+            {{-- Kolom Kiri: Rincian Pilihan & Nominal --}}
+            <div class="min-w-0 flex-1">
+                <template x-if="selectedSlots.length > 0">
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[11px] text-gray-500 truncate">
+                            <span class="font-bold text-[#1a146b]" x-text="durationHours + ' Jam Sesi'"></span>
+                            <span>•</span>
+                            <span class="truncate" x-text="timeRangeLabel"></span>
+                        </div>
+                        <div class="flex items-baseline gap-1.5 mt-0.5">
+                            <span class="text-xs text-gray-600 font-bold" x-text="paymentScheme === 'dp' ? 'DP 50%:' : 'Total Lunas:'"></span>
+                            <span class="text-base font-black text-[#1a146b]"
+                                  x-text="paymentScheme === 'dp' ? formatRp(dpAmount) : formatRp(grandTotal)">
+                            </span>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="selectedSlots.length === 0">
+                    <div>
+                        <p class="text-xs font-bold text-gray-800">Belum ada jam dipilih</p>
+                        <p class="text-[11px] text-gray-400">Pilih slot waktu di atas</p>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Kolom Kanan: Tombol Lanjut (Gojek / Gopay Blue Button) --}}
+            <button type="submit"
+                    :disabled="selectedSlots.length === 0"
+                    class="shrink-0 px-7 py-3 rounded-full font-headline font-black text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+                    :class="selectedSlots.length > 0
+                        ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+                <span>Lanjut</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+        </form>
+    </div>
+
+    {{-- Spacer Tambahan di Mobile agar Konten Bawah Tidak Tertutup Sticky Bar --}}
+    <div class="h-28 lg:hidden"></div>
 
 </div>
 @endsection
