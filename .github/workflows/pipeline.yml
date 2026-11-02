@@ -1,0 +1,116 @@
+name: LapangIn CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - development
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  # ── 1. Continuous Integration: Otomatisasi Uji Kualitas Kode & Unit Test ────
+  test:
+    name: 🧪 Automated Tests & Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_sqlite, bcmath, gd, zip, pcntl
+          coverage: none
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install NPM Dependencies & Build Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare Laravel Environment
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+
+      - name: Run Test Suite (85 Core Business Tests)
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          APP_ENV: testing
+          MIDTRANS_IS_PRODUCTION: false
+        run: |
+          php artisan test tests/Feature/HargaKhususDanAddonPerlengkapanTest.php tests/Feature/JadwalServiceTest.php tests/Feature/AdminLapanganCrudTest.php tests/Feature/AdminLaporanRekonsiliasiTest.php tests/Feature/KasirCheckInFlowTest.php tests/Feature/EndToEndBookingTest.php tests/Feature/GuestCheckoutAndAutoClaimTest.php tests/Feature/BookingAdjustmentServiceTest.php tests/Feature/PelangganProfileAndRiwayatPaymentTest.php tests/Feature/HardwareCheckinAndPublicPagesTest.php tests/Feature/KasirAndAdminDynamicFlowTest.php tests/Feature/KatalogSyncAndApiTest.php tests/Feature/LayoutsDynamicDataTest.php tests/Feature/MidtransCallbackTest.php tests/Feature/Auth/RegistrationTest.php tests/Unit/
+
+  # ── 2. Continuous Deployment: Otomatisasi Deploy ke Server VPS Cloud ────────
+  deploy:
+    name: 🚀 Continuous Deployment to VPS
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'development')
+
+    steps:
+      - name: Determine Target Environment
+        id: env_select
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "env_name=production" >> $GITHUB_OUTPUT
+            echo "branch=main" >> $GITHUB_OUTPUT
+            echo "target_dir=/var/www/lapangin" >> $GITHUB_OUTPUT
+          else
+            echo "env_name=staging" >> $GITHUB_OUTPUT
+            echo "branch=development" >> $GITHUB_OUTPUT
+            echo "target_dir=/var/www/lapangin-staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy via Secure SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            TARGET_DIR="${{ steps.env_select.outputs.target_dir }}"
+            ENV_NAME="${{ steps.env_select.outputs.env_name }}"
+            BRANCH="${{ steps.env_select.outputs.branch }}"
+
+            echo "=========================================================="
+            echo "🚀 Memulai Deployment LapangIn Otomatis (CI/CD)"
+            echo "   Environment : ${ENV_NAME}"
+            echo "   Branch      : ${BRANCH}"
+            echo "   Target Dir  : ${TARGET_DIR}"
+            echo "=========================================================="
+
+            if [ ! -d "${TARGET_DIR}" ]; then
+              echo "⚠️ Direktori ${TARGET_DIR} belum ada. Melakukan clone awal secara idempoten..."
+              sudo mkdir -p "${TARGET_DIR}"
+              sudo chown -R $USER:$USER "${TARGET_DIR}"
+              git clone -b "${BRANCH}" https://github.com/yosima050/lapangin-webapp.git "${TARGET_DIR}"
+            fi
+
+            cd "${TARGET_DIR}"
+            bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
