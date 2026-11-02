@@ -32,117 +32,111 @@
         </div>
     </section>
 
-    {{-- Filter --}}
-    <section class="sticky top-20 z-30 bg-[#f8f9ff]/95 backdrop-blur-md border-y border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    {{-- Filter Tanggal & Fasilitas: Non-sticky (Tidak ikut turun saat scroll down) --}}
+    <section class="border-y border-gray-100 bg-[#f8f9ff]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 
-            <div class="flex flex-col gap-4">
+                {{-- Date Picker --}}
+                <form method="GET" action="{{ route('katalog.index') }}" class="flex items-center gap-2">
+                    @if(request('kategori'))
+                        <input type="hidden" name="kategori" value="{{ request('kategori') }}">
+                    @endif
+                    <label
+                        for="tanggal"
+                        class="text-xs sm:text-sm font-bold text-gray-700 shrink-0"
+                    >
+                        Tanggal:
+                    </label>
 
-                {{-- Category --}}
-                <div class="flex flex-wrap items-center gap-2">
+                    <input
+                        id="tanggal"
+                        name="tanggal"
+                        type="date"
+                        min="{{ now('Asia/Jakarta')->toDateString() }}"
+                        value="{{ $tanggal }}"
+                        onchange="this.form.submit()"
+                        class="px-3.5 py-1.5 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#acf847]"
+                    >
+                </form>
 
-                    <span class="text-sm font-bold text-gray-700 mr-1">
-                        Kategori:
-                    </span>
-
-                    @php
-                        $currentKategori = request('kategori', 'Semua');
-                    @endphp
+                {{-- Quick Filters --}}
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
 
                     <button
                         type="button"
-                        data-testid="filter-kategori-semua"
-                        @click="sport = 'Semua'"
-                        :class="sport === 'Semua'
-                            ? 'bg-[#1a146b] text-white shadow-sm'
-                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
-                        class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center cursor-pointer"
+                        @click="dp = !dp"
+                        :class="dp
+                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
+                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
                     >
-                        Semua
+                        Bisa DP 50%
                     </button>
 
-                    @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->filter()->unique()) as $kat)
-                        @if(filled($kat))
-                            <button
-                                type="button"
-                                @click="sport = '{{ $kat }}'"
-                                :class="sport === '{{ $kat }}'
-                                    ? 'bg-[#1a146b] text-white shadow-sm'
-                                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
-                                class="px-4 py-2 rounded-full text-sm font-semibold transition inline-flex items-center cursor-pointer"
-                            >
-                                {{ $kat }}
-                            </button>
-                        @endif
-                    @endforeach
+                    <button
+                        type="button"
+                        @click="parking = !parking"
+                        :class="parking
+                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
+                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
+                    >
+                        Parkir Mobil
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="indoor = !indoor"
+                        :class="indoor
+                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
+                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
+                    >
+                        AC / Indoor
+                    </button>
 
                 </div>
 
-                {{-- Date + Options --}}
-                <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+            </div>
+        </div>
+    </section>
 
-                    {{-- Date --}}
-                    <form method="GET" action="{{ route('katalog.index') }}" class="flex items-center gap-2">
-                        @if(request('kategori'))
-                            <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                        @endif
-                        <label
-                            for="tanggal"
-                            class="text-sm font-bold text-gray-700"
-                        >
-                            Tanggal:
-                        </label>
+    {{-- Kategori Bar: Sticky (Ikut turun saat scroll down) + Horizontal Scroll Gopay Style (Tanpa Numpuk) --}}
+    <section class="sticky top-20 z-30 bg-[#f8f9ff]/95 backdrop-blur-md border-b border-gray-200/80 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+            <div class="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
 
-                        <input
-                            id="tanggal"
-                            name="tanggal"
-                            type="date"
-                            min="{{ now('Asia/Jakarta')->toDateString() }}"
-                            value="{{ $tanggal }}"
-                            onchange="this.form.submit()"
-                            class="px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#acf847]"
-                        >
-                    </form>
+                @php
+                    $currentKategori = request('kategori', 'Semua');
+                @endphp
 
-                    {{-- Quick Filters --}}
-                    <div class="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    data-testid="filter-kategori-semua"
+                    @click="sport = 'Semua'"
+                    :class="sport === 'Semua'
+                        ? 'border-[#416900] bg-[#eaf7d8] text-[#284200] font-black ring-1 ring-[#acf847] shadow-xs'
+                        : 'border-gray-200 bg-white text-gray-700 font-bold hover:bg-gray-50 hover:border-gray-300'"
+                    class="shrink-0 px-5 py-2 rounded-full text-xs sm:text-sm border transition-all inline-flex items-center justify-center cursor-pointer whitespace-nowrap"
+                >
+                    Semua
+                </button>
 
+                @foreach (($kategoriList ?? collect($katalog)->pluck('kategori')->filter()->unique()) as $kat)
+                    @if(filled($kat))
                         <button
                             type="button"
-                            @click="dp = !dp"
-                            :class="dp
-                                ? 'bg-[#eaf7d8] text-[#416900] border-[#acf847]'
-                                : 'bg-white text-gray-700 border-gray-200'"
-                            class="px-4 py-2 rounded-xl border text-sm font-semibold transition"
+                            @click="sport = '{{ $kat }}'"
+                            :class="sport === '{{ $kat }}'
+                                ? 'border-[#416900] bg-[#eaf7d8] text-[#284200] font-black ring-1 ring-[#acf847] shadow-xs'
+                                : 'border-gray-200 bg-white text-gray-700 font-bold hover:bg-gray-50 hover:border-gray-300'"
+                            class="shrink-0 px-5 py-2 rounded-full text-xs sm:text-sm border transition-all inline-flex items-center justify-center cursor-pointer whitespace-nowrap"
                         >
-                            Bisa DP 50%
+                            {{ $kat }}
                         </button>
-
-                        <button
-                            type="button"
-                            @click="parking = !parking"
-                            :class="parking
-                                ? 'bg-[#eaf7d8] text-[#416900] border-[#acf847]'
-                                : 'bg-white text-gray-700 border-gray-200'"
-                            class="px-4 py-2 rounded-xl border text-sm font-semibold transition"
-                        >
-                            Parkir Mobil
-                        </button>
-
-                        <button
-                            type="button"
-                            @click="indoor = !indoor"
-                            :class="indoor
-                                ? 'bg-[#eaf7d8] text-[#416900] border-[#acf847]'
-                                : 'bg-white text-gray-700 border-gray-200'"
-                            class="px-4 py-2 rounded-xl border text-sm font-semibold transition"
-                        >
-                            AC / Indoor
-                        </button>
-
-                    </div>
-
-                </div>
+                    @endif
+                @endforeach
 
             </div>
         </div>
