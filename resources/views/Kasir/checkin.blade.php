@@ -90,6 +90,7 @@
 
                 <button
                     type="submit"
+                    data-testid="checkin-submit"
                     class="absolute right-2.5 top-1/2 -translate-y-1/2 px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-1.5 cursor-pointer"
                 >
                     <span>Proses</span>

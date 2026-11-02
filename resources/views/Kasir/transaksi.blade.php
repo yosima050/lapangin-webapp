@@ -31,7 +31,7 @@
             </p>
         </div>
 
-        <button type="button" onclick="window.print()"
+        <button type="button" data-testid="transaction-print" onclick="window.print()"
                 class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-md cursor-pointer">
             <span class="material-symbols-outlined text-base">print</span>
             <span>Cetak Rekap Transaksi</span>

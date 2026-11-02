@@ -51,6 +51,7 @@
 
                     <button
                         type="button"
+                        data-testid="filter-kategori-semua"
                         @click="sport = 'Semua'"
                         :class="sport === 'Semua'
                             ? 'bg-[#1a146b] text-white shadow-sm'
