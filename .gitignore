@@ -29,3 +29,7 @@ Thumbs.db
 SKPL_LapangIn.md
 *SKPL*
 
+
+# Python cache
+__pycache__/
+*.py[cod]
