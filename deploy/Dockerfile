@@ -7,15 +7,14 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     bash curl git unzip supervisor \
     libpng-dev libjpeg-turbo-dev freetype-dev \
-    libzip-dev oniguruma-dev icu-dev \
+    libzip-dev \
     postgresql-dev
 
-# ── PHP extensions ────────────────────────────────────────────────────────────
+# ── PHP extensions (pdo, mbstring, opcache sudah bawaan php:8.3-fpm-alpine) ───
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo pdo_pgsql pgsql \
-        gd zip bcmath intl mbstring \
-        opcache pcntl
+        pdo_pgsql pgsql \
+        gd zip bcmath pcntl
 
 # ── Composer ─────────────────────────────────────────────────────────────────
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
