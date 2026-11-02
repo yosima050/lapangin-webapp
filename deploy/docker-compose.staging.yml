@@ -63,7 +63,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lapangin_staging_net
+      lapangin_staging_net:
+        aliases:
+          - db
+          - staging_db
+          - lapangin_staging_db
 
   # ── Queue Worker Staging ───────────────────────────────────────────────────
   queue:
