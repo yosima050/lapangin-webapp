@@ -87,9 +87,9 @@ jobs:
       - name: Deploy via Secure SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST || secrets.HOST || secrets.SERVER_HOST || 'lapangin.australiaeast.cloudapp.azure.com' }}
-          username: ${{ secrets.SSH_USER || secrets.SSH_USERNAME || secrets.USERNAME || 'userlapang' }}
-          key: ${{ secrets.SSH_PRIVATE_KEY || secrets.SSH_KEY || secrets.PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST || '20.211.144.75' }}
+          username: ${{ secrets.SSH_USER || 'userlapang' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY || secrets.SSH_KEY || secrets.KEY || secrets.PRIVATE_KEY || secrets.VM_KEY || secrets.PEM_KEY }}
           password: ${{ secrets.SSH_PASSWORD || secrets.PASSWORD }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
