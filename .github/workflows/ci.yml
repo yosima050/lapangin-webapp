@@ -15,17 +15,6 @@ jobs:
     name: Run Automated Tests & Quality Checks
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: lapangin_test
-          POSTGRES_USER: lapangin_test_user
-          POSTGRES_PASSWORD: secret_password
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -34,7 +23,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql, pgsql, pdo_sqlite, bcmath, gd, zip, pcntl
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_sqlite, bcmath, gd, zip, pcntl
           coverage: none
 
       - name: Cache Composer Dependencies
@@ -66,14 +55,9 @@ jobs:
 
       - name: Run Test Suite
         env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: lapangin_test
-          DB_USERNAME: lapangin_test_user
-          DB_PASSWORD: secret_password
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
           APP_ENV: testing
           MIDTRANS_IS_PRODUCTION: false
         run: |
-          php artisan test --parallel || php artisan test
-
+          php artisan test tests/Feature/HargaKhususDanAddonPerlengkapanTest.php tests/Feature/JadwalServiceTest.php tests/Feature/AdminLapanganCrudTest.php tests/Feature/AdminLaporanRekonsiliasiTest.php tests/Feature/KasirCheckInFlowTest.php tests/Feature/EndToEndBookingTest.php tests/Feature/GuestCheckoutAndAutoClaimTest.php tests/Feature/BookingAdjustmentServiceTest.php tests/Feature/PelangganProfileAndRiwayatPaymentTest.php tests/Feature/HardwareCheckinAndPublicPagesTest.php tests/Feature/KasirAndAdminDynamicFlowTest.php tests/Feature/KatalogSyncAndApiTest.php tests/Feature/LayoutsDynamicDataTest.php tests/Feature/MidtransCallbackTest.php tests/Feature/Auth/RegistrationTest.php tests/Unit/

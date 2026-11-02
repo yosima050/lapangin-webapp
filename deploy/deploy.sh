@@ -92,6 +92,7 @@ fi
 
 # ── 6. Build & Jalankan Kontainer Docker (Idempoten) ──────────────────────────
 echo "[5/8] Membangun dan memperbarui service kontainer Docker..."
+docker network create lapangin_net 2>/dev/null || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
 
@@ -110,6 +111,12 @@ echo "[7/8] Mengoptimasi cache Laravel & menyalakan kembali aplikasi..."
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize:clear
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan up 2>/dev/null || true
+
+# Reload Nginx jika kontainer Nginx utama sedang berjalan (Idempoten & Zero Downtime)
+if docker ps --format '{{.Names}}' | grep -q 'lapangin_nginx'; then
+    echo "      Memperbarui konfigurasi Nginx (Hot Reload)..."
+    docker exec lapangin_nginx nginx -s reload 2>/dev/null || true
+fi
 
 # ── 9. Verifikasi Healthcheck ─────────────────────────────────────────────────
 echo "[8/8] Menjalankan healthcheck verifikasi..."

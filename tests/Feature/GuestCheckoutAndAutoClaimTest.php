@@ -272,7 +272,7 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
             'created_at' => now(),
         ]);
 
-        // 2. Pengguna mendaftar secara resmi melalui alur /register
+        // 2. Pengguna mendaftar secara resmi melalui alur /register & verifikasi OTP
         $response = $this->post(route('register'), [
             'name' => 'Citra Lestari Official',
             'email' => 'citra.lestari@example.com',
@@ -281,7 +281,14 @@ class GuestCheckoutAndAutoClaimTest extends TestCase
             'password_confirmation' => 'Password123!',
         ]);
 
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('register.otp.show', absolute: false));
+        $sessionData = session('register_data');
+        $this->assertNotNull($sessionData);
+
+        $verifyResponse = $this->post(route('register.otp.verify'), [
+            'otp' => $sessionData['otp'],
+        ]);
+        $verifyResponse->assertRedirect(route('dashboard', absolute: false));
 
         // 3. Verifikasi akun resmi baru terdaftar
         $officialUser = Pelanggan::where('email', 'citra.lestari@example.com')->first();
