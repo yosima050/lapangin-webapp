@@ -91,6 +91,7 @@
                         <th class="px-5 py-4">Nama Perlengkapan</th>
                         <th class="px-5 py-4">Deskripsi</th>
                         <th class="px-5 py-4">Harga Sewa</th>
+                        <th class="px-5 py-4">Tersedia di Lapangan</th>
                         <th class="px-5 py-4">Status</th>
                         <th class="px-5 py-4">Aksi</th>
                     </tr>
@@ -133,6 +134,24 @@
                             {{-- Harga --}}
                             <td class="px-5 py-4 font-bold text-[#0b1c30]">
                                 Rp {{ number_format((float) $item->harga, 0, ',', '.') }}
+                            </td>
+
+                            {{-- Lapangan yang Tersedia --}}
+                            <td class="px-5 py-4">
+                                @if ($item->lapangans->isEmpty())
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#eaf7d8] text-[#416900] border border-[#acf847]/60">
+                                        <span class="material-symbols-outlined text-[14px]">all_inclusive</span>
+                                        Semua Lapangan
+                                    </span>
+                                @else
+                                    <div class="flex flex-wrap gap-1.5 max-w-xs">
+                                        @foreach ($item->lapangans as $lap)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#eff4ff] text-[#1a146b] border border-[#dce9ff]" title="{{ $lap->nama }}">
+                                                {{ Str::limit($lap->nama, 22) }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </td>
 
                             {{-- Status --}}
@@ -179,7 +198,7 @@
 
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-8 text-center text-gray-500">
+                            <td colspan="8" class="px-5 py-8 text-center text-gray-500">
                                 Belum ada data perlengkapan.
                             </td>
                         </tr>

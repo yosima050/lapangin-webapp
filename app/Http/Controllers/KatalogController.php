@@ -46,80 +46,6 @@ class KatalogController extends Controller
             $slotData['deskripsi'] = $item->deskripsi;
             $slotData['harga_weekday'] = $item->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday')->first()?->harga;
             $slotData['harga_weekend'] = $item->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend')->first()?->harga;
-            $baseDate = \Carbon\Carbon::parse($tanggal)->startOfDay();
-            $dayOfWeek = $baseDate->dayOfWeek;
-            $isWeekend = in_array($dayOfWeek, [0, 6]);
-            $jenisHari = $isWeekend ? 'weekend' : 'weekday';
-
-            $prioritizedRates = [];
-            $hoursToCheck = [];
-
-            if (!empty($slotData['slots'])) {
-                foreach ($slotData['slots'] as $slot) {
-                    $slotStart = $baseDate->copy()->setTimeFromTimeString(substr($slot['jam_mulai'], 0, 5));
-                    $slotSelesaiStr = substr($slot['jam_selesai'], 0, 5);
-                    $slotEnd = ($slotSelesaiStr === '24:00' || $slotSelesaiStr === '00:00')
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString($slotSelesaiStr);
-                    $hoursToCheck[] = [$slotStart, $slotEnd];
-                }
-            } else {
-                for ($h = 0; $h < 24; $h++) {
-                    $slotStart = $baseDate->copy()->addHours($h);
-                    $slotEnd = $slotStart->copy()->addHour();
-                    $hoursToCheck[] = [$slotStart, $slotEnd];
-                }
-            }
-
-            foreach ($hoursToCheck as [$slotStart, $slotEnd]) {
-                $customPrice = $item->hargaMasters->first(function ($hm) use ($tanggal, $baseDate, $slotStart, $slotEnd) {
-                    if (!$hm->tanggal_khusus || $hm->tanggal_khusus->toDateString() !== $tanggal) {
-                        return false;
-                    }
-                    if (!$hm->jam_mulai || !$hm->jam_selesai) {
-                        return true;
-                    }
-                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
-                    $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                    $hmSelesai = ($hmSelesaiStr === '24:00' || $hmSelesaiStr === '00:00')
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
-
-                    return $slotStart->gte($hmMulai) && $slotEnd->lte($hmSelesai);
-                });
-
-                if ($customPrice) {
-                    $prioritizedRates[] = (float) $customPrice->harga;
-                } else {
-                    $defaultPrice = $item->hargaMasters->first(function ($hm) use ($jenisHari, $baseDate, $slotStart, $slotEnd) {
-                        if ($hm->tanggal_khusus !== null || $hm->jenis_hari !== $jenisHari) {
-                            return false;
-                        }
-                        if (!$hm->jam_mulai || !$hm->jam_selesai) {
-                            return true;
-                        }
-                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
-                        $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                        $hmSelesai = ($hmSelesaiStr === '24:00' || $hmSelesaiStr === '00:00')
-                            ? $baseDate->copy()->addDay()->startOfDay()
-                            : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
-
-                        return $slotStart->gte($hmMulai) && $slotEnd->lte($hmSelesai);
-                    });
-
-                    if ($defaultPrice) {
-                        $prioritizedRates[] = (float) $defaultPrice->harga;
-                    }
-                }
-            }
-
-            if (!empty($prioritizedRates)) {
-                $minApplicable = min($prioritizedRates);
-            } else {
-                $minApplicable = $item->hargaMasters->whereNull('tanggal_khusus')->min('harga');
-            }
-
-            $slotData['harga_termurah'] = $minApplicable ?? 100000;
             $slotData['lapangan'] = $item;
 
             return $slotData;
@@ -191,8 +117,8 @@ class KatalogController extends Controller
             ->first()?->harga;
 
         $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
-        $baseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
-        $primeRate = (float) ($baseRate + 40000);
+        $baseRate = (float) ($jadwalData['base_rate'] ?? ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000)));
+        $primeRate = (float) ($jadwalData['prime_rate'] ?? ($baseRate + 40000));
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -209,7 +135,15 @@ class KatalogController extends Controller
             ]);
         }
 
-        $perlengkapans = Perlengkapan::where('is_active', true)->get();
+        // Ambil perlengkapan aktif yang tersedia untuk lapangan ini (atau tersedia untuk semua lapangan jika tidak ada pembatasan relasi)
+        $perlengkapans = Perlengkapan::where('is_active', true)
+            ->where(function ($q) use ($id) {
+                $q->whereHas('lapangans', fn ($l) => $l->where('lapangan_id', $id))
+                  ->orDoesntHave('lapangans');
+            })
+            ->orderBy('nama')
+            ->get();
+
         $semuaLapangan = Lapangan::all();
 
         // Precompute jadwal 7 hari ke depan agar client bisa render instan tanpa loading
@@ -218,8 +152,6 @@ class KatalogController extends Controller
             $cDateStr = $d['date_str'];
             $cDateCarbon = \Carbon\Carbon::parse($cDateStr)->startOfDay();
             $cIsWeekend = in_array($cDateCarbon->dayOfWeek, [0, 6]);
-            $cBaseRate = (float) ($cIsWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
-            $cPrimeRate = (float) ($cBaseRate + 40000);
 
             if ($cDateStr === $tanggal) {
                 $initialDaysCache[$cDateStr] = [
@@ -227,8 +159,8 @@ class KatalogController extends Controller
                     'slotsMalam' => $slotsMalam,
                     'formattedDate' => $cDateCarbon->translatedFormat('l, d F Y'),
                     'monthYear' => $cDateCarbon->translatedFormat('F Y'),
-                    'baseRate' => $cBaseRate,
-                    'primeRate' => $cPrimeRate,
+                    'baseRate' => $baseRate,
+                    'primeRate' => $primeRate,
                 ];
             } else {
                 $cSlotData = $this->jadwalService->getSlotStatus((string) $id, $cDateStr);
@@ -242,6 +174,10 @@ class KatalogController extends Controller
                         $cSlotsMalam[] = $s;
                     }
                 }
+
+                $cBaseRate = (float) ($cSlotData['base_rate'] ?? ($cIsWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000)));
+                $cPrimeRate = (float) ($cSlotData['prime_rate'] ?? ($cBaseRate + 40000));
+
                 $initialDaysCache[$cDateStr] = [
                     'slotsSiang' => $cSlotsSiang,
                     'slotsMalam' => $cSlotsMalam,

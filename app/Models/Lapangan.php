@@ -6,6 +6,7 @@ use App\Models\HargaKhusus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Lapangan extends Model
 {
@@ -64,5 +65,15 @@ class Lapangan extends Model
     public function hargaKhusus(): HasMany
     {
         return $this->hasMany(HargaKhusus::class, 'lapangan_id');
+    }
+
+    public function perlengkapans(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Perlengkapan::class,
+            'lapangan_perlengkapan',
+            'lapangan_id',
+            'perlengkapan_id'
+        );
     }
 }

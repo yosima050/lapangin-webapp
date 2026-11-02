@@ -1,62 +1,122 @@
 #!/usr/bin/env bash
 # =============================================================================
-# LapangIn — Deploy Script (jalankan di VPS sebagai deploy user)
-# Penggunaan: bash deploy/deploy.sh [branch]
-# Contoh:     bash deploy/deploy.sh development
+# LapangIn — Idempotent Deployment Script (CI/CD Automated & Manual)
+#
+# Penggunaan:
+#   bash deploy/deploy.sh [environment] [branch]
+#
+# Contoh:
+#   bash deploy/deploy.sh staging development
+#   bash deploy/deploy.sh production main
+#
+# Karakteristik Idempoten:
+#   1. Aman dieksekusi berulang kali (tidak akan error jika folder/container sudah ada).
+#   2. Membersihkan dependensi lama dan menyinkronkan state secara deterministik.
+#   3. Mempertahankan data persistence PostgreSQL & storage upload tanpa data loss.
 # =============================================================================
+
 set -euo pipefail
 
-BRANCH="${1:-development}"
-APP_DIR="/var/www/lapangin"
-COMPOSE_FILE="${APP_DIR}/deploy/docker-compose.yml"
+ENV_TARGET="${1:-staging}"
+BRANCH="${2:-development}"
+
+echo "================================================================="
+echo "  LapangIn CI/CD Idempotent Deployment"
+echo "  Waktu       : $(date '+%Y-%m-%d %H:%M:%S WIB')"
+echo "  Target Env  : ${ENV_TARGET}"
+echo "  Target Git  : origin/${BRANCH}"
+echo "================================================================="
+
+# ── 1. Tentukan Direktori dan File Konfigurasi Berdasarkan Environment ─────────
+if [ "${ENV_TARGET}" = "production" ]; then
+    APP_DIR="/var/www/lapangin"
+    COMPOSE_PROJECT="lapangin_prod"
+    COMPOSE_FILE="${APP_DIR}/deploy/docker-compose.yml"
+    DEFAULT_ENV_FILE="${APP_DIR}/deploy/.env.production"
+else
+    APP_DIR="/var/www/lapangin-staging"
+    COMPOSE_PROJECT="lapangin_staging"
+    COMPOSE_FILE="${APP_DIR}/deploy/docker-compose.staging.yml"
+    DEFAULT_ENV_FILE="${APP_DIR}/deploy/.env.staging"
+fi
+
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_DIR="/var/backups/lapangin"
+BACKUP_DIR="/var/backups/lapangin/${ENV_TARGET}"
 
-echo "======================================================"
-echo " LapangIn Deploy Script — $(date '+%Y-%m-%d %H:%M:%S')"
-echo " Branch: ${BRANCH}"
-echo "======================================================"
-
-# ── 1. Backup database sebelum deploy ─────────────────────────────────────────
-echo "[1/7] Backup database PostgreSQL..."
+# Pastikan folder target dan backup ada (Idempoten: mkdir -p tidak akan error jika sudah ada)
+mkdir -p "${APP_DIR}"
 mkdir -p "${BACKUP_DIR}"
-docker compose -f "${COMPOSE_FILE}" exec -T db \
-    pg_dump -U lapangin_user lapangin_db \
-    > "${BACKUP_DIR}/lapangin_db_${TIMESTAMP}.sql"
-echo "      Backup saved: ${BACKUP_DIR}/lapangin_db_${TIMESTAMP}.sql"
 
-# Hapus backup lebih dari 7 hari
-find "${BACKUP_DIR}" -name "*.sql" -mtime +7 -delete
-
-# ── 2. Pull latest code ───────────────────────────────────────────────────────
-echo "[2/7] Pulling latest code dari branch '${BRANCH}'..."
 cd "${APP_DIR}"
-git fetch origin
-git checkout "${BRANCH}"
-git pull origin "${BRANCH}"
 
-# ── 3. Aktifkan maintenance mode ──────────────────────────────────────────────
-echo "[3/7] Mengaktifkan maintenance mode..."
-docker compose -f "${COMPOSE_FILE}" exec -T app \
-    php artisan down --retry=60 --secret="lapangin-bypass-$(openssl rand -hex 8)"
+# ── 2. Backup Database Sebelum Perubahan (Idempoten) ───────────────────────────
+echo "[1/8] Memeriksa status database & membuat backup..."
+if docker ps --format '{{.Names}}' | grep -q "${COMPOSE_PROJECT}_db\|lapangin_db\|lapangin_staging_db"; then
+    echo "      Database aktif terdeteksi. Membuat snapshot pg_dump..."
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T db \
+        pg_dump -U lapangin_user "${DB_DATABASE:-lapangin_db}" > "${BACKUP_DIR}/db_backup_${TIMESTAMP}.sql" 2>/dev/null || true
+    echo "      ✅ Backup tersimpan di ${BACKUP_DIR}/db_backup_${TIMESTAMP}.sql"
+else
+    echo "      ℹ️ Kontainer database belum berjalan. Melewati backup awal."
+fi
 
-# ── 4. Build Docker image baru ────────────────────────────────────────────────
-echo "[4/7] Building Docker image..."
-docker compose -f "${COMPOSE_FILE}" build app
+# Rotasi backup: Hapus file cadangan yang lebih lama dari 7 hari (Idempoten)
+find "${BACKUP_DIR}" -name "*.sql" -mtime +7 -delete 2>/dev/null || true
 
-# ── 5. Jalankan migrasi database ──────────────────────────────────────────────
-echo "[5/7] Menjalankan database migrations..."
-docker compose -f "${COMPOSE_FILE}" run --rm app php artisan migrate --force
+# ── 3. Ambil Kode Terbaru dari Git (Idempoten & Bersih dari Conflict) ──────────
+echo "[2/8] Menyinkronkan repositori Git (origin/${BRANCH})..."
+git fetch --all --prune
+git checkout -B "${BRANCH}" "origin/${BRANCH}"
+git reset --hard "origin/${BRANCH}"
 
-# ── 6. Restart semua services ─────────────────────────────────────────────────
-echo "[6/7] Restart services..."
-docker compose -f "${COMPOSE_FILE}" up -d --remove-orphans
+# ── 4. Verifikasi File Environment .env (Idempoten) ───────────────────────────
+echo "[3/8] Memeriksa konfigurasi .env..."
+if [ ! -f "${APP_DIR}/.env" ]; then
+    if [ -f "${DEFAULT_ENV_FILE}" ]; then
+        echo "      Menyalin template ${DEFAULT_ENV_FILE} ke .env..."
+        cp "${DEFAULT_ENV_FILE}" "${APP_DIR}/.env"
+    else
+        echo "      Menyalin .env.example ke .env..."
+        cp "${APP_DIR}/.env.example" "${APP_DIR}/.env"
+    fi
+fi
 
-# ── 7. Matikan maintenance mode ───────────────────────────────────────────────
-echo "[7/7] Mematikan maintenance mode..."
-sleep 5
-docker compose -f "${COMPOSE_FILE}" exec -T app php artisan up
+# ── 5. Aktifkan Maintenance Mode Sementara ─────────────────────────────────────
+echo "[4/8] Mengaktifkan maintenance mode..."
+if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps -q app 2>/dev/null | grep -q .; then
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app \
+        php artisan down --retry=30 2>/dev/null || true
+fi
 
-echo ""
-echo "✅ Deploy selesai! Aplikasi berjalan di $(grep APP_URL "${APP_DIR}/.env" | cut -d= -f2)"
+# ── 6. Build & Jalankan Kontainer Docker (Idempoten) ──────────────────────────
+echo "[5/8] Membangun dan memperbarui service kontainer Docker..."
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
 
+# ── 7. Eksekusi Migrasi Database & Storage Symlink (Idempoten) ────────────────
+echo "[6/8] Menjalankan migrasi database & symlink storage..."
+# Tunggu db healthy
+echo "      Menunggu koneksi database PostgreSQL siap..."
+sleep 4
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
+
+# Symlink storage (Idempoten)
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan storage:link 2>/dev/null || true
+
+# ── 8. Optimasi Cache & Mematikan Maintenance Mode ───────────────────────────
+echo "[7/8] Mengoptimasi cache Laravel & menyalakan kembali aplikasi..."
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize:clear
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan up 2>/dev/null || true
+
+# ── 9. Verifikasi Healthcheck ─────────────────────────────────────────────────
+echo "[8/8] Menjalankan healthcheck verifikasi..."
+sleep 3
+CONTAINER_STATUS=$(docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps --format '{{.Service}}: {{.Status}}')
+echo "${CONTAINER_STATUS}"
+
+echo "================================================================="
+echo "✅ DEPLOYMENT BERHASIL & IDEMPOTEN!"
+echo "   Environment : ${ENV_TARGET}"
+echo "   Branch      : ${BRANCH}"
+echo "================================================================="

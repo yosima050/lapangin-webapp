@@ -48,6 +48,11 @@ class HargaKhususController extends Controller
 
         $this->pastikanTidakBentrok($validated, $hargaKhusus->id);
 
+        // Jika request tidak membawa field is_active, pertahankan nilai sebelumnya
+        if (! $request->has('is_active')) {
+            $validated['is_active'] = $hargaKhusus->is_active;
+        }
+
         $hargaKhusus->update($validated);
 
         return redirect()
@@ -79,6 +84,13 @@ class HargaKhususController extends Controller
 
     private function validateHargaKhusus(Request $request): array
     {
+        if ($request->filled('jam_mulai')) {
+            $request->merge(['jam_mulai' => substr((string) $request->jam_mulai, 0, 5)]);
+        }
+        if ($request->filled('jam_selesai')) {
+            $request->merge(['jam_selesai' => substr((string) $request->jam_selesai, 0, 5)]);
+        }
+
         $validated = $request->validate([
             'lapangan_id' => [
                 'required',
@@ -111,7 +123,7 @@ class HargaKhususController extends Controller
             ],
         ]);
 
-        $validated['is_active'] = true;
+        $validated['is_active'] = $request->boolean('is_active', true);
 
         return $validated;
     }
