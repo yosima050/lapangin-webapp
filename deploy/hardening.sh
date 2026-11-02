@@ -37,6 +37,19 @@ APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::AutocleanInterval "7";
 EOF
 
+# ── Konfigurasi Swap 2GB (Idempoten: Mencegah OOM Hang pada VM Azure B-Series) ──
+if [ ! -f /swapfile ] && [ "$(swapon --show | wc -l)" -le 1 ]; then
+    echo "      Membuat swap file 2GB untuk stabilitas memori VM..."
+    fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    if ! grep -q '/swapfile' /etc/fstab; then
+        echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+    sysctl vm.swappiness=10 >/dev/null 2>&1 || true
+fi
+
 # ── 2. Konfigurasi Firewall UFW (Idempoten) ────────────────────────────────────
 echo "[2/7] Mengonfigurasi Firewall UFW..."
 ufw --force reset >/dev/null 2>&1 || true
