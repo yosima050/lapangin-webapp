@@ -83,6 +83,13 @@ if [ ! -f "${APP_DIR}/.env" ]; then
     fi
 fi
 
+# Pastikan DB_HOST terisolasi dengan tepat sesuai environment
+if [ "${ENV_TARGET}" = "staging" ]; then
+    sed -i 's/^DB_HOST=.*/DB_HOST=lapangin_staging_db/' "${APP_DIR}/.env" 2>/dev/null || true
+else
+    sed -i 's/^DB_HOST=.*/DB_HOST=lapangin_db/' "${APP_DIR}/.env" 2>/dev/null || true
+fi
+
 # ── 5. Aktifkan Maintenance Mode Sementara ─────────────────────────────────────
 echo "[4/8] Mengaktifkan maintenance mode..."
 if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps -q app 2>/dev/null | grep -q .; then
@@ -101,14 +108,32 @@ echo "[6/8] Menjalankan migrasi database & symlink storage..."
 # Tunggu db healthy
 echo "      Menunggu koneksi database PostgreSQL siap..."
 sleep 4
+
+# Pastikan password database sinkron di postgres
+if [ "${ENV_TARGET}" = "staging" ] && docker ps --format '{{.Names}}' | grep -q 'lapangin_staging_db'; then
+    docker exec lapangin_staging_db psql -U lapangin_user -d postgres -c "ALTER USER lapangin_user WITH PASSWORD 'lapangin_staging_secret';" 2>/dev/null || true
+fi
+
 if grep -q '^APP_KEY=$' "${APP_DIR}/.env" || grep -q '^APP_KEY=""$' "${APP_DIR}/.env" || ! grep -q '^APP_KEY=base64:' "${APP_DIR}/.env"; then
     echo "      Menghasilkan APP_KEY baru..."
     docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan key:generate --force || true
 fi
+
+echo "      Menjalankan migrasi skema database..."
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
+
+# Seed database hanya untuk staging jika database masih awal
+if [ "${ENV_TARGET}" = "staging" ]; then
+    echo "      Menyiapkan data awal (seeder) staging..."
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan db:seed --force 2>/dev/null || true
+fi
 
 # Symlink storage (Idempoten)
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan storage:link 2>/dev/null || true
+
+# Perbaiki kepemilikan direktori storage & cache
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 # ── 8. Optimasi Cache & Mematikan Maintenance Mode ───────────────────────────
 echo "[7/8] Mengoptimasi cache Laravel & menyalakan kembali aplikasi..."
