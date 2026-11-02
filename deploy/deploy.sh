@@ -101,7 +101,10 @@ echo "[6/8] Menjalankan migrasi database & symlink storage..."
 # Tunggu db healthy
 echo "      Menunggu koneksi database PostgreSQL siap..."
 sleep 4
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan key:generate --if-missing 2>/dev/null || true
+if grep -q '^APP_KEY=$' "${APP_DIR}/.env" || grep -q '^APP_KEY=""$' "${APP_DIR}/.env" || ! grep -q '^APP_KEY=base64:' "${APP_DIR}/.env"; then
+    echo "      Menghasilkan APP_KEY baru..."
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan key:generate --force || true
+fi
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
 
 # Symlink storage (Idempoten)
