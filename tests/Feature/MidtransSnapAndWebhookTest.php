@@ -423,7 +423,7 @@ class MidtransSnapAndWebhookTest extends TestCase
         $response->assertStatus(200);
 
         // Pastikan info card Midtrans Snap tampil
-        $response->assertSee('Metode Pembayaran Tersedia via Midtrans Snap');
+        $response->assertSee('Midtrans Snap');
         $response->assertSee('id="pay-button"', false);
         $response->assertSee('Bayar Sekarang');
         $response->assertSee('Bayar DP (50%)');

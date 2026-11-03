@@ -26,10 +26,12 @@ class ReviewFixesTest extends TestCase
 
         $pelanggan = Pelanggan::factory()->create(['role' => 'pelanggan', 'email_verified_at' => now()]);
 
+        $testDate = now()->addDays(2)->toDateString();
+
         // Request starting before jam_buka
         $responseBefore = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '07:00',
             'durasi' => 1,
         ]));
@@ -38,7 +40,7 @@ class ReviewFixesTest extends TestCase
         // Request ending after jam_tutup
         $responseAfter = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '21:00',
             'durasi' => 2,
         ]));
@@ -56,12 +58,13 @@ class ReviewFixesTest extends TestCase
         ]);
 
         $pelanggan = Pelanggan::factory()->create(['role' => 'pelanggan', 'email_verified_at' => now()]);
+        $testDate = now()->addDays(2)->toDateString();
 
         // Existing booking at 10:00 - 12:00
         Jadwal::create([
             'lapangan_id' => $lapangan->id,
             'pelanggan_id' => $pelanggan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '10:00',
             'jam_selesai' => '12:00',
             'harga_disepakati' => 200000,
@@ -76,7 +79,7 @@ class ReviewFixesTest extends TestCase
         // Overlapping request at 11:00 - 13:00
         $response = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '11:00',
             'durasi' => 2,
         ]));
