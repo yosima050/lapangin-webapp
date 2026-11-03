@@ -69,9 +69,13 @@ find "${BACKUP_DIR}" -name "*.sql" -mtime +7 -delete 2>/dev/null || true
 
 # ── 3. Ambil Kode Terbaru dari Git (Idempoten & Bersih dari Conflict) ──────────
 echo "[2/8] Menyinkronkan repositori Git (origin/${BRANCH})..."
-# Buka akses write storage/cache via Docker root container yang sedang berjalan (tanpa butuh sudo)
+# Pastikan storage dan cache hanya dapat ditulis oleh UID/GID aplikasi (www-data) dengan mode minimal yang aman (775)
 if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps -q app 2>/dev/null | grep -q .; then
-    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chown -R www-data:www-data storage bootstrap/cache
+    if ! docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chmod -R 775 storage bootstrap/cache; then
+        echo "❌ Error: Gagal mengubah hak akses storage dan bootstrap/cache ke mode 775." >&2
+        exit 1
+    fi
 fi
 git fetch --all --prune
 git checkout -B "${BRANCH}" "origin/${BRANCH}"
