@@ -20,30 +20,32 @@ class JadwalService
         $lapangan = Lapangan::with('hargaMasters')->findOrFail($lapanganId);
         Jadwal::autoCancelExpiredPendingBookings();
 
+        $baseDate = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+        $normalizedTanggal = $baseDate->toDateString();
+
         $daftarJadwal = Jadwal::query()
             ->where('lapangan_id', $lapanganId)
-            ->whereDate('tanggal', $tanggal)
+            ->whereDate('tanggal', $normalizedTanggal)
             ->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])
             ->get();
 
         $hargaKhususAktif = HargaKhusus::query()
             ->where('lapangan_id', $lapanganId)
-            ->whereDate('tanggal', $tanggal)
+            ->whereDate('tanggal', $normalizedTanggal)
             ->where('is_active', true)
             ->get();
 
-        $baseDate = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
         $isWeekend = in_array($baseDate->dayOfWeek, [0, 6], true);
 
         // Cek master harga tanggal khusus (jika ada)
         $hargaMasterKhusus = $lapangan->hargaMasters
-            ->filter(function ($hm) use ($tanggal) {
+            ->filter(function ($hm) use ($normalizedTanggal) {
                 if (! $hm->tanggal_khusus) {
                     return false;
                 }
                 $tglStr = is_string($hm->tanggal_khusus) ? substr($hm->tanggal_khusus, 0, 10) : $hm->tanggal_khusus->toDateString();
 
-                return $tglStr === $tanggal;
+                return $tglStr === $normalizedTanggal;
             });
 
         $hargaWeekday = $lapangan->hargaMasters
@@ -67,8 +69,8 @@ class JadwalService
         $slots = [];
 
         $now = Carbon::now('Asia/Jakarta');
-        $isToday = $tanggal === $now->toDateString();
-        $isPastDate = $tanggal < $now->toDateString();
+        $isToday = $normalizedTanggal === $now->toDateString();
+        $isPastDate = $normalizedTanggal < $now->toDateString();
         $currentTime = $now->format('H:i');
 
         for ($slotMulai = $jamBuka->copy(); $slotMulai->lt($jamTutup); $slotMulai->addHour()) {
@@ -120,16 +122,22 @@ class JadwalService
             $masterKhusus = null;
             if ($customPrice === null && $hargaMasterKhusus->isNotEmpty()) {
                 $masterKhusus = $hargaMasterKhusus->first(function ($hm) use ($baseDate, $slotMulai, $slotSelesai): bool {
-                    if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                        return true;
+                    $matchesStart = true;
+                    if (! empty($hm->jam_mulai)) {
+                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
+                        $matchesStart = $slotMulai->gte($hmMulai);
                     }
-                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
-                    $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                    $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
 
-                    return $slotMulai->gte($hmMulai) && $slotSelesai->lte($hmSelesai);
+                    $matchesEnd = true;
+                    if (! empty($hm->jam_selesai)) {
+                        $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
+                        $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
+                            ? $baseDate->copy()->addDay()->startOfDay()
+                            : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
+                        $matchesEnd = $slotSelesai->lte($hmSelesai);
+                    }
+
+                    return $matchesStart && $matchesEnd;
                 });
             }
 
@@ -166,7 +174,7 @@ class JadwalService
             'lapangan_id' => $lapangan->id,
             'lapangan_nama' => $lapangan->nama,
             'kategori' => $lapangan->kategori,
-            'tanggal' => $tanggal,
+            'tanggal' => $normalizedTanggal,
             'jam_operasional' => [
                 'jam_buka' => $jamBuka->format('H:i'),
                 'jam_tutup' => $jamTutup->format('H:i'),
