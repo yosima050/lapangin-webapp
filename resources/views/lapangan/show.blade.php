@@ -248,13 +248,13 @@
             </div>
         @endif
 
-        {{-- 2. Main Two-Column Split Grid --}}
+        {{-- 2. Main Two-Column Split Grid (70% Kiri, 30% Kanan) --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {{-- ======================================================== --}}
-            {{-- LEFT COLUMN: Arena Details, Date Carousel, Slots & Addons --}}
+            {{-- KOLOM KIRI (Main Content): Jadwal, Carousel Tanggal, Slots & Addons --}}
             {{-- ======================================================== --}}
-            <div class="lg:col-span-8 flex flex-col gap-8">
+            <div class="lg:col-span-8 xl:col-span-8 flex flex-col gap-8">
 
                 {{-- Venue Header Card --}}
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
@@ -565,18 +565,23 @@
             </div>
 
             {{-- ======================================================== --}}
-            {{-- RIGHT COLUMN: Sticky Order Summary & Booking Checkout (Desktop Only) --}}
+            {{-- KOLOM KANAN (Sticky Sidebar / Anti-Gravity): Ringkasan Pesanan --}}
             {{-- ======================================================== --}}
-            <div class="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
+            <aside class="block lg:col-span-4 xl:col-span-4 lg:sticky" style="position: sticky; top: 80px; height: fit-content;">
                 <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
 
-                    {{-- Summary Header --}}
+                    {{-- Summary Header: Ringkasan Pesanan --}}
                     <div>
-                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">
-                            RINGKASAN PEMESANAN
-                        </span>
-                        <div class="flex items-center gap-3 mt-2">
-                            <div class="w-12 h-12 rounded-xl bg-gray-900 overflow-hidden shrink-0 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xs font-black uppercase tracking-wider text-[#416900] flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
+                                <span>Ringkasan Pesanan</span>
+                            </h2>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#eff4ff] text-[#1a146b]" x-text="selectedSlots.length > 0 ? (selectedSlots.length + ' Slot Dipilih') : 'Belum Memilih'"></span>
+                        </div>
+
+                        <div class="flex items-center gap-3 mt-3">
+                            <div class="w-12 h-12 rounded-xl bg-gray-900 overflow-hidden shrink-0 border border-gray-200 shadow-2xs">
                                 <img src="{{ $lapangan->foto_url }}" alt="{{ $lapangan->nama }}" class="w-full h-full object-cover">
                             </div>
                             <div class="min-w-0">
@@ -584,106 +589,130 @@
                                     {{ $lapangan->nama }}
                                 </h3>
                                 <p class="text-xs text-gray-500 truncate">
-                                    {{ $lapangan->kategori }} • Standard AFC
+                                    {{ $lapangan->kategori }} • {{ $lapangan->lokasi ?? 'Venue Mitra' }}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Schedule Summary Meta --}}
-                    <div class="p-4 rounded-2xl bg-[#eff4ff] border border-[#dce9ff] flex flex-col gap-2.5 text-xs">
-                        <div class="flex items-center justify-between text-gray-600">
-                            <span class="flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_today</span>
-                                <span>Tanggal:</span>
-                            </span>
-                            <strong class="text-gray-900" x-text="formattedDate"></strong>
-                        </div>
-
-                        <div class="flex items-center justify-between text-gray-600">
-                            <span class="flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
-                                <span>Slot Waktu:</span>
-                            </span>
-                            <strong class="text-gray-900" x-text="timeRangeLabel"></strong>
-                        </div>
-
-                        <div class="flex items-center justify-between text-gray-600">
-                            <span class="flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
-                                <span>Durasi Total:</span>
-                            </span>
-                            <strong class="text-[#1a146b]" x-text="durationHours > 0 ? (durationHours + ' Jam Sesi') : '-'"></strong>
-                        </div>
-                    </div>
-
-                    {{-- Cost Breakdown --}}
-                    <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
-                        <div class="flex items-center justify-between">
-                            <span>Sesi Sewa Lapangan (<span x-text="durationHours"></span> jam):</span>
-                            <span class="font-bold text-gray-900" x-text="selectedSlots.length > 0 ? formatRp(courtTotalFee) : 'Rp0'"></span>
-                        </div>
-
-                        <template x-if="equipmentTotalFee > 0">
-                            <div class="flex items-center justify-between text-emerald-700 font-medium">
-                                <span>Sewa Perlengkapan Tambahan:</span>
-                                <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
+                    {{-- Detail Jadwal yang Sedang Dipilih / Empty State --}}
+                    <template x-if="selectedSlots.length === 0">
+                        <div class="p-5 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center flex flex-col items-center justify-center gap-2">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                <span class="material-symbols-outlined text-xl">event_busy</span>
                             </div>
-                        </template>
-
-                        <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-1">
-                                <span>Biaya Layanan &amp; Pemeliharaan</span>
-                                <span class="material-symbols-outlined text-xs text-gray-400">info</span>
-                            </span>
-                            <span class="font-bold text-[#416900] uppercase text-[10px]">GRATIS</span>
+                            <p class="text-xs font-bold text-gray-600">Belum ada jadwal yang dipilih</p>
+                            <p class="text-[11px] text-gray-400 leading-snug">Silakan klik salah satu atau beberapa slot jam pada kolom di sebelah kiri.</p>
                         </div>
+                    </template>
 
-                        <div class="border-t border-gray-100 my-1"></div>
-
-                        <div class="flex items-center justify-between text-sm font-headline">
-                            <span class="font-bold text-gray-900">Total Biaya Sewa:</span>
-                            <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
-                        </div>
-                    </div>
-
-                    {{-- Payment Scheme Selector --}}
-                    <div class="flex flex-col gap-2.5 pt-1">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">
-                            PILIHAN SKEMA PEMBAYARAN
-                        </span>
-
-                        <label class="p-3.5 rounded-2xl border transition cursor-pointer flex flex-col gap-1"
-                               :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/40 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white hover:bg-gray-50'">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <input type="radio" name="scheme" value="dp" x-model="paymentScheme" class="text-[#416900] focus:ring-[#acf847]">
-                                    <span class="text-xs font-bold text-gray-900">Bayar DP 50%</span>
+                    <template x-if="selectedSlots.length > 0">
+                        <div class="flex flex-col gap-4">
+                            {{-- Schedule Summary Meta --}}
+                            <div class="p-4 rounded-2xl bg-[#eff4ff] border border-[#dce9ff] flex flex-col gap-2.5 text-xs">
+                                <div class="flex items-center justify-between text-gray-600">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_today</span>
+                                        <span>Tanggal:</span>
+                                    </span>
+                                    <strong class="text-gray-900" x-text="formattedDate"></strong>
                                 </div>
-                                <span class="px-2 py-0.5 rounded-md bg-[#acf847] text-[#102000] text-[10px] font-black uppercase tracking-wider">
-                                    Rekomendasi
+
+                                <div class="flex items-center justify-between text-gray-600">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                        <span>Slot Waktu:</span>
+                                    </span>
+                                    <strong class="text-gray-900" x-text="timeRangeLabel"></strong>
+                                </div>
+
+                                <div class="flex items-center justify-between text-gray-600">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
+                                        <span>Durasi Total:</span>
+                                    </span>
+                                    <strong class="text-[#1a146b]" x-text="durationHours > 0 ? (durationHours + ' Jam Sesi') : '-'"></strong>
+                                </div>
+                            </div>
+
+                            {{-- List Slot yang Dipilih (Detail Jadwal, Sesi, Jam, dan Harga) --}}
+                            <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                                <template x-for="slot in selectedSlots" :key="slot.jam_mulai">
+                                    <div class="p-2.5 rounded-xl border border-gray-100 bg-gray-50/70 flex items-center justify-between text-xs">
+                                        <div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-[#0b1c30]" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                                <span class="text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase"
+                                                      :class="parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'"
+                                                      x-text="parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? 'Sesi Malam Prime Time' : 'Sesi Siang & Sore'"></span>
+                                            </div>
+                                        </div>
+                                        <span class="font-black text-[#1a146b]"
+                                              x-text="formatRp((slot.harga !== undefined && slot.harga !== null && Number(slot.harga) > 0) ? Number(slot.harga) : (parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? primeRate : baseRate))"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            {{-- Cost Breakdown --}}
+                            <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
+                                <div class="flex items-center justify-between">
+                                    <span>Sesi Sewa Lapangan (<span x-text="durationHours"></span> jam):</span>
+                                    <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
+                                </div>
+
+                                <template x-if="equipmentTotalFee > 0">
+                                    <div class="flex items-center justify-between text-emerald-700 font-medium">
+                                        <span>Sewa Perlengkapan Tambahan:</span>
+                                        <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
+                                    </div>
+                                </template>
+
+                                <div class="flex items-center justify-between">
+                                    <span class="flex items-center gap-1">
+                                        <span>Biaya Layanan &amp; Pemeliharaan</span>
+                                        <span class="material-symbols-outlined text-xs text-gray-400">info</span>
+                                    </span>
+                                    <span class="font-bold text-[#416900] uppercase text-[10px]">GRATIS</span>
+                                </div>
+
+                                <div class="border-t border-gray-100 my-1"></div>
+
+                                <div class="flex items-center justify-between text-sm font-headline">
+                                    <span class="font-bold text-gray-900">Total Biaya:</span>
+                                    <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
+                                </div>
+                            </div>
+
+                            {{-- Payment Scheme Selector --}}
+                            <div class="flex flex-col gap-2 pt-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                                    PILIHAN SKEMA PEMBAYARAN
                                 </span>
-                            </div>
-                            <div class="flex items-baseline justify-between pl-6 mt-1">
-                                <span class="text-base font-headline font-black text-[#416900]" x-text="formatRp(dpAmount)"></span>
-                                <span class="text-[10px] text-gray-500">Sisa dibayar di kasir venue</span>
-                            </div>
-                        </label>
 
-                        <label class="p-3.5 rounded-2xl border transition cursor-pointer flex flex-col gap-1"
-                               :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-indigo-50/50 ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white hover:bg-gray-50'">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <input type="radio" name="scheme" value="full" x-model="paymentScheme" class="text-[#1a146b] focus:ring-[#1a146b]">
-                                    <span class="text-xs font-bold text-gray-900">Bayar Lunas (100%)</span>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between"
+                                           :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/40 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[11px] font-bold text-gray-900">DP 50%</span>
+                                            <input type="radio" name="scheme" value="dp" x-model="paymentScheme" class="text-[#416900] focus:ring-[#acf847]">
+                                        </div>
+                                        <span class="text-sm font-headline font-black text-[#416900] mt-1" x-text="formatRp(dpAmount)"></span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Sisa di kasir</span>
+                                    </label>
+
+                                    <label class="p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between"
+                                           :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-indigo-50/50 ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white hover:bg-gray-50'">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[11px] font-bold text-gray-900">Lunas 100%</span>
+                                            <input type="radio" name="scheme" value="full" x-model="paymentScheme" class="text-[#1a146b] focus:ring-[#1a146b]">
+                                        </div>
+                                        <span class="text-sm font-headline font-black text-[#1a146b] mt-1" x-text="formatRp(grandTotal)"></span>
+                                        <span class="text-[9px] text-[#416900] font-semibold mt-0.5">Bebas antre</span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="flex items-baseline justify-between pl-6 mt-1">
-                                <span class="text-base font-headline font-black text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
-                                <span class="text-[10px] text-gray-500">Main langsung tanpa kasir</span>
-                            </div>
-                        </label>
-                    </div>
+                        </div>
+                    </template>
 
                     {{-- Checkout Submit Form (Desktop) --}}
                     <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="pt-1">
@@ -696,30 +725,33 @@
                         @guest
                             <div class="mb-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-snug flex items-start gap-2">
                                 <span class="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
-                                <span>Pemesanan online memerlukan akun terdaftar. Anda akan diarahkan ke pendaftaran akun sebelum menyelesaikan pesanan.</span>
+                                <span>Pemesanan online memerlukan akun terdaftar. Anda akan diarahkan ke login/daftar jika belum masuk.</span>
                             </div>
                         @endguest
 
+                        {{-- Tombol Besar Berwarna Biru dengan Teks Pesan Sekarang! --}}
                         <button type="submit"
                                 :disabled="selectedSlots.length === 0"
-                                class="w-full py-4 px-6 rounded-2xl font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer"
-                                :class="selectedSlots.length > 0 ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-                            <span>Lanjut ke Pembayaran</span>
-                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                class="w-full py-4 px-6 rounded-2xl font-headline font-black text-base flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.99] cursor-pointer"
+                                :class="selectedSlots.length > 0
+                                    ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
+                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+                            <span>Pesan Sekarang!</span>
+                            <span class="material-symbols-outlined text-xl">arrow_forward</span>
                         </button>
                     </form>
 
                     {{-- Lock Reassurance Box --}}
                     <div class="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-2.5 text-gray-500 text-[11px] leading-snug">
                         <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">lock_clock</span>
-                        <span>Slot otomatis terkunci aman selama 10 menit saat Anda menekan tombol lanjut ke checkout.</span>
+                        <span>Slot otomatis terkunci aman selama 10 menit saat Anda menekan tombol Pesan Sekarang.</span>
                     </div>
 
                     {{-- Helpline Note --}}
                     <div class="text-center pt-1 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                         <span class="flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">support_agent</span>
-                            <span>Butuh bantuan jadwal?</span>
+                            <span>Butuh bantuan?</span>
                         </span>
                         <a href="https://wa.me/{{ config('app.support_whatsapp', '6281234567890') }}" target="_blank" class="font-bold text-[#1a146b] hover:underline">
                             Hubungi CS
@@ -727,7 +759,7 @@
                     </div>
 
                 </div>
-            </div>
+            </aside>
 
         </div>
 
