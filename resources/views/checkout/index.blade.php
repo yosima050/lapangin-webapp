@@ -454,35 +454,86 @@
                 </section>
             </div>
 
-            {{-- KOLOM KANAN: RINGKASAN & PEMILIHAN TIPE BAYAR --}}
-            <aside class="lg:sticky lg:top-6 lg:col-span-5">
-                <section class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
+            {{-- KOLOM KANAN: WIDGET REVIEW & CARD RINGKASAN PEMESANAN ALA REFERENSI --}}
+            <aside class="space-y-4 lg:sticky lg:top-6 lg:col-span-5">
 
-                    <div class="px-5 py-5 sm:px-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-[#416900]">
-                                <span class="h-2 w-2 rounded-full bg-[#416900]"></span>
-                                Ringkasan Booking
-                            </h2>
-                            <span id="section-badge-tipe" class="rounded-full bg-[#acf847] px-3 py-1 text-xs font-bold text-[#304f00]">
-                                {{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}
-                            </span>
+                {{-- 1. Widget Ulasan dan Rating (Sesuai Referensi Gambar 1 & 2) --}}
+                <div class="rounded-2xl border border-[#e8edfa] bg-white p-5 shadow-sm">
+                    <p class="text-xs font-bold text-[#474651]">Ulasan dan rating</p>
+                    <div class="mt-2 flex items-center gap-3">
+                        <span class="text-3xl font-black text-[#0b1c30]">4.98</span>
+                        <div class="flex items-center gap-1 text-amber-400">
+                            @for($i = 0; $i < 5; $i++)
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @endfor
+                        </div>
+                    </div>
+                    <p class="mt-1 text-[11px] text-[#777682]">
+                        Berdasarkan total 1.400+ rating pemain di LapangIn
+                    </p>
+                </div>
+
+                {{-- 2. Widget Butuh Bantuan CS (Sesuai Referensi Gambar 1) --}}
+                <div class="flex items-center justify-between rounded-2xl border border-[#e8edfa] bg-white p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eff4ff] text-[#1a146b]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-[#0b1c30]">Butuh Bantuan?</p>
+                            <p class="text-[11px] text-[#777682]">Kamu bisa hubungi admin CS kami.</p>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/6281234567890?text=Halo%20Admin%20LapangIn,%20saya%20butuh%20bantuan%20booking" 
+                       target="_blank"
+                       class="rounded-xl bg-[#eff4ff] px-3 py-2 text-xs font-extrabold text-[#1a146b] hover:bg-[#dce9ff] transition">
+                        Hubungi CS
+                    </a>
+                </div>
+
+                {{-- 3. Card Ringkasan Pemesanan Utama (Sesuai Referensi Gambar 2) --}}
+                <section class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
+                    <div class="p-5 sm:p-6">
+
+                        {{-- Item Header: Thumbnail + Nama Lapangan + Venue --}}
+                        <div class="flex items-center gap-3.5 pb-4 border-b border-gray-100">
+                            @php
+                                $thumbUrl = $lapangan->foto_utama_url 
+                                    ?? ($lapangan->images && count($lapangan->images) > 0 ? asset('storage/' . $lapangan->images[0]) : null)
+                                    ?? asset('images/default-lapangan.jpg');
+                            @endphp
+                            <img src="{{ $thumbUrl }}" 
+                                 alt="{{ $lapangan->nama }}" 
+                                 class="h-14 w-14 rounded-xl object-cover border border-gray-100 shadow-2xs"
+                                 onerror="this.src='{{ asset('images/Logo_revisi.png') }}'">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="truncate text-sm font-extrabold text-[#0b1c30]">
+                                    {{ $lapangan->nama }}
+                                </h3>
+                                <p class="text-xs font-semibold text-[#416900] mt-0.5">
+                                    {{ $lapangan->kategori->nama ?? 'Olahraga' }} &bull; {{ $lapangan->lokasi ?? 'Venue Mitra' }}
+                                </p>
+                            </div>
                         </div>
 
-                        {{-- Pilihan Tipe Pembayaran (Disatukan dalam Card Ringkasan) --}}
-                        <div class="mb-5">
+                        {{-- Pilihan Skema Pembayaran (DP 50% vs Lunas 100%) --}}
+                        <div class="py-4 border-b border-gray-100">
                             <label class="block text-xs font-bold uppercase tracking-wider text-[#474651] mb-2.5">
-                                Pilih Tipe Pembayaran
+                                Skema Pembayaran
                             </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                {{-- Opsi A: DP 50% --}}
+                            <div class="grid grid-cols-2 gap-2">
+                                {{-- Opsi A: Bayar DP 50% --}}
                                 <button type="button"
                                         id="card-tipe-dp"
                                         onclick="setTipeBayar('dp')"
-                                        class="text-left w-full relative flex flex-col p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                                        class="text-left flex flex-col justify-between p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                     <div class="flex items-center justify-between">
                                         <span id="label-tipe-dp" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                            Bayar DP (50%)
+                                            DP 50%
                                         </span>
                                         <span id="radio-tipe-dp" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                             @if($tipeBayar === 'dp')
@@ -490,22 +541,20 @@
                                             @endif
                                         </span>
                                     </div>
-                                    <p class="mt-1 text-base font-extrabold text-[#0b1c30]">
+                                    <p class="mt-1 text-sm font-black text-[#0b1c30]">
                                         Rp{{ number_format($nominalDp, 0, ',', '.') }}
                                     </p>
-                                    <p class="mt-0.5 text-[10px] leading-snug text-[#474651]">
-                                        Sisa dilunasi di kasir venue
-                                    </p>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">Sisa di kasir</p>
                                 </button>
 
                                 {{-- Opsi B: Bayar Lunas 100% --}}
                                 <button type="button"
                                         id="card-tipe-full"
                                         onclick="setTipeBayar('full')"
-                                        class="text-left w-full relative flex flex-col p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
+                                        class="text-left flex flex-col justify-between p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                     <div class="flex items-center justify-between">
                                         <span id="label-tipe-full" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                            Bayar Lunas (100%)
+                                            Lunas 100%
                                         </span>
                                         <span id="radio-tipe-full" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                             @if($tipeBayar === 'full')
@@ -513,164 +562,104 @@
                                             @endif
                                         </span>
                                     </div>
-                                    <p class="mt-1 text-base font-extrabold text-[#0b1c30]">
+                                    <p class="mt-1 text-sm font-black text-[#0b1c30]">
                                         Rp{{ number_format($totalHarga, 0, ',', '.') }}
                                     </p>
-                                    <p class="mt-0.5 text-[10px] leading-snug text-[#416900] font-semibold">
-                                        Main langsung tanpa kasir
-                                    </p>
+                                    <p class="text-[10px] text-[#416900] font-semibold mt-0.5">Bebas antre</p>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="rounded-xl bg-[#eff4ff] p-4">
-                            <p class="text-xs font-bold uppercase tracking-wide text-[#474651]">
-                                Lapangan pilihan
-                            </p>
+                        {{-- Rincian Biaya Sesuai Format Referensi (Harga, Jumlah/Durasi, Biaya, Total Pembayaran) --}}
+                        <div class="py-4 space-y-3 text-xs">
+                            <div class="flex justify-between items-center text-[#474651]">
+                                <span>Jadwal Main</span>
+                                <span class="font-bold text-[#0b1c30]">
+                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d M Y') }} &bull; {{ $jamMulai }}–{{ $jamSelesai }}
+                                </span>
+                            </div>
 
-                            <h3 class="mt-2 text-lg font-extrabold text-[#0b1c30]">
-                                {{ $lapangan->nama }}
-                            </h3>
+                            <div class="flex justify-between items-center text-[#474651]">
+                                <span>Harga Sewa Lapangan</span>
+                                <span class="font-semibold text-[#0b1c30]">
+                                    Rp{{ number_format($totalHarga, 0, ',', '.') }}
+                                </span>
+                            </div>
 
-                            <span class="mt-3 inline-flex rounded-md bg-[#dce9ff] px-2 py-1 text-xs font-bold text-[#1a146b]">
-                                Booking Lapangan
-                            </span>
+                            <div class="flex justify-between items-center text-[#474651]">
+                                <span>Durasi Pemesanan</span>
+                                <span class="font-semibold text-[#0b1c30]">
+                                    {{ $durasi }} Jam
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between items-center text-[#474651]">
+                                <span>Biaya Layanan</span>
+                                <span class="font-bold text-[#416900]">
+                                    Rp0
+                                </span>
+                            </div>
+
+                            {{-- Info Sisa Tagihan Kasir Jika DP --}}
+                            <div class="flex justify-between items-center text-[#474651]">
+                                <span id="sidebar-status-label">{{ $tipeBayar === 'full' ? 'Sisa di Kasir' : 'Sisa Bayar di Kasir' }}</span>
+                                <span id="sidebar-status-val" class="font-bold {{ $tipeBayar === 'full' ? 'text-[#416900]' : 'text-amber-600' }}">
+                                    {{ $tipeBayar === 'full' ? 'Rp0 (Lunas)' : 'Rp' . number_format($sisaPembayaran, 0, ',', '.') }}
+                                </span>
+                            </div>
                         </div>
 
-                        <div class="mt-4 space-y-4 rounded-xl border border-[#e8edfa] p-4">
-                            <div class="flex items-start justify-between gap-4">
-                                <span class="text-sm text-[#474651]">Tanggal</span>
-                                <span class="text-right text-sm font-bold text-[#1a146b]">
-                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y') }}
-                                </span>
-                            </div>
-
-                            <div class="flex items-start justify-between gap-4">
-                                <span class="text-sm text-[#474651]">Jam booking</span>
-                                <span class="text-right text-sm font-bold text-[#0b1c30]">
-                                    {{ $jamMulai }} – {{ $jamSelesai }}
-                                </span>
-                            </div>
-
-                            <div class="flex items-start justify-between gap-4">
-                                <span class="text-sm text-[#474651]">Durasi</span>
-                                <span class="rounded-md bg-[#acf847] px-2 py-1 text-xs font-bold text-[#304f00]">
-                                    {{ $durasi }} jam
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Rincian Finansial --}}
-                        <div class="mt-6">
-                            <h3 class="mb-4 text-xs font-extrabold uppercase tracking-wider text-[#474651]">
-                                Rincian Finansial
-                            </h3>
-
-                            <div class="space-y-3">
-                                <div class="flex justify-between gap-3 text-sm">
-                                    <span class="text-[#474651]">Harga rata-rata per jam</span>
-                                    <span class="font-semibold text-[#0b1c30]">
-                                        Rp{{ number_format($hargaPerJam, 0, ',', '.') }}
+                        {{-- Divider --}}
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-bold text-[#0b1c30] block">
+                                        Total Pembayaran
+                                    </span>
+                                    <span id="sidebar-panel-title" class="text-[10px] text-[#777682]">
+                                        {{ $tipeBayar === 'full' ? 'Pembayaran Lunas 100%' : 'DP yang Dibayar Sekarang' }}
                                     </span>
                                 </div>
-
-                                <div class="flex justify-between gap-3 text-sm">
-                                    <span class="text-[#474651]">Durasi sewa</span>
-                                    <span class="font-semibold text-[#0b1c30]">
-                                        {{ $durasi }} jam
-                                    </span>
-                                </div>
-
-                                <div class="border-t border-dashed border-[#c8c5d3] pt-4">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <span class="font-bold text-[#0b1c30]">
-                                            Total Tagihan
-                                        </span>
-                                        <span class="text-right text-lg font-extrabold text-[#1a146b]">
-                                            Rp{{ number_format($totalHarga, 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Panel Pembayaran (DP vs Full) --}}
-                        <div class="mt-5 rounded-xl bg-[#1a146b] p-5 text-white">
-                            <div class="flex items-center justify-between gap-3">
-                                <span id="sidebar-panel-title" class="text-xs font-bold uppercase tracking-wide text-[#e2dfff]">
-                                    {{ $tipeBayar === 'full' ? 'Total Pembayaran Lunas' : 'DP yang Harus Dibayar' }}
-                                </span>
-
-                                <span id="sidebar-panel-badge" class="rounded-md bg-[#416900] px-2 py-1 text-xs font-bold text-white">
-                                    {{ $tipeBayar === 'full' ? '100% LUNAS' : '50% DP' }}
+                                <span id="sidebar-panel-amount" class="text-xl sm:text-2xl font-black text-[#1a146b]">
+                                    Rp{{ number_format($nominalBayar, 0, ',', '.') }}
                                 </span>
                             </div>
-
-                            <p id="sidebar-panel-amount" class="mt-3 text-2xl font-extrabold">
-                                Rp{{ number_format($nominalBayar, 0, ',', '.') }}
-                            </p>
-
-                            <div class="mt-4 border-t border-white/20 pt-4">
-                                <div class="flex items-center justify-between gap-3">
-                                    <span id="sidebar-status-label" class="text-sm text-[#e2dfff]">
-                                        {{ $tipeBayar === 'full' ? 'Status pelunasan' : 'Sisa pembayaran di kasir' }}
-                                    </span>
-
-                                    <span id="sidebar-status-val" class="text-right font-bold text-[#acf847]">
-                                        @if($tipeBayar === 'full')
-                                            Rp0 (Lunas Online)
-                                        @else
-                                            Rp{{ number_format($sisaPembayaran, 0, ',', '.') }}
-                                        @endif
-                                    </span>
-                                </div>
-
-                                <p id="sidebar-status-note" class="mt-2 text-xs leading-5 text-[#e2dfff]">
-                                    @if($tipeBayar === 'full')
-                                        Pembayaran sewa lunas online. Tidak ada tagihan sewa lapangan lagi saat tiba di kasir venue.
-                                    @else
-                                        Sisa tagihan dibayarkan di kasir. Pastikan pembayaran DP sudah terverifikasi sebelum menggunakan e-tiket.
-                                    @endif
-                                </p>
-                            </div>
                         </div>
 
-                        {{-- Status integrasi --}}
-                        <div class="mt-4 rounded-xl bg-[#dce9ff] p-4">
-                            <p class="text-sm font-bold text-[#1a146b]">
-                                Periksa kembali pesanan
-                            </p>
+                        {{-- Hidden elements for backward compatibility JS updates --}}
+                        <span id="section-badge-tipe" class="hidden">{{ $tipeBayar === 'full' ? 'Lunas 100%' : 'DP 50%' }}</span>
+                        <span id="sidebar-panel-badge" class="hidden">{{ $tipeBayar === 'full' ? '100% LUNAS' : '50% DP' }}</span>
+                        <p id="sidebar-status-note" class="hidden"></p>
 
-                            <p class="mt-1 text-xs leading-5 text-[#474651]">
-                                Pastikan tanggal, waktu, durasi, dan lapangan sudah benar.
-                                Nominal di atas merupakan rincian perhitungan, bukan bukti
-                                pembayaran.
-                            </p>
-                        </div>
-
-                        {{-- Timer Reminder Pill di Sidebar --}}
-                        <div class="mt-4 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/90 px-3.5 py-2.5 text-xs text-amber-900">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span class="font-bold">Sisa Waktu Bayar:</span>
-                            </div>
-                            <span id="sidebar-countdown" class="font-mono font-extrabold text-amber-900">
-                                {{ sprintf('%02d:%02d', floor(($sisaDetik ?? 600) / 60), ($sisaDetik ?? 600) % 60) }}
-                            </span>
-                        </div>
-
-                        {{-- Tombol Aksi Utama --}}
+                        {{-- Tombol Aksi Utama: Pesan Sekarang! (Sesuai Referensi Gambar 2) --}}
                         <button id="pay-button"
                                 type="button"
-                                class="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-6 py-4 text-base font-extrabold text-white shadow-md transition hover:bg-[#130d52]">
-                            <span id="pay-button-text">Bayar Sekarang (Rp {{ number_format($nominalBayar, 0, ',', '.') }})</span>
+                                class="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-6 py-4 text-base font-extrabold text-white shadow-md transition hover:bg-[#130d52] active:scale-[0.99]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                            <span id="pay-button-text">Pesan Sekarang!</span>
                         </button>
 
-                        <p class="mt-3 text-center text-xs leading-5 text-[#777682]">
-                            Pembayaran aman via Midtrans Snap (QRIS, VA, E-Wallet, Kartu Kredit).
+                        <p class="mt-2.5 text-center text-[11px] text-[#777682]">
+                            Diverifikasi otomatis &amp; aman via Midtrans
                         </p>
                     </div>
                 </section>
+
+                {{-- Status aman & countdown pill --}}
+                <div class="flex items-center justify-between rounded-xl bg-[#eff4ff] px-4 py-3 text-xs text-[#1a146b]">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-[#416900]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        <span class="font-bold">Transaksi Dijamin Aman</span>
+                    </div>
+                    <span id="sidebar-countdown" class="font-mono font-extrabold text-[#1a146b]">
+                        {{ sprintf('%02d:%02d', floor(($sisaDetik ?? 600) / 60), ($sisaDetik ?? 600) % 60) }}
+                    </span>
+                </div>
+            </aside>
 
                 <div class="mt-4 flex items-center justify-center gap-2 text-xs text-[#777682]">
                     <svg class="w-3.5 h-3.5 text-[#777682] inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
@@ -928,7 +917,7 @@
 
         // 4. Panel Sidebar Ringkasan Kanan
         const sideTitle = document.getElementById('sidebar-panel-title');
-        if (sideTitle) sideTitle.textContent = isFull ? 'Total Pembayaran Lunas' : 'DP yang Harus Dibayar';
+        if (sideTitle) sideTitle.textContent = isFull ? 'Pembayaran Lunas 100%' : 'DP yang Dibayar Sekarang';
 
         const sideBadge = document.getElementById('sidebar-panel-badge');
         if (sideBadge) sideBadge.textContent = isFull ? '100% LUNAS' : '50% DP';
@@ -937,10 +926,13 @@
         if (sideAmount) sideAmount.textContent = formatRupiah(nominal);
 
         const sideStatusLabel = document.getElementById('sidebar-status-label');
-        if (sideStatusLabel) sideStatusLabel.textContent = isFull ? 'Status pelunasan' : 'Sisa pembayaran di kasir';
+        if (sideStatusLabel) sideStatusLabel.textContent = isFull ? 'Sisa di Kasir' : 'Sisa Bayar di Kasir';
 
         const sideStatusVal = document.getElementById('sidebar-status-val');
-        if (sideStatusVal) sideStatusVal.textContent = isFull ? 'Rp0 (Lunas Online)' : formatRupiah(sisa);
+        if (sideStatusVal) {
+            sideStatusVal.textContent = isFull ? 'Rp0 (Lunas)' : formatRupiah(sisa);
+            sideStatusVal.className = 'font-bold ' + (isFull ? 'text-[#416900]' : 'text-amber-600');
+        }
 
         const sideStatusNote = document.getElementById('sidebar-status-note');
         if (sideStatusNote) {
@@ -954,9 +946,9 @@
             el.textContent = formatRupiah(nominal);
         });
 
-        // 6. Teks Tombol Bayar Sekarang
+        // 6. Teks Tombol Bayar Sekarang (Tetap mempertahankan Pesan Sekarang!)
         const payText = document.getElementById('pay-button-text');
-        if (payText) payText.textContent = `Bayar Sekarang (${formatRupiah(nominal)})`;
+        if (payText) payText.textContent = `Pesan Sekarang!`;
     };
 
     document.addEventListener('DOMContentLoaded', function () {
