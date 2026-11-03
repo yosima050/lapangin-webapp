@@ -3,7 +3,20 @@
 @section('title', 'Pengaturan Harga Khusus - Admin LapangIn')
 
 @section('content')
-<div class="w-full px-8 py-8 flex flex-col gap-6">
+<div class="w-full px-8 py-8 flex flex-col gap-6"
+    x-data="{
+        editModalOpen: false,
+        editData: {
+            id: '',
+            lapangan_id: '',
+            tanggal: '',
+            jam_mulai: '',
+            jam_selesai: '',
+            harga: '',
+            keterangan: '',
+            is_active: true
+        }
+    }">
 
     {{-- Header --}}
     <div>
@@ -191,6 +204,21 @@
 
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-2">
+                                    <button type="button"
+                                        @click="editData = {
+                                            id: '{{ $item->id }}',
+                                            lapangan_id: '{{ $item->lapangan_id }}',
+                                            tanggal: '{{ $item->tanggal->format('Y-m-d') }}',
+                                            jam_mulai: '{{ substr($item->jam_mulai, 0, 5) }}',
+                                            jam_selesai: '{{ substr($item->jam_selesai, 0, 5) }}',
+                                            harga: '{{ (float) $item->harga }}',
+                                            keterangan: '{{ addslashes($item->keterangan ?? '') }}',
+                                            is_active: {{ $item->is_active ? 'true' : 'false' }}
+                                        }; editModalOpen = true;"
+                                        class="whitespace-nowrap rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">
+                                        Edit
+                                    </button>
+
                                     <form
                                         action="{{ route('admin.harga-khusus.toggle-status', $item->id) }}"
                                         method="POST">
@@ -227,6 +255,83 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    {{-- Modal Edit Harga Khusus --}}
+    <div x-show="editModalOpen"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 flex items-center justify-center p-4">
+        <div @click.away="editModalOpen = false"
+             class="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-2xl w-full p-6 transition-all transform">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-[#0b1c30]">
+                    Edit Aturan Harga Khusus
+                </h3>
+                <button type="button" @click="editModalOpen = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form :action="'{{ url('admin/harga-khusus') }}/' + editData.id" method="POST" class="mt-5 space-y-4">
+                @csrf
+                @method('PATCH')
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Lapangan</label>
+                        <select name="lapangan_id" x-model="editData.lapangan_id" required
+                                class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                            <option value="">Pilih lapangan</option>
+                            @foreach ($lapangans as $lapangan)
+                                <option value="{{ $lapangan->id }}">{{ $lapangan->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Tanggal</label>
+                        <input type="date" name="tanggal" x-model="editData.tanggal" required
+                               class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Jam Mulai</label>
+                        <input type="time" name="jam_mulai" x-model="editData.jam_mulai" required
+                               class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Jam Selesai</label>
+                        <input type="time" name="jam_selesai" x-model="editData.jam_selesai" required
+                               class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Tarif (Rp)</label>
+                        <input type="number" name="harga" x-model="editData.harga" min="0" step="0.01" required
+                               class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-[#474651] mb-1.5">Keterangan (opsional)</label>
+                        <input type="text" name="keterangan" x-model="editData.keterangan" maxlength="150"
+                               class="w-full rounded-xl border border-[#d8deeb] bg-white px-3 py-2.5 text-sm text-[#0b1c30] focus:ring-2 focus:ring-[#1a146b] outline-none">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" @click="editModalOpen = false"
+                            class="px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-xl bg-[#1a146b] text-xs font-bold text-white hover:bg-[#312e81] transition-colors inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm text-[#acf847]">check</span>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Perlengkapan extends Model
 {
@@ -25,5 +26,15 @@ class Perlengkapan extends Model
             'harga' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function lapangans(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Lapangan::class,
+            'lapangan_perlengkapan',
+            'perlengkapan_id',
+            'lapangan_id'
+        );
     }
 }

@@ -158,6 +158,8 @@
                 </div>
 
                 <select
+                    data-testid="katalog-sort-select"
+                    aria-label="Urutkan lapangan"
                     class="hidden sm:block px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 focus:outline-none"
                 >
                     <option>Terdekat dari Lokasimu</option>
@@ -222,7 +224,14 @@
                                 <div class="mt-5 pt-4 border-t border-gray-100">
                                     <div class="flex items-end justify-between gap-3">
                                         <div>
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
+                                            <div class="flex items-center gap-1.5">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
+                                                @if(!empty($item['has_harga_khusus']))
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800">
+                                                        PROMO / KHUSUS
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <div class="flex items-baseline gap-1">
                                                 <span class="text-lg font-extrabold text-[#0b1c30]">
                                                     Rp {{ number_format($item['harga_termurah'] ?? ($item['harga_weekday'] ?? 100000), 0, ',', '.') }}
@@ -240,7 +249,7 @@
                                     </div>
 
                                     <a
-                                        href="{{ route('katalog.show', $item['lapangan_id']) }}"
+                                        href="{{ route('katalog.show', ['id' => $item['lapangan_id'], 'tanggal' => $tanggal]) }}"
                                         class="mt-4 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold shadow-sm transition"
                                     >
                                         Lihat Detail &amp; Jadwal Lengkap →

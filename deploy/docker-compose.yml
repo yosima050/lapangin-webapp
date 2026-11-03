@@ -38,6 +38,7 @@ services:
       - "443:443"
     volumes:
       - ../:/var/www/lapangin:ro
+      - /var/www/lapangin-staging:/var/www/lapangin-staging:ro
       - lapangin_storage:/var/www/lapangin/storage:ro
       - ./nginx.conf:/etc/nginx/conf.d/lapangin.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -64,7 +65,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lapangin_net
+      lapangin_net:
+        aliases:
+          - db
+          - prod_db
+          - lapangin_db
 
   # ── Queue Worker ─────────────────────────────────────────────────────────────
   queue:
@@ -120,4 +125,5 @@ volumes:
 
 networks:
   lapangin_net:
-    driver: bridge
+    name: lapangin_net
+    external: true

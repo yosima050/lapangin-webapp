@@ -7,16 +7,14 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     bash curl git unzip supervisor \
     libpng-dev libjpeg-turbo-dev freetype-dev \
-    libzip-dev oniguruma-dev icu-dev \
-    postgresql-dev \
-    nodejs npm
+    libzip-dev \
+    postgresql-dev
 
-# ── PHP extensions ────────────────────────────────────────────────────────────
+# ── PHP extensions (pdo, mbstring, opcache sudah bawaan php:8.3-fpm-alpine) ───
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo pdo_pgsql pgsql \
-        gd zip bcmath intl mbstring \
-        opcache pcntl
+        pdo_pgsql pgsql \
+        gd zip bcmath pcntl
 
 # ── Composer ─────────────────────────────────────────────────────────────────
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -48,8 +46,9 @@ COPY . .
 # ── Generate full autoloader with package discovery ──────────────────────────
 RUN composer dump-autoload --optimize --no-dev
 
-# ── Build frontend assets (Vite) ─────────────────────────────────────────────
-RUN npm ci && npm run build && rm -rf node_modules
+# ── Frontend assets (Vite) ───────────────────────────────────────────────────
+# Asset frontend sudah terkompilasi dan tersedia di direktori public/build/ (terlacak Git).
+# Tidak perlu kompilasi ulang via nodejs di dalam container agar build cepat dan hemat RAM.
 
 # ── Permissions ───────────────────────────────────────────────────────────────
 RUN chown -R www-data:www-data /var/www/lapangin \

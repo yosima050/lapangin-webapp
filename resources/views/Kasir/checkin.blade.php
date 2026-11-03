@@ -81,6 +81,7 @@
                     id="barcode-input"
                     type="text"
                     name="code"
+                    aria-label="Scan barcode atau masukkan kode tiket"
                     required
                     autofocus
                     autocomplete="off"

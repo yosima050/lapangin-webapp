@@ -26,10 +26,12 @@ class ReviewFixesTest extends TestCase
 
         $pelanggan = Pelanggan::factory()->create(['role' => 'pelanggan', 'email_verified_at' => now()]);
 
+        $testDate = now()->addDays(2)->toDateString();
+
         // Request starting before jam_buka
         $responseBefore = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '07:00',
             'durasi' => 1,
         ]));
@@ -38,7 +40,7 @@ class ReviewFixesTest extends TestCase
         // Request ending after jam_tutup
         $responseAfter = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '21:00',
             'durasi' => 2,
         ]));
@@ -56,12 +58,13 @@ class ReviewFixesTest extends TestCase
         ]);
 
         $pelanggan = Pelanggan::factory()->create(['role' => 'pelanggan', 'email_verified_at' => now()]);
+        $testDate = now()->addDays(2)->toDateString();
 
         // Existing booking at 10:00 - 12:00
         Jadwal::create([
             'lapangan_id' => $lapangan->id,
             'pelanggan_id' => $pelanggan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '10:00',
             'jam_selesai' => '12:00',
             'harga_disepakati' => 200000,
@@ -76,7 +79,7 @@ class ReviewFixesTest extends TestCase
         // Overlapping request at 11:00 - 13:00
         $response = $this->actingAs($pelanggan)->get(route('checkout.index', [
             'lapangan_id' => $lapangan->id,
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $testDate,
             'jam_mulai' => '11:00',
             'durasi' => 2,
         ]));
@@ -254,10 +257,83 @@ class ReviewFixesTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['tanggal']);
 
+        $responseDateTime = $this->getJson(route('katalog.index', ['tanggal' => '2026-11-20 10:00']));
+        $responseDateTime->assertStatus(422);
+        $responseDateTime->assertJsonValidationErrors(['tanggal']);
+
         $responseValid = $this->get(route('katalog.index', ['tanggal' => now()->toDateString()]));
         $responseValid->assertStatus(200);
 
         $responseOmitted = $this->get(route('katalog.index'));
         $responseOmitted->assertStatus(200);
+    }
+
+    public function test_katalog_show_validates_tanggal_format_and_rejects_malformed_input(): void
+    {
+        $lapangan = Lapangan::create([
+            'nama' => 'Lapangan Show Test ' . uniqid(),
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00',
+            'jam_tutup' => '22:00',
+            'deskripsi' => 'Deskripsi lapangan test',
+        ]);
+
+        $responseInvalid = $this->getJson(route('katalog.show', [
+            'id' => $lapangan->id,
+            'tanggal' => 'abc-invalid',
+        ]));
+        $responseInvalid->assertStatus(422);
+        $responseInvalid->assertJsonValidationErrors(['tanggal']);
+
+        $responseDateTime = $this->getJson(route('katalog.show', [
+            'id' => $lapangan->id,
+            'tanggal' => '2026-11-20 10:00',
+        ]));
+        $responseDateTime->assertStatus(422);
+        $responseDateTime->assertJsonValidationErrors(['tanggal']);
+
+        $responseValid = $this->getJson(route('katalog.show', [
+            'id' => $lapangan->id,
+            'tanggal' => now()->toDateString(),
+        ]));
+        $responseValid->assertStatus(200);
+    }
+
+    public function test_schema_rejects_single_missing_bound_for_harga_master(): void
+    {
+        $lapangan = Lapangan::create([
+            'nama' => 'Lapangan Single Bound ' . uniqid(),
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00',
+            'jam_tutup' => '22:00',
+            'deskripsi' => 'Deskripsi lapangan test',
+        ]);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
+        // Schema enforces NOT NULL on both jam_mulai and jam_selesai
+        $specialTariff = new HargaMaster([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'tanggal_khusus' => '2026-11-20',
+            'jam_mulai' => '18:00',
+            'jam_selesai' => null,
+            'harga' => 250000,
+        ]);
+        $specialTariff->id = (string) \Illuminate\Support\Str::uuid();
+        $specialTariff->save();
+    }
+
+    public function test_validation_rejects_single_missing_bound_for_harga_master(): void
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make([
+            'lapangan_id' => (string) \Illuminate\Support\Str::uuid(),
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '18:00',
+            'harga' => 100000,
+        ], (new \App\Http\Requests\HargaMasterRequest())->rules());
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('jam_selesai', $validator->errors()->toArray());
     }
 }

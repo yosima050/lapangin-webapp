@@ -46,10 +46,14 @@ class MidtransCallbackController extends Controller
         $transactionId = $request->input('transaction_id');
 
         // 3. Cari data transaksi di database
-        $transaksi = Transaksi::where('order_id', $orderId)
-            ->orWhere('referensi_midtrans', $orderId)
-            ->orWhere('id', $orderId)
-            ->first();
+        $query = Transaksi::where('order_id', $orderId)
+            ->orWhere('referensi_midtrans', $orderId);
+
+        if (Str::isUuid($orderId)) {
+            $query->orWhere('id', $orderId);
+        }
+
+        $transaksi = $query->first();
 
         if (!$transaksi) {
             Log::warning("Midtrans Callback: Transaksi dengan order_id {$orderId} tidak ditemukan di database.");

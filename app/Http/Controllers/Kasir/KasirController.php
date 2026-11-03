@@ -920,28 +920,30 @@ for ($i = 0; $i < $durasi; $i++) {
                     return false;
                 }
 
-                if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                    return true;
+                $matchesStart = true;
+                if (! empty($hm->jam_mulai)) {
+                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                        substr($hm->jam_mulai, 0, 5)
+                    );
+                    $matchesStart = $slotStart->gte($hmMulai);
                 }
 
-                $hmMulai = $baseDate->copy()->setTimeFromTimeString(
-                    substr($hm->jam_mulai, 0, 5)
-                );
+                $matchesEnd = true;
+                if (! empty($hm->jam_selesai)) {
+                    $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
+                    $hmSelesai = in_array(
+                        $jamSelesaiMaster,
+                        ['24:00', '00:00'],
+                        true
+                    )
+                        ? $baseDate->copy()->addDay()->startOfDay()
+                        : $baseDate->copy()->setTimeFromTimeString(
+                            $jamSelesaiMaster
+                        );
+                    $matchesEnd = $slotEnd->lte($hmSelesai);
+                }
 
-                $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
-
-                $hmSelesai = in_array(
-                    $jamSelesaiMaster,
-                    ['24:00', '00:00'],
-                    true
-                )
-                    ? $baseDate->copy()->addDay()->startOfDay()
-                    : $baseDate->copy()->setTimeFromTimeString(
-                        $jamSelesaiMaster
-                    );
-
-                return $slotStart->gte($hmMulai)
-                    && $slotEnd->lte($hmSelesai);
+                return $matchesStart && $matchesEnd;
             })
             ->first();
 
@@ -962,28 +964,30 @@ for ($i = 0; $i < $durasi; $i++) {
                         return false;
                     }
 
-                    if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                        return true;
+                    $matchesStart = true;
+                    if (! empty($hm->jam_mulai)) {
+                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                            substr($hm->jam_mulai, 0, 5)
+                        );
+                        $matchesStart = $slotStart->gte($hmMulai);
                     }
 
-                    $hmMulai = $baseDate->copy()->setTimeFromTimeString(
-                        substr($hm->jam_mulai, 0, 5)
-                    );
+                    $matchesEnd = true;
+                    if (! empty($hm->jam_selesai)) {
+                        $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
+                        $hmSelesai = in_array(
+                            $jamSelesaiMaster,
+                            ['24:00', '00:00'],
+                            true
+                        )
+                            ? $baseDate->copy()->addDay()->startOfDay()
+                            : $baseDate->copy()->setTimeFromTimeString(
+                                $jamSelesaiMaster
+                            );
+                        $matchesEnd = $slotEnd->lte($hmSelesai);
+                    }
 
-                    $jamSelesaiMaster = substr($hm->jam_selesai, 0, 5);
-
-                    $hmSelesai = in_array(
-                        $jamSelesaiMaster,
-                        ['24:00', '00:00'],
-                        true
-                    )
-                        ? $baseDate->copy()->addDay()->startOfDay()
-                        : $baseDate->copy()->setTimeFromTimeString(
-                            $jamSelesaiMaster
-                        );
-
-                    return $slotStart->gte($hmMulai)
-                        && $slotEnd->lte($hmSelesai);
+                    return $matchesStart && $matchesEnd;
                 })
                 ->first();
 
@@ -1257,29 +1261,29 @@ for ($i = 0; $i < $durasi; $i++) {
                                 return false;
                             }
 
-                            // Harga khusus lama tanpa rentang jam berlaku
-                            // untuk seluruh hari pada tanggal tersebut.
-                            if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                                return true;
+                            $matchesStart = true;
+                            if (! empty($hm->jam_mulai)) {
+                                $hmMulai = Carbon::parse(
+                                    $tanggalBaru . ' ' .
+                                    substr($hm->jam_mulai, 0, 5)
+                                );
+                                $matchesStart = $slotStart->gte($hmMulai);
                             }
 
-                            $hmMulai = Carbon::parse(
-                                $tanggalBaru . ' ' .
-                                substr($hm->jam_mulai, 0, 5)
-                            );
+                            $matchesEnd = true;
+                            if (! empty($hm->jam_selesai)) {
+                                $jamSelesai = substr($hm->jam_selesai, 0, 5);
+                                $hmSelesai = in_array(
+                                    $jamSelesai,
+                                    ['24:00', '00:00'],
+                                    true
+                                )
+                                    ? Carbon::parse($tanggalBaru)->addDay()->startOfDay()
+                                    : Carbon::parse($tanggalBaru . ' ' . $jamSelesai);
+                                $matchesEnd = $slotEnd->lte($hmSelesai);
+                            }
 
-                            $jamSelesai = substr($hm->jam_selesai, 0, 5);
-
-                            $hmSelesai = in_array(
-                                $jamSelesai,
-                                ['24:00', '00:00'],
-                                true
-                            )
-                                ? Carbon::parse($tanggalBaru)->addDay()->startOfDay()
-                                : Carbon::parse($tanggalBaru . ' ' . $jamSelesai);
-
-                            return $slotStart->gte($hmMulai)
-                                && $slotEnd->lte($hmSelesai);
+                            return $matchesStart && $matchesEnd;
                         })
                         ->first();
 

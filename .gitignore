@@ -2,6 +2,8 @@
 .DS_Store
 .env
 .env.*
+!deploy/.env.staging
+!deploy/.env.production
 deploy/.env
 .phpactor.json
 .phpunit.result.cache
@@ -27,3 +29,7 @@ Thumbs.db
 SKPL_LapangIn.md
 *SKPL*
 
+
+# Python cache
+__pycache__/
+*.py[cod]

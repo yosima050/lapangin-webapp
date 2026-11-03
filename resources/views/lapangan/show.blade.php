@@ -183,7 +183,11 @@
              let sum = 0;
              this.selectedSlots.forEach(slot => {
                  const hour = parseInt(slot.jam_mulai.substring(0, 2), 10);
-                 sum += (hour >= 18 ? this.primeRate : this.baseRate);
+                 const defaultRate = (hour >= 18 ? this.primeRate : this.baseRate);
+                 const price = (slot.harga !== undefined && slot.harga !== null && Number(slot.harga) > 0)
+                     ? Number(slot.harga)
+                     : defaultRate;
+                 sum += price;
              });
              return sum;
          },
@@ -363,6 +367,12 @@
                                                 <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                             </div>
                                             <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <template x-if="slot.is_harga_khusus">
+                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                                                      :class="isSlotSelected(slot) ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-800'"
+                                                      x-text="formatRp(slot.harga)">
+                                                </span>
+                                            </template>
                                             <span class="text-[10px] font-bold mt-0.5"
                                                   :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
                                                   x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">
@@ -410,6 +420,12 @@
                                                 <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                             </div>
                                             <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <template x-if="slot.is_harga_khusus">
+                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                                                      :class="isSlotSelected(slot) ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-800'"
+                                                      x-text="formatRp(slot.harga)">
+                                                </span>
+                                            </template>
                                             <span class="text-[10px] font-bold mt-0.5"
                                                   :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
                                                   x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">

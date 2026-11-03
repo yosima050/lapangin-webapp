@@ -635,21 +635,24 @@ class CheckoutController extends Controller
                             return false;
                         }
 
-                        if (! $hm->jam_mulai || ! $hm->jam_selesai) {
-                            return true;
+                        $matchesStart = true;
+                        if (! empty($hm->jam_mulai)) {
+                            $hmMulai = $baseDate->copy()->setTimeFromTimeString(
+                                substr($hm->jam_mulai, 0, 5)
+                            );
+                            $matchesStart = $slotStart->gte($hmMulai);
                         }
 
-                        $hmMulai = $baseDate->copy()->setTimeFromTimeString(
-                            substr($hm->jam_mulai, 0, 5)
-                        );
+                        $matchesEnd = true;
+                        if (! empty($hm->jam_selesai)) {
+                            $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
+                            $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
+                                ? $baseDate->copy()->addDay()->startOfDay()
+                                : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
+                            $matchesEnd = $slotEnd->lte($hmSelesai);
+                        }
 
-                        $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
-                        $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
-                            ? $baseDate->copy()->addDay()->startOfDay()
-                            : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
-
-                        return $slotStart->gte($hmMulai)
-                            && $slotEnd->lte($hmSelesai);
+                        return $matchesStart && $matchesEnd;
                     })
                     ->first();
 
