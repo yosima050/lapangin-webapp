@@ -112,7 +112,16 @@ jobs:
             fi
 
             cd "${TARGET_DIR}"
-            echo "📥 Mendelegasikan sync Git dan deployment ke deploy.sh..."
+            echo "📥 Menyinkronkan kode repositori terbaru secara idempoten..."
+
+            # Kembalikan kepemilikan bootstrap/cache ke user host (userlapang) via container aktif
+            # agar git reset --hard tidak terkendala Permission Denied dari file lama www-data
+            docker exec -u 0 lapangin_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage 2>/dev/null || true
+            docker exec -u 0 lapangin_staging_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage 2>/dev/null || true
+
+            git fetch origin "${BRANCH}"
+            git checkout -B "${BRANCH}" "origin/${BRANCH}"
+            git reset --hard "origin/${BRANCH}"
 
             bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
 
