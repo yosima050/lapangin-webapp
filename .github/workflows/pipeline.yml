@@ -112,5 +112,10 @@ jobs:
             fi
 
             cd "${TARGET_DIR}"
+            echo "📥 Menyinkronkan kode repositori terbaru secara idempoten..."
+            git fetch origin "${BRANCH}"
+            git checkout -B "${BRANCH}" "origin/${BRANCH}"
+            git reset --hard "origin/${BRANCH}"
+
             bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
 
