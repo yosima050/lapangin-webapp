@@ -175,20 +175,31 @@
                     <span class="font-bold text-[#0b1c30]">Rp <span x-text="formatRupiah(cashExpected)"></span></span>
                 </div>
                 <div class="flex flex-col gap-1.5 mt-2">
-                    <label class="text-[11px] font-bold text-[#0b1c30]">Input Kas Fisik Aktual:</label>
-                    <input type="number" x-model.number="cashActual"
-                           class="w-full px-3 py-2 rounded-xl bg-white text-sm font-bold text-[#0b1c30] border border-[#dce9ff] outline-none focus:ring-2 focus:ring-[#acf847]">
-                </div>
-                <div class="pt-2 border-t border-[#dce9ff] flex items-center justify-between font-bold text-xs">
-                    <span>Selisih Kas:</span>
-                    <span :class="difference === 0 ? 'text-[#416900]' : 'text-[#ba1a1a]'">
-                        Rp <span x-text="formatRupiah(difference)">0</span>
-                        <span x-text="difference === 0 ? '(Cocok)' : '(Tidak Cocok)'"></span>
-                    </span>
-                </div>
+               <label for="cash-actual" class="text-[11px] font-bold text-[#0b1c30]">
+                    Input Kas Fisik Aktual:
+                </label>
+
+                <input
+                    id="cash-actual"
+                    data-testid="cash-actual-input"
+                    type="number"
+                    x-model.number="cashActual"
+                    class="w-full px-3 py-2 rounded-xl bg-white text-sm font-bold text-[#0b1c30] border border-[#dce9ff] outline-none focus:ring-2 focus:ring-[#acf847]"
+                >
             </div>
 
-            <button type="button" @click="alert('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
+            <div class="pt-2 border-t border-[#dce9ff] flex items-center justify-between font-bold text-xs">
+                <span>Selisih Kas:</span>
+                <span :class="difference === 0 ? 'text-[#416900]' : 'text-[#ba1a1a]'">
+                    Rp <span x-text="formatRupiah(difference)">0</span>
+                    <span x-text="difference === 0 ? '(Cocok)' : '(Tidak Cocok)'"></span>
+                </span>
+            </div>
+
+            <button
+                type="button"
+                data-testid="shift-close-button"
+                @click="alert('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
                     class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-base text-[#acf847]">lock_clock</span>
                 <span>Tutup Shift &amp; Cetak Berita Acara</span>
