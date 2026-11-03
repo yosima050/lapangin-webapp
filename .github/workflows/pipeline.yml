@@ -112,15 +112,7 @@ jobs:
             fi
 
             cd "${TARGET_DIR}"
-            echo "📥 Menyinkronkan kode repositori terbaru secara idempoten..."
-
-            # Pulihkan kepemilikan file yang mungkin ditulis oleh kontainer Docker (www-data)
-            # agar git reset --hard tidak gagal karena Permission Denied.
-            docker exec -u 0 lapangin_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage > /dev/null 2>&1 || true
-
-            git fetch origin "${BRANCH}"
-            git checkout -B "${BRANCH}" "origin/${BRANCH}"
-            git reset --hard "origin/${BRANCH}"
+            echo "📥 Mendelegasikan sync Git dan deployment ke deploy.sh..."
 
             bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
 
