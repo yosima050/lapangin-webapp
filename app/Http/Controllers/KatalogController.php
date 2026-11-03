@@ -22,11 +22,11 @@ class KatalogController extends Controller
 
         $validated = $request->validate([
             'kategori' => ['nullable', 'string'],
-            'tanggal' => ['nullable', 'date'],
+            'tanggal' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $kategori = $validated['kategori'] ?? $request->query('kategori');
-        $rawTanggal = !empty($validated['tanggal']) ? $validated['tanggal'] : $todayWib;
+        $kategori = $validated['kategori'] ?? null;
+        $rawTanggal = ! empty($validated['tanggal']) ? $validated['tanggal'] : $todayWib;
 
         // Cegah pemilihan tanggal kemarin / lampau
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
@@ -69,11 +69,15 @@ class KatalogController extends Controller
 
     public function show(Request $request, $id)
     {
+        $validated = $request->validate([
+            'tanggal' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
         // Ambil data lapangan dari database beserta master tarif
         $lapangan = Lapangan::with('hargaMasters')->findOrFail($id);
 
         $todayWib = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
-        $rawTanggal = $request->query('tanggal', $todayWib);
+        $rawTanggal = ! empty($validated['tanggal']) ? $validated['tanggal'] : $todayWib;
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
 
         // Ambil status ketersediaan jam dari JadwalService
