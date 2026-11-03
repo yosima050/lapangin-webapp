@@ -30,7 +30,7 @@ echo "================================================================="
 # ── 1. Tentukan Direktori dan File Konfigurasi Berdasarkan Environment ─────────
 if [ "${ENV_TARGET}" = "production" ]; then
     APP_DIR="/var/www/lapangin"
-    COMPOSE_PROJECT="lapangin_prod"
+    COMPOSE_PROJECT="deploy"
     COMPOSE_FILE="${APP_DIR}/deploy/docker-compose.yml"
     DEFAULT_ENV_FILE="${APP_DIR}/deploy/.env.production"
 else
