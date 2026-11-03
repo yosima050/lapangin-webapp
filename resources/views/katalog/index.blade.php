@@ -164,6 +164,8 @@
                 </div>
 
                 <select
+                    data-testid="katalog-sort-select"
+                    aria-label="Urutkan lapangan"
                     class="hidden sm:block px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 focus:outline-none"
                 >
                     <option>Terdekat dari Lokasimu</option>
