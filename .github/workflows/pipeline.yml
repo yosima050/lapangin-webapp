@@ -114,15 +114,9 @@ jobs:
             cd "${TARGET_DIR}"
             echo "📥 Menyinkronkan kode repositori terbaru secara idempoten..."
 
-            # Pulihkan kepemilikan workspace ke user host sebelum git reset jika sebelumnya terkunci oleh kontainer Docker
-            if command -v docker &>/dev/null; then
-              COMPOSE_FILE="deploy/docker-compose.yml"
-              [ "${ENV_NAME}" = "production" ] && COMPOSE_FILE="deploy/docker-compose.prod.yml"
-              DETECTED_PROJECT=$(docker inspect lapangin_db --format '{{ index .Config.Labels "com.docker.compose.project" }}' 2>/dev/null || true)
-              COMPOSE_PROJECT="${DETECTED_PROJECT:-deploy}"
-              docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chown -R $(id -u):$(id -g) bootstrap/cache storage 2>/dev/null || \
-              docker run --rm -v "${TARGET_DIR}:/repo" -u 0 lapangin-app:${ENV_NAME} chown -R $(id -u):$(id -g) /repo/bootstrap/cache /repo/storage 2>/dev/null || true
-            fi
+            # Pulihkan kepemilikan file yang mungkin ditulis oleh kontainer Docker (www-data)
+            # agar git reset --hard tidak gagal karena Permission Denied.
+            docker exec -u 0 lapangin_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage > /dev/null 2>&1 || true
 
             git fetch origin "${BRANCH}"
             git checkout -B "${BRANCH}" "origin/${BRANCH}"
