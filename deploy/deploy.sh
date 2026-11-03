@@ -67,9 +67,12 @@ find "${BACKUP_DIR}" -name "*.sql" -mtime +7 -delete 2>/dev/null || true
 
 # ── 3. Ambil Kode Terbaru dari Git (Idempoten & Bersih dari Conflict) ──────────
 echo "[2/8] Menyinkronkan repositori Git (origin/${BRANCH})..."
+CURRENT_USER="${USER:-$(whoami)}"
+sudo chown -R "${CURRENT_USER}:${CURRENT_USER}" "${APP_DIR}" 2>/dev/null || true
 git fetch --all --prune
 git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
+sudo chmod -R 777 "${APP_DIR}/storage" "${APP_DIR}/bootstrap/cache" 2>/dev/null || chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 
 # ── 4. Verifikasi File Environment .env (Idempoten) ───────────────────────────
 echo "[3/8] Memeriksa konfigurasi .env..."

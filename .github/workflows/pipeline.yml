@@ -111,6 +111,9 @@ jobs:
               sudo mkdir -p "${TARGET_DIR}"
               sudo chown -R $USER:$USER "${TARGET_DIR}"
               git clone -b "${BRANCH}" https://github.com/yosima050/lapangin-webapp.git "${TARGET_DIR}"
+            else
+              echo "🔧 Memastikan kepemilikan direktori kerja ($USER)..."
+              sudo chown -R $USER:$USER "${TARGET_DIR}"
             fi
 
             cd "${TARGET_DIR}"
