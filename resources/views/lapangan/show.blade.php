@@ -269,17 +269,7 @@
                                 <span>{{ $lapangan->deskripsi ?: 'Arena futsal, badminton, dan multisport resmi dengan standar pencahayaan turnamen.' }}</span>
                             </p>
 
-                            {{-- Tarif Resmi Terverifikasi --}}
-                            <div class="mt-3.5 flex flex-wrap items-center gap-3 text-xs">
-                                <div class="px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200">
-                                    <span class="text-gray-500">Tarif Weekday:</span>
-                                    <strong class="text-[#1a146b] ml-1">Rp {{ number_format($hargaWeekday ?? 125000, 0, ',', '.') }}</strong>
-                                </div>
-                                <div class="px-3 py-1.5 rounded-xl bg-[#eaf7d8] border border-[#acf847]/60">
-                                    <span class="text-[#416900]">Tarif Weekend:</span>
-                                    <strong class="text-[#102000] ml-1">Rp {{ number_format($hargaWeekend ?? 175000, 0, ',', '.') }}</strong>
-                                </div>
-                            </div>
+
                         </div>
 
                         {{-- Tombol Kembali ke Katalog (Area Atas Bersih) --}}
@@ -400,9 +390,7 @@
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#1a146b]"></span>
                                 <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Malam Prime Time</h3>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-[#eaf7d8] text-[#416900] text-[10px] font-black uppercase tracking-wider">
-                                    ⚡ PALING FAVORIT
-                                </span>
+
                             </div>
                             <span class="text-xs font-bold text-[#1a146b]" x-text="formatRp(primeRate) + ' / jam'"></span>
                         </div>
@@ -567,7 +555,16 @@
             {{-- ======================================================== --}}
             {{-- KOLOM KANAN (Sticky Sidebar / Anti-Gravity): Ringkasan Pesanan --}}
             {{-- ======================================================== --}}
-            <aside class="block lg:col-span-4 xl:col-span-4 lg:sticky top-28" style="position: sticky; top: 110px; height: fit-content;">
+            {{-- CSS helper inline agar pasti tampil di layar desktop tanpa bergantung cache build Tailwind --}}
+            <style>
+                @media (max-width: 1023px) {
+                    #desktop-order-summary { display: none !important; }
+                }
+                @media (min-width: 1024px) {
+                    #desktop-order-summary { display: block !important; }
+                }
+            </style>
+            <aside id="desktop-order-summary" class="lg:col-span-4 xl:col-span-4 lg:sticky top-28" style="position: sticky; top: 110px; height: fit-content;">
                 <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
 
                     {{-- Summary Header: Ringkasan Pesanan --}}
@@ -662,9 +659,15 @@
                                 <div class="border-t border-gray-100 my-1"></div>
 
                                 <div class="flex items-center justify-between text-sm font-headline">
-                                    <span class="font-bold text-gray-900">Total Biaya:</span>
-                                    <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
+                                    <span class="font-bold text-gray-900" x-text="paymentScheme === 'dp' ? 'DP yang Harus Dibayar:' : 'Total Pembayaran:'"></span>
+                                    <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
                                 </div>
+                                <template x-if="paymentScheme === 'dp'">
+                                    <div class="flex items-center justify-between text-xs text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200">
+                                        <span>Sisa pelunasan di kasir:</span>
+                                        <span class="font-bold" x-text="formatRp(remainingAmount)"></span>
+                                    </div>
+                                </template>
                             </div>
 
                             {{-- Payment Scheme Selector --}}
@@ -720,7 +723,7 @@
                                 :class="selectedSlots.length > 0
                                     ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-                            <span>Pesan Sekarang!</span>
+                            <span x-text="selectedSlots.length === 0 ? 'Pesan Sekarang!' : ('Bayar ' + (paymentScheme === 'dp' ? 'DP ' : 'Lunas ') + formatRp(payableAmount))">Pesan Sekarang!</span>
                             <span class="material-symbols-outlined text-xl">arrow_forward</span>
                         </button>
                     </form>
@@ -750,118 +753,134 @@
     </div>
 
     {{-- ========================================================================= --}}
-    {{-- MOBILE / SMALL SCREEN STICKY BOTTOM BAR (GOPAY GAMES STYLE + ACCORDION) --}}
+    {{-- MOBILE / SMALL SCREEN FIXED BOTTOM BAR DENGAN AKORDEON EXPAND/COLLAPSE --}}
     {{-- ========================================================================= --}}
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-2xl transition-all duration-300 ease-out">
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] border-t border-gray-100 transition-all duration-300">
         
-        {{-- Accordion Drawer Pilihan Skema Pembayaran (Gopay Style Warna Toska Kontras Tinggi) --}}
-        <div class="bg-[#00708f] text-white transition-all overflow-hidden"
-             :class="showSchemeAccordion ? 'max-h-[500px]' : 'max-h-12'">
+        {{-- Area Wrapper Akordeon Ringkasan Pesanan --}}
+        <div class="max-w-xl mx-auto px-5 pt-3.5 pb-2">
             
-            {{-- Header Accordion Buka/Tutup --}}
-            <button type="button"
-                    @click="showSchemeAccordion = !showSchemeAccordion"
-                    class="w-full h-12 px-4 flex items-center justify-between text-xs font-bold bg-[#00708f] text-white hover:bg-[#005e78] transition cursor-pointer">
-                <div class="flex items-center gap-2 text-white">
-                    <span class="material-symbols-outlined text-base text-[#acf847]">payments</span>
-                    <span class="text-xs font-bold text-white tracking-wide"
-                          x-text="paymentScheme === 'full' ? 'Skema Pembayaran: Bayar Lunas (100%)' : 'Skema Pembayaran: Bayar DP 50%'"></span>
+            {{-- Handle Bar Kecil di Atas --}}
+            <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-2.5"></div>
+
+            {{-- KONDISI 1: Belum Ada Jadwal Lapangan yang Dipilih --}}
+            <template x-if="selectedSlots.length === 0">
+                <div class="py-2.5 px-3 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center">
+                    <p class="text-xs font-medium text-gray-400">Belum ada jadwal lapangan yang dipilih.</p>
                 </div>
-                <div class="flex items-center gap-1.5 text-white/95">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-white" x-text="showSchemeAccordion ? 'Tutup' : 'Ubah'"></span>
-                    <span class="material-symbols-outlined text-base transition-transform duration-200 text-white"
-                          :class="showSchemeAccordion ? 'rotate-180' : ''">expand_more</span>
+            </template>
+
+            {{-- KONDISI 2 & 3: Jadwal Lapangan Dipilih (Header Akordeon Collapsed / Expanded) --}}
+            <template x-if="selectedSlots.length > 0">
+                <div class="rounded-2xl border border-gray-200 bg-gray-50/80 overflow-hidden transition-all shadow-xs">
+                    
+                    {{-- Baris Header yang Bisa Diklik untuk Toggle Expand/Collapse --}}
+                    <button type="button"
+                            @click="showSchemeAccordion = !showSchemeAccordion"
+                            class="w-full p-3.5 flex items-center justify-between text-left transition cursor-pointer hover:bg-gray-100/70">
+                        <div class="min-w-0 flex-1 pr-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-[#1a146b]"></span>
+                                <span class="text-xs font-bold text-[#0b1c30] truncate"
+                                      x-text="parseInt(earliestSlot.substring(0,2)) >= 18 ? 'Sesi Malam Prime Time' : 'Sesi Siang & Sore'">
+                                </span>
+                            </div>
+                            <p class="text-[11px] font-semibold text-gray-500 mt-0.5 truncate" x-text="timeRangeLabel"></p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <div class="text-right">
+                                <span class="text-xs font-extrabold text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
+                                <span class="block text-[9px] text-gray-400 font-semibold" x-text="paymentScheme === 'dp' ? 'Bayar DP' : 'Bayar Lunas'"></span>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400 text-xl transition-transform duration-200"
+                                  :class="showSchemeAccordion ? 'rotate-180' : ''">expand_more</span>
+                        </div>
+                    </button>
+
+                    {{-- KONDISI 3 (EXPANDED): Detail Rincian Biaya & Pilihan Skema Pembayaran --}}
+                    <div x-show="showSchemeAccordion"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="px-3.5 pb-3.5 pt-1 border-t border-gray-200/80 space-y-2.5 text-xs text-gray-600 bg-white">
+                        
+                        {{-- Baris 1: Sewa Lapangan --}}
+                        <div class="flex items-center justify-between pt-1">
+                            <span>Sewa Lapangan (<span x-text="durationHours"></span> Jam):</span>
+                            <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
+                        </div>
+
+                        {{-- Baris 2: Perlengkapan Opsional --}}
+                        <template x-if="equipmentTotalFee > 0">
+                            <div class="flex items-center justify-between text-emerald-700">
+                                <span>Sewa Perlengkapan:</span>
+                                <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
+                            </div>
+                        </template>
+
+                        {{-- Baris 3: Biaya Layanan --}}
+                        <div class="flex items-center justify-between">
+                            <span>Biaya Layanan:</span>
+                            <span class="font-bold text-[#416900] uppercase text-[10px]">Gratis</span>
+                        </div>
+
+                        {{-- Garis Pemisah (Divider) --}}
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        {{-- Baris Total Biaya --}}
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-bold text-gray-900" x-text="paymentScheme === 'dp' ? 'DP yang Harus Dibayar:' : 'Total Biaya:'">Total Biaya:</span>
+                            <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
+                        </div>
+
+                        {{-- Pilihan Skema Pembayaran Simpel di Dalam Area Expanded --}}
+                        <div class="pt-2 border-t border-gray-100">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Pilihan Skema Pembayaran</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
+                                       :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white'">
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-extrabold text-[#0b1c30]">Bayar Lunas 100%</p>
+                                        <p class="text-[10px] font-bold text-[#1a146b]" x-text="formatRp(grandTotal)"></p>
+                                    </div>
+                                    <input type="radio" name="mobile_scheme" value="full" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#1a146b] focus:ring-[#1a146b]">
+                                </label>
+
+                                <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
+                                       :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/60 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white'">
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-extrabold text-[#0b1c30]">DP 50%</p>
+                                        <p class="text-[10px] font-bold text-[#416900]" x-text="formatRp(dpAmount)"></p>
+                                    </div>
+                                    <input type="radio" name="mobile_scheme" value="dp" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#416900] focus:ring-[#acf847]">
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </button>
+            </template>
 
-            {{-- Isi Accordion yang Bisa Dibuka/Tutup --}}
-            <div x-show="showSchemeAccordion"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-2"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="p-4 space-y-3 bg-[#f8f9ff] text-[#0b1c30] border-t border-cyan-800/40">
+            {{-- Tombol Aksi Utama: Full-Width Pil Navy Blue --}}
+            <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="mt-2.5 mb-1 pb-safe">
+                <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
+                <input type="hidden" name="tanggal" :value="selectedDate">
+                <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
+                <input type="hidden" name="durasi" :value="durationHours">
+                <input type="hidden" name="tipe_bayar" :value="paymentScheme">
 
-                {{-- Opsi 1: Bayar Lunas 100% (Default Awal) --}}
-                <label @click="paymentScheme = 'full'; showSchemeAccordion = false"
-                       class="p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between gap-3 shadow-xs"
-                       :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white hover:bg-gray-50'">
-                    <div class="flex items-center gap-3">
-                        <input type="radio" name="mobile_scheme" value="full" x-model="paymentScheme" class="w-4 h-4 text-[#1a146b] focus:ring-[#1a146b]">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-[#0b1c30]">Bayar Lunas (100%)</span>
-                                <span class="px-1.5 py-0.5 rounded bg-blue-100 text-[#1a146b] text-[9px] font-black uppercase">Utama</span>
-                            </div>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Langsung main tanpa antre di kasir</p>
-                        </div>
-                    </div>
-                    <span class="text-sm font-black text-[#1a146b]" x-text="formatRp(grandTotal)"></span>
-                </label>
+                <button type="submit"
+                        :disabled="selectedSlots.length === 0"
+                        class="w-full py-3.5 px-6 rounded-full font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                        :class="selectedSlots.length > 0
+                            ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+                    <span>Lanjut ➔</span>
+                </button>
+            </form>
 
-                {{-- Opsi 2: Bayar DP 50% --}}
-                <label @click="paymentScheme = 'dp'; showSchemeAccordion = false"
-                       class="p-3.5 rounded-2xl border-2 transition cursor-pointer flex items-center justify-between gap-3 shadow-xs"
-                       :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/60 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white hover:bg-gray-50'">
-                    <div class="flex items-center gap-3">
-                        <input type="radio" name="mobile_scheme" value="dp" x-model="paymentScheme" class="w-4 h-4 text-[#416900] focus:ring-[#acf847]">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-[#0b1c30]">Bayar DP 50%</span>
-                                <span class="px-1.5 py-0.5 rounded bg-[#acf847] text-[#102000] text-[9px] font-black uppercase">Fleksibel</span>
-                            </div>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Sisa dilunasi di kasir venue saat tiba</p>
-                        </div>
-                    </div>
-                    <span class="text-sm font-black text-[#416900]" x-text="formatRp(dpAmount)"></span>
-                </label>
-
-            </div>
         </div>
-
-        {{-- Bottom Action Bar --}}
-        <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="max-w-xl mx-auto flex items-center justify-between gap-3 px-4 py-3 pb-safe bg-white">
-            <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
-            <input type="hidden" name="tanggal" :value="selectedDate">
-            <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
-            <input type="hidden" name="durasi" :value="durationHours">
-            <input type="hidden" name="tipe_bayar" :value="paymentScheme">
-
-            {{-- Kolom Kiri: Rincian Pilihan & Nominal --}}
-            <div class="min-w-0 flex-1">
-                <template x-if="selectedSlots.length > 0">
-                    <div>
-                        <div class="flex items-center gap-1.5 text-[11px] text-gray-500 truncate">
-                            <span class="font-bold text-[#1a146b]" x-text="durationHours + ' Jam Sesi'"></span>
-                            <span>•</span>
-                            <span class="truncate" x-text="timeRangeLabel"></span>
-                        </div>
-                        <div class="flex items-baseline gap-1.5 mt-0.5">
-                            <span class="text-xs text-gray-600 font-bold" x-text="paymentScheme === 'dp' ? 'DP 50%:' : 'Total Lunas:'"></span>
-                            <span class="text-base font-black text-[#1a146b]"
-                                  x-text="paymentScheme === 'dp' ? formatRp(dpAmount) : formatRp(grandTotal)">
-                            </span>
-                        </div>
-                    </div>
-                </template>
-                <template x-if="selectedSlots.length === 0">
-                    <div>
-                        <p class="text-xs font-bold text-gray-800">Belum ada jam dipilih</p>
-                        <p class="text-[11px] text-gray-400">Pilih slot waktu di atas</p>
-                    </div>
-                </template>
-            </div>
-
-            {{-- Kolom Kanan: Tombol Lanjut (Gojek / Gopay Blue Button) --}}
-            <button type="submit"
-                    :disabled="selectedSlots.length === 0"
-                    class="shrink-0 px-7 py-3 rounded-full font-headline font-black text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
-                    :class="selectedSlots.length > 0
-                        ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-                <span>Lanjut</span>
-                <span class="material-symbols-outlined text-base">arrow_forward</span>
-            </button>
-        </form>
     </div>
 
     {{-- Spacer Tambahan di Mobile agar Konten Bawah Tidak Tertutup Sticky Bar --}}
