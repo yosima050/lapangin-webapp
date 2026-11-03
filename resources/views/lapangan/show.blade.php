@@ -567,7 +567,7 @@
             {{-- ======================================================== --}}
             {{-- KOLOM KANAN (Sticky Sidebar / Anti-Gravity): Ringkasan Pesanan --}}
             {{-- ======================================================== --}}
-            <aside class="block lg:col-span-4 xl:col-span-4 lg:sticky" style="position: sticky; top: 80px; height: fit-content;">
+            <aside class="block lg:col-span-4 xl:col-span-4 lg:sticky top-28" style="position: sticky; top: 110px; height: fit-content;">
                 <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-lg border border-gray-100 flex flex-col gap-5">
 
                     {{-- Summary Header: Ringkasan Pesanan --}}
@@ -635,23 +635,7 @@
                                 </div>
                             </div>
 
-                            {{-- List Slot yang Dipilih (Detail Jadwal, Sesi, Jam, dan Harga) --}}
-                            <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                                <template x-for="slot in selectedSlots" :key="slot.jam_mulai">
-                                    <div class="p-2.5 rounded-xl border border-gray-100 bg-gray-50/70 flex items-center justify-between text-xs">
-                                        <div>
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="font-bold text-[#0b1c30]" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
-                                                <span class="text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase"
-                                                      :class="parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'"
-                                                      x-text="parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? 'Sesi Malam Prime Time' : 'Sesi Siang & Sore'"></span>
-                                            </div>
-                                        </div>
-                                        <span class="font-black text-[#1a146b]"
-                                              x-text="formatRp((slot.harga !== undefined && slot.harga !== null && Number(slot.harga) > 0) ? Number(slot.harga) : (parseInt(slot.jam_mulai.substring(0,2)) >= 18 ? primeRate : baseRate))"></span>
-                                    </div>
-                                </template>
-                            </div>
+
 
                             {{-- Cost Breakdown --}}
                             <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
