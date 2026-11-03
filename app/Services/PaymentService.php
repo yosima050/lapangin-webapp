@@ -37,6 +37,10 @@ class PaymentService
      */
     public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = [], array $enabledPayments = []): string
     {
+        if (! empty($transaksi->snap_token)) {
+            return $transaksi->snap_token;
+        }
+
         $this->initMidtrans();
 
         $grossAmount = (int) round((float) $transaksi->jumlah);
