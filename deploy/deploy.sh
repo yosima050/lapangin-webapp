@@ -69,17 +69,32 @@ find "${BACKUP_DIR}" -name "*.sql" -mtime +7 -delete 2>/dev/null || true
 
 # ── 3. Ambil Kode Terbaru dari Git (Idempoten & Bersih dari Conflict) ──────────
 echo "[2/8] Menyinkronkan repositori Git (origin/${BRANCH})..."
-# Pastikan storage dan cache hanya dapat ditulis oleh UID/GID aplikasi (www-data) dengan mode minimal yang aman (775)
-if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps -q app 2>/dev/null | grep -q .; then
-    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chown -R www-data:www-data storage bootstrap/cache
-    if ! docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T -u 0 app chmod -R 775 storage bootstrap/cache; then
-        echo "❌ Error: Gagal mengubah hak akses storage dan bootstrap/cache ke mode 775." >&2
-        exit 1
-    fi
+
+# Pulihkan kepemilikan file yang mungkin ditulis oleh kontainer Docker (www-data)
+# agar git reset --hard tidak gagal karena Permission Denied.
+# Gunakan container name yang tepat berdasarkan environment.
+if [ "${ENV_TARGET}" = "production" ]; then
+    APP_CONTAINER="lapangin_app"
+else
+    APP_CONTAINER="lapangin_staging_app"
 fi
+docker exec -u 0 "${APP_CONTAINER}" chown -R "$(id -u)" \
+    /var/www/lapangin/bootstrap/cache \
+    /var/www/lapangin/storage > /dev/null 2>&1 || true
+
 git fetch --all --prune
 git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
+
+# Kembalikan kepemilikan ke mode normal (host user:www-data, mode 775) untuk keamanan
+if docker ps --format '{{.Names}}' | grep -q "^${APP_CONTAINER}$" 2>/dev/null; then
+    docker exec -u 0 "${APP_CONTAINER}" chown -R "$(id -u):www-data" \
+        /var/www/lapangin/bootstrap/cache \
+        /var/www/lapangin/storage > /dev/null 2>&1 || true
+    docker exec -u 0 "${APP_CONTAINER}" chmod -R 775 \
+        /var/www/lapangin/bootstrap/cache \
+        /var/www/lapangin/storage > /dev/null 2>&1 || true
+fi
 
 # ── 4. Verifikasi File Environment .env (Idempoten) ───────────────────────────
 echo "[3/8] Memeriksa konfigurasi .env..."
