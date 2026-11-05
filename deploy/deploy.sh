@@ -108,17 +108,12 @@ if [ ! -f "${APP_DIR}/.env" ]; then
     fi
 fi
 
-# ── 5. Aktifkan Maintenance Mode Sementara ─────────────────────────────────────
-echo "[4/8] Mengaktifkan maintenance mode..."
-if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" ps -q app 2>/dev/null | grep -q .; then
-    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app \
-        php artisan down --retry=30 2>/dev/null || true
-fi
-
-# ── 6. Build & Jalankan Kontainer Docker (Idempoten) ──────────────────────────
-echo "[5/8] Membangun dan memperbarui service kontainer Docker..."
+# ── 5. Build & Jalankan Kontainer Docker (Zero-Downtime Deployment) ────────────
+echo "[4/8] Membangun image Docker (Aplikasi tetap aktif melayani pengguna tanpa 503)..."
 docker network create lapangin_net 2>/dev/null || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
+
+echo "[5/8] Memperbarui service kontainer Docker secara atomik..."
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
 
 # ── 7. Eksekusi Migrasi Database & Storage Symlink (Idempoten) ────────────────
