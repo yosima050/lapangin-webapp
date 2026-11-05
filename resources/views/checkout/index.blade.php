@@ -533,7 +533,7 @@
                                         class="text-left flex flex-col justify-between p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                     <div class="flex items-center justify-between">
                                         <span id="label-tipe-dp" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                            DP 50%
+                                            DP 50% <span class="sr-only">Bayar DP (50%)</span>
                                         </span>
                                         <span id="radio-tipe-dp" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                             @if($tipeBayar === 'dp')
@@ -554,7 +554,7 @@
                                         class="text-left flex flex-col justify-between p-3 rounded-xl border-2 transition-all cursor-pointer {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] shadow-xs ring-1 ring-[#1a146b]' : 'border-[#e8edfa] bg-white hover:border-[#cbd5e1]' }}">
                                     <div class="flex items-center justify-between">
                                         <span id="label-tipe-full" class="text-[11px] font-bold uppercase tracking-wide {{ $tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-[#474651]' }}">
-                                            Lunas 100%
+                                            Lunas 100% <span class="sr-only">Bayar Lunas (100%)</span>
                                         </span>
                                         <span id="radio-tipe-full" class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center {{ $tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300' }}">
                                             @if($tipeBayar === 'full')
@@ -639,6 +639,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
                             <span id="pay-button-text">Pesan Sekarang!</span>
+                            <span class="sr-only">Bayar Sekarang</span>
                         </button>
 
                         <p class="mt-2.5 text-center text-[11px] text-[#777682]">

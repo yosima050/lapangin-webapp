@@ -31,9 +31,10 @@ class KatalogController extends Controller
         // Cegah pemilihan tanggal kemarin / lampau
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
 
-        // Ambil semua lapangan agar filter Alpine.js di browser instan tanpa reload
-        $lapangan = Lapangan::with('hargaMasters')->get();
-        $kategoriList = Lapangan::distinct()
+        // Ambil semua lapangan aktif agar filter Alpine.js di browser instan tanpa reload
+        $lapangan = Lapangan::with('hargaMasters')->where('is_active', true)->get();
+        $kategoriList = Lapangan::where('is_active', true)
+            ->distinct()
             ->whereNotNull('kategori')
             ->where('kategori', '!=', '')
             ->orderBy('kategori')
@@ -73,8 +74,8 @@ class KatalogController extends Controller
             'tanggal' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        // Ambil data lapangan dari database beserta master tarif
-        $lapangan = Lapangan::with('hargaMasters')->findOrFail($id);
+        // Ambil data lapangan aktif dari database beserta master tarif
+        $lapangan = Lapangan::with('hargaMasters')->where('is_active', true)->findOrFail($id);
 
         $todayWib = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
         $rawTanggal = ! empty($validated['tanggal']) ? $validated['tanggal'] : $todayWib;

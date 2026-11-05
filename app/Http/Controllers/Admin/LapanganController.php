@@ -179,6 +179,17 @@ class LapanganController extends Controller
             ->with('success', 'Data lapangan dan tarif dasar berhasil diperbarui!');
     }
 
+    public function toggleStatus(Lapangan $lapangan): RedirectResponse
+    {
+        $lapangan->is_active = ! ($lapangan->is_active ?? true);
+        $lapangan->save();
+
+        $status = $lapangan->is_active ? 'diaktifkan' : 'dinonaktifkan sementara';
+
+        return redirect()->route('admin.lapangan.index')
+            ->with('success', "Status lapangan {$lapangan->nama} berhasil {$status}.");
+    }
+
     public function destroy(Lapangan $lapangan): RedirectResponse
     {
         if ($lapangan->foto && !str_starts_with($lapangan->foto, 'http') && Storage::disk('public')->exists($lapangan->foto)) {

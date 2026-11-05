@@ -22,7 +22,8 @@ use App\Http\Controllers\Kasir\CheckinController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $lapangans = \App\Models\Lapangan::all(); return view('pages.landing', compact('lapangans'));
+    $lapangans = \App\Models\Lapangan::where('is_active', true)->get();
+    return view('pages.landing', compact('lapangans'));
 })->name('home');
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
@@ -71,11 +72,11 @@ Route::middleware(['auth', 'IsAdmin'])
         Route::get('/', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::patch('/lapangan/{lapangan}/toggle-status', [LapanganController::class, 'toggleStatus'])
+            ->name('lapangan.toggle-status');
         Route::resource('lapangan', LapanganController::class);
         Route::resource('harga', HargaMasterController::class);
         Route::resource('perlengkapan', PerlengkapanController::class);
-        Route::resource('lapangan', LapanganController::class);
-        Route::resource('harga', HargaMasterController::class);
 
 
         // Transaksi admin

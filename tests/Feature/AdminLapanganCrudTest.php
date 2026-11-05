@@ -247,4 +247,55 @@ class AdminLapanganCrudTest extends TestCase
             'harga' => 85000,
         ]);
     }
+
+    public function test_admin_can_toggle_lapangan_active_status(): void
+    {
+        $lapangan = Lapangan::create([
+            'nama' => 'Lapangan Toggle Test',
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00',
+            'jam_tutup' => '22:00',
+            'is_active' => true,
+        ]);
+
+        HargaMaster::create([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '08:00',
+            'jam_selesai' => '22:00',
+            'harga' => 100000,
+        ]);
+
+        // Non-admin ditolak
+        $nonAdminRes = $this->actingAs($this->pelangganBiasa)
+            ->patch(route('admin.lapangan.toggle-status', $lapangan->id));
+        $nonAdminRes->assertStatus(403);
+
+        // Admin menonaktifkan lapangan
+        $response = $this->actingAs($this->admin)
+            ->patch(route('admin.lapangan.toggle-status', $lapangan->id));
+        $response->assertRedirect(route('admin.lapangan.index'));
+        $response->assertSessionHas('success');
+
+        $lapangan->refresh();
+        $this->assertFalse($lapangan->is_active);
+
+        // Lapangan nonaktif tidak tampil di katalog publik & beranda
+        $katalogRes = $this->get(route('katalog.index'));
+        $katalogRes->assertDontSee('Lapangan Toggle Test');
+
+        $homeRes = $this->get(route('home'));
+        $homeRes->assertDontSee('Lapangan Toggle Test');
+
+        // Admin mengaktifkan kembali lapangan
+        $responseReactivate = $this->actingAs($this->admin)
+            ->patch(route('admin.lapangan.toggle-status', $lapangan->id));
+        $responseReactivate->assertRedirect(route('admin.lapangan.index'));
+
+        $lapangan->refresh();
+        $this->assertTrue($lapangan->is_active);
+
+        $katalogRes2 = $this->get(route('katalog.index'));
+        $katalogRes2->assertSee('Lapangan Toggle Test');
+    }
 }

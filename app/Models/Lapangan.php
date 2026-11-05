@@ -21,6 +21,7 @@ class Lapangan extends Model
         'jam_tutup',
         'deskripsi',
         'foto',
+        'is_active',
         'created_at',
     ];
 
@@ -48,6 +49,7 @@ class Lapangan extends Model
     protected function casts(): array
     {
         return [
+            'is_active' => 'boolean',
             'created_at' => 'datetime',
         ];
     }

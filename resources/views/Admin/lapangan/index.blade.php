@@ -156,11 +156,21 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
                                 <h3 class="text-lg font-headline font-bold text-[#0b1c30]">{{ $lapangan->nama }}</h3>
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#acf847] text-[#102000]">AKTIF</span>
+                                @if ($lapangan->is_active ?? true)
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#acf847] text-[#102000]">AKTIF</span>
+                                @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">NONAKTIF</span>
+                                @endif
                             </div>
-                            <span class="flex items-center gap-1.5 text-xs text-[#416900] font-semibold">
-                                <span class="material-symbols-outlined text-sm">wifi</span> Online Terbuka
-                            </span>
+                            @if ($lapangan->is_active ?? true)
+                                <span class="flex items-center gap-1.5 text-xs text-[#416900] font-semibold">
+                                    <span class="material-symbols-outlined text-sm">wifi</span> Online Terbuka
+                                </span>
+                            @else
+                                <span class="flex items-center gap-1.5 text-xs text-[#ba1a1a] font-semibold">
+                                    <span class="material-symbols-outlined text-sm">wifi_off</span> Ditutup Sementara
+                                </span>
+                            @endif
                         </div>
 
                         <!-- Facility Chips -->
@@ -223,10 +233,16 @@
                                 <span class="material-symbols-outlined text-sm text-[#acf847]">tune</span>
                                 <span>Atur Tarif</span>
                             </button>
-                            <button type="button" onclick="alert('Status lapangan {{ $lapangan->nama }} dialihkan ke nonaktif sementara.');"
-                                    class="px-3.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#ffdad6] text-[#ba1a1a] font-semibold text-xs transition-colors">
-                                Nonaktifkan Sementara
-                            </button>
+                            <form method="POST" action="{{ route('admin.lapangan.toggle-status', $lapangan->id) }}"
+                                  onsubmit="return confirm('Yakin ingin {{ ($lapangan->is_active ?? true) ? 'menonaktifkan' : 'mengaktifkan kembali' }} lapangan {{ $lapangan->nama }}?');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                        class="px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-colors flex items-center gap-1 {{ ($lapangan->is_active ?? true) ? 'bg-[#eff4ff] hover:bg-[#ffdad6] text-[#ba1a1a]' : 'bg-[#eaf7d8] hover:bg-[#acf847] text-[#102000]' }}">
+                                    <span class="material-symbols-outlined text-sm">{{ ($lapangan->is_active ?? true) ? 'block' : 'check_circle' }}</span>
+                                    <span>{{ ($lapangan->is_active ?? true) ? 'Nonaktifkan' : 'Aktifkan Lapangan' }}</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

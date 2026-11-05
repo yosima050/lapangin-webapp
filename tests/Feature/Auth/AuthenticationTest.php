@@ -104,4 +104,30 @@ class AuthenticationTest extends TestCase
         $response->assertSee(route('logout'));
         $response->assertSee('Keluar (Log Out)');
     }
+
+    public function test_login_prevents_redirect_loop_when_intended_is_auth_route(): void
+    {
+        $pelanggan = Pelanggan::factory()->create([
+            'role' => 'pelanggan',
+            'password_hash' => bcrypt('password123'),
+        ]);
+
+        // Simulasikan session memiliki url.intended yang mengarah ke /login (kondisi pemicu loop)
+        $response = $this->withSession(['url.intended' => 'http://localhost:8000/login'])
+            ->post('/login', [
+                'email' => $pelanggan->email,
+                'password' => 'password123',
+            ]);
+
+        $this->assertAuthenticatedAs($pelanggan);
+        // Memastikan tidak redirect balik ke /login, tapi ke dashboard default
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_logout_succeeds_even_when_unauthenticated(): void
+    {
+        $response = $this->post('/logout');
+        $response->assertRedirect('/');
+        $this->assertGuest();
+    }
 }
