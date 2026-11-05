@@ -1,5 +1,5 @@
 # =============================================================================
-# LapangIn — Docker Compose (Staging Environment)
+# LapangIn — Docker Compose (Production Environment)
 # Jalankan: docker compose -f deploy/docker-compose.yml up -d
 # =============================================================================
 
@@ -10,11 +10,11 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lapangin-app:staging
+    image: lapangin-app:production
     container_name: lapangin_app
     restart: unless-stopped
     environment:
-      APP_ENV: staging
+      APP_ENV: production
       APP_DEBUG: "false"
     env_file:
       - ../.env
