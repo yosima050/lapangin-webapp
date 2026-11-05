@@ -22,12 +22,38 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $defaultRoute = route('dashboard', absolute: false);
+
+        // Cegah redirect loop jika intended URL mengarah ke auth routes atau role tidak sesuai
+        $intended = $request->session()->get('url.intended');
+        if ($intended) {
+            $parsedPath = parse_url($intended, PHP_URL_PATH) ?? '';
+            $isAuthPath = str_contains($parsedPath, '/login')
+                || str_contains($parsedPath, '/register')
+                || str_contains($parsedPath, '/logout')
+                || str_contains($parsedPath, '/password');
+
+            $isAdminPath = str_starts_with($parsedPath, '/admin');
+            $isKasirPath = str_starts_with($parsedPath, '/kasir');
+
+            $user = Auth::user();
+            $roleMismatch = ($isAdminPath && $user?->role !== 'admin')
+                || ($isKasirPath && $user?->role !== 'kasir');
+
+            if ($isAuthPath || $roleMismatch) {
+                $request->session()->forget('url.intended');
+                return redirect()->to($defaultRoute);
+            }
+        }
+
+        return redirect()->intended($defaultRoute);
     }
 
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        if (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+        }
 
         $request->session()->invalidate();
 

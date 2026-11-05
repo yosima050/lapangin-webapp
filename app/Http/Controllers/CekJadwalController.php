@@ -31,8 +31,8 @@ class CekJadwalController extends Controller
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
         $selectedLapanganId = $validated['lapangan_id'] ?? null;
 
-        // Query Lapangan
-        $query = Lapangan::with('hargaMasters');
+        // Query Lapangan Aktif
+        $query = Lapangan::with('hargaMasters')->where('is_active', true);
 
         if ($kategori && $kategori !== 'Semua') {
             $query->where('kategori', $kategori);
@@ -43,12 +43,13 @@ class CekJadwalController extends Controller
         }
 
         $lapangans = $query->orderBy('nama')->get();
-        $kategoriList = Lapangan::distinct()
+        $kategoriList = Lapangan::where('is_active', true)
+            ->distinct()
             ->whereNotNull('kategori')
             ->where('kategori', '!=', '')
             ->orderBy('kategori')
             ->pluck('kategori');
-        $allLapangans = Lapangan::orderBy('nama')->get(['id', 'nama', 'kategori']);
+        $allLapangans = Lapangan::where('is_active', true)->orderBy('nama')->get(['id', 'nama', 'kategori']);
 
         // Generate 7 hari cepat navigasi kalender
         $currentDateCarbon = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();

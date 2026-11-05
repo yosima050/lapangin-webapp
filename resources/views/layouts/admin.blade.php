@@ -77,32 +77,25 @@
                     <span>Kelola Lapangan &amp; Tarif</span>
                 </a>
 
-                <!-- 3. Custom Price Hari Libur -->
-                <a href="{{ route('admin.custom-price') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.custom-price') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
+                <!-- 3. Pengaturan Harga Khusus -->
+                <a href="{{ route('admin.harga-khusus.index') }}"
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ (request()->routeIs('admin.custom-price') || request()->routeIs('admin.harga-khusus.*')) ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">event_available</span>
-                    <span>Custom Price Hari Libur</span>
+                    <span>Pengaturan Harga Khusus</span>
                 </a>
 
-                <!-- 3. Kelola Perlengkapan -->
+                <!-- 4. Kelola Perlengkapan -->
                 <a href="{{ route('admin.perlengkapan.index') }}"
                 class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.perlengkapan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">sports_tennis</span>
                     <span>Kelola Perlengkapan</span>
                 </a>
 
-                <!-- 4. Kelola Pegawai / Kasir -->
+                <!-- 5. Kelola Pegawai / Kasir -->
                 <a href="{{ route('admin.pegawai.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.pegawai.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">badge</span>
                     <span>Kelola Pegawai / Kasir</span>
-                </a>
-
-                <!-- 5. Approval Reschedule (Kasir POS) -->
-                <a href="{{ route('kasir.reschedule') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]">
-                    <span class="material-symbols-outlined text-[20px]">pending_actions</span>
-                    <span>Approval Reschedule (POS)</span>
                 </a>
 
                 <!-- 6. Laporan & Analitik -->
@@ -110,13 +103,6 @@
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.laporan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <span class="material-symbols-outlined text-[20px]">monitoring</span>
                     <span>Laporan &amp; Analitik</span>
-                </a>
-
-                <!-- 7. Pengaturan Venue -->
-                <a href="{{ route('admin.custom-price') }}"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]">
-                    <span class="material-symbols-outlined text-[20px]">settings</span>
-                    <span>Pengaturan Venue</span>
                 </a>
             </nav>
         </div>

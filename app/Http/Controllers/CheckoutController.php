@@ -528,7 +528,7 @@ class CheckoutController extends Controller
     ): array {
         Jadwal::autoCancelExpiredPendingBookings();
 
-        $lapangan = Lapangan::with('hargaMasters')->findOrFail($lapanganId);
+        $lapangan = Lapangan::with('hargaMasters')->where('is_active', true)->findOrFail($lapanganId);
 
         $hargaKhususAktif = HargaKhusus::query()
             ->where('lapangan_id', $lapangan->id)

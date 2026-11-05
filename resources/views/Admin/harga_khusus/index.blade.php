@@ -72,6 +72,7 @@
                     <select name="lapangan_id" id="lapangan_id" required
                         class="w-full rounded-xl border border-[#d8deeb] bg-white px-4 py-3 text-sm text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#1a146b]">
                         <option value="">Pilih lapangan</option>
+                        <option value="all" class="font-bold text-[#1a146b]" @selected(old('lapangan_id') == 'all')>⭐ Semua Lapangan (Terapkan ke Semua)</option>
                         @foreach ($lapangans as $lapangan)
                             <option value="{{ $lapangan->id }}"
                                 @selected(old('lapangan_id') == $lapangan->id)>

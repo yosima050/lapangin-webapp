@@ -125,4 +125,68 @@ class HargaKhususDanAddonPerlengkapanTest extends TestCase
         $responseB->assertDontSee('Raket Yonex Khusus Lapangan A');
         $responseB->assertSee('Handuk Olahraga Universal');
     }
+
+    public function test_admin_can_set_harga_khusus_for_all_lapangans(): void
+    {
+        $admin = \App\Models\Pelanggan::forceCreate([
+            'nama' => 'Admin Test',
+            'email' => 'admin.khusus@lapangin.com',
+            'no_hp' => '081299990099',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'admin',
+        ]);
+
+        $lap1 = Lapangan::forceCreate([
+            'nama' => 'Arena Satu',
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00:00',
+            'jam_tutup' => '22:00:00',
+            'is_active' => true,
+        ]);
+
+        $lap2 = Lapangan::forceCreate([
+            'nama' => 'Arena Dua',
+            'kategori' => 'Badminton',
+            'jam_buka' => '08:00:00',
+            'jam_tutup' => '22:00:00',
+            'is_active' => true,
+        ]);
+
+        $targetDate = Carbon::now('Asia/Jakarta')->addDays(5)->toDateString();
+
+        $response = $this->actingAs($admin)->post(route('admin.harga-khusus.store'), [
+            'lapangan_id' => 'all',
+            'tanggal' => $targetDate,
+            'jam_mulai' => '10:00',
+            'jam_selesai' => '12:00',
+            'harga' => 175000,
+            'keterangan' => 'Libur Nasional Bersama',
+        ]);
+
+        $response->assertRedirect(route('admin.harga-khusus.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('harga_khusus', [
+            'lapangan_id' => $lap1->id,
+            'jam_mulai' => '10:00',
+            'harga' => 175000,
+        ]);
+
+        $this->assertDatabaseHas('harga_khusus', [
+            'lapangan_id' => $lap2->id,
+            'jam_mulai' => '10:00',
+            'harga' => 175000,
+        ]);
+
+        // Coba masukkan lagi yang bentrok jamnya
+        $responseConflict = $this->actingAs($admin)->post(route('admin.harga-khusus.store'), [
+            'lapangan_id' => 'all',
+            'tanggal' => $targetDate,
+            'jam_mulai' => '11:00',
+            'jam_selesai' => '13:00',
+            'harga' => 200000,
+        ]);
+
+        $responseConflict->assertSessionHasErrors(['lapangan_id']);
+    }
 }
