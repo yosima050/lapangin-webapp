@@ -14,6 +14,8 @@ services:
     image: lapangin-app:staging
     container_name: lapangin_staging_app
     restart: unless-stopped
+    mem_limit: 384m
+    mem_reservation: 128m
     environment:
       APP_ENV: staging
       APP_DEBUG: "true"
@@ -24,6 +26,7 @@ services:
       - ../:/var/www/lapangin
       - /var/www/lapangin/vendor
       - lapangin_staging_storage:/var/www/lapangin/storage
+      - ./php-fpm-pool.conf:/usr/local/etc/php-fpm.d/zz-pool.conf:ro
     depends_on:
       db:
         condition: service_healthy
@@ -36,6 +39,8 @@ services:
     image: nginx:1.27-alpine
     container_name: lapangin_staging_nginx
     restart: unless-stopped
+    mem_limit: 128m
+    mem_reservation: 32m
     ports:
       - "8080:80"
     volumes:
@@ -52,6 +57,9 @@ services:
     image: postgres:16-alpine
     container_name: lapangin_staging_db
     restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    command: postgres -c shared_buffers=128MB -c max_connections=50
     environment:
       POSTGRES_DB: ${DB_DATABASE:-lapangin_db_staging}
       POSTGRES_USER: ${DB_USERNAME:-lapangin_user}
@@ -78,6 +86,8 @@ services:
     image: lapangin-app:staging
     container_name: lapangin_staging_queue
     restart: unless-stopped
+    mem_limit: 128m
+    mem_reservation: 64m
     environment:
       DB_HOST: lapangin_staging_db
     command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
@@ -103,6 +113,8 @@ services:
     image: lapangin-app:staging
     container_name: lapangin_staging_scheduler
     restart: unless-stopped
+    mem_limit: 64m
+    mem_reservation: 32m
     environment:
       DB_HOST: lapangin_staging_db
     command: php artisan schedule:work
