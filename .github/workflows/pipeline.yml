@@ -127,6 +127,8 @@ jobs:
             docker exec -u 0 lapangin_staging_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage 2>/dev/null || true
 
             git fetch origin "${BRANCH}"
+            git reset --hard HEAD || true
+            git clean -fd || true
             git checkout -B "${BRANCH}" "origin/${BRANCH}"
             git reset --hard "origin/${BRANCH}"
 

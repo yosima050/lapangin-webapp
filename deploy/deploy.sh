@@ -73,6 +73,8 @@ docker exec -u 0 "${APP_CONTAINER}" chown -R "$(id -u)" \
     /var/www/lapangin/storage > /dev/null 2>&1 || true
 
 git fetch origin "${BRANCH}"
+git reset --hard HEAD || true
+git clean -fd || true
 git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
 
@@ -86,6 +88,11 @@ if [ ! -f "${APP_DIR}/.env" ]; then
         echo "      Menyalin .env.example ke .env..."
         cp "${APP_DIR}/.env.example" "${APP_DIR}/.env"
     fi
+fi
+
+if grep -q '<GANTI_INI>' "${APP_DIR}/.env" 2>/dev/null; then
+    echo "      ⚠️ PERINGATAN: Ditemukan nilai placeholder '<GANTI_INI>' pada ${APP_DIR}/.env."
+    echo "         Harap pastikan MIDTRANS_SERVER_KEY, MIDTRANS_CLIENT_KEY, GOOGLE_CLIENT_ID, dan GOOGLE_CLIENT_SECRET sudah diisi dengan benar di server."
 fi
 
 # ── 5. Build Image Docker (Menggunakan Layer Cache Lokal & Zero Downtime) ─────

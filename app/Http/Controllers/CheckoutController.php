@@ -365,7 +365,19 @@ class CheckoutController extends Controller
                     ],
                 ];
 
-                $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+                try {
+                    $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Midtrans createSnapToken error: ' . $e->getMessage(), [
+                        'order_id' => $transaksi->order_id,
+                        'exception' => $e,
+                    ]);
+
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Layanan pembayaran Midtrans sedang mengalami kendala: ' . $e->getMessage(),
+                    ], 422);
+                }
 
                 return response()->json([
                     'status' => 'success',
@@ -482,7 +494,19 @@ class CheckoutController extends Controller
             ],
         ];
 
-        $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+        try {
+            $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Midtrans createSnapToken error: ' . $e->getMessage(), [
+                'order_id' => $transaksi->order_id,
+                'exception' => $e,
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Layanan pembayaran Midtrans sedang mengalami kendala: ' . $e->getMessage(),
+            ], 422);
+        }
 
         return response()->json([
             'status' => 'success',
