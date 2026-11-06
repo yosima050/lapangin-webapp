@@ -15,8 +15,10 @@ class AuthLoginGoogle extends Controller
 {
     protected function getGoogleRedirectUrl(): string
     {
-        $rawUrl = config('services.google.redirect')
-            ?: (rtrim((string) config('app.url'), '/') . '/auth/google/callback');
+        $rawUrl = config('services.google.redirect');
+        if (empty($rawUrl) || str_contains((string) $rawUrl, '${APP_URL}')) {
+            $rawUrl = rtrim((string) (config('app.url') ?: url('/')), '/') . '/auth/google/callback';
+        }
 
         return preg_replace('#(?<!:)//+#', '/', (string) $rawUrl);
     }
@@ -41,8 +43,17 @@ class AuthLoginGoogle extends Controller
                 ->redirectUrl($this->getGoogleRedirectUrl())
                 ->user();
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google SSO Callback Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+            ]);
+
+            $errMsg = config('app.debug')
+                ? 'Gagal masuk dengan Google (' . $e->getMessage() . '). Pastikan Authorized Redirect URI di Google Console sesuai: ' . $this->getGoogleRedirectUrl()
+                : 'Proses masuk dengan Google dibatalkan atau sesi telah kedaluwarsa. Silakan coba kembali.';
+
             return redirect()->route('login')->withErrors([
-                'email' => 'Proses masuk dengan Google dibatalkan atau sesi telah kedaluwarsa. Silakan coba kembali.',
+                'email' => $errMsg,
             ]);
         }
 

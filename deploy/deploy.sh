@@ -88,6 +88,11 @@ if [ ! -f "${APP_DIR}/.env" ]; then
     fi
 fi
 
+if grep -q '<GANTI_INI>' "${APP_DIR}/.env" 2>/dev/null; then
+    echo "      ⚠️ PERINGATAN: Ditemukan nilai placeholder '<GANTI_INI>' pada ${APP_DIR}/.env."
+    echo "         Harap pastikan MIDTRANS_SERVER_KEY, MIDTRANS_CLIENT_KEY, GOOGLE_CLIENT_ID, dan GOOGLE_CLIENT_SECRET sudah diisi dengan benar di server."
+fi
+
 # ── 5. Build Image Docker (Menggunakan Layer Cache Lokal & Zero Downtime) ─────
 echo "[4/8] Membangun image Docker menggunakan layer cache lokal..."
 docker network create lapangin_net 2>/dev/null || true
