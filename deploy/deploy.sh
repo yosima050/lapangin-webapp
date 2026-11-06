@@ -111,6 +111,15 @@ fi
 # ── 5. Build & Jalankan Kontainer Docker (Zero-Downtime Deployment) ────────────
 echo "[4/8] Membangun image Docker (Aplikasi tetap aktif melayani pengguna tanpa 503)..."
 docker network create lapangin_net 2>/dev/null || true
+
+# Gunakan cache layer dari image staging jika image production belum ada agar build instan tanpa kompilasi ulang
+if [ "${ENV_TARGET}" = "production" ]; then
+    if ! docker image inspect lapangin-app:production >/dev/null 2>&1 && docker image inspect lapangin-app:staging >/dev/null 2>&1; then
+        echo "      ⚡ Memanfaatkan cache layer dari lapangin-app:staging agar build cepat..."
+        docker tag lapangin-app:staging lapangin-app:production 2>/dev/null || true
+    fi
+fi
+
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
 
 echo "[5/8] Memperbarui service kontainer Docker secara atomik..."
