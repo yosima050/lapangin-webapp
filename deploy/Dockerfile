@@ -43,8 +43,8 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 # ── Copy source ───────────────────────────────────────────────────────────────
 COPY . .
 
-# ── Generate full autoloader with package discovery ──────────────────────────
-RUN composer dump-autoload --optimize --no-dev
+# ── Generate full autoloader without running scripts at build time ──────────
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # ── Frontend assets (Vite) ───────────────────────────────────────────────────
 # Asset frontend sudah terkompilasi dan tersedia di direktori public/build/ (terlacak Git).
