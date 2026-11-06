@@ -123,5 +123,13 @@ jobs:
             git checkout -B "${BRANCH}" "origin/${BRANCH}"
             git reset --hard "origin/${BRANCH}"
 
+            # Percepat build production dengan meminjam layer cache staging jika belum ada
+            if [ "${ENV_NAME}" = "production" ]; then
+              if ! docker image inspect lapangin-app:production >/dev/null 2>&1 && docker image inspect lapangin-app:staging >/dev/null 2>&1; then
+                echo "⚡ Menggunakan cache layer dari lapangin-app:staging untuk mempercepat build..."
+                docker tag lapangin-app:staging lapangin-app:production 2>/dev/null || true
+              fi
+            fi
+
             bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
 
