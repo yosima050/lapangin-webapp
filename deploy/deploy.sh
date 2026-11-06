@@ -132,6 +132,7 @@ docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php arti
 
 # ── 8. Optimasi Cache & Mematikan Maintenance Mode ───────────────────────────
 echo "[7/8] Mengoptimasi cache Laravel & menyalakan kembali aplikasi..."
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan package:discover --ansi || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize:clear
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan up 2>/dev/null || true
