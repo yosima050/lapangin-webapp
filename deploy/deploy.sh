@@ -73,6 +73,8 @@ docker exec -u 0 "${APP_CONTAINER}" chown -R "$(id -u)" \
     /var/www/lapangin/storage > /dev/null 2>&1 || true
 
 git fetch origin "${BRANCH}"
+git reset --hard HEAD || true
+git clean -fd || true
 git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
 
