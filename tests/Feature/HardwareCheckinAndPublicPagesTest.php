@@ -54,6 +54,8 @@ class HardwareCheckinAndPublicPagesTest extends TestCase
         $this->get(route('kebijakan.reschedule'))->assertOk()->assertSee('Kebijakan Reschedule');
         $this->get(route('syarat.ketentuan'))->assertOk()->assertSee('Ketentuan Layanan');
         $this->get(route('kebijakan.privasi'))->assertOk()->assertSee('Kebijakan Privasi');
+        $this->get('/health')->assertOk()->assertSee('OK');
+        $this->get('/up')->assertOk();
     }
 
     public function test_kasir_hardware_checkin_screen_accessible(): void

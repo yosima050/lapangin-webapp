@@ -33,6 +33,13 @@ RUN echo "disable_functions = exec,passthru,shell_exec,system" >> /usr/local/etc
     && echo "upload_max_filesize = 10M" >> /usr/local/etc/php/conf.d/security.ini \
     && echo "post_max_size = 12M" >> /usr/local/etc/php/conf.d/security.ini
 
+# ── PHP-FPM Pool Optimization (Disesuaikan untuk host 1 GiB RAM) ─────────────
+RUN sed -i 's/^pm.max_children = .*/pm.max_children = 5/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true \
+    && sed -i 's/^pm.start_servers = .*/pm.start_servers = 2/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true \
+    && sed -i 's/^pm.min_spare_servers = .*/pm.min_spare_servers = 1/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true \
+    && sed -i 's/^pm.max_spare_servers = .*/pm.max_spare_servers = 3/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true \
+    && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true
+
 # ── Working directory ─────────────────────────────────────────────────────────
 WORKDIR /var/www/lapangin
 

@@ -25,6 +25,11 @@ Route::get('/', function () {
     $lapangans = \App\Models\Lapangan::where('is_active', true)->get();
     return view('pages.landing', compact('lapangans'));
 })->name('home');
+
+// Health Check Endpoint (Digunakan untuk CI/CD, Container Monitoring & Docker Healthcheck)
+Route::get('/health', function () {
+    return response('OK', 200)->header('Content-Type', 'text/plain');
+});
 Route::get('/lapangan/{id}', [KatalogController::class, 'show'])->name('katalog.show');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 Route::get('/jadwal', [CekJadwalController::class, 'index'])->name('jadwal.index');
