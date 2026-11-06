@@ -160,32 +160,30 @@ if [ "${HAS_VALID_APP_KEY}" = "false" ]; then
     fi
 fi
 
-# ── 5. Siapkan Image Kontainer (Pull dari Registry GHCR atau Build Fallback) ──
-echo "[4/8] Menyiapkan Image Docker Aplikasi..."
+# ── 5. Siapkan Image Kontainer (Build Instan Berkat Docker Layer Cache) ───────
+echo "[4/8] Membangun image Docker (Memanfaatkan cache lokal instan)..."
 docker network create lapangin_net 2>/dev/null || true
 if [ "${ENV_TARGET}" = "staging" ]; then
     docker network create lapangin_staging_net 2>/dev/null || true
-fi
-
-PULLED_SUCCESS=false
-if [ -n "${APP_IMAGE}" ]; then
-    echo "      📥 Mengunduh pre-built image dari GHCR: ${APP_IMAGE}..."
-    if docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" pull app; then
-        PULLED_SUCCESS=true
-        echo "      ✅ Image berhasil diunduh tanpa beban build di server VPS."
+    if ! docker image inspect lapangin-app:staging >/dev/null 2>&1 && docker image inspect lapangin-app:production >/dev/null 2>&1; then
+        echo "      ⚡ Meminjam cache layer dari lapangin-app:production..."
+        docker tag lapangin-app:production lapangin-app:staging 2>/dev/null || true
+    fi
+else
+    if ! docker image inspect lapangin-app:production >/dev/null 2>&1 && docker image inspect lapangin-app:staging >/dev/null 2>&1; then
+        echo "      ⚡ Meminjam cache layer dari lapangin-app:staging..."
+        docker tag lapangin-app:staging lapangin-app:production 2>/dev/null || true
     fi
 fi
 
-if [ "${PULLED_SUCCESS}" = "false" ]; then
-    echo "      ℹ️ Image pre-built tidak tersedia atau pull gagal. Melakukan build lokal..."
-    docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
-fi
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
 
-# ── 6. Pastikan Database Sehat & Jalankan Migrasi Sebelum Container Live ──────
-echo "[5/8] Memastikan database aktif dan menjalankan migrasi skema..."
-# Nyalakan service db terlebih dahulu jika belum hidup
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d db
+# ── 6. Update Kontainer (Atomic Container Swap) ───────────────────────────────
+echo "[5/8] Memperbarui service kontainer Docker secara atomik..."
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
 
+# ── 7. Jalankan Migrasi Database & Optimasi Cache ─────────────────────────────
+echo "[6/8] Memastikan database aktif dan menjalankan migrasi..."
 echo "      Menunggu kesiapan database via pg_isready..."
 DB_USER=$(grep -E '^DB_USERNAME=' "${APP_DIR}/.env" 2>/dev/null | cut -d '=' -f2- | tr -d ' "\r' || echo "lapangin_user")
 DB_NAME=$(grep -E '^DB_DATABASE=' "${APP_DIR}/.env" 2>/dev/null | cut -d '=' -f2- | tr -d ' "\r' || echo "lapangin_db")
@@ -204,18 +202,13 @@ until docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T db pg_
 done
 echo "      ✅ Database PostgreSQL siap."
 
-# Eksekusi migrasi sebelum traffic berpindah ke container baru
+# Eksekusi migrasi & link storage di dalam container yang sudah aktif
 echo "      Menjalankan database migration (--force)..."
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" run --rm --no-deps app php artisan migrate --force
-
-# Symlink storage
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" run --rm --no-deps app php artisan storage:link 2>/dev/null || true
-
-# ── 7. Update Kontainer (Atomic Container Swap) & Optimasi Cache ──────────────
-echo "[6/8] Memperbarui service kontainer Docker secara atomik..."
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan storage:link 2>/dev/null || true
 
 echo "[7/8] Mengoptimasi cache Laravel & menyalakan aplikasi..."
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan package:discover --ansi || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize:clear
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan up 2>/dev/null || true

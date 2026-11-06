@@ -10,7 +10,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: ${APP_IMAGE:-ghcr.io/yosima050/lapangin-webapp/app:production}
+    image: lapangin-app:production
     container_name: lapangin_app
     restart: unless-stopped
     mem_limit: 384m
@@ -24,6 +24,7 @@ services:
       - ../:/var/www/lapangin
       - /var/www/lapangin/vendor
       - lapangin_storage:/var/www/lapangin/storage
+      - ./php-fpm-pool.conf:/usr/local/etc/php-fpm.d/zz-pool.conf:ro
     depends_on:
       db:
         condition: service_healthy
@@ -83,7 +84,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: ${APP_IMAGE:-ghcr.io/yosima050/lapangin-webapp/app:production}
+    image: lapangin-app:production
     container_name: lapangin_queue
     restart: unless-stopped
     mem_limit: 128m
@@ -108,7 +109,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: ${APP_IMAGE:-ghcr.io/yosima050/lapangin-webapp/app:production}
+    image: lapangin-app:production
     container_name: lapangin_scheduler
     restart: unless-stopped
     mem_limit: 64m

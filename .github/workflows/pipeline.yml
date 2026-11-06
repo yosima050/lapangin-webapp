@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   # ── 1. Continuous Integration: Otomatisasi Uji Kualitas Kode & Unit Test ────
@@ -67,7 +66,7 @@ jobs:
         run: |
           php artisan test tests/Feature/HargaKhususDanAddonPerlengkapanTest.php tests/Feature/JadwalServiceTest.php tests/Feature/AdminLapanganCrudTest.php tests/Feature/AdminLaporanRekonsiliasiTest.php tests/Feature/KasirCheckInFlowTest.php tests/Feature/EndToEndBookingTest.php tests/Feature/GuestCheckoutAndAutoClaimTest.php tests/Feature/BookingAdjustmentServiceTest.php tests/Feature/PelangganProfileAndRiwayatPaymentTest.php tests/Feature/HardwareCheckinAndPublicPagesTest.php tests/Feature/KasirAndAdminDynamicFlowTest.php tests/Feature/KatalogSyncAndApiTest.php tests/Feature/LayoutsDynamicDataTest.php tests/Feature/MidtransCallbackTest.php tests/Feature/Auth/RegistrationTest.php tests/Unit/
 
-  # ── 2. Continuous Deployment: Otomatisasi Build GHCR & Deploy ke VPS ─────────
+  # ── 2. Continuous Deployment: Otomatisasi Deploy ke Server VPS Cloud ────────
   deploy:
     name: 🚀 Continuous Deployment to VPS
     runs-on: ubuntu-latest
@@ -75,25 +74,9 @@ jobs:
     if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'development')
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install NPM Dependencies & Build Fresh Assets
+      - name: Determine Target Environment
+        id: env_select
         run: |
-          npm ci
-          npm run build
-
-      - name: Determine Target Environment & Image Tags
-        id: meta
-        run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "image_base=ghcr.io/${REPO_LOWER}/app" >> $GITHUB_OUTPUT
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "env_name=production" >> $GITHUB_OUTPUT
             echo "branch=main" >> $GITHUB_OUTPUT
@@ -104,34 +87,8 @@ jobs:
             echo "target_dir=/var/www/lapangin-staging" >> $GITHUB_OUTPUT
           fi
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Image to GHCR
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: deploy/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.image_base }}:${{ github.sha }}
-            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.env_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Deploy via Secure SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          GHCR_USER: ${{ github.actor }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APP_IMAGE: ${{ steps.meta.outputs.image_base }}:${{ github.sha }}
         with:
           host: ${{ secrets.SSH_HOST || '20.211.144.75' }}
           username: ${{ secrets.SSH_USER || 'userlapang' }}
@@ -140,31 +97,28 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
           command_timeout: 30m
-          envs: GHCR_USER,GHCR_TOKEN,APP_IMAGE
           script: |
-            TARGET_DIR="${{ steps.meta.outputs.target_dir }}"
-            ENV_NAME="${{ steps.meta.outputs.env_name }}"
-            BRANCH="${{ steps.meta.outputs.branch }}"
+            TARGET_DIR="${{ steps.env_select.outputs.target_dir }}"
+            ENV_NAME="${{ steps.env_select.outputs.env_name }}"
+            BRANCH="${{ steps.env_select.outputs.branch }}"
 
             echo "=========================================================="
-            echo "🚀 Memulai Deployment LapangIn ke VPS"
+            echo "🚀 Memulai Deployment LapangIn Otomatis (CI/CD)"
             echo "   Environment : ${ENV_NAME}"
             echo "   Branch      : ${BRANCH}"
             echo "   Target Dir  : ${TARGET_DIR}"
-            echo "   Docker Image: ${APP_IMAGE}"
             echo "=========================================================="
 
             if [ ! -d "${TARGET_DIR}" ]; then
-              echo "⚠️ Direktori ${TARGET_DIR} belum ada. Melakukan clone awal..."
+              echo "⚠️ Direktori ${TARGET_DIR} belum ada. Melakukan clone awal secara idempoten..."
               git clone -b "${BRANCH}" https://github.com/yosima050/lapangin-webapp.git "${TARGET_DIR}"
             fi
 
             cd "${TARGET_DIR}"
+            echo "📥 Menyinkronkan kode repositori terbaru secara idempoten..."
 
-            # Login ke GHCR di VPS agar dapat menarik image tanpa hambatan otorisasi
-            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-
-            # Pulihkan kepemilikan bootstrap/cache jika tersentuh root/www-data
+            # Kembalikan kepemilikan bootstrap/cache ke user host (userlapang) via container aktif
+            # agar git reset --hard tidak terkendala Permission Denied dari file lama www-data
             docker exec -u 0 lapangin_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage 2>/dev/null || true
             docker exec -u 0 lapangin_staging_app chown -R "$(id -u)" /var/www/lapangin/bootstrap/cache /var/www/lapangin/storage 2>/dev/null || true
 
@@ -172,4 +126,17 @@ jobs:
             git checkout -B "${BRANCH}" "origin/${BRANCH}"
             git reset --hard "origin/${BRANCH}"
 
-            bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}" "${APP_IMAGE}"
+            # Saling berbagi layer cache Docker agar build selalu instan (< 1 menit) tanpa kompilasi ulang
+            if [ "${ENV_NAME}" = "production" ]; then
+              if ! docker image inspect lapangin-app:production >/dev/null 2>&1 && docker image inspect lapangin-app:staging >/dev/null 2>&1; then
+                echo "⚡ Menggunakan cache layer dari lapangin-app:staging untuk mempercepat build..."
+                docker tag lapangin-app:staging lapangin-app:production 2>/dev/null || true
+              fi
+            else
+              if ! docker image inspect lapangin-app:staging >/dev/null 2>&1 && docker image inspect lapangin-app:production >/dev/null 2>&1; then
+                echo "⚡ Menggunakan cache layer dari lapangin-app:production untuk mempercepat build..."
+                docker tag lapangin-app:production lapangin-app:staging 2>/dev/null || true
+              fi
+            fi
+
+            bash deploy/deploy.sh "${ENV_NAME}" "${BRANCH}"
