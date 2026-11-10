@@ -129,10 +129,10 @@ docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php arti
 docker exec -u 0 "${APP_CONTAINER}" chown -R www-data:www-data /var/www/lapangin/storage /var/www/lapangin/bootstrap/cache 2>/dev/null || true
 docker exec -u 0 "${APP_CONTAINER}" chmod -R 775 /var/www/lapangin/storage /var/www/lapangin/bootstrap/cache 2>/dev/null || true
 
-# Reload Nginx jika kontainer Nginx utama sedang berjalan (Hot Reload)
+# Restart kontainer Nginx agar perubahan bind-mounted file diterapkan sepenuhnya
 if [ -n "$(docker ps -q -f "name=^lapangin_nginx$")" ]; then
-    echo "      Memperbarui konfigurasi Nginx (Hot Reload)..."
-    docker exec lapangin_nginx nginx -s reload 2>/dev/null || true
+    echo "      Memuat ulang kontainer Nginx agar membaca konfigurasi bind-mount terbaru..."
+    docker restart lapangin_nginx 2>/dev/null || docker exec lapangin_nginx nginx -s reload 2>/dev/null || true
 fi
 
 # ── 9. Verifikasi Status Kontainer ───────────────────────────────────────────
