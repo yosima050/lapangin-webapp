@@ -15,12 +15,36 @@ class AuthLoginGoogle extends Controller
 {
     protected function getGoogleRedirectUrl(): string
     {
-        $rawUrl = config('services.google.redirect');
-        if (empty($rawUrl) || str_contains((string) $rawUrl, '${APP_URL}')) {
-            $rawUrl = rtrim((string) (config('app.url') ?: url('/')), '/') . '/auth/google/callback';
+        $configured = config('services.google.redirect');
+
+        // Ambil host aktif dari request
+        $host = request()->getHost();
+
+        // 1. Jika diakses melalui domain production (lapangin.biz.id)
+        if (str_contains($host, 'lapangin.biz.id')) {
+            return 'https://lapangin.biz.id/auth/google/callback';
         }
 
-        return preg_replace('#(?<!:)//+#', '/', (string) $rawUrl);
+        // 2. Jika diakses melalui domain staging Azure (cloudapp.azure.com)
+        if (str_contains($host, 'cloudapp.azure.com')) {
+            return 'https://lapangin.australiaeast.cloudapp.azure.com/auth/google/callback';
+        }
+
+        // 3. Jika konfigurasi eksplisit valid dan bukan placeholder
+        if (! empty($configured) && ! str_contains((string) $configured, '${APP_URL}')) {
+            $url = (string) $configured;
+        } else {
+            $url = rtrim((string) (config('app.url') ?: url('/')), '/') . '/auth/google/callback';
+        }
+
+        // 4. Jika bukan localhost, pastikan selalu HTTPS dan tanpa port internal 8080/80
+        if (! str_contains($url, 'localhost') && ! str_contains($url, '127.0.0.1')) {
+            $url = preg_replace('#^http://#', 'https://', $url);
+            $url = preg_replace('#:8080/#', '/', $url);
+            $url = preg_replace('#:80/#', '/', $url);
+        }
+
+        return preg_replace('#(?<!:)//+#', '/', (string) $url);
     }
 
     public function google_redirect()
