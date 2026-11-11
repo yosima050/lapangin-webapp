@@ -34,7 +34,7 @@ class RiwayatController extends Controller
             ->with(['lapangan', 'transaksis', 'reschedules'])
             ->orderByDesc('tanggal')
             ->orderByDesc('jam_mulai')
-            ->paginate(10) : collect();
+            ->get() : collect();
 
         return view('Pelanggan.riwayat', compact('jadwals'));
     }

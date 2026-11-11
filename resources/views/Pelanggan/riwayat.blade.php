@@ -1,7 +1,64 @@
 @extends('layouts.pelanggan')
 
+@section('title', 'Riwayat Booking')
+
 @section('content')
+@php
+    $countSemua = $jadwals->count();
+    $countAktif = 0;
+    $countSelesai = 0;
+    $countDibatalkan = 0;
+
+    foreach ($jadwals as $j) {
+        $jIsCancelled = $j->isCancelled();
+        $jTanggalStr = $j->tanggal instanceof \Carbon\Carbon ? $j->tanggal->format('Y-m-d') : (string) $j->tanggal;
+        $jJamSelesai = in_array(substr((string)$j->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$j->jam_selesai;
+        $jEndTime = \Carbon\Carbon::parse($jTanggalStr . ' ' . $jJamSelesai);
+        $jIsPast = now()->gt($jEndTime);
+        $jIsSelesai = ! $jIsCancelled && ($j->status === 'selesai' || $jIsPast);
+
+        if ($jIsCancelled) {
+            $countDibatalkan++;
+        } elseif ($jIsSelesai) {
+            $countSelesai++;
+        } else {
+            $countAktif++;
+        }
+    }
+@endphp
 <div x-data="{
+    activeTab: '{{ $countAktif > 0 ? "aktif" : "all" }}',
+    searchQuery: '',
+    bookingItems: [
+        @foreach ($jadwals as $j)
+            @php
+                $rawKode = (string) ($j->kode_booking ?? $j->id);
+                $displayKode = strlen($rawKode) > 12 ? '#BK-' . strtoupper(substr($rawKode, 0, 8)) : '#BK-' . $rawKode;
+                $namaLap = $j->lapangan?->nama ?? 'Lapangan';
+                $jIsCancelled = $j->isCancelled();
+                $jTanggalStr = $j->tanggal instanceof \Carbon\Carbon ? $j->tanggal->format('Y-m-d') : (string) $j->tanggal;
+                $jJamSelesai = in_array(substr((string)$j->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$j->jam_selesai;
+                $jEndTime = \Carbon\Carbon::parse($jTanggalStr . ' ' . $jJamSelesai);
+                $jIsPast = now()->gt($jEndTime);
+                $jIsSelesai = ! $jIsCancelled && ($j->status === 'selesai' || $jIsPast);
+                $tabCat = $jIsCancelled ? 'dibatalkan' : ($jIsSelesai ? 'selesai' : 'aktif');
+                $searchKeywords = strtolower($rawKode . ' ' . $displayKode . ' ' . $namaLap . ' ' . ($j->lapangan?->kategori ?? ''));
+            @endphp
+            {
+                id: '{{ $j->id }}',
+                category: '{{ $tabCat }}',
+                search: {{ json_encode($searchKeywords) }}
+            },
+        @endforeach
+    ],
+    get visibleCount() {
+        return this.bookingItems.filter(item => {
+            const matchesTab = (this.activeTab === 'all') || (this.activeTab === item.category);
+            if (!matchesTab) return false;
+            if (!this.searchQuery.trim()) return true;
+            return item.search.includes(this.searchQuery.toLowerCase().trim());
+        }).length;
+    },
     showTicketModal: false,
     activeTicket: null,
     payModalOpen: false,
@@ -191,12 +248,7 @@
         <div class="mb-8 overflow-hidden rounded-2xl bg-[#1a146b] text-white shadow-lg sm:rounded-3xl">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between px-5 py-7 sm:px-8 sm:py-9 lg:px-10 gap-6">
                 <div>
-                    <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#acf847]">
-                        <span class="h-2 w-2 rounded-full bg-[#acf847]"></span>
-                        Manajemen Reservasi Aktif
-                    </div>
-
-                    <h1 class="mt-4 text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                         Riwayat Booking &amp; Jadwal Saya
                     </h1>
 
@@ -206,25 +258,19 @@
                 </div>
 
                 {{-- Statistik Ringkasan ala Figma --}}
-                <div class="grid grid-cols-3 gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 shrink-0">
-                    <div class="text-center px-3 border-r border-white/10 last:border-none">
+                <div class="grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 shrink-0">
+                    <div class="text-center px-4 border-r border-white/10">
                         <p class="text-xl sm:text-2xl font-extrabold text-white">
-                            {{ isset($jadwals) ? count($jadwals) : 0 }}
+                            {{ $countAktif }}
                         </p>
                         <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
                             Jadwal Aktif
                         </p>
                     </div>
-                    <div class="text-center px-3 border-r border-white/10 last:border-none">
-                        <p class="text-xl sm:text-2xl font-extrabold text-white">0</p>
+                    <div class="text-center px-4">
+                        <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $countSelesai }}</p>
                         <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
                             Selesai
-                        </p>
-                    </div>
-                    <div class="text-center px-3">
-                        <p class="text-xl sm:text-2xl font-extrabold text-[#acf847]">100%</p>
-                        <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
-                            Validasi QR
                         </p>
                     </div>
                 </div>
@@ -245,33 +291,53 @@
         <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {{-- Tab Filter Status --}}
             <div class="flex flex-wrap items-center gap-2 rounded-2xl bg-gray-200/60 p-1.5 text-xs font-semibold text-gray-600">
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Semua ({{ isset($jadwals) ? count($jadwals) : 0 }})
+                <button type="button"
+                        @click="activeTab = 'all'"
+                        :class="activeTab === 'all' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Semua ({{ $countSemua }})
                 </button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#1a146b] px-4 py-2 font-bold text-white shadow-sm">
+                <button type="button"
+                        @click="activeTab = 'aktif'"
+                        :class="activeTab === 'aktif' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 transition cursor-pointer">
                     Aktif &amp; Mendatang
-                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-[#acf847] text-[10px] font-extrabold text-[#1a146b]">
-                        {{ isset($jadwals) ? count($jadwals) : 0 }}
+                    <span :class="activeTab === 'aktif' ? 'bg-[#acf847] text-[#1a146b]' : 'bg-gray-300 text-gray-700'"
+                          class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[10px] font-extrabold">
+                        {{ $countAktif }}
                     </span>
                 </button>
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Selesai (0)
+                <button type="button"
+                        @click="activeTab = 'selesai'"
+                        :class="activeTab === 'selesai' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Selesai ({{ $countSelesai }})
                 </button>
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Dibatalkan (0)
+                <button type="button"
+                        @click="activeTab = 'dibatalkan'"
+                        :class="activeTab === 'dibatalkan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Dibatalkan ({{ $countDibatalkan }})
                 </button>
             </div>
 
             {{-- Input Pencarian --}}
             <div class="relative w-full sm:w-72">
                 <input type="text"
-                       placeholder="Cari Kode Booking / Lapangan..."
-                       class="w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                       x-model="searchQuery"
+                       placeholder="Cari lapangan..."
+                       class="w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
+                <button type="button"
+                        x-show="searchQuery.trim().length > 0"
+                        @click="searchQuery = ''"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
         </div>
 
@@ -279,7 +345,8 @@
         <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-800">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-800"
+                    x-text="activeTab === 'all' ? 'Semua Jadwal Reservasi' : (activeTab === 'aktif' ? 'Jadwal Pertandingan Aktif & Mendatang' : (activeTab === 'selesai' ? 'Riwayat Pertandingan Selesai' : 'Daftar Booking Dibatalkan'))">
                     Jadwal Pertandingan Terdekat
                 </h2>
             </div>
@@ -313,7 +380,7 @@
                 ));
 
                 // Format kode booking pendek
-                $rawKode = $jadwal->kode_booking ?? $jadwal->id;
+                $rawKode = (string) ($jadwal->kode_booking ?? $jadwal->id);
                 $displayKode = strlen($rawKode) > 12 ? '#BK-' . strtoupper(substr($rawKode, 0, 8)) : '#BK-' . $rawKode;
 
                 // Menghitung durasi jam
@@ -323,30 +390,47 @@
                 $tanggalStr = $jadwal->tanggal instanceof \Carbon\Carbon ? $jadwal->tanggal->toDateString() : (string) $jadwal->tanggal;
                 $namaLapangan = $jadwal->lapangan?->nama ?? 'Lapangan';
 
+                $jJamSelesai = in_array(substr((string)$jadwal->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$jadwal->jam_selesai;
+                $jEndTime = \Carbon\Carbon::parse($tanggalStr . ' ' . $jJamSelesai);
+                $jIsPast = now()->gt($jEndTime);
+                $jIsSelesai = ! $isDibatalkan && ($jadwal->status === 'selesai' || $jIsPast);
+                $tabCategory = $isDibatalkan ? 'dibatalkan' : ($jIsSelesai ? 'selesai' : 'aktif');
+                $searchKeywords = strtolower($rawKode . ' ' . $displayKode . ' ' . $namaLapangan . ' ' . ($jadwal->lapangan?->kategori ?? ''));
+
                 // Helper Reschedule & Pembatalan (Sprint 5)
                 $kickoff = \Carbon\Carbon::parse($tanggalStr . ' ' . substr((string) $jadwal->jam_mulai, 0, 5));
                 $hoursUntilKickoff = now()->diffInHours($kickoff, false);
                 $pendingReschedule = $jadwal->reschedules ? $jadwal->reschedules->firstWhere('status', 'diajukan') : null;
                 $canReschedule = ! $isDibatalkan && empty($jadwal->checked_in_at) && ! $pendingReschedule && $hoursUntilKickoff >= 24;
-                $canCancel = ! $isDibatalkan && empty($jadwal->checked_in_at) && $jadwal->status !== 'selesai';
+                $canCancel = ! $isDibatalkan && empty($jadwal->checked_in_at) && $jadwal->status !== 'selesai' && ! $jIsPast;
             @endphp
 
-            <article x-data="{ showModal: false }" class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
+            <article x-data="{ showModal: false }"
+                     x-show="(activeTab === 'all' || activeTab === '{{ $tabCategory }}') && (!searchQuery.trim() || {{ json_encode($searchKeywords) }}.includes(searchQuery.toLowerCase().trim()))"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all">
 
-                {{-- Baris Atas: Kode Booking & Badge Status --}}
+                {{-- Baris Atas: Waktu Pemesanan & Badge Status --}}
                 <div class="flex flex-wrap items-center justify-between border-b border-gray-100 bg-indigo-50/30 px-5 py-3 gap-2">
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="font-mono font-bold text-[#1a146b] bg-indigo-100/70 px-2.5 py-1 rounded-md">
-                            {{ $displayKode }}
-                        </span>
-                        <span class="text-gray-300">•</span>
-                        <span class="text-gray-500">
-                            Dipesan: {{ \Carbon\Carbon::parse($jadwal->created_at)->translatedFormat('d M Y, H:i') }} WIB
-                        </span>
+                    <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Dipesan: {{ \Carbon\Carbon::parse($jadwal->created_at)->translatedFormat('d M Y, H:i') }} WIB</span>
                     </div>
 
                     {{-- Badge Status Utama --}}
-                    @if ($isLunas)
+                    @if ($isDibatalkan)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
+                            Dibatalkan
+                        </span>
+                    @elseif ($jIsSelesai)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">
+                            <span class="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
+                            Pertandingan Selesai
+                        </span>
+                    @elseif ($isLunas)
                         <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-green-100 text-green-800 border border-green-200">
                             <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
                             Lunas 100% (Siap Main)
@@ -355,11 +439,6 @@
                         <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-[#acf847]/40 text-emerald-950 border border-[#acf847]">
                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
                             DP 50% Terverifikasi (Siap Main)
-                        </span>
-                    @elseif ($isDibatalkan)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
-                            <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
-                            Dibatalkan
                         </span>
                     @else
                         @php
@@ -812,6 +891,20 @@
             </div>
         @endforelse
 
+        {{-- Empty state jika hasil filter atau search tidak ada data yang cocok --}}
+        @if(count($jadwals) > 0)
+            <div x-show="visibleCount === 0" x-cloak class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center my-6">
+                <div class="mx-auto w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#1a146b] mb-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900">Tidak Ada Jadwal Ditemukan</h3>
+                <p class="mt-1 text-xs text-gray-500">Tidak ada jadwal booking yang sesuai dengan tab filter atau pencarian Anda.</p>
+                <button type="button" @click="activeTab = 'all'; searchQuery = ''" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a146b] text-white text-xs font-bold hover:bg-indigo-900 transition cursor-pointer shadow-xs">
+                    Tampilkan Semua Booking
+                </button>
+            </div>
+        @endif
+
     {{-- POP-UP MODAL SELESAIKAN PEMBAYARAN VIA MIDTRANS SNAP --}}
     <div x-show="payModalOpen"
          x-cloak
@@ -1107,7 +1200,7 @@
                     </p>
                 </div>
 
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit">
+                <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
