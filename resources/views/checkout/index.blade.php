@@ -1001,8 +1001,15 @@
             }).catch(console.error);
             @endif
 
-            alert("Batas waktu pembayaran 10 menit telah kedaluwarsa. Pemesanan slot ini otomatis dibatalkan dan dibuka kembali untuk pengguna lain.");
-            window.location.href = "{{ route('katalog.show', $lapangan->id) }}";
+            showThemeAlert({
+                title: "Waktu Pembayaran Habis",
+                message: "Batas waktu pembayaran 10 menit telah kedaluwarsa. Pemesanan slot ini otomatis dibatalkan dan dibuka kembali untuk pengguna lain.",
+                type: "warning",
+                confirmText: "Kembali ke Jadwal",
+                onConfirm: function () {
+                    window.location.href = "{{ route('katalog.show', $lapangan->id) }}";
+                }
+            });
         }
 
         updateTimerUI();

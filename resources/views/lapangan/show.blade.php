@@ -68,6 +68,14 @@
          slotsMalam: {{ Js::from($slotsMalam) }},
          isLoadingSlots: false,
          slotsCache: {{ Js::from($initialDaysCache) }},
+         showAlertModal: false,
+         alertTitle: 'Batas Pemesanan',
+         alertMessage: '',
+         showAlert(message, title = 'Batas Durasi Booking') {
+             this.alertMessage = message;
+             this.alertTitle = title;
+             this.showAlertModal = true;
+         },
 
          async changeDate(newDate) {
              if (this.selectedDate === newDate) return;
@@ -144,7 +152,7 @@
                  this.selectedSlots.splice(index, 1);
              } else {
                  if (this.selectedSlots.length >= 4) {
-                     alert('Maksimal pemesanan sekaligus adalah 4 jam.');
+                     this.showAlert('Maksimal pemesanan sekaligus adalah 4 jam.', 'Batas Durasi Booking');
                      return;
                  }
                  this.selectedSlots.push(slot);
@@ -886,6 +894,53 @@
                 </button>
             </form>
 
+        </div>
+    </div>
+
+    {{-- Custom Pop-up Modal Peringatan (Menggantikan Alert Bawaan Browser) --}}
+    <div x-show="showAlertModal"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;">
+
+        <div @click.away="showAlertModal = false"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-3"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 translate-y-3"
+             class="relative w-full max-w-sm rounded-3xl bg-white p-6 sm:p-7 text-center shadow-2xl border border-gray-100">
+
+            {{-- Icon Peringatan --}}
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 shadow-xs">
+                <span class="material-symbols-outlined text-3xl">schedule</span>
+            </div>
+
+            {{-- Judul --}}
+            <h3 class="text-base sm:text-lg font-headline font-black text-[#0b1c30]" x-text="alertTitle">
+                Batas Durasi Booking
+            </h3>
+
+            {{-- Pesan --}}
+            <p class="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed" x-text="alertMessage">
+                Maksimal pemesanan sekaligus adalah 4 jam.
+            </p>
+
+            {{-- Tombol OK / Mengerti --}}
+            <div class="mt-6 flex justify-center">
+                <button type="button"
+                        @click="showAlertModal = false"
+                        class="w-full sm:w-auto min-w-[140px] px-6 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130d52] text-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
+                    Mengerti
+                </button>
+            </div>
         </div>
     </div>
 

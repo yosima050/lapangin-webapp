@@ -60,50 +60,7 @@
         {{-- ==================== KOLOM KIRI ==================== --}}
         <div class="lg:col-span-4 space-y-5">
 
-            {{-- 1. Kartu Member Player ID ala Figma --}}
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a146b] via-[#211a7a] to-[#120d4f] p-6 text-white shadow-lg border border-[#30269c]">
-                {{-- Decorative background glow --}}
-                <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#acf847]/10 blur-2xl"></div>
-
-                <div class="relative z-10 flex items-center justify-between gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#acf847] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#1a146b] shadow-xs">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[#1a146b]"></span>
-                        PRO PLAYER ID
-                    </span>
-
-                    <span class="text-white/80" title="Identitas Terverifikasi LapangIn">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="relative z-10 mt-6 flex items-center gap-4">
-                    <div class="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#eff4ff] border-2 border-[#acf847] text-2xl font-black text-[#1a146b] shadow-md overflow-hidden">
-                        {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <h3 class="truncate text-base font-extrabold text-white">
-                            {{ Auth::user()->nama ?? Auth::user()->name }}
-                        </h3>
-                        <p class="font-mono text-xs font-semibold text-indigo-200 mt-0.5 tracking-wider">
-                            LP - {{ substr(strtoupper(md5(Auth::user()->id ?? '12345')), 0, 5) }} - ID
-                        </p>
-                    </div>
-                </div>
-
-                <div class="relative z-10 mt-6 pt-4 border-t border-white/10">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-                        SPORT FAVORIT
-                    </p>
-                    <p class="mt-1 text-xs font-bold text-[#acf847]">
-                        Futsal, Badminton &amp; Mini Soccer
-                    </p>
-                </div>
-            </div>
-
-            {{-- 2. Sidebar Menu Navigasi Tabs --}}
+            {{-- Sidebar Menu Navigasi Tabs --}}
             <nav class="rounded-2xl border border-[#e8edfa] bg-white p-2 shadow-xs space-y-1">
                 {{-- Item 1: Informasi Profil (Aktif) --}}
                 <a href="#informasi-pribadi"
