@@ -665,12 +665,13 @@
          style="display: none;">
         
         <div @click.away="showModal = false" 
+             id="printable-ticket-{{ $jadwal->id }}"
              class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto text-left border border-gray-100">
             
             {{-- Tombol Close X --}}
             <button @click="showModal = false" 
                     type="button" 
-                    class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
+                    class="no-print absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
@@ -686,9 +687,6 @@
                     <h2 class="text-xl sm:text-2xl font-extrabold text-[#1a146b] mt-1">
                         Reservasi Berhasil Dikonfirmasi!
                     </h2>
-                    <p class="text-xs text-gray-500 mt-1">
-                        Kode Booking <span class="font-mono font-bold text-gray-800">#{{ $jadwal->kode_booking ?? ($jadwal->kode_qr ?? $displayKode) }}</span> telah aktif dan tersinkronisasi otomatis di sistem kasir venue.
-                    </p>
                 </div>
             </div>
 
@@ -700,9 +698,6 @@
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                         <span class="px-3 py-1 rounded-full bg-[#1a146b] text-white text-[10px] font-extrabold uppercase tracking-wider">
                             OFFICIAL MATCH PASS
-                        </span>
-                        <span class="text-[10px] font-mono text-gray-400 font-bold uppercase">
-                            LAPANGIN SECURE ID: {{ $jadwal->kode_booking ?? ($jadwal->kode_qr ?? $displayKode) }}
                         </span>
                     </div>
 
@@ -794,15 +789,14 @@
                 <div class="lg:col-span-4 bg-[#f4f7ff] p-6 flex flex-col items-center justify-center text-center border-t lg:border-t-0 lg:border-l border-gray-100">
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-3">BOARDING PASS GATE</span>
                     
-                    {{-- QR Code Image / SimpleSoftwareIO --}}
-                    <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100 mb-3">
-                        @if (!empty($jadwal->kode_qr))
-                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(150)->margin(1)->generate($jadwal->kode_qr) !!}
-                        @else
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $jadwal->kode_booking ?? $displayKode }}" 
-                                 alt="QR Code Tiket" 
-                                 class="w-36 h-36 object-contain">
-                        @endif
+                    {{-- QR Code Image / SimpleSoftwareIO (High-resolution, clean vector SVG) --}}
+                    @php
+                        $qrPayload = $jadwal->kode_qr ?: ($jadwal->kode_booking ?: ('LPNG-' . $jadwal->id));
+                    @endphp
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-2.5">
+                        <div class="w-36 h-36 flex items-center justify-center">
+                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(144)->style('round', 0.7)->eye('circle')->color(26, 20, 107)->margin(1)->errorCorrection('M')->generate($qrPayload) !!}
+                        </div>
                     </div>
 
                     <p class="text-[10px] text-gray-500 font-medium">Scan di Meja Resepsionis</p>
@@ -819,21 +813,23 @@
             </div>
 
             {{-- Tombol Action --}}
-            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <div class="no-print flex flex-wrap items-center justify-center gap-3 pt-2">
                 <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}" 
                    target="_blank"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.75 6.47 6.47 0 00.384-2.548C3.606 16.353 3 14.28 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
                     <span>Bagikan Tiket ke WhatsApp Tim</span>
                 </a>
-                <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
+                <button type="button" 
+                        onclick="printTiketDocument('printable-ticket-{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')" 
+                        class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                     <span>Unduh Tiket PDF</span>
                 </button>
             </div>
 
             {{-- Panduan & Protokol --}}
-            <div class="pt-4 border-t border-gray-100">
+            <div class="no-print pt-4 border-t border-gray-100">
                 <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-3">
                     <svg class="w-4 h-4 text-[#416900] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                     <span>Panduan &amp; Protokol Hari Pertandingan</span>
@@ -1367,26 +1363,112 @@
             }
         }, 1000);
     });
+
+    // Fungsi cetak/unduh PDF tiket bersih 1 halaman terisolasi
+    window.printTiketDocument = function(elementId, docTitle) {
+        const ticketEl = document.getElementById(elementId);
+        if (!ticketEl) {
+            window.print();
+            return;
+        }
+
+        // Buat clone dari tiket
+        const clone = ticketEl.cloneNode(true);
+        // Hilangkan elemen yang tidak perlu dicetak (tombol close, tombol action)
+        clone.querySelectorAll('.no-print').forEach(el => el.remove());
+        
+        // Pastikan style container pas dalam 1 halaman A4 tanpa scrolling modal
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
+        clone.style.boxShadow = 'none';
+        clone.style.border = '1px solid #e5e7eb';
+        clone.style.margin = '0 auto';
+        clone.style.padding = '20px';
+        clone.style.width = '100%';
+
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = '0';
+        document.body.appendChild(printFrame);
+
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(`
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <title>${docTitle || 'E-Tiket LapangIn'}</title>
+                <script src="https://cdn.tailwindcss.com"><\/script>
+                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+                <style>
+                    @page {
+                        size: A4 portrait;
+                        margin: 8mm 10mm;
+                    }
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        box-sizing: border-box;
+                    }
+                    body {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        background: #ffffff !important;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .no-print {
+                        display: none !important;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="p-2">
+                    ${clone.outerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        frameDoc.close();
+
+        printFrame.contentWindow.focus();
+        setTimeout(() => {
+            printFrame.contentWindow.print();
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 2000);
+        }, 400);
+    };
 </script>
 
-{{-- Pengaturan Cetak --}}
+{{-- Pengaturan Cetak Fallback --}}
 <style>
     @media print {
-        body {
-            background: white !important;
+        body * {
+            visibility: hidden;
         }
-
-        nav, header, footer {
-            print-color-adjust: exact;
+        .fixed.inset-0:has([id^="printable-ticket-"]),
+        [id^="printable-ticket-"],
+        [id^="printable-ticket-"] * {
+            visibility: visible;
         }
-
-        .print\:hidden {
+        .fixed.inset-0:has([id^="printable-ticket-"]) {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: transparent !important;
+        }
+        .no-print {
             display: none !important;
         }
-
-        article {
-            break-inside: avoid;
-            box-shadow: none !important;
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
         }
     }
 </style>
