@@ -34,10 +34,10 @@
         }
     }
 
-    // Tentukan estimasi harga dasar
+    // Tentukan estimasi harga dasar dari controller / jadwal data
     $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
-    $baseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
-    $primeRate = (float) ($baseRate + 40000);
+    $baseRate = (float) ($baseRate ?? ($jadwalData['base_rate'] ?? ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000))));
+    $primeRate = (float) ($primeRate ?? ($jadwalData['prime_rate'] ?? $baseRate));
     // Auto-select slot jika dikirim lewat parameter query 'jam' dari Cek Jadwal
     $initialSelectedSlots = [];
     $paramJam = request('jam');
@@ -68,6 +68,14 @@
          slotsMalam: {{ Js::from($slotsMalam) }},
          isLoadingSlots: false,
          slotsCache: {{ Js::from($initialDaysCache) }},
+         showAlertModal: false,
+         alertTitle: 'Batas Pemesanan',
+         alertMessage: '',
+         showAlert(message, title = 'Batas Durasi Booking') {
+             this.alertMessage = message;
+             this.alertTitle = title;
+             this.showAlertModal = true;
+         },
 
          async changeDate(newDate) {
              if (this.selectedDate === newDate) return;
@@ -144,7 +152,7 @@
                  this.selectedSlots.splice(index, 1);
              } else {
                  if (this.selectedSlots.length >= 4) {
-                     alert('Maksimal pemesanan sekaligus adalah 4 jam.');
+                     this.showAlert('Maksimal pemesanan sekaligus adalah 4 jam.', 'Batas Durasi Booking');
                      return;
                  }
                  this.selectedSlots.push(slot);
@@ -174,6 +182,38 @@
              const start = this.earliestSlot.substring(0, 5);
              const end = this.latestSlotEnd.substring(0, 5);
              return `${start} - ${end} WIB`;
+         },
+
+         // Mengelompokkan slot yang berurutan (kontigu) menjadi interval terpisah
+         get groupedSlotIntervals() {
+             if (this.selectedSlots.length === 0) return [];
+             
+             // Salin dan urutkan berdasarkan jam mulai
+             const sorted = [...this.selectedSlots].sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
+             const intervals = [];
+             let current = null;
+
+             sorted.forEach(slot => {
+                 const sStart = slot.jam_mulai.substring(0, 5);
+                 const sEnd = slot.jam_selesai.substring(0, 5);
+
+                 if (!current) {
+                     current = { start: sStart, end: sEnd };
+                 } else if (current.end === sStart) {
+                     // Menyambung (kontigu), perpanjang jam selesai
+                     current.end = sEnd;
+                 } else {
+                     // Ada jeda/lompat jam, simpan interval sebelumnya dan mulai interval baru
+                     intervals.push({ ...current });
+                     current = { start: sStart, end: sEnd };
+                 }
+             });
+
+             if (current) {
+                 intervals.push(current);
+             }
+
+             return intervals;
          },
 
          get courtTotalFee() {
@@ -621,15 +661,29 @@
                                     <strong class="text-gray-900" x-text="formattedDate"></strong>
                                 </div>
 
-                                <div class="flex items-center justify-between text-gray-600">
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
-                                        <span>Slot Waktu:</span>
-                                    </span>
-                                    <strong class="text-gray-900" x-text="timeRangeLabel"></strong>
+                                {{-- Slot Waktu Terinci Per Sesi / Interval Sesuai Pilihan --}}
+                                <div class="pt-2 border-t border-indigo-100/70">
+                                    <div class="flex items-center justify-between text-gray-600 mb-1.5">
+                                        <span class="flex items-center gap-1.5 font-medium">
+                                            <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                            <span>Jadwal Main Terpilih:</span>
+                                        </span>
+                                        <span class="text-[11px] font-bold text-[#1a146b]" x-text="selectedSlots.length + ' Sesi Jam'"></span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <template x-for="(interval, idx) in groupedSlotIntervals" :key="idx">
+                                            <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-white border border-indigo-100/80 shadow-2xs">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
+                                                    <span class="text-[11px] text-gray-500 font-medium" x-text="formattedDate"></span>
+                                                </div>
+                                                <span class="font-extrabold text-xs text-[#0b1c30] font-mono tracking-tight" x-text="interval.start + ' - ' + interval.end + ' WIB'"></span>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center justify-between text-gray-600">
+                                <div class="flex items-center justify-between text-gray-600 pt-1">
                                     <span class="flex items-center gap-1.5">
                                         <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
                                         <span>Durasi Total:</span>
@@ -788,10 +842,11 @@
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-[#1a146b]"></span>
                                 <span class="text-xs font-bold text-[#0b1c30] truncate"
-                                      x-text="parseInt(earliestSlot.substring(0,2)) >= 18 ? 'Sesi Malam Prime Time' : 'Sesi Siang & Sore'">
+                                      x-text="selectedSlots.length + ' Sesi Jam Dipilih'">
                                 </span>
                             </div>
-                            <p class="text-[11px] font-semibold text-gray-500 mt-0.5 truncate" x-text="timeRangeLabel"></p>
+                            <p class="text-[11px] font-semibold text-gray-500 mt-0.5 truncate" 
+                               x-text="groupedSlotIntervals.map(i => i.start + '-' + i.end).join(', ') + ' WIB'"></p>
                         </div>
 
                         <div class="flex items-center gap-2 shrink-0">
@@ -810,6 +865,17 @@
                          x-transition:enter-start="opacity-0 -translate-y-1"
                          x-transition:enter-end="opacity-100 translate-y-0"
                          class="px-3.5 pb-3.5 pt-1 border-t border-gray-200/80 space-y-2.5 text-xs text-gray-600 bg-white">
+                        
+                        {{-- Daftar Sesi Terpilih Mobile --}}
+                        <div class="pt-1 space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Rincian Jam Main:</p>
+                            <template x-for="(interval, idx) in groupedSlotIntervals" :key="idx">
+                                <div class="flex items-center justify-between py-1 px-2 rounded-lg bg-gray-50 border border-gray-100 text-[11px]">
+                                    <span class="text-gray-500" x-text="formattedDate"></span>
+                                    <span class="font-bold text-[#0b1c30] font-mono" x-text="interval.start + ' - ' + interval.end + ' WIB'"></span>
+                                </div>
+                            </template>
+                        </div>
                         
                         {{-- Baris 1: Sewa Lapangan --}}
                         <div class="flex items-center justify-between pt-1">
@@ -886,6 +952,53 @@
                 </button>
             </form>
 
+        </div>
+    </div>
+
+    {{-- Custom Pop-up Modal Peringatan (Menggantikan Alert Bawaan Browser) --}}
+    <div x-show="showAlertModal"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+         style="display: none;">
+
+        <div @click.away="showAlertModal = false"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-3"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 translate-y-3"
+             class="relative w-full max-w-sm rounded-3xl bg-white p-6 sm:p-7 text-center shadow-2xl border border-gray-100">
+
+            {{-- Icon Peringatan --}}
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 shadow-xs">
+                <span class="material-symbols-outlined text-3xl">schedule</span>
+            </div>
+
+            {{-- Judul --}}
+            <h3 class="text-base sm:text-lg font-headline font-black text-[#0b1c30]" x-text="alertTitle">
+                Batas Durasi Booking
+            </h3>
+
+            {{-- Pesan --}}
+            <p class="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed" x-text="alertMessage">
+                Maksimal pemesanan sekaligus adalah 4 jam.
+            </p>
+
+            {{-- Tombol OK / Mengerti --}}
+            <div class="mt-6 flex justify-center">
+                <button type="button"
+                        @click="showAlertModal = false"
+                        class="w-full sm:w-auto min-w-[140px] px-6 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130d52] text-white text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
+                    Mengerti
+                </button>
+            </div>
         </div>
     </div>
 

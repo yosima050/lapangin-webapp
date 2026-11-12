@@ -14,7 +14,7 @@
             </div>
 
             <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-black uppercase tracking-wider">
-                <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                 <span>Langkah Terakhir</span>
             </div>
         </div>
@@ -26,15 +26,9 @@
                 {{-- Header with Google Profile Badge --}}
                 <div class="text-center flex flex-col items-center mb-6">
                     <div class="relative mb-5">
-                        @if (!empty($googleUser['avatar']))
-                            <img src="{{ $googleUser['avatar'] }}"
-                                 alt="{{ $googleUser['nama'] }}"
-                                 class="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover">
-                        @else
-                            <div class="w-20 h-20 rounded-full bg-[#e83e8c] text-white border-4 border-white shadow-md flex items-center justify-center font-black text-2xl">
-                                {{ strtoupper(substr($googleUser['nama'], 0, 1)) }}
-                            </div>
-                        @endif
+                        <div class="w-20 h-20 rounded-full bg-[#1a146b] text-white border-4 border-white shadow-md flex items-center justify-center font-black text-2xl">
+                            {{ strtoupper(substr($googleUser['nama'], 0, 1)) }}
+                        </div>
 
                         {{-- Google Small Icon Badge --}}
                         <div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center">

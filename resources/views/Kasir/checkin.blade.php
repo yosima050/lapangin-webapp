@@ -9,7 +9,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#416900] animate-pulse"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#416900]"></span>
                 <span class="text-xs font-black uppercase tracking-wider text-[#416900]">
                     TERMINAL POS SCANNER AKTIF
                 </span>
@@ -64,7 +64,7 @@
                 </h2>
             </div>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eff4ff] text-[#1a146b] text-xs font-bold border border-[#dce9ff]">
-                <span class="w-2 h-2 rounded-full bg-[#416900] animate-ping"></span>
+                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                 <span>Auto-Focus Scanner Siap</span>
             </span>
         </div>

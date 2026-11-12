@@ -298,4 +298,142 @@ class AdminLapanganCrudTest extends TestCase
         $katalogRes2 = $this->get(route('katalog.index'));
         $katalogRes2->assertSee('Lapangan Toggle Test');
     }
+
+    public function test_admin_can_store_and_update_lapangan_with_morning_and_evening_prices(): void
+    {
+        $payload = [
+            'nama' => 'Arena Futsal Day & Night',
+            'kategori' => 'Futsal',
+            'jam_buka' => '07:00',
+            'jam_tutup' => '23:00',
+            'deskripsi' => 'Lapangan dengan tier tarif siang dan malam',
+            'harga_weekday' => 120000,
+            'harga_weekday_malam' => 180000,
+            'harga_weekend' => 150000,
+            'harga_weekend_malam' => 210000,
+        ];
+
+        $res = $this->actingAs($this->admin)->post(route('admin.lapangan.store'), $payload);
+        $res->assertRedirect(route('admin.lapangan.index'));
+
+        $lapangan = Lapangan::where('nama', 'Arena Futsal Day & Night')->first();
+        $this->assertNotNull($lapangan);
+
+        // Check weekday day and night
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '18:00:00',
+            'harga' => 120000,
+        ]);
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '18:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 180000,
+        ]);
+
+        // Check weekend day and night
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '18:00:00',
+            'harga' => 150000,
+        ]);
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'jam_mulai' => '18:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 210000,
+        ]);
+
+        // Now test update
+        $updatePayload = [
+            'nama' => 'Arena Futsal Day & Night Updated',
+            'kategori' => 'Futsal',
+            'jam_buka' => '07:00',
+            'jam_tutup' => '23:00',
+            'harga_weekday' => 130000,
+            'harga_weekday_malam' => 195000,
+            'harga_weekend' => 160000,
+            'harga_weekend_malam' => 225000,
+        ];
+
+        $resUpdate = $this->actingAs($this->admin)->put(route('admin.lapangan.update', $lapangan->id), $updatePayload);
+        $resUpdate->assertRedirect(route('admin.lapangan.index'));
+
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 130000,
+        ]);
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 195000,
+        ]);
+    }
+
+    public function test_admin_can_update_tarif_via_atur_tarif_drawer(): void
+    {
+        $lapangan = Lapangan::create([
+            'nama' => 'Lapangan Atur Tarif Test',
+            'kategori' => 'Badminton',
+            'jam_buka' => '07:00',
+            'jam_tutup' => '23:00',
+        ]);
+
+        HargaMaster::create([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 80000,
+        ]);
+
+        HargaMaster::create([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 100000,
+        ]);
+
+        // Kirim request update tarif via route lapangan.update-tarif
+        $payload = [
+            'harga_weekday' => 85000,
+            'harga_weekday_malam' => 110000,
+            'harga_weekend' => 105000,
+            'harga_weekend_malam' => 105000, // Sama dengan pagi (flat weekend)
+        ];
+
+        $response = $this->actingAs($this->admin)
+            ->patch(route('admin.lapangan.update-tarif', $lapangan->id), $payload);
+
+        $response->assertRedirect(route('admin.lapangan.index'));
+        $response->assertSessionHas('success');
+
+        // Weekday siang dan malam berbeda
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 85000,
+        ]);
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 110000,
+        ]);
+
+        // Weekend karena malamnya sama, tersimpan 105000
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'harga' => 105000,
+        ]);
+    }
 }

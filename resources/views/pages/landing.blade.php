@@ -146,7 +146,7 @@
                                         {{-- Header Brand Badge Overlay (Kiri Atas) --}}
                                         <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
                                             <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1a146b]/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-black tracking-wider uppercase shadow-sm">
-                                                <span class="w-2 h-2 rounded-full bg-[#acf847] animate-pulse"></span>
+                                                <span class="w-2 h-2 rounded-full bg-[#acf847]"></span>
                                                 <span class="text-white">{{ $slide['kategori'] }}</span>
                                             </div>
                                         </div>

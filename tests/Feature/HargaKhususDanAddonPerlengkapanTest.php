@@ -189,4 +189,64 @@ class HargaKhususDanAddonPerlengkapanTest extends TestCase
 
         $responseConflict->assertSessionHasErrors(['lapangan_id']);
     }
+
+    public function test_admin_can_view_harga_khusus_calendar_and_separated_tabs(): void
+    {
+        $admin = \App\Models\Pelanggan::forceCreate([
+            'nama' => 'Admin Tab Test',
+            'email' => 'admin.tab@lapangin.com',
+            'no_hp' => '081299990088',
+            'password_hash' => bcrypt('password123'),
+            'role' => 'admin',
+        ]);
+        $lapangan = Lapangan::forceCreate([
+            'nama' => 'Lapangan Tab Test',
+            'kategori' => 'Futsal',
+            'jam_buka' => '08:00:00',
+            'jam_tutup' => '22:00:00',
+            'is_active' => true,
+        ]);
+
+        $futureDate = Carbon::now('Asia/Jakarta')->addDays(5)->toDateString();
+        $pastDate = Carbon::now('Asia/Jakarta')->subDays(3)->toDateString();
+
+        // 1. Harga khusus aktif / mendatang
+        $hkAktif = HargaKhusus::forceCreate([
+            'lapangan_id' => $lapangan->id,
+            'tanggal' => $futureDate,
+            'jam_mulai' => '09:00',
+            'jam_selesai' => '12:00',
+            'harga' => 199000,
+            'keterangan' => 'Event Mendatang Promo',
+            'is_active' => true,
+        ]);
+
+        // 2. Harga khusus yang sudah lewat / selesai
+        $hkSelesai = HargaKhusus::forceCreate([
+            'lapangan_id' => $lapangan->id,
+            'tanggal' => $pastDate,
+            'jam_mulai' => '09:00',
+            'jam_selesai' => '12:00',
+            'harga' => 155000,
+            'keterangan' => 'Event Masa Lalu',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.harga-khusus.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Kalender Tanggal Harga Khusus');
+        $response->assertSee('Tarif Aktif &amp; Mendatang', false);
+        $response->assertSee('Selesai (Riwayat)');
+        $response->assertSee('Event Mendatang Promo');
+        $response->assertSee('Event Masa Lalu');
+        $response->assertSee('Selesai');
+
+        $viewData = $response->viewData('hargaKhususAktif');
+        $this->assertTrue($viewData->contains('id', $hkAktif->id));
+        $this->assertFalse($viewData->contains('id', $hkSelesai->id));
+
+        $viewSelesai = $response->viewData('hargaKhususSelesai');
+        $this->assertTrue($viewSelesai->contains('id', $hkSelesai->id));
+        $this->assertFalse($viewSelesai->contains('id', $hkAktif->id));
+    }
 }

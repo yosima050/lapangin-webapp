@@ -104,7 +104,6 @@ class AuthLoginGoogle extends Controller
                     'pelanggan_id' => $pelanggan->id,
                     'nama' => $pelanggan->nama,
                     'email' => $pelanggan->email,
-                    'avatar' => $googleUser->getAvatar(),
                 ]);
 
                 return redirect()->route('auth.google.complete');
@@ -112,6 +111,7 @@ class AuthLoginGoogle extends Controller
 
             Auth::login($pelanggan, true);
             $request->session()->regenerate();
+            $request->session()->put('login_provider', 'google');
 
             return redirect()->intended(route('dashboard', absolute: false));
         }
@@ -120,7 +120,6 @@ class AuthLoginGoogle extends Controller
         session()->put('google_complete_user', [
             'nama' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Pengguna Google',
             'email' => $googleUser->getEmail(),
-            'avatar' => $googleUser->getAvatar(),
         ]);
 
         return redirect()->route('auth.google.complete');
@@ -204,6 +203,7 @@ class AuthLoginGoogle extends Controller
         // Otomatis login ke aplikasi
         Auth::login($pelanggan, true);
         $request->session()->regenerate();
+        $request->session()->put('login_provider', 'google');
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

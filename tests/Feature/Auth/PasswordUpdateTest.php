@@ -50,4 +50,26 @@ class PasswordUpdateTest extends TestCase
             ->assertSessionHasErrorsIn('updatePassword', 'current_password')
             ->assertRedirect('/profile');
     }
+
+    public function test_google_sso_user_can_set_password_without_current_password(): void
+    {
+        $pelanggan = Pelanggan::factory()->create();
+
+        $response = $this
+            ->actingAs($pelanggan)
+            ->withSession(['login_provider' => 'google'])
+            ->from('/pelanggan')
+            ->put('/password', [
+                'password' => 'brand-new-secret',
+                'password_confirmation' => 'brand-new-secret',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/pelanggan');
+
+        $this->assertTrue(
+            Hash::check('brand-new-secret', $pelanggan->refresh()->password_hash)
+        );
+    }
 }

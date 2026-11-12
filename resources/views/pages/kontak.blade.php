@@ -18,7 +18,7 @@
     {{-- Header --}}
     <div class="mb-10 text-center max-w-2xl mx-auto">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-black uppercase tracking-wider mb-3">
-            <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+            <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
             Layanan Pelanggan 24/7
         </span>
         <h1 class="text-3xl sm:text-4xl font-headline font-black text-[#0b1c30] tracking-tight">

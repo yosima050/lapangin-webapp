@@ -5,16 +5,19 @@
 @section('content')
 <div class="w-full px-8 py-8 flex flex-col gap-6" x-data="{
     drawerOpen: false,
-    selectedCourt: 'Lapangan 1 - Vinyl Pro',
-    offPeakRate: 120000,
-    primeRate: 180000,
-    weekendRate: 200000,
-    syncCalendar: true,
-    openDrawer(courtName, offPeak, prime, weekend) {
+    selectedCourtId: '',
+    selectedCourt: '',
+    offPeakRate: 150000,
+    primeRate: 150000,
+    weekendRate: 175000,
+    weekendPrimeRate: 175000,
+    openDrawer(courtId, courtName, offPeak, prime, weekend, weekendPrime) {
+        this.selectedCourtId = courtId;
         this.selectedCourt = courtName;
         this.offPeakRate = offPeak;
         this.primeRate = prime;
         this.weekendRate = weekend;
+        this.weekendPrimeRate = weekendPrime;
         this.drawerOpen = true;
     }
 }">
@@ -36,10 +39,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button type="button" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs border border-[#dce9ff] transition-all shadow-xs">
-                <span class="material-symbols-outlined text-base">tune</span>
-                <span>Filter Kategori</span>
-            </button>
             <a href="{{ route('admin.lapangan.create') }}"
                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs shadow-md transition-all">
                 <span class="material-symbols-outlined text-base text-[#acf847]">add_circle</span>
@@ -48,6 +47,25 @@
         </div>
     </div>
 
+    {{-- Notifikasi --}}
+    @if (session('success'))
+        <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center gap-2 text-sm font-semibold">
+            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <p class="font-bold mb-1">Periksa kembali data tarif:</p>
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Summary KPI Section (3 Cards) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Card 1: Total Lapangan Aktif -->
@@ -55,12 +73,12 @@
             <div class="flex flex-col z-10">
                 <span class="text-[11px] uppercase font-bold tracking-wider text-[#777682]">TOTAL LAPANGAN AKTIF</span>
                 <div class="flex items-baseline gap-2 mt-2">
-                    <span class="text-3xl font-headline font-black text-[#0b1c30]">{{ $lapangans->count() }}</span>
+                    <span class="text-3xl font-headline font-black text-[#0b1c30]">{{ $lapangans->filter(fn($l) => $l->is_active ?? true)->count() }}</span>
                     <span class="text-xs font-semibold text-[#416900]">Siap Sewa</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
                     <span class="material-symbols-outlined text-sm text-[#416900]">check_circle</span>
-                    <span>100% kapasitas fasilitas online</span>
+                    <span>{{ $lapangans->filter(fn($l) => !($l->is_active ?? true))->count() }} nonaktif dari {{ $lapangans->count() }} total lapangan</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
@@ -78,7 +96,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
                     <span class="material-symbols-outlined text-sm text-[#1a146b]">trending_up</span>
-                    <span>Rentang aktif Rp {{ number_format(($minRate ?? 60000) / 1000, 0) }}rb - Rp {{ number_format(($maxRate ?? 200000) / 1000, 0) }}rb/jam</span>
+                    <span>Rentang aktif Rp {{ number_format(($minRate ?? 60000) / 1000, 0) }}rb – Rp {{ number_format(($maxRate ?? 200000) / 1000, 0) }}rb/jam</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
@@ -92,13 +110,13 @@
                 <span class="text-[11px] uppercase font-bold tracking-wider text-[#777682]">STATUS OPERASIONAL</span>
                 <div class="flex items-center gap-2 mt-2">
                     <span class="px-2.5 py-1 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                         Buka Sekarang
                     </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
                     <span class="material-symbols-outlined text-sm">schedule</span>
-                    <span>Jam operasional 07:00 – 24:00 WIB</span>
+                    <span>Jam operasional {{ substr($lapangans->min('jam_buka') ?? '07:00', 0, 5) }} – {{ substr($lapangans->max('jam_tutup') ?? '24:00', 0, 5) }} WIB</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
@@ -116,7 +134,7 @@
             <div>
                 <h4 class="text-xs font-bold text-[#0b1c30]">Validasi Master Price Proteksi Aktif</h4>
                 <p class="text-xs text-[#474651]">
-                    Perubahan tarif lapangan baru berlaku otomatis untuk booking baru tanpa mengubah booking terkonfirmasi.
+                    Perubahan tarif lapangan berlaku otomatis untuk pemesanan baru tanpa mengubah booking terkonfirmasi.
                 </p>
             </div>
         </div>
@@ -129,9 +147,20 @@
     <div class="flex flex-col gap-5">
         @forelse ($lapangans as $index => $lapangan)
             @php
-                $weekdayOffPeak = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday')->first()?->harga ?? 120000;
-                $weekdayPrime = $weekdayOffPeak * 1.5;
-                $weekendRate = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend')->first()?->harga ?? 200000;
+                $weekdayMasters = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday');
+                $weekdayOffPeak = $weekdayMasters->filter(fn($hm) => empty($hm->jam_mulai) || substr($hm->jam_mulai, 0, 2) < '18')->first()?->harga
+                    ?? $weekdayMasters->first()?->harga
+                    ?? 120000;
+                $weekdayPrime = $weekdayMasters->filter(fn($hm) => !empty($hm->jam_mulai) && substr($hm->jam_mulai, 0, 2) >= '18')->first()?->harga
+                    ?? $weekdayOffPeak;
+
+                $weekendMasters = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend');
+                $weekendRate = $weekendMasters->filter(fn($hm) => empty($hm->jam_mulai) || substr($hm->jam_mulai, 0, 2) < '18')->first()?->harga
+                    ?? $weekendMasters->first()?->harga
+                    ?? 175000;
+                $weekendPrime = $weekendMasters->filter(fn($hm) => !empty($hm->jam_mulai) && substr($hm->jam_mulai, 0, 2) >= '18')->first()?->harga
+                    ?? $weekendRate;
+
                 $courtId = 'ID: LAP-0' . ($index + 1);
             @endphp
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] hover:shadow-md transition-all flex flex-col lg:flex-row gap-6 items-start">
@@ -173,17 +202,18 @@
                             @endif
                         </div>
 
-                        <!-- Facility Chips -->
+                        <!-- Facility Chips: Real Operational Hours & Description -->
                         <div class="flex flex-wrap gap-2 mt-2.5">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-medium text-[#474651]">
-                                <span class="material-symbols-outlined text-xs text-[#1a146b]">layers</span> Lantai Vinyl Tarkett 8mm
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-semibold text-[#1a146b]">
+                                <span class="material-symbols-outlined text-xs text-[#1a146b]">schedule</span>
+                                Operasional: {{ substr($lapangan->jam_buka, 0, 5) }} – {{ substr($lapangan->jam_tutup, 0, 5) }} WIB
                             </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-medium text-[#474651]">
-                                <span class="material-symbols-outlined text-xs text-[#1a146b]">grid_view</span> Jaring Pengaman Keliling
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-medium text-[#474651]">
-                                <span class="material-symbols-outlined text-xs text-[#1a146b]">scoreboard</span> Papan Skor Digital Wireless
-                            </span>
+                            @if (!empty($lapangan->deskripsi))
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-medium text-[#474651]" title="{{ $lapangan->deskripsi }}">
+                                    <span class="material-symbols-outlined text-xs text-[#1a146b]">notes</span>
+                                    {{ Str::limit($lapangan->deskripsi, 80) }}
+                                </span>
+                            @endif
                         </div>
                     </div>
 
@@ -193,25 +223,36 @@
                         <div class="flex flex-col gap-1.5">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">TARIF WEEKDAY (SENIN – JUMAT)</span>
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span>Pagi – Siang (07:00 – 16:00):</span>
+                                <span>Pagi – Siang (07:00 – 18:00):</span>
                                 <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekdayOffPeak, 0, ',', '.') }}/jam</span>
                             </div>
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span>Malam (16:00 – 24:00):</span>
-                                <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekdayPrime, 0, ',', '.') }}/jam</span>
+                                <span>Malam (18:00 – 24:00):</span>
+                                <span class="font-bold text-[#0b1c30]">
+                                    Rp {{ number_format($weekdayPrime, 0, ',', '.') }}/jam
+                                    @if ($weekdayPrime == $weekdayOffPeak)
+                                        <span class="text-[10px] text-[#777682] font-normal">(sama flat)</span>
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
                         <!-- Right: Tarif Weekend -->
                         <div class="flex flex-col gap-1.5 md:border-l md:border-[#dce9ff] md:pl-4">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">TARIF WEEKEND (SABTU – MINGGU)</span>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="text-[#474651]">Tarif Seharian (07:00 – 24:00):</span>
-                                <span class="font-extrabold text-[#416900]">Rp {{ number_format($weekendRate, 0, ',', '.') }}/jam flat</span>
+                            <div class="flex items-center justify-between text-xs text-[#474651]">
+                                <span>Pagi – Siang (07:00 – 18:00):</span>
+                                <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekendRate, 0, ',', '.') }}/jam</span>
                             </div>
-                            <span class="text-[10px] text-[#416900] flex items-center gap-1">
-                                <span class="material-symbols-outlined text-xs">bolt</span> Otomatis tier harga peak hours
-                            </span>
+                            <div class="flex items-center justify-between text-xs text-[#474651]">
+                                <span>Malam (18:00 – 24:00):</span>
+                                <span class="font-bold text-[#0b1c30]">
+                                    Rp {{ number_format($weekendPrime, 0, ',', '.') }}/jam
+                                    @if ($weekendPrime == $weekendRate)
+                                        <span class="text-[10px] text-[#777682] font-normal">(sama flat)</span>
+                                    @endif
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -224,12 +265,13 @@
 
                         <div class="flex items-center gap-2">
                             <a href="{{ route('admin.lapangan.edit', $lapangan->id) }}"
-                               class="px-3.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs border border-[#dce9ff] transition-colors flex items-center gap-1">
+                               class="px-3.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs border border-[#dce9ff] transition-colors flex items-center gap-1 cursor-pointer">
                                 <span class="material-symbols-outlined text-sm">edit</span>
                                 <span>Edit Detail</span>
                             </a>
-                            <button type="button" @click="openDrawer('{{ $lapangan->nama }}', {{ $weekdayOffPeak }}, {{ $weekdayPrime }}, {{ $weekendRate }})"
-                                    class="px-3.5 py-1.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1">
+                            <button type="button"
+                                    @click="openDrawer('{{ $lapangan->id }}', '{{ addslashes($lapangan->nama) }}', {{ (float) $weekdayOffPeak }}, {{ (float) $weekdayPrime }}, {{ (float) $weekendRate }}, {{ (float) $weekendPrime }})"
+                                    class="px-3.5 py-1.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer">
                                 <span class="material-symbols-outlined text-sm text-[#acf847]">tune</span>
                                 <span>Atur Tarif</span>
                             </button>
@@ -238,7 +280,7 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                        class="px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-colors flex items-center gap-1 {{ ($lapangan->is_active ?? true) ? 'bg-[#eff4ff] hover:bg-[#ffdad6] text-[#ba1a1a]' : 'bg-[#eaf7d8] hover:bg-[#acf847] text-[#102000]' }}">
+                                        class="px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer {{ ($lapangan->is_active ?? true) ? 'bg-[#eff4ff] hover:bg-[#ffdad6] text-[#ba1a1a]' : 'bg-[#eaf7d8] hover:bg-[#acf847] text-[#102000]' }}">
                                     <span class="material-symbols-outlined text-sm">{{ ($lapangan->is_active ?? true) ? 'block' : 'check_circle' }}</span>
                                     <span>{{ ($lapangan->is_active ?? true) ? 'Nonaktifkan' : 'Aktifkan Lapangan' }}</span>
                                 </button>
@@ -275,7 +317,7 @@
         <div class="absolute inset-0 bg-black/40 backdrop-blur-xs" @click="drawerOpen = false"></div>
 
         <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div class="w-screen max-w-md bg-white shadow-2xl p-6 flex flex-col justify-between border-l border-[#e5eeff]"
+            <div class="w-screen max-w-md bg-white shadow-2xl p-6 flex flex-col justify-between border-l border-[#e5eeff] overflow-y-auto"
                  x-transition:enter="transform transition ease-in-out duration-300"
                  x-transition:enter-start="translate-x-full"
                  x-transition:enter-end="translate-x-0"
@@ -291,8 +333,8 @@
                                 <span class="material-symbols-outlined text-lg">tune</span>
                             </div>
                             <div>
-                                <h3 class="text-base font-bold text-[#0b1c30]">Pengaturan Tarif Master</h3>
-                                <p class="text-[10px] text-[#777682] uppercase font-mono">RULE_ENGINE: HARGA_MASTER</p>
+                                <h3 class="text-base font-bold text-[#0b1c30]">Atur Tarif Sewa Master</h3>
+                                <p class="text-[10px] text-[#777682] uppercase font-mono">PENGATURAN HARGA LAPANGAN</p>
                             </div>
                         </div>
                         <button type="button" @click="drawerOpen = false" class="text-[#777682] hover:text-[#0b1c30] p-1 rounded-lg">
@@ -309,68 +351,81 @@
                         <span class="px-2 py-0.5 rounded-md bg-[#dce9ff] text-[#1a146b] text-[10px] font-bold">Slot 60 Menit</span>
                     </div>
 
-                    <!-- Price Lock Alert -->
+                    <!-- Price Info Note -->
                     <div class="p-3.5 rounded-xl bg-[#eff4ff] border border-[#dce9ff] flex items-start gap-2.5 text-xs text-[#474651] mb-5">
-                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">lock</span>
+                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">info</span>
                         <div class="text-[11px] leading-relaxed">
-                            <span class="font-bold text-[#0b1c30]">Aturan Penguncian Validasi Harga (Price Lock):</span>
-                            Perubahan tidak akan mengubah harga order berstatus Confirmed maupun Menunggu Pembayaran.
+                            Bila tarif malam belum ada atau sama dengan tarif pagi, Anda dapat mengisi nilai yang sama.
                         </div>
                     </div>
 
-                    <!-- Form Inputs -->
-                    <form class="flex flex-col gap-4 text-xs" @submit.prevent="alert('Perubahan tarif master untuk ' + selectedCourt + ' berhasil disimpan!'); drawerOpen = false;">
+                    <!-- Form Inputs (Real Backend Submission) -->
+                    <form :action="'{{ url('admin/lapangan') }}/' + selectedCourtId + '/tarif'" method="POST" class="flex flex-col gap-4 text-xs">
+                        @csrf
+                        @method('PATCH')
+
                         <div>
                             <span class="font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider block mb-2">
                                 1. TARIF WEEKDAY (SENIN – JUMAT)
                             </span>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="text-[#777682] block mb-1">Off-Peak Pagi – Siang (07:00 – 16:00)</label>
+                                    <label class="text-[#777682] block mb-1 font-semibold">Pagi – Siang (07:00 – 18:00) <span class="text-red-500">*</span></label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] font-bold">Rp</span>
-                                        <input type="number" x-model.number="offPeakRate" class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
+                                        <input type="number" name="harga_weekday" x-model.number="offPeakRate" min="0" required
+                                               class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
                                         <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#777682] text-[10px]">/jam</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="text-[#777682] block mb-1">Prime Time Malam (16:00 – 24:00)</label>
+                                    <label class="text-[#777682] block mb-1 font-semibold">Malam (18:00 – 24:00)</label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] font-bold">Rp</span>
-                                        <input type="number" x-model.number="primeRate" class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
+                                        <input type="number" name="harga_weekday_malam" x-model.number="primeRate" min="0"
+                                               class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
+                                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#777682] text-[10px]">/jam</span>
+                                    </div>
+                                    <span class="text-[10px] text-[#777682] mt-0.5 block">Kosongkan atau samakan dengan pagi jika tidak ada kenaikan malam.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-[#eff4ff]">
+                            <span class="font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider block mb-2">
+                                2. TARIF WEEKEND (SABTU – MINGGU)
+                            </span>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-[#777682] block mb-1 font-semibold">Pagi – Siang (07:00 – 18:00) <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] font-bold">Rp</span>
+                                        <input type="number" name="harga_weekend" x-model.number="weekendRate" min="0" required
+                                               class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
                                         <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#777682] text-[10px]">/jam</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-2 border-t border-[#eff4ff]">
-                            <span class="font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider block mb-2">
-                                2. TARIF WEEKEND &amp; HARI LIBUR UMUM
-                            </span>
-                            <div>
-                                <label class="text-[#777682] block mb-1">Tarif All-Day (Sabtu – Minggu Flat)</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] font-bold">Rp</span>
-                                    <input type="number" x-model.number="weekendRate" class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
-                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#777682] text-[10px]">/jam</span>
+                                <div>
+                                    <label class="text-[#777682] block mb-1 font-semibold">Malam (18:00 – 24:00)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] font-bold">Rp</span>
+                                        <input type="number" name="harga_weekend_malam" x-model.number="weekendPrimeRate" min="0"
+                                               class="w-full pl-9 pr-14 py-2 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-[#0b1c30] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b]">
+                                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#777682] text-[10px]">/jam</span>
+                                    </div>
+                                    <span class="text-[10px] text-[#777682] mt-0.5 block">Kosongkan atau samakan dengan pagi jika tidak ada kenaikan malam.</span>
                                 </div>
                             </div>
                         </div>
-
-                        <label class="flex items-start gap-2 pt-2 text-[#474651] cursor-pointer">
-                            <input type="checkbox" x-model="syncCalendar" class="rounded text-[#1a146b] focus:ring-[#acf847] mt-0.5">
-                            <span class="text-[11px]">Sinkronisasikan penyesuaian tarif ini ke modul kalender kasir pegawai secara instan.</span>
-                        </label>
 
                         <!-- Buttons -->
                         <div class="pt-6 border-t border-[#eff4ff] flex items-center justify-end gap-3">
                             <button type="button" @click="drawerOpen = false"
-                                    class="px-4 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs transition-colors">
+                                    class="px-4 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs transition-colors cursor-pointer">
                                 Batalkan
                             </button>
                             <button type="submit"
-                                    class="px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs shadow-md transition-all">
+                                    class="px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs shadow-md transition-all cursor-pointer">
                                 Simpan Perubahan Tarif
                             </button>
                         </div>

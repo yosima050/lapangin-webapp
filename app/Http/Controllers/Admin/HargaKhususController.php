@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\HargaKhusus;
 use App\Models\Lapangan;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,16 +16,54 @@ class HargaKhususController extends Controller
 {
     public function index(): View
     {
-        $hargaKhusus = HargaKhusus::with('lapangan')
+        $today = Carbon::now('Asia/Jakarta')->toDateString();
+
+        // Tarif khusus yang aktif & mendatang (tanggal >= hari ini)
+        $hargaKhususAktif = HargaKhusus::with('lapangan')
+            ->whereDate('tanggal', '>=', $today)
+            ->orderBy('tanggal')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Tarif khusus yang sudah lewat / selesai (tanggal < hari ini)
+        $hargaKhususSelesai = HargaKhusus::with('lapangan')
+            ->whereDate('tanggal', '<', $today)
             ->orderByDesc('tanggal')
             ->orderBy('jam_mulai')
             ->get();
 
+        // Siapkan data kalender untuk visualisasi
+        $allHargaKhusus = HargaKhusus::with('lapangan')->get();
+        $calendarEvents = [];
+        foreach ($allHargaKhusus as $hk) {
+            $tgl = $hk->tanggal->format('Y-m-d');
+            if (! isset($calendarEvents[$tgl])) {
+                $calendarEvents[$tgl] = [];
+            }
+            $calendarEvents[$tgl][] = [
+                'id' => $hk->id,
+                'lapangan' => $hk->lapangan?->nama ?? 'Semua Lapangan',
+                'jam_mulai' => substr($hk->jam_mulai, 0, 5),
+                'jam_selesai' => substr($hk->jam_selesai, 0, 5),
+                'harga' => (float) $hk->harga,
+                'keterangan' => $hk->keterangan ?: 'Harga Khusus',
+                'is_active' => (bool) $hk->is_active,
+                'is_past' => $tgl < $today,
+            ];
+        }
+
         $lapangans = Lapangan::orderBy('nama')->get();
+
+        // Tetap kirim $hargaKhusus sebagai $hargaKhususAktif untuk backwards-compatibility
+        $hargaKhusus = $hargaKhususAktif;
 
         return view('Admin.harga_khusus.index', compact(
             'hargaKhusus',
-            'lapangans'
+            'hargaKhususAktif',
+            'hargaKhususSelesai',
+            'calendarEvents',
+            'lapangans',
+            'today'
         ));
     }
 

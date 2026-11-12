@@ -21,7 +21,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#acf847]">
-                    <span class="h-2 w-2 rounded-full bg-[#acf847] animate-pulse"></span>
+                    <span class="h-2 w-2 rounded-full bg-[#acf847]"></span>
                     Penjadwalan Ulang Mandiri (Self-Service)
                 </div>
                 <h1 class="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl text-white">

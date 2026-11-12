@@ -43,13 +43,18 @@
         </div>
     @endif
 
-    @if ($errors->any())
+    @if ($errors->any() || ($errors->updatePassword && $errors->updatePassword->any()))
         <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-semibold space-y-1">
             <p class="font-bold">Terjadi kesalahan pada data yang dimasukkan:</p>
             <ul class="list-disc pl-5 space-y-0.5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
+                @if ($errors->updatePassword)
+                    @foreach ($errors->updatePassword->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                @endif
             </ul>
         </div>
     @endif
@@ -60,50 +65,7 @@
         {{-- ==================== KOLOM KIRI ==================== --}}
         <div class="lg:col-span-4 space-y-5">
 
-            {{-- 1. Kartu Member Player ID ala Figma --}}
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a146b] via-[#211a7a] to-[#120d4f] p-6 text-white shadow-lg border border-[#30269c]">
-                {{-- Decorative background glow --}}
-                <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#acf847]/10 blur-2xl"></div>
-
-                <div class="relative z-10 flex items-center justify-between gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#acf847] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#1a146b] shadow-xs">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[#1a146b]"></span>
-                        PRO PLAYER ID
-                    </span>
-
-                    <span class="text-white/80" title="Identitas Terverifikasi LapangIn">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="relative z-10 mt-6 flex items-center gap-4">
-                    <div class="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#eff4ff] border-2 border-[#acf847] text-2xl font-black text-[#1a146b] shadow-md overflow-hidden">
-                        {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <h3 class="truncate text-base font-extrabold text-white">
-                            {{ Auth::user()->nama ?? Auth::user()->name }}
-                        </h3>
-                        <p class="font-mono text-xs font-semibold text-indigo-200 mt-0.5 tracking-wider">
-                            LP - {{ substr(strtoupper(md5(Auth::user()->id ?? '12345')), 0, 5) }} - ID
-                        </p>
-                    </div>
-                </div>
-
-                <div class="relative z-10 mt-6 pt-4 border-t border-white/10">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-                        SPORT FAVORIT
-                    </p>
-                    <p class="mt-1 text-xs font-bold text-[#acf847]">
-                        Futsal, Badminton &amp; Mini Soccer
-                    </p>
-                </div>
-            </div>
-
-            {{-- 2. Sidebar Menu Navigasi Tabs --}}
+            {{-- Sidebar Menu Navigasi Tabs --}}
             <nav class="rounded-2xl border border-[#e8edfa] bg-white p-2 shadow-xs space-y-1">
                 {{-- Item 1: Informasi Profil (Aktif) --}}
                 <a href="#informasi-pribadi"
@@ -188,32 +150,6 @@
                         <p class="mt-0.5 text-xs text-[#777682]">
                             Data ini digunakan untuk verifikasi fisik di lapangan dan daftar tunggu pertandingan.
                         </p>
-                    </div>
-                </div>
-
-                {{-- Banner Foto Profil --}}
-                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-[#f8faff] border border-[#e5eeff] p-4">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#1a146b] text-xl font-black text-white shadow-sm border-2 border-white">
-                            {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-[#0b1c30]">Foto Profil</p>
-                            <p class="mt-0.5 text-[11px] text-[#777682] max-w-sm">
-                                Format didukung JPG, PNG, atau WEBP. Maksimal 2MB beresolusi minimal 400x400 px.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#1a146b] hover:bg-[#130d52] px-3.5 py-2 text-xs font-bold text-white shadow-2xs transition">
-                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                            <span>Unggah Baru</span>
-                        </button>
-                        <button type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 transition">
-                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                            <span>Hapus</span>
-                        </button>
                     </div>
                 </div>
 
@@ -338,38 +274,83 @@
                     </span>
                 </div>
 
-                <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+                <form method="POST" action="{{ route('password.update') }}" class="space-y-5"
+                      x-data="{
+                          newPassword: '',
+                          confirmPassword: '',
+                          get hasMinLength() { return this.newPassword.length >= 8; },
+                          get hasLetterAndNumber() { return /[a-zA-Z]/.test(this.newPassword) && /[0-9]/.test(this.newPassword); },
+                          get isMatched() { return this.newPassword.length > 0 && this.newPassword === this.confirmPassword; },
+                          get score() {
+                              if (!this.newPassword) return 0;
+                              let s = 0;
+                              if (this.newPassword.length >= 8) s++;
+                              if (this.newPassword.length >= 10) s++;
+                              if (/[a-zA-Z]/.test(this.newPassword) && /[0-9]/.test(this.newPassword)) s++;
+                              if (/[^a-zA-Z0-9]/.test(this.newPassword)) s++;
+                              return s;
+                          },
+                          get strength() {
+                              if (!this.newPassword) {
+                                  return { label: 'Belum Diisi', textClass: 'text-gray-400', barClass: 'bg-gray-200', width: '0%' };
+                              }
+                              if (this.score <= 1) {
+                                  return { label: 'Sangat Lemah', textClass: 'text-red-500', barClass: 'bg-red-500', width: '25%' };
+                              }
+                              if (this.score === 2) {
+                                  return { label: 'Sedang', textClass: 'text-amber-500', barClass: 'bg-amber-500', width: '50%' };
+                              }
+                              if (this.score === 3) {
+                                  return { label: 'Kuat', textClass: 'text-blue-600', barClass: 'bg-blue-600', width: '75%' };
+                              }
+                              return { label: 'Sangat Kuat', textClass: 'text-[#416900]', barClass: 'bg-gradient-to-r from-[#acf847] to-[#22c55e]', width: '100%' };
+                          }
+                      }">
                     @csrf
                     @method('put')
 
-                    {{-- Kata Sandi Saat Ini --}}
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label for="current_password" class="block text-[11px] font-extrabold uppercase tracking-wider text-[#474651]">
-                                Kata Sandi Saat Ini (Old Password)
-                            </label>
-                            @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-[#1a146b] hover:underline">
-                                    Lupa Kata Sandi?
-                                </a>
-                            @endif
+                    @if (session('status') === 'password-updated')
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-emerald-600 shrink-0">check_circle</span>
+                            <span>Kata sandi Anda berhasil diperbarui dan telah aktif.</span>
                         </div>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none text-sm">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
-                            </span>
-                            <input type="password"
-                                   id="current_password"
-                                   name="current_password"
-                                   placeholder="Masukkan kata sandi lama Anda"
-                                   autocomplete="current-password"
-                                   required
-                                   class="w-full rounded-xl border border-[#dce9ff] bg-[#fdfdff] py-2.5 pl-10 pr-10 text-xs sm:text-sm font-semibold text-[#0b1c30] shadow-2xs transition focus:border-[#1a146b] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1a146b]">
+                    @endif
+
+                    @if (session('login_provider') === 'google')
+                        <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-[#1a146b] text-xs font-semibold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-blue-600 shrink-0">info</span>
+                            <span>Anda masuk menggunakan Akun Google. Anda dapat langsung menentukan kata sandi baru untuk mengaktifkan login via Email &amp; Password tanpa memerlukan kata sandi lama.</span>
                         </div>
-                        @error('current_password', 'updatePassword')
-                            <p class="mt-1 text-[11px] text-red-600 font-semibold">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    @else
+                        {{-- Kata Sandi Saat Ini --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="current_password" class="block text-[11px] font-extrabold uppercase tracking-wider text-[#474651]">
+                                    Kata Sandi Saat Ini (Old Password)
+                                </label>
+                                @if (Route::has('password.request'))
+                                    <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-[#1a146b] hover:underline">
+                                        Lupa Kata Sandi?
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none text-sm">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                                </span>
+                                <input type="password"
+                                       id="current_password"
+                                       name="current_password"
+                                       placeholder="Masukkan kata sandi lama Anda"
+                                       autocomplete="current-password"
+                                       required
+                                       class="w-full rounded-xl border border-[#dce9ff] bg-[#fdfdff] py-2.5 pl-10 pr-10 text-xs sm:text-sm font-semibold text-[#0b1c30] shadow-2xs transition focus:border-[#1a146b] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1a146b]">
+                            </div>
+                            @error('current_password', 'updatePassword')
+                                <p class="mt-1 text-[11px] text-red-600 font-semibold">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
 
                     {{-- Grid 2 Kolom: Kata Sandi Baru & Konfirmasi --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -384,6 +365,7 @@
                                 <input type="password"
                                        id="password"
                                        name="password"
+                                       x-model="newPassword"
                                        placeholder="Minimal 8 karakter baru"
                                        autocomplete="new-password"
                                        required
@@ -405,6 +387,7 @@
                                 <input type="password"
                                        id="password_confirmation"
                                        name="password_confirmation"
+                                       x-model="confirmPassword"
                                        placeholder="Ketik ulang kata sandi baru"
                                        autocomplete="new-password"
                                        required
@@ -416,40 +399,38 @@
                         </div>
                     </div>
 
-                    {{-- Box Kekuatan Sandi ala Figma --}}
+                    {{-- Box Kekuatan Sandi Interaktif (Real-time Dynamic Strength Meter) --}}
                     <div class="rounded-2xl border border-[#dce9ff] bg-[#f4f7ff] p-4 text-[#474651]">
                         <div class="flex items-center justify-between text-xs font-bold mb-2">
                             <span class="flex items-center gap-1.5 text-[#1a146b]">
-                                <svg class="w-4 h-4 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                                <span class="material-symbols-outlined text-base text-[#1a146b]">shield</span>
                                 <span>Kekuatan Sandi</span>
                             </span>
-                            <span class="text-[#416900] font-black">
-                                Kuat
-                            </span>
+                            <span :class="strength.textClass" class="font-black tracking-wide" x-text="strength.label"></span>
                         </div>
 
-                        {{-- Progress Bar --}}
+                        {{-- Progress Bar Dinamis --}}
                         <div class="h-2 w-full rounded-full bg-gray-200 overflow-hidden mb-3">
-                            <div class="h-full rounded-full bg-gradient-to-r from-[#acf847] to-[#22c55e]" style="width: 100%;"></div>
+                            <div :class="strength.barClass" :style="'width: ' + strength.width" class="h-full rounded-full transition-all duration-300"></div>
                         </div>
 
-                        {{-- Checklist Kriteria --}}
+                        {{-- Checklist Kriteria Dinamis --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasMinLength ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasMinLength ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasMinLength ? 'check_circle' : 'radio_button_unchecked'"></span>
                                 <span>Minimal 8 karakter</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasLetterAndNumber ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasLetterAndNumber ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasLetterAndNumber ? 'check_circle' : 'radio_button_unchecked'"></span>
                                 <span>Kombinasi huruf &amp; angka</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                <span>Disimpan menggunakan Hashing Bcrypt</span>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="isMatched ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="isMatched ? 'text-[#22c55e]' : 'text-gray-400'" x-text="isMatched ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <span>Konfirmasi sandi cocok</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                <span>Sesi aktif di perangkat lain akan direset</span>
+                            <div class="flex items-center gap-1.5 text-gray-500">
+                                <span class="material-symbols-outlined text-sm text-[#1a146b] shrink-0">lock</span>
+                                <span>Disimpan dengan Hashing Bcrypt</span>
                             </div>
                         </div>
                     </div>

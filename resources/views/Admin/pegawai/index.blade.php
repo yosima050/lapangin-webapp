@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Staf Kasir & Dynamic Pricing Hari Libur - Admin LapangIn')
+@section('title', 'Kelola Akun Pegawai & Kasir - Admin LapangIn')
 
 @section('content')
 <div class="w-full px-8 py-8 flex flex-col gap-8" x-data="{
@@ -50,10 +50,10 @@
                 </span>
             </div>
             <h1 class="text-2xl lg:text-3xl font-headline font-extrabold text-[#0b1c30] tracking-tight">
-                Kelola Staf Kasir &amp; Dynamic Pricing Hari Libur
+                Kelola Akun Pegawai &amp; Kasir
             </h1>
             <p class="text-sm text-[#474651] mt-1">
-                Kelola otorisasi akun kasir POS operasional serta konfigurasi penyesuaian tarif dinamis tanggal merah nasional.
+                Kelola otorisasi akun kasir POS operasional, pengaturan shift meja kasir, dan kredensial staf venue.
             </p>
         </div>
 
@@ -77,7 +77,7 @@
                 </div>
             </div>
             <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#eff4ff] text-[#1a146b]">
-                Otoritas FR-15
+                Role Pegawai
             </span>
         </div>
 
@@ -99,15 +99,15 @@
         <div class="p-5 rounded-2xl bg-white shadow-sm border border-[#e5eeff] flex items-center justify-between">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                    <span class="material-symbols-outlined text-2xl">event_busy</span>
+                    <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
                 </div>
                 <div>
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">TARIF LIBUR TERPASANG</span>
-                    <p class="text-xl font-headline font-extrabold text-[#0b1c30] mt-0.5">{{ $customPrices->count() }} Aturan Aktif</p>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">ADMINISTRATOR SISTEM</span>
+                    <p class="text-xl font-headline font-extrabold text-[#0b1c30] mt-0.5">{{ $totalAdmin }} Admin Utama</p>
                 </div>
             </div>
             <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#e2dfff] text-[#100563]">
-                FR-13 Aktif
+                Full Access
             </span>
         </div>
     </div>
@@ -290,14 +290,13 @@
         </div>
     </div>
 
-    <!-- Section 2: Form Tambah Kasir Baru (FR-15) -->
+    <!-- Section 2: Form Tambah Kasir Baru -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-5" id="form-tambah-kasir">
         <div class="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-xl text-[#1a146b]">person_add</span>
                 <h2 class="text-base font-bold text-[#0b1c30]">Form Tambah Kasir Baru</h2>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#eff4ff] text-[#1a146b]">FR-15</span>
         </div>
 
         <form method="POST" action="{{ route('admin.pegawai.store') }}" class="flex flex-col gap-4 text-xs">
@@ -353,133 +352,6 @@
                 <span>Simpan Akun Kasir ke Database</span>
             </button>
         </form>
-    </div>
-
-    <!-- Section 3: Penetapan Custom Price Hari Libur & Tanggal Merah (Real Database Loop) -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-6" id="custom-price">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#eff4ff]">
-            <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#1a146b] flex items-center justify-center text-white shrink-0">
-                    <span class="material-symbols-outlined text-xl">calendar_month</span>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-base font-bold text-[#0b1c30]">Penetapan Custom Price Hari Libur &amp; Tanggal Merah</h2>
-                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[#acf847] text-[#102000]">SKPL FR-13</span>
-                    </div>
-                    <p class="text-xs text-[#777682]">Kalender penyesuaian tarif otomatis (Peak Weekend Surcharge) pada hari libur nasional atau cuti bersama.</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span class="px-3 py-1.5 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-xs font-bold text-[#1a146b] flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm">tune</span>
-                    Tarif Weekend + Rp 25.000 / Jam
-                </span>
-                <a href="{{ route('admin.harga.create') }}"
-                   class="px-4 py-2 rounded-xl bg-[#416900] hover:bg-[#304f00] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
-                    <span class="material-symbols-outlined text-base">add</span>
-                    <span>Tambah Hari Libur</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Calendar Month Grid & Right Surcharge List Split -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            <!-- Month Calendar: High Season (7 cols) -->
-            <div class="lg:col-span-7 flex flex-col gap-3">
-                <div class="flex items-center justify-between px-1">
-                    <h3 class="text-sm font-bold text-[#0b1c30]">Kalender High Season &amp; Tanggal Merah</h3>
-                    <div class="flex items-center gap-1">
-                        <button type="button" class="p-1 rounded-lg bg-[#eff4ff] text-[#474651] hover:bg-[#dce9ff]">
-                            <span class="material-symbols-outlined text-sm">chevron_left</span>
-                        </button>
-                        <button type="button" class="p-1 rounded-lg bg-[#eff4ff] text-[#474651] hover:bg-[#dce9ff]">
-                            <span class="material-symbols-outlined text-sm">chevron_right</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Days of week -->
-                <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] uppercase text-[#777682] py-1 border-b border-[#eff4ff]">
-                    <span class="text-[#ba1a1a]">MIN</span>
-                    <span>SEN</span>
-                    <span>SEL</span>
-                    <span>RAB</span>
-                    <span>KAM</span>
-                    <span>JUM</span>
-                    <span class="text-[#ba1a1a]">SAB</span>
-                </div>
-
-                <!-- Calendar Days Matrix (Dynamic Real from Database) -->
-                <div class="grid grid-cols-7 gap-1 text-xs">
-                    {{-- Padding blank days at start of month --}}
-                    @for ($i = 0; $i < $startDayOfWeek; $i++)
-                        <div class="p-2 h-14 bg-[#eff4ff]/20 rounded-lg"></div>
-                    @endfor
-
-                    @foreach ($calendarDays as $cday)
-                        <div class="p-1.5 h-14 rounded-lg flex flex-col justify-between transition-all {{ $cday['isToday'] ? 'bg-[#1a146b] text-white shadow-xs' : ($cday['isHoliday'] ? 'bg-[#acf847]/40 border border-[#acf847]' : ($cday['isWeekend'] ? 'bg-[#eff4ff] border border-[#ba1a1a]/30' : 'bg-[#eff4ff]')) }}">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold {{ $cday['isToday'] ? 'text-white' : ($cday['isWeekend'] ? 'text-[#ba1a1a]' : 'text-[#0b1c30]') }}">
-                                    {{ $cday['day'] }}
-                                </span>
-                                @if ($cday['isToday'])
-                                    <span class="text-[8px] px-1 rounded bg-[#acf847] text-[#102000] font-bold">Hari Ini</span>
-                                @elseif ($cday['isHoliday'])
-                                    <span class="text-[8px] px-1 rounded bg-[#acf847] text-[#102000] font-bold">Libur</span>
-                                @endif
-                            </div>
-                            <span class="text-[9px] font-bold {{ $cday['isToday'] ? 'text-[#acf847]' : ($cday['isHoliday'] ? 'text-[#416900]' : ($cday['isWeekend'] ? 'text-[#ba1a1a]' : 'text-[#777682]')) }}">
-                                {{ $cday['rateText'] }}
-                            </span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Right Side: Daftar Tanggal Merah (Real from Database $customPrices) -->
-            <div class="lg:col-span-5 flex flex-col gap-3">
-                <div class="pb-1 border-b border-[#eff4ff]">
-                    <h3 class="text-xs font-bold text-[#0b1c30]">Daftar Tanggal Merah &amp; Custom Surcharge ({{ $customPrices->count() }})</h3>
-                    <p class="text-[11px] text-[#777682]">Data penyesuaian tarif aktif langsung dari tabel database HargaMaster.</p>
-                </div>
-
-                <div class="flex flex-col gap-2.5">
-                    @forelse ($customPrices->unique('tanggal_khusus') as $price)
-                        <div class="p-3.5 rounded-xl bg-[#eff4ff] border border-[#e5eeff] flex flex-col gap-1.5 text-xs">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-[#ba1a1a]"></span>
-                                    <span class="font-bold text-[#0b1c30]">{{ $price->tanggal_khusus?->format('d F Y') }}</span>
-                                </div>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">Tarif Khusus</span>
-                            </div>
-                            <p class="text-[11px] text-[#474651]">{{ $price->lapangan->nama ?? 'Semua Lapangan' }}</p>
-                            <div class="pt-2 mt-1 border-t border-[#dce9ff] flex items-center justify-between">
-                                <span class="text-[#416900] font-bold">Tarif: Rp {{ number_format($price->harga, 0, ',', '.') }} / Jam</span>
-                                <a href="{{ route('admin.harga.edit', $price->id) }}" class="text-[#1a146b] font-bold hover:underline">Ubah →</a>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="p-4 rounded-xl bg-[#eff4ff] text-center text-[#777682] text-xs">
-                            Belum ada tarif khusus tanggal merah.
-                        </div>
-                    @endforelse
-                </div>
-
-                <!-- Footer Sync Status -->
-                <div class="p-3 rounded-xl bg-[#acf847]/20 border border-[#acf847] flex items-center justify-between text-xs">
-                    <span class="flex items-center gap-1.5 text-[#102000] font-bold">
-                        <span class="material-symbols-outlined text-sm text-[#416900]">sync</span>
-                        Sinkronisasi Kalender Libur Resmi
-                    </span>
-                    <span class="text-[#416900] font-bold text-[11px]">Aktif</span>
-                </div>
-            </div>
-
-        </div>
     </div>
 </div>
 @endsection

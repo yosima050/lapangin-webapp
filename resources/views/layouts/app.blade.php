@@ -46,14 +46,18 @@
                 if (isNavigating) return;
                 isNavigating = true;
 
-                // 1. Optimistic Feedback: Pindahkan active border hijau seketika ke link yang diklik
-                const navLinks = document.querySelectorAll('header nav a');
-                navLinks.forEach(link => {
-                    link.classList.remove('text-[#1a146b]', 'font-bold', 'border-b-2', 'border-[#acf847]');
-                    link.classList.add('text-gray-600');
-                });
-                targetAnchor.classList.remove('text-gray-600');
-                targetAnchor.classList.add('text-[#1a146b]', 'font-bold', 'border-b-2', 'border-[#acf847]');
+                // 1. Optimistic Feedback: Pindahkan active border hijau seketika ke link menu navbar (bukan logo brand)
+                const isBrandLogo = targetAnchor.getAttribute('aria-label') === 'LapangIn' || targetAnchor.closest('a[aria-label="LapangIn"]');
+                const isNavLink = targetAnchor.matches('header nav div a');
+                if (isNavLink && !isBrandLogo) {
+                    const navLinks = document.querySelectorAll('header nav a');
+                    navLinks.forEach(link => {
+                        link.classList.remove('text-[#1a146b]', 'font-bold', 'border-b-2', 'border-[#acf847]');
+                        link.classList.add('text-gray-600');
+                    });
+                    targetAnchor.classList.remove('text-gray-600');
+                    targetAnchor.classList.add('text-[#1a146b]', 'font-bold', 'border-b-2', 'border-[#acf847]');
+                }
 
                 // 2. Haluskan konten lama (fade sedikit) sehingga pengguna merasa halaman langsung bertransisi
                 if (mainContent) {
