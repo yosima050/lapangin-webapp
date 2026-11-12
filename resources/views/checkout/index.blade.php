@@ -454,48 +454,10 @@
                 </section>
             </div>
 
-            {{-- KOLOM KANAN: WIDGET REVIEW & CARD RINGKASAN PEMESANAN ALA REFERENSI --}}
-            <aside class="space-y-4 lg:sticky lg:top-6 lg:col-span-5">
+            {{-- KOLOM KANAN: CARD RINGKASAN PEMESANAN (STICKY DENGAN JARAK DARI NAVBAR) --}}
+            <aside class="space-y-4 lg:sticky lg:top-28 lg:col-span-5" style="position: sticky; top: 110px; height: fit-content;">
 
-                {{-- 1. Widget Ulasan dan Rating (Sesuai Referensi Gambar 1 & 2) --}}
-                <div class="rounded-2xl border border-[#e8edfa] bg-white p-5 shadow-sm">
-                    <p class="text-xs font-bold text-[#474651]">Ulasan dan rating</p>
-                    <div class="mt-2 flex items-center gap-3">
-                        <span class="text-3xl font-black text-[#0b1c30]">4.98</span>
-                        <div class="flex items-center gap-1 text-amber-400">
-                            @for($i = 0; $i < 5; $i++)
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                </svg>
-                            @endfor
-                        </div>
-                    </div>
-                    <p class="mt-1 text-[11px] text-[#777682]">
-                        Berdasarkan total 1.400+ rating pemain di LapangIn
-                    </p>
-                </div>
-
-                {{-- 2. Widget Butuh Bantuan CS (Sesuai Referensi Gambar 1) --}}
-                <div class="flex items-center justify-between rounded-2xl border border-[#e8edfa] bg-white p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eff4ff] text-[#1a146b]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-[#0b1c30]">Butuh Bantuan?</p>
-                            <p class="text-[11px] text-[#777682]">Kamu bisa hubungi admin CS kami.</p>
-                        </div>
-                    </div>
-                    <a href="https://wa.me/6281234567890?text=Halo%20Admin%20LapangIn,%20saya%20butuh%20bantuan%20booking" 
-                       target="_blank"
-                       class="rounded-xl bg-[#eff4ff] px-3 py-2 text-xs font-extrabold text-[#1a146b] hover:bg-[#dce9ff] transition">
-                        Hubungi CS
-                    </a>
-                </div>
-
-                {{-- 3. Card Ringkasan Pemesanan Utama (Sesuai Referensi Gambar 2) --}}
+                {{-- Card Ringkasan Pemesanan Utama (Sesuai Referensi Gambar 2) --}}
                 <section class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
                     <div class="p-5 sm:p-6">
 
@@ -647,25 +609,6 @@
                         </p>
                     </div>
                 </section>
-
-                {{-- Status aman & countdown pill --}}
-                <div class="flex items-center justify-between rounded-xl bg-[#eff4ff] px-4 py-3 text-xs text-[#1a146b]">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-[#416900]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                        <span class="font-bold">Transaksi Dijamin Aman</span>
-                    </div>
-                    <span id="sidebar-countdown" class="font-mono font-extrabold text-[#1a146b]">
-                        {{ sprintf('%02d:%02d', floor(($sisaDetik ?? 600) / 60), ($sisaDetik ?? 600) % 60) }}
-                    </span>
-                </div>
-            </aside>
-
-                <div class="mt-4 flex items-center justify-center gap-2 text-xs text-[#777682]">
-                    <svg class="w-3.5 h-3.5 text-[#777682] inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-                    Detail booking Lapangin
-                </div>
             </aside>
         </div>
     </main>
@@ -1001,8 +944,15 @@
             }).catch(console.error);
             @endif
 
-            alert("Batas waktu pembayaran 10 menit telah kedaluwarsa. Pemesanan slot ini otomatis dibatalkan dan dibuka kembali untuk pengguna lain.");
-            window.location.href = "{{ route('katalog.show', $lapangan->id) }}";
+            showThemeAlert({
+                title: "Waktu Pembayaran Habis",
+                message: "Batas waktu pembayaran 10 menit telah kedaluwarsa. Pemesanan slot ini otomatis dibatalkan dan dibuka kembali untuk pengguna lain.",
+                type: "warning",
+                confirmText: "Kembali ke Jadwal",
+                onConfirm: function () {
+                    window.location.href = "{{ route('katalog.show', $lapangan->id) }}";
+                }
+            });
         }
 
         updateTimerUI();

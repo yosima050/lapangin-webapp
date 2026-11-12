@@ -1,7 +1,64 @@
 @extends('layouts.pelanggan')
 
+@section('title', 'Riwayat Booking')
+
 @section('content')
+@php
+    $countSemua = $jadwals->count();
+    $countAktif = 0;
+    $countSelesai = 0;
+    $countDibatalkan = 0;
+
+    foreach ($jadwals as $j) {
+        $jIsCancelled = $j->isCancelled();
+        $jTanggalStr = $j->tanggal instanceof \Carbon\Carbon ? $j->tanggal->format('Y-m-d') : (string) $j->tanggal;
+        $jJamSelesai = in_array(substr((string)$j->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$j->jam_selesai;
+        $jEndTime = \Carbon\Carbon::parse($jTanggalStr . ' ' . $jJamSelesai);
+        $jIsPast = now()->gt($jEndTime);
+        $jIsSelesai = ! $jIsCancelled && ($j->status === 'selesai' || $jIsPast);
+
+        if ($jIsCancelled) {
+            $countDibatalkan++;
+        } elseif ($jIsSelesai) {
+            $countSelesai++;
+        } else {
+            $countAktif++;
+        }
+    }
+@endphp
 <div x-data="{
+    activeTab: '{{ $countAktif > 0 ? "aktif" : "all" }}',
+    searchQuery: '',
+    bookingItems: [
+        @foreach ($jadwals as $j)
+            @php
+                $rawKode = (string) ($j->kode_booking ?? $j->id);
+                $displayKode = strlen($rawKode) > 12 ? '#BK-' . strtoupper(substr($rawKode, 0, 8)) : '#BK-' . $rawKode;
+                $namaLap = $j->lapangan?->nama ?? 'Lapangan';
+                $jIsCancelled = $j->isCancelled();
+                $jTanggalStr = $j->tanggal instanceof \Carbon\Carbon ? $j->tanggal->format('Y-m-d') : (string) $j->tanggal;
+                $jJamSelesai = in_array(substr((string)$j->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$j->jam_selesai;
+                $jEndTime = \Carbon\Carbon::parse($jTanggalStr . ' ' . $jJamSelesai);
+                $jIsPast = now()->gt($jEndTime);
+                $jIsSelesai = ! $jIsCancelled && ($j->status === 'selesai' || $jIsPast);
+                $tabCat = $jIsCancelled ? 'dibatalkan' : ($jIsSelesai ? 'selesai' : 'aktif');
+                $searchKeywords = strtolower($rawKode . ' ' . $displayKode . ' ' . $namaLap . ' ' . ($j->lapangan?->kategori ?? ''));
+            @endphp
+            {
+                id: '{{ $j->id }}',
+                category: '{{ $tabCat }}',
+                search: {{ json_encode($searchKeywords) }}
+            },
+        @endforeach
+    ],
+    get visibleCount() {
+        return this.bookingItems.filter(item => {
+            const matchesTab = (this.activeTab === 'all') || (this.activeTab === item.category);
+            if (!matchesTab) return false;
+            if (!this.searchQuery.trim()) return true;
+            return item.search.includes(this.searchQuery.toLowerCase().trim());
+        }).length;
+    },
     showTicketModal: false,
     activeTicket: null,
     payModalOpen: false,
@@ -191,12 +248,7 @@
         <div class="mb-8 overflow-hidden rounded-2xl bg-[#1a146b] text-white shadow-lg sm:rounded-3xl">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between px-5 py-7 sm:px-8 sm:py-9 lg:px-10 gap-6">
                 <div>
-                    <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#acf847]">
-                        <span class="h-2 w-2 rounded-full bg-[#acf847]"></span>
-                        Manajemen Reservasi Aktif
-                    </div>
-
-                    <h1 class="mt-4 text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                         Riwayat Booking &amp; Jadwal Saya
                     </h1>
 
@@ -206,25 +258,19 @@
                 </div>
 
                 {{-- Statistik Ringkasan ala Figma --}}
-                <div class="grid grid-cols-3 gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 shrink-0">
-                    <div class="text-center px-3 border-r border-white/10 last:border-none">
+                <div class="grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 shrink-0">
+                    <div class="text-center px-4 border-r border-white/10">
                         <p class="text-xl sm:text-2xl font-extrabold text-white">
-                            {{ isset($jadwals) ? count($jadwals) : 0 }}
+                            {{ $countAktif }}
                         </p>
                         <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
                             Jadwal Aktif
                         </p>
                     </div>
-                    <div class="text-center px-3 border-r border-white/10 last:border-none">
-                        <p class="text-xl sm:text-2xl font-extrabold text-white">0</p>
+                    <div class="text-center px-4">
+                        <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $countSelesai }}</p>
                         <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
                             Selesai
-                        </p>
-                    </div>
-                    <div class="text-center px-3">
-                        <p class="text-xl sm:text-2xl font-extrabold text-[#acf847]">100%</p>
-                        <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
-                            Validasi QR
                         </p>
                     </div>
                 </div>
@@ -245,33 +291,53 @@
         <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {{-- Tab Filter Status --}}
             <div class="flex flex-wrap items-center gap-2 rounded-2xl bg-gray-200/60 p-1.5 text-xs font-semibold text-gray-600">
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Semua ({{ isset($jadwals) ? count($jadwals) : 0 }})
+                <button type="button"
+                        @click="activeTab = 'all'"
+                        :class="activeTab === 'all' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Semua ({{ $countSemua }})
                 </button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#1a146b] px-4 py-2 font-bold text-white shadow-sm">
+                <button type="button"
+                        @click="activeTab = 'aktif'"
+                        :class="activeTab === 'aktif' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 transition cursor-pointer">
                     Aktif &amp; Mendatang
-                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-[#acf847] text-[10px] font-extrabold text-[#1a146b]">
-                        {{ isset($jadwals) ? count($jadwals) : 0 }}
+                    <span :class="activeTab === 'aktif' ? 'bg-[#acf847] text-[#1a146b]' : 'bg-gray-300 text-gray-700'"
+                          class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[10px] font-extrabold">
+                        {{ $countAktif }}
                     </span>
                 </button>
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Selesai (0)
+                <button type="button"
+                        @click="activeTab = 'selesai'"
+                        :class="activeTab === 'selesai' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Selesai ({{ $countSelesai }})
                 </button>
-                <button type="button" class="rounded-xl px-4 py-2 transition text-gray-600 hover:text-gray-900">
-                    Dibatalkan (0)
+                <button type="button"
+                        @click="activeTab = 'dibatalkan'"
+                        :class="activeTab === 'dibatalkan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                    Dibatalkan ({{ $countDibatalkan }})
                 </button>
             </div>
 
             {{-- Input Pencarian --}}
             <div class="relative w-full sm:w-72">
                 <input type="text"
-                       placeholder="Cari Kode Booking / Lapangan..."
-                       class="w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                       x-model="searchQuery"
+                       placeholder="Cari lapangan..."
+                       class="w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
+                <button type="button"
+                        x-show="searchQuery.trim().length > 0"
+                        @click="searchQuery = ''"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
         </div>
 
@@ -279,7 +345,8 @@
         <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-800">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-800"
+                    x-text="activeTab === 'all' ? 'Semua Jadwal Reservasi' : (activeTab === 'aktif' ? 'Jadwal Pertandingan Aktif & Mendatang' : (activeTab === 'selesai' ? 'Riwayat Pertandingan Selesai' : 'Daftar Booking Dibatalkan'))">
                     Jadwal Pertandingan Terdekat
                 </h2>
             </div>
@@ -313,7 +380,7 @@
                 ));
 
                 // Format kode booking pendek
-                $rawKode = $jadwal->kode_booking ?? $jadwal->id;
+                $rawKode = (string) ($jadwal->kode_booking ?? $jadwal->id);
                 $displayKode = strlen($rawKode) > 12 ? '#BK-' . strtoupper(substr($rawKode, 0, 8)) : '#BK-' . $rawKode;
 
                 // Menghitung durasi jam
@@ -323,30 +390,47 @@
                 $tanggalStr = $jadwal->tanggal instanceof \Carbon\Carbon ? $jadwal->tanggal->toDateString() : (string) $jadwal->tanggal;
                 $namaLapangan = $jadwal->lapangan?->nama ?? 'Lapangan';
 
+                $jJamSelesai = in_array(substr((string)$jadwal->jam_selesai, 0, 5), ['24:00', '00:00'], true) ? '23:59:59' : (string)$jadwal->jam_selesai;
+                $jEndTime = \Carbon\Carbon::parse($tanggalStr . ' ' . $jJamSelesai);
+                $jIsPast = now()->gt($jEndTime);
+                $jIsSelesai = ! $isDibatalkan && ($jadwal->status === 'selesai' || $jIsPast);
+                $tabCategory = $isDibatalkan ? 'dibatalkan' : ($jIsSelesai ? 'selesai' : 'aktif');
+                $searchKeywords = strtolower($rawKode . ' ' . $displayKode . ' ' . $namaLapangan . ' ' . ($jadwal->lapangan?->kategori ?? ''));
+
                 // Helper Reschedule & Pembatalan (Sprint 5)
                 $kickoff = \Carbon\Carbon::parse($tanggalStr . ' ' . substr((string) $jadwal->jam_mulai, 0, 5));
                 $hoursUntilKickoff = now()->diffInHours($kickoff, false);
                 $pendingReschedule = $jadwal->reschedules ? $jadwal->reschedules->firstWhere('status', 'diajukan') : null;
                 $canReschedule = ! $isDibatalkan && empty($jadwal->checked_in_at) && ! $pendingReschedule && $hoursUntilKickoff >= 24;
-                $canCancel = ! $isDibatalkan && empty($jadwal->checked_in_at) && $jadwal->status !== 'selesai';
+                $canCancel = ! $isDibatalkan && empty($jadwal->checked_in_at) && $jadwal->status !== 'selesai' && ! $jIsPast;
             @endphp
 
-            <article x-data="{ showModal: false }" class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
+            <article x-data="{ showModal: false }"
+                     x-show="(activeTab === 'all' || activeTab === '{{ $tabCategory }}') && (!searchQuery.trim() || {{ json_encode($searchKeywords) }}.includes(searchQuery.toLowerCase().trim()))"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all">
 
-                {{-- Baris Atas: Kode Booking & Badge Status --}}
+                {{-- Baris Atas: Waktu Pemesanan & Badge Status --}}
                 <div class="flex flex-wrap items-center justify-between border-b border-gray-100 bg-indigo-50/30 px-5 py-3 gap-2">
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="font-mono font-bold text-[#1a146b] bg-indigo-100/70 px-2.5 py-1 rounded-md">
-                            {{ $displayKode }}
-                        </span>
-                        <span class="text-gray-300">•</span>
-                        <span class="text-gray-500">
-                            Dipesan: {{ \Carbon\Carbon::parse($jadwal->created_at)->translatedFormat('d M Y, H:i') }} WIB
-                        </span>
+                    <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Dipesan: {{ \Carbon\Carbon::parse($jadwal->created_at)->translatedFormat('d M Y, H:i') }} WIB</span>
                     </div>
 
                     {{-- Badge Status Utama --}}
-                    @if ($isLunas)
+                    @if ($isDibatalkan)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
+                            Dibatalkan
+                        </span>
+                    @elseif ($jIsSelesai)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">
+                            <span class="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
+                            Pertandingan Selesai
+                        </span>
+                    @elseif ($isLunas)
                         <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-green-100 text-green-800 border border-green-200">
                             <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
                             Lunas 100% (Siap Main)
@@ -355,11 +439,6 @@
                         <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-[#acf847]/40 text-emerald-950 border border-[#acf847]">
                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
                             DP 50% Terverifikasi (Siap Main)
-                        </span>
-                    @elseif ($isDibatalkan)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
-                            <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
-                            Dibatalkan
                         </span>
                     @else
                         @php
@@ -586,12 +665,13 @@
          style="display: none;">
         
         <div @click.away="showModal = false" 
+             id="printable-ticket-{{ $jadwal->id }}"
              class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto text-left border border-gray-100">
             
             {{-- Tombol Close X --}}
             <button @click="showModal = false" 
                     type="button" 
-                    class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
+                    class="no-print absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
@@ -607,9 +687,6 @@
                     <h2 class="text-xl sm:text-2xl font-extrabold text-[#1a146b] mt-1">
                         Reservasi Berhasil Dikonfirmasi!
                     </h2>
-                    <p class="text-xs text-gray-500 mt-1">
-                        Kode Booking <span class="font-mono font-bold text-gray-800">#{{ $jadwal->kode_booking ?? ($jadwal->kode_qr ?? $displayKode) }}</span> telah aktif dan tersinkronisasi otomatis di sistem kasir venue.
-                    </p>
                 </div>
             </div>
 
@@ -621,9 +698,6 @@
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                         <span class="px-3 py-1 rounded-full bg-[#1a146b] text-white text-[10px] font-extrabold uppercase tracking-wider">
                             OFFICIAL MATCH PASS
-                        </span>
-                        <span class="text-[10px] font-mono text-gray-400 font-bold uppercase">
-                            LAPANGIN SECURE ID: {{ $jadwal->kode_booking ?? ($jadwal->kode_qr ?? $displayKode) }}
                         </span>
                     </div>
 
@@ -715,15 +789,14 @@
                 <div class="lg:col-span-4 bg-[#f4f7ff] p-6 flex flex-col items-center justify-center text-center border-t lg:border-t-0 lg:border-l border-gray-100">
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-3">BOARDING PASS GATE</span>
                     
-                    {{-- QR Code Image / SimpleSoftwareIO --}}
-                    <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100 mb-3">
-                        @if (!empty($jadwal->kode_qr))
-                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(150)->margin(1)->generate($jadwal->kode_qr) !!}
-                        @else
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $jadwal->kode_booking ?? $displayKode }}" 
-                                 alt="QR Code Tiket" 
-                                 class="w-36 h-36 object-contain">
-                        @endif
+                    {{-- QR Code Image / SimpleSoftwareIO (High-resolution, clean vector SVG) --}}
+                    @php
+                        $qrPayload = $jadwal->kode_qr ?: ($jadwal->kode_booking ?: ('LPNG-' . $jadwal->id));
+                    @endphp
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-2.5">
+                        <div class="w-36 h-36 flex items-center justify-center">
+                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(144)->style('round', 0.7)->eye('circle')->color(26, 20, 107)->margin(1)->errorCorrection('M')->generate($qrPayload) !!}
+                        </div>
                     </div>
 
                     <p class="text-[10px] text-gray-500 font-medium">Scan di Meja Resepsionis</p>
@@ -740,21 +813,23 @@
             </div>
 
             {{-- Tombol Action --}}
-            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <div class="no-print flex flex-wrap items-center justify-center gap-3 pt-2">
                 <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}" 
                    target="_blank"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.75 6.47 6.47 0 00.384-2.548C3.606 16.353 3 14.28 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
                     <span>Bagikan Tiket ke WhatsApp Tim</span>
                 </a>
-                <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
+                <button type="button" 
+                        onclick="printTiketDocument('printable-ticket-{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')" 
+                        class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                     <span>Unduh Tiket PDF</span>
                 </button>
             </div>
 
             {{-- Panduan & Protokol --}}
-            <div class="pt-4 border-t border-gray-100">
+            <div class="no-print pt-4 border-t border-gray-100">
                 <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-3">
                     <svg class="w-4 h-4 text-[#416900] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                     <span>Panduan &amp; Protokol Hari Pertandingan</span>
@@ -811,6 +886,20 @@
                 <p class="mt-2 text-sm text-gray-600">Booking lapangan Anda akan muncul di sini setelah pesanan tersedia.</p>
             </div>
         @endforelse
+
+        {{-- Empty state jika hasil filter atau search tidak ada data yang cocok --}}
+        @if(count($jadwals) > 0)
+            <div x-show="visibleCount === 0" x-cloak class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center my-6">
+                <div class="mx-auto w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#1a146b] mb-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900">Tidak Ada Jadwal Ditemukan</h3>
+                <p class="mt-1 text-xs text-gray-500">Tidak ada jadwal booking yang sesuai dengan tab filter atau pencarian Anda.</p>
+                <button type="button" @click="activeTab = 'all'; searchQuery = ''" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a146b] text-white text-xs font-bold hover:bg-indigo-900 transition cursor-pointer shadow-xs">
+                    Tampilkan Semua Booking
+                </button>
+            </div>
+        @endif
 
     {{-- POP-UP MODAL SELESAIKAN PEMBAYARAN VIA MIDTRANS SNAP --}}
     <div x-show="payModalOpen"
@@ -1107,7 +1196,7 @@
                     </p>
                 </div>
 
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit">
+                <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -1274,26 +1363,112 @@
             }
         }, 1000);
     });
+
+    // Fungsi cetak/unduh PDF tiket bersih 1 halaman terisolasi
+    window.printTiketDocument = function(elementId, docTitle) {
+        const ticketEl = document.getElementById(elementId);
+        if (!ticketEl) {
+            window.print();
+            return;
+        }
+
+        // Buat clone dari tiket
+        const clone = ticketEl.cloneNode(true);
+        // Hilangkan elemen yang tidak perlu dicetak (tombol close, tombol action)
+        clone.querySelectorAll('.no-print').forEach(el => el.remove());
+        
+        // Pastikan style container pas dalam 1 halaman A4 tanpa scrolling modal
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
+        clone.style.boxShadow = 'none';
+        clone.style.border = '1px solid #e5e7eb';
+        clone.style.margin = '0 auto';
+        clone.style.padding = '20px';
+        clone.style.width = '100%';
+
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = '0';
+        document.body.appendChild(printFrame);
+
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(`
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <title>${docTitle || 'E-Tiket LapangIn'}</title>
+                <script src="https://cdn.tailwindcss.com"><\/script>
+                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+                <style>
+                    @page {
+                        size: A4 portrait;
+                        margin: 8mm 10mm;
+                    }
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        box-sizing: border-box;
+                    }
+                    body {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        background: #ffffff !important;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .no-print {
+                        display: none !important;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="p-2">
+                    ${clone.outerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        frameDoc.close();
+
+        printFrame.contentWindow.focus();
+        setTimeout(() => {
+            printFrame.contentWindow.print();
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 2000);
+        }, 400);
+    };
 </script>
 
-{{-- Pengaturan Cetak --}}
+{{-- Pengaturan Cetak Fallback --}}
 <style>
     @media print {
-        body {
-            background: white !important;
+        body * {
+            visibility: hidden;
         }
-
-        nav, header, footer {
-            print-color-adjust: exact;
+        .fixed.inset-0:has([id^="printable-ticket-"]),
+        [id^="printable-ticket-"],
+        [id^="printable-ticket-"] * {
+            visibility: visible;
         }
-
-        .print\:hidden {
+        .fixed.inset-0:has([id^="printable-ticket-"]) {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: transparent !important;
+        }
+        .no-print {
             display: none !important;
         }
-
-        article {
-            break-inside: avoid;
-            box-shadow: none !important;
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
         }
     }
 </style>

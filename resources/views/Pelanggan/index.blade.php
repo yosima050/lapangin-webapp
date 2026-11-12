@@ -60,50 +60,7 @@
         {{-- ==================== KOLOM KIRI ==================== --}}
         <div class="lg:col-span-4 space-y-5">
 
-            {{-- 1. Kartu Member Player ID ala Figma --}}
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a146b] via-[#211a7a] to-[#120d4f] p-6 text-white shadow-lg border border-[#30269c]">
-                {{-- Decorative background glow --}}
-                <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#acf847]/10 blur-2xl"></div>
-
-                <div class="relative z-10 flex items-center justify-between gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#acf847] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#1a146b] shadow-xs">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[#1a146b]"></span>
-                        PRO PLAYER ID
-                    </span>
-
-                    <span class="text-white/80" title="Identitas Terverifikasi LapangIn">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="relative z-10 mt-6 flex items-center gap-4">
-                    <div class="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#eff4ff] border-2 border-[#acf847] text-2xl font-black text-[#1a146b] shadow-md overflow-hidden">
-                        {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                    </div>
-
-                    <div class="min-w-0 flex-1">
-                        <h3 class="truncate text-base font-extrabold text-white">
-                            {{ Auth::user()->nama ?? Auth::user()->name }}
-                        </h3>
-                        <p class="font-mono text-xs font-semibold text-indigo-200 mt-0.5 tracking-wider">
-                            LP - {{ substr(strtoupper(md5(Auth::user()->id ?? '12345')), 0, 5) }} - ID
-                        </p>
-                    </div>
-                </div>
-
-                <div class="relative z-10 mt-6 pt-4 border-t border-white/10">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-                        SPORT FAVORIT
-                    </p>
-                    <p class="mt-1 text-xs font-bold text-[#acf847]">
-                        Futsal, Badminton &amp; Mini Soccer
-                    </p>
-                </div>
-            </div>
-
-            {{-- 2. Sidebar Menu Navigasi Tabs --}}
+            {{-- Sidebar Menu Navigasi Tabs --}}
             <nav class="rounded-2xl border border-[#e8edfa] bg-white p-2 shadow-xs space-y-1">
                 {{-- Item 1: Informasi Profil (Aktif) --}}
                 <a href="#informasi-pribadi"
@@ -188,32 +145,6 @@
                         <p class="mt-0.5 text-xs text-[#777682]">
                             Data ini digunakan untuk verifikasi fisik di lapangan dan daftar tunggu pertandingan.
                         </p>
-                    </div>
-                </div>
-
-                {{-- Banner Foto Profil --}}
-                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-[#f8faff] border border-[#e5eeff] p-4">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#1a146b] text-xl font-black text-white shadow-sm border-2 border-white">
-                            {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-[#0b1c30]">Foto Profil</p>
-                            <p class="mt-0.5 text-[11px] text-[#777682] max-w-sm">
-                                Format didukung JPG, PNG, atau WEBP. Maksimal 2MB beresolusi minimal 400x400 px.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#1a146b] hover:bg-[#130d52] px-3.5 py-2 text-xs font-bold text-white shadow-2xs transition">
-                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                            <span>Unggah Baru</span>
-                        </button>
-                        <button type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 transition">
-                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                            <span>Hapus</span>
-                        </button>
                     </div>
                 </div>
 

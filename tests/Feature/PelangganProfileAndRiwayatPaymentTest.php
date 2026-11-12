@@ -52,7 +52,6 @@ class PelangganProfileAndRiwayatPaymentTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Pengaturan Akun &amp; Profil Pelanggan', false);
-        $response->assertSee('PRO PLAYER ID');
         $response->assertSee('Dimas Prasetyo');
         $response->assertSee('dimas.prasetyo@sports.id');
         $response->assertSee('Informasi Pribadi');

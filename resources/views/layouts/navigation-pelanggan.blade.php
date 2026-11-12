@@ -59,14 +59,8 @@
 
             </div>
 
-            {{-- Navigasi Kanan (Lokasi & Akun) --}}
+            {{-- Navigasi Kanan (Akun) --}}
             <div class="hidden lg:flex items-center gap-4 ml-auto">
-
-                {{-- Location Badge --}}
-                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700">
-                    <svg class="w-3.5 h-3.5 text-[#416900]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-                    <span>Malang</span>
-                </div>
 
                 @guest
                     <div class="flex items-center gap-3">
@@ -85,13 +79,9 @@
                         <button
                             type="button"
                             @click="profileOpen = !profileOpen"
-                            class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-gray-50 transition cursor-pointer"
+                            class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200/80 bg-white hover:bg-gray-50 transition cursor-pointer shadow-2xs"
                         >
-                            <span class="w-9 h-9 rounded-full bg-[#1a146b] border-2 border-[#acf847] flex items-center justify-center text-sm font-bold text-white shadow-xs">
-                                {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 1)) }}
-                            </span>
-
-                            <span class="text-xs font-bold text-gray-800 max-w-[120px] truncate">
+                            <span class="text-xs font-bold text-gray-800 max-w-[140px] truncate">
                                 {{ Auth::user()->nama ?? Auth::user()->name ?? 'Pengguna' }}
                             </span>
 
