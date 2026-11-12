@@ -140,37 +140,83 @@
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
 
                     {{-- Tarif Weekday --}}
-                    <div class="bg-[#eff4ff] p-5 rounded-2xl border border-[#dce9ff]">
-                        <label for="harga_weekday" class="block font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider mb-1.5">
-                            Tarif Weekday (Senin – Jumat) <span class="text-[#ba1a1a]">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
-                            <input type="number" name="harga_weekday" id="harga_weekday" value="{{ old('harga_weekday', 150000) }}" min="0" required
-                                   placeholder="150000"
-                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekday') border-[#ba1a1a] @enderror">
+                    <div class="bg-[#eff4ff] p-5 rounded-2xl border border-[#dce9ff] flex flex-col gap-4">
+                        <div class="border-b border-[#dce9ff] pb-2">
+                            <span class="font-extrabold text-[#0b1c30] uppercase text-[11px] tracking-wider">
+                                Tarif Weekday (Senin – Jumat)
+                            </span>
                         </div>
-                        <p class="text-[11px] text-[#777682] mt-1.5">Tarif sewa per jam hari kerja reguler.</p>
-                        @error('harga_weekday')
-                            <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
-                        @enderror
+
+                        <div>
+                            <label for="harga_weekday" class="block font-bold text-[#0b1c30] text-[11px] mb-1">
+                                Tarif Pagi – Siang (07:00 – 18:00) <span class="text-[#ba1a1a]">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
+                                <input type="number" name="harga_weekday" id="harga_weekday" value="{{ old('harga_weekday', 150000) }}" min="0" required
+                                       placeholder="150000"
+                                       class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekday') border-[#ba1a1a] @enderror">
+                            </div>
+                            @error('harga_weekday')
+                                <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="harga_weekday_malam" class="block font-bold text-[#0b1c30] text-[11px] mb-1">
+                                Tarif Malam (18:00 – 24:00) <span class="text-[10px] text-[#777682] font-normal">(Opsional)</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
+                                <input type="number" name="harga_weekday_malam" id="harga_weekday_malam" value="{{ old('harga_weekday_malam', 190000) }}" min="0"
+                                       placeholder="190000"
+                                       class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekday_malam') border-[#ba1a1a] @enderror">
+                            </div>
+                            <p class="text-[10px] text-[#777682] mt-1">Jika dikosongkan, tarif malam akan otomatis mengikuti tarif pagi.</p>
+                            @error('harga_weekday_malam')
+                                <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     {{-- Tarif Weekend --}}
-                    <div class="bg-[#eff4ff] p-5 rounded-2xl border border-[#dce9ff]">
-                        <label for="harga_weekend" class="block font-bold text-[#0b1c30] uppercase text-[11px] tracking-wider mb-1.5">
-                            Tarif Weekend (Sabtu – Minggu) <span class="text-[#ba1a1a]">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
-                            <input type="number" name="harga_weekend" id="harga_weekend" value="{{ old('harga_weekend', 175000) }}" min="0" required
-                                   placeholder="175000"
-                                   class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekend') border-[#ba1a1a] @enderror">
+                    <div class="bg-[#eff4ff] p-5 rounded-2xl border border-[#dce9ff] flex flex-col gap-4">
+                        <div class="border-b border-[#dce9ff] pb-2">
+                            <span class="font-extrabold text-[#0b1c30] uppercase text-[11px] tracking-wider">
+                                Tarif Weekend (Sabtu – Minggu)
+                            </span>
                         </div>
-                        <p class="text-[11px] text-[#777682] mt-1.5">Tarif sewa per jam akhir pekan.</p>
-                        @error('harga_weekend')
-                            <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
-                        @enderror
+
+                        <div>
+                            <label for="harga_weekend" class="block font-bold text-[#0b1c30] text-[11px] mb-1">
+                                Tarif Pagi – Siang (07:00 – 18:00) <span class="text-[#ba1a1a]">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
+                                <input type="number" name="harga_weekend" id="harga_weekend" value="{{ old('harga_weekend', 175000) }}" min="0" required
+                                       placeholder="175000"
+                                       class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekend') border-[#ba1a1a] @enderror">
+                            </div>
+                            @error('harga_weekend')
+                                <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="harga_weekend_malam" class="block font-bold text-[#0b1c30] text-[11px] mb-1">
+                                Tarif Malam (18:00 – 24:00) <span class="text-[10px] text-[#777682] font-normal">(Opsional)</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-[#777682]">Rp</span>
+                                <input type="number" name="harga_weekend_malam" id="harga_weekend_malam" value="{{ old('harga_weekend_malam', 215000) }}" min="0"
+                                       placeholder="215000"
+                                       class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white border border-[#dce9ff] text-xs font-bold text-[#0b1c30] focus:ring-2 focus:ring-[#acf847] outline-none transition @error('harga_weekend_malam') border-[#ba1a1a] @enderror">
+                            </div>
+                            <p class="text-[10px] text-[#777682] mt-1">Jika dikosongkan, tarif malam akan otomatis mengikuti tarif pagi.</p>
+                            @error('harga_weekend_malam')
+                                <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                 </div>

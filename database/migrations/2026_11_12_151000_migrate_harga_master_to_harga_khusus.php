@@ -26,14 +26,14 @@ return new class extends Migration
                     continue;
                 }
 
-                $exists = DB::table('harga_khusus')
+                $existing = DB::table('harga_khusus')
                     ->where('lapangan_id', $m->lapangan_id)
                     ->where('tanggal', $m->tanggal_khusus)
                     ->where('jam_mulai', $m->jam_mulai ?: '07:00:00')
                     ->where('jam_selesai', $m->jam_selesai ?: '24:00:00')
-                    ->exists();
+                    ->first();
 
-                if (! $exists) {
+                if (! $existing) {
                     DB::table('harga_khusus')->insert([
                         'id' => (string) Str::uuid(),
                         'lapangan_id' => $m->lapangan_id,
@@ -44,13 +44,18 @@ return new class extends Migration
                         'keterangan' => 'Tarif Khusus Hari Libur / Tanggal Merah',
                         'is_active' => true,
                     ]);
+                } elseif (! $existing->is_active) {
+                    DB::table('harga_khusus')
+                        ->where('id', $existing->id)
+                        ->update([
+                            'harga' => $m->harga,
+                            'is_active' => true,
+                        ]);
                 }
             }
 
-            // Hapus data tanggal_khusus dari harga_masters agar harga master hanya untuk weekday & weekend dasar
-            DB::table('harga_masters')
-                ->whereNotNull('tanggal_khusus')
-                ->delete();
+            // Catatan: Baris legacy pada harga_masters sengaja tetap dipertahankan
+            // demi backward-compatibility reader yang masih membaca tabel harga_masters.
         }
     }
 

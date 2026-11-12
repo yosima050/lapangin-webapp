@@ -129,9 +129,20 @@
     <div class="flex flex-col gap-5">
         @forelse ($lapangans as $index => $lapangan)
             @php
-                $weekdayOffPeak = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday')->first()?->harga ?? 120000;
-                $weekdayPrime = $weekdayOffPeak * 1.5;
-                $weekendRate = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend')->first()?->harga ?? 200000;
+                $weekdayMasters = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday');
+                $weekdayOffPeak = $weekdayMasters->filter(fn($hm) => empty($hm->jam_mulai) || substr($hm->jam_mulai, 0, 2) < '18')->first()?->harga
+                    ?? $weekdayMasters->first()?->harga
+                    ?? 120000;
+                $weekdayPrime = $weekdayMasters->filter(fn($hm) => !empty($hm->jam_mulai) && substr($hm->jam_mulai, 0, 2) >= '18')->first()?->harga
+                    ?? ($weekdayOffPeak + 40000);
+
+                $weekendMasters = $lapangan->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend');
+                $weekendRate = $weekendMasters->filter(fn($hm) => empty($hm->jam_mulai) || substr($hm->jam_mulai, 0, 2) < '18')->first()?->harga
+                    ?? $weekendMasters->first()?->harga
+                    ?? 175000;
+                $weekendPrime = $weekendMasters->filter(fn($hm) => !empty($hm->jam_mulai) && substr($hm->jam_mulai, 0, 2) >= '18')->first()?->harga
+                    ?? ($weekendRate + 40000);
+
                 $courtId = 'ID: LAP-0' . ($index + 1);
             @endphp
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] hover:shadow-md transition-all flex flex-col lg:flex-row gap-6 items-start">
@@ -193,11 +204,11 @@
                         <div class="flex flex-col gap-1.5">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">TARIF WEEKDAY (SENIN – JUMAT)</span>
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span>Pagi – Siang (07:00 – 16:00):</span>
+                                <span>Pagi – Siang (07:00 – 18:00):</span>
                                 <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekdayOffPeak, 0, ',', '.') }}/jam</span>
                             </div>
                             <div class="flex items-center justify-between text-xs text-[#474651]">
-                                <span>Malam (16:00 – 24:00):</span>
+                                <span>Malam (18:00 – 24:00):</span>
                                 <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekdayPrime, 0, ',', '.') }}/jam</span>
                             </div>
                         </div>
@@ -205,13 +216,14 @@
                         <!-- Right: Tarif Weekend -->
                         <div class="flex flex-col gap-1.5 md:border-l md:border-[#dce9ff] md:pl-4">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">TARIF WEEKEND (SABTU – MINGGU)</span>
-                            <div class="flex items-center justify-between text-xs">
-                                <span class="text-[#474651]">Tarif Seharian (07:00 – 24:00):</span>
-                                <span class="font-extrabold text-[#416900]">Rp {{ number_format($weekendRate, 0, ',', '.') }}/jam flat</span>
+                            <div class="flex items-center justify-between text-xs text-[#474651]">
+                                <span>Pagi – Siang (07:00 – 18:00):</span>
+                                <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekendRate, 0, ',', '.') }}/jam</span>
                             </div>
-                            <span class="text-[10px] text-[#416900] flex items-center gap-1">
-                                <span class="material-symbols-outlined text-xs">bolt</span> Otomatis tier harga peak hours
-                            </span>
+                            <div class="flex items-center justify-between text-xs text-[#474651]">
+                                <span>Malam (18:00 – 24:00):</span>
+                                <span class="font-bold text-[#0b1c30]">Rp {{ number_format($weekendPrime, 0, ',', '.') }}/jam</span>
+                            </div>
                         </div>
                     </div>
 

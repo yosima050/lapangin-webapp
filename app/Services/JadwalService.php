@@ -48,18 +48,24 @@ class JadwalService
                 return $tglStr === $normalizedTanggal;
             });
 
-        $hargaWeekday = $lapangan->hargaMasters
-            ->whereNull('tanggal_khusus')
-            ->where('jenis_hari', 'weekday')
-            ->first()?->harga;
+        $jenisHari = $isWeekend ? 'weekend' : 'weekday';
 
-        $hargaWeekend = $lapangan->hargaMasters
+        $mastersJenisHari = $lapangan->hargaMasters
             ->whereNull('tanggal_khusus')
-            ->where('jenis_hari', 'weekend')
-            ->first()?->harga;
+            ->where('jenis_hari', $jenisHari);
 
-        $defaultBaseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
-        $defaultPrimeRate = (float) ($defaultBaseRate + 40000);
+        // Cari master yang spesifik malam (>= 18:00) jika ada
+        $nightMaster = $mastersJenisHari->first(function ($hm) {
+            return ! empty($hm->jam_mulai) && substr($hm->jam_mulai, 0, 2) >= '18';
+        });
+
+        // Cari master yang pagi / umum (< 18:00 atau flat)
+        $dayMaster = $mastersJenisHari->first(function ($hm) {
+            return empty($hm->jam_mulai) || substr($hm->jam_mulai, 0, 2) < '18';
+        }) ?? $mastersJenisHari->first();
+
+        $defaultBaseRate = (float) ($dayMaster?->harga ?? ($isWeekend ? 175000 : 125000));
+        $defaultPrimeRate = (float) ($nightMaster?->harga ?? ($defaultBaseRate + 40000));
 
         $jamBuka = $baseDate->copy()->setTimeFromTimeString(substr($lapangan->jam_buka, 0, 5));
         $jamTutupStr = substr($lapangan->jam_tutup, 0, 5);
@@ -150,8 +156,35 @@ class JadwalService
                 $isHargaKhusus = true;
                 $keteranganHarga = 'Tarif Khusus Tanggal';
             } else {
-                $hour = (int) $slotMulai->format('H');
-                $slotHarga = (float) ($hour >= 18 ? $defaultPrimeRate : $defaultBaseRate);
+                // Prioritas 3: Cari master tarif reguler (weekday/weekend) yang mencakup jam ini
+                $regularMaster = $lapangan->hargaMasters
+                    ->whereNull('tanggal_khusus')
+                    ->where('jenis_hari', $jenisHari)
+                    ->first(function ($hm) use ($baseDate, $slotMulai, $slotSelesai): bool {
+                        $matchesStart = true;
+                        if (! empty($hm->jam_mulai)) {
+                            $hmMulai = $baseDate->copy()->setTimeFromTimeString(substr($hm->jam_mulai, 0, 5));
+                            $matchesStart = $slotMulai->gte($hmMulai);
+                        }
+
+                        $matchesEnd = true;
+                        if (! empty($hm->jam_selesai)) {
+                            $hmSelesaiStr = substr($hm->jam_selesai, 0, 5);
+                            $hmSelesai = in_array($hmSelesaiStr, ['24:00', '00:00'], true)
+                                ? $baseDate->copy()->addDay()->startOfDay()
+                                : $baseDate->copy()->setTimeFromTimeString($hmSelesaiStr);
+                            $matchesEnd = $slotSelesai->lte($hmSelesai);
+                        }
+
+                        return $matchesStart && $matchesEnd;
+                    });
+
+                if ($regularMaster !== null) {
+                    $slotHarga = (float) $regularMaster->harga;
+                } else {
+                    $hour = (int) $slotMulai->format('H');
+                    $slotHarga = (float) ($hour >= 18 ? $defaultPrimeRate : $defaultBaseRate);
+                }
                 $isHargaKhusus = false;
                 $keteranganHarga = null;
             }

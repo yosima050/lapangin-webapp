@@ -41,25 +41,73 @@ class LapanganController extends Controller
 
             $lapangan = Lapangan::create($data);
 
-            // Simpan tarif dasar Weekday
-            HargaMaster::create([
-                'lapangan_id' => $lapangan->id,
-                'jenis_hari' => 'weekday',
-                'tanggal_khusus' => null,
-                'jam_mulai' => $lapangan->jam_buka,
-                'jam_selesai' => $lapangan->jam_tutup,
-                'harga' => $request->validated('harga_weekday'),
-            ]);
+            $jamBuka = strlen($lapangan->jam_buka) === 5 ? $lapangan->jam_buka . ':00' : $lapangan->jam_buka;
+            $jamTutup = strlen($lapangan->jam_tutup) === 5 ? $lapangan->jam_tutup . ':00' : $lapangan->jam_tutup;
 
-            // Simpan tarif dasar Weekend
-            HargaMaster::create([
-                'lapangan_id' => $lapangan->id,
-                'jenis_hari' => 'weekend',
-                'tanggal_khusus' => null,
-                'jam_mulai' => $lapangan->jam_buka,
-                'jam_selesai' => $lapangan->jam_tutup,
-                'harga' => $request->validated('harga_weekend'),
-            ]);
+            $hargaWeekday = $request->validated('harga_weekday');
+            $hargaWeekdayMalam = $request->validated('harga_weekday_malam');
+            $hargaWeekend = $request->validated('harga_weekend');
+            $hargaWeekendMalam = $request->validated('harga_weekend_malam');
+
+            // Simpan tarif dasar Weekday (Pagi/Siang vs Malam)
+            if ($hargaWeekdayMalam !== null && $hargaWeekdayMalam !== '') {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => '18:00:00',
+                    'harga' => $hargaWeekday,
+                ]);
+
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => '18:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekdayMalam,
+                ]);
+            } else {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka,
+                    'jam_selesai' => $jamTutup,
+                    'harga' => $hargaWeekday,
+                ]);
+            }
+
+            // Simpan tarif dasar Weekend (Pagi/Siang vs Malam)
+            if ($hargaWeekendMalam !== null && $hargaWeekendMalam !== '') {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => '18:00:00',
+                    'harga' => $hargaWeekend,
+                ]);
+
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => '18:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekendMalam,
+                ]);
+            } else {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka,
+                    'jam_selesai' => $jamTutup,
+                    'harga' => $hargaWeekend,
+                ]);
+            }
 
             // Simpan tarif khusus tanggal merah (jika diisi)
             if ($request->filled('harga_tanggal_merah') && $request->filled('tanggal_khusus')) {
@@ -92,21 +140,55 @@ class LapanganController extends Controller
     {
         $lapangan->load('hargaMasters');
 
-        $hargaWeekday = $lapangan->hargaMasters
+        $hargaWeekdayPagi = $lapangan->hargaMasters
             ->whereNull('tanggal_khusus')
             ->where('jenis_hari', 'weekday')
+            ->where('jam_mulai', '<', '18:00:00')
+            ->first()?->harga
+            ?? $lapangan->hargaMasters
+                ->whereNull('tanggal_khusus')
+                ->where('jenis_hari', 'weekday')
+                ->first()?->harga;
+
+        $hargaWeekdayMalam = $lapangan->hargaMasters
+            ->whereNull('tanggal_khusus')
+            ->where('jenis_hari', 'weekday')
+            ->where('jam_mulai', '>=', '18:00:00')
             ->first()?->harga;
 
-        $hargaWeekend = $lapangan->hargaMasters
+        $hargaWeekendPagi = $lapangan->hargaMasters
             ->whereNull('tanggal_khusus')
             ->where('jenis_hari', 'weekend')
+            ->where('jam_mulai', '<', '18:00:00')
+            ->first()?->harga
+            ?? $lapangan->hargaMasters
+                ->whereNull('tanggal_khusus')
+                ->where('jenis_hari', 'weekend')
+                ->first()?->harga;
+
+        $hargaWeekendMalam = $lapangan->hargaMasters
+            ->whereNull('tanggal_khusus')
+            ->where('jenis_hari', 'weekend')
+            ->where('jam_mulai', '>=', '18:00:00')
             ->first()?->harga;
+
+        $hargaWeekday = $hargaWeekdayPagi;
+        $hargaWeekend = $hargaWeekendPagi;
 
         $hargaKhusus = $lapangan->hargaMasters
             ->whereNotNull('tanggal_khusus')
             ->first();
 
-        return view('Admin.lapangan.edit', compact('lapangan', 'hargaWeekday', 'hargaWeekend', 'hargaKhusus'));
+        return view('Admin.lapangan.edit', compact(
+            'lapangan',
+            'hargaWeekday',
+            'hargaWeekend',
+            'hargaWeekdayPagi',
+            'hargaWeekdayMalam',
+            'hargaWeekendPagi',
+            'hargaWeekendMalam',
+            'hargaKhusus'
+        ));
     }
 
     public function update(UpdateLapanganRequest $request, Lapangan $lapangan): RedirectResponse
@@ -123,36 +205,102 @@ class LapanganController extends Controller
 
             $lapangan->update($data);
 
+            $jamBuka = strlen($lapangan->jam_buka) === 5 ? $lapangan->jam_buka . ':00' : $lapangan->jam_buka;
+            $jamTutup = strlen($lapangan->jam_tutup) === 5 ? $lapangan->jam_tutup . ':00' : $lapangan->jam_tutup;
+
+            $hargaWeekday = $request->validated('harga_weekday');
+            $hargaWeekdayMalam = $request->validated('harga_weekday_malam');
+            $hargaWeekend = $request->validated('harga_weekend');
+            $hargaWeekendMalam = $request->validated('harga_weekend_malam');
+
             // Update tarif weekday jika diberikan
             if ($request->filled('harga_weekday')) {
-                HargaMaster::updateOrCreate(
-                    [
-                        'lapangan_id' => $lapangan->id,
-                        'jenis_hari' => 'weekday',
-                        'tanggal_khusus' => null,
-                    ],
-                    [
-                        'jam_mulai' => $lapangan->jam_buka,
-                        'jam_selesai' => $lapangan->jam_tutup,
-                        'harga' => $request->validated('harga_weekday'),
-                    ]
-                );
+                if ($request->filled('harga_weekday_malam')) {
+                    HargaMaster::updateOrCreate(
+                        [
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekday',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => $jamBuka ?: '07:00:00',
+                            'jam_selesai' => '18:00:00',
+                        ],
+                        ['harga' => $hargaWeekday]
+                    );
+
+                    HargaMaster::updateOrCreate(
+                        [
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekday',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => '18:00:00',
+                            'jam_selesai' => $jamTutup ?: '24:00:00',
+                        ],
+                        ['harga' => $hargaWeekdayMalam]
+                    );
+                } else {
+                    $existingWeekday = HargaMaster::where('lapangan_id', $lapangan->id)
+                        ->where('jenis_hari', 'weekday')
+                        ->whereNull('tanggal_khusus')
+                        ->first();
+
+                    if ($existingWeekday) {
+                        $existingWeekday->update(['harga' => $hargaWeekday]);
+                    } else {
+                        HargaMaster::create([
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekday',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => $jamBuka,
+                            'jam_selesai' => $jamTutup,
+                            'harga' => $hargaWeekday,
+                        ]);
+                    }
+                }
             }
 
             // Update tarif weekend jika diberikan
             if ($request->filled('harga_weekend')) {
-                HargaMaster::updateOrCreate(
-                    [
-                        'lapangan_id' => $lapangan->id,
-                        'jenis_hari' => 'weekend',
-                        'tanggal_khusus' => null,
-                    ],
-                    [
-                        'jam_mulai' => $lapangan->jam_buka,
-                        'jam_selesai' => $lapangan->jam_tutup,
-                        'harga' => $request->validated('harga_weekend'),
-                    ]
-                );
+                if ($request->filled('harga_weekend_malam')) {
+                    HargaMaster::updateOrCreate(
+                        [
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekend',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => $jamBuka ?: '07:00:00',
+                            'jam_selesai' => '18:00:00',
+                        ],
+                        ['harga' => $hargaWeekend]
+                    );
+
+                    HargaMaster::updateOrCreate(
+                        [
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekend',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => '18:00:00',
+                            'jam_selesai' => $jamTutup ?: '24:00:00',
+                        ],
+                        ['harga' => $hargaWeekendMalam]
+                    );
+                } else {
+                    $existingWeekend = HargaMaster::where('lapangan_id', $lapangan->id)
+                        ->where('jenis_hari', 'weekend')
+                        ->whereNull('tanggal_khusus')
+                        ->first();
+
+                    if ($existingWeekend) {
+                        $existingWeekend->update(['harga' => $hargaWeekend]);
+                    } else {
+                        HargaMaster::create([
+                            'lapangan_id' => $lapangan->id,
+                            'jenis_hari' => 'weekend',
+                            'tanggal_khusus' => null,
+                            'jam_mulai' => $jamBuka,
+                            'jam_selesai' => $jamTutup,
+                            'harga' => $hargaWeekend,
+                        ]);
+                    }
+                }
             }
 
             // Update tarif tanggal merah jika diisi
