@@ -92,7 +92,7 @@
                 <span class="text-[11px] uppercase font-bold tracking-wider text-[#777682]">STATUS OPERASIONAL</span>
                 <div class="flex items-center gap-2 mt-2">
                     <span class="px-2.5 py-1 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                         Buka Sekarang
                     </span>
                 </div>

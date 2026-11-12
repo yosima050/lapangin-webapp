@@ -77,7 +77,7 @@
                 </div>
             </div>
             <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#eff4ff] text-[#1a146b]">
-                Otoritas FR-15
+                Role Pegawai
             </span>
         </div>
 
@@ -107,7 +107,7 @@
                 </div>
             </div>
             <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#e2dfff] text-[#100563]">
-                FR-13 Aktif
+                Tarif Khusus
             </span>
         </div>
     </div>
@@ -290,14 +290,13 @@
         </div>
     </div>
 
-    <!-- Section 2: Form Tambah Kasir Baru (FR-15) -->
+    <!-- Section 2: Form Tambah Kasir Baru -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-5" id="form-tambah-kasir">
         <div class="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-xl text-[#1a146b]">person_add</span>
                 <h2 class="text-base font-bold text-[#0b1c30]">Form Tambah Kasir Baru</h2>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#eff4ff] text-[#1a146b]">FR-15</span>
         </div>
 
         <form method="POST" action="{{ route('admin.pegawai.store') }}" class="flex flex-col gap-4 text-xs">
@@ -365,16 +364,15 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h2 class="text-base font-bold text-[#0b1c30]">Penetapan Custom Price Hari Libur &amp; Tanggal Merah</h2>
-                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[#acf847] text-[#102000]">SKPL FR-13</span>
                     </div>
-                    <p class="text-xs text-[#777682]">Kalender penyesuaian tarif otomatis (Peak Weekend Surcharge) pada hari libur nasional atau cuti bersama.</p>
+                    <p class="text-xs text-[#777682]">Kalender khusus hari libur dan tanggal merah dengan penetapan harga hari khusus.</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
                 <span class="px-3 py-1.5 rounded-xl bg-[#eff4ff] border border-[#dce9ff] text-xs font-bold text-[#1a146b] flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm">tune</span>
-                    Tarif Weekend + Rp 25.000 / Jam
+                    <span class="material-symbols-outlined text-sm">event_available</span>
+                    <span>{{ $customPrices->unique('tanggal_khusus')->count() }} Tanggal Libur Ditetapkan</span>
                 </span>
                 <a href="{{ route('admin.harga.create') }}"
                    class="px-4 py-2 rounded-xl bg-[#416900] hover:bg-[#304f00] text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
@@ -420,7 +418,7 @@
                     @endfor
 
                     @foreach ($calendarDays as $cday)
-                        <div class="p-1.5 h-14 rounded-lg flex flex-col justify-between transition-all {{ $cday['isToday'] ? 'bg-[#1a146b] text-white shadow-xs' : ($cday['isHoliday'] ? 'bg-[#acf847]/40 border border-[#acf847]' : ($cday['isWeekend'] ? 'bg-[#eff4ff] border border-[#ba1a1a]/30' : 'bg-[#eff4ff]')) }}">
+                        <div class="p-1.5 h-14 rounded-lg flex flex-col justify-between transition-all {{ $cday['isToday'] ? 'bg-[#1a146b] text-white shadow-xs' : ($cday['isHoliday'] ? 'bg-[#acf847]/30 border-2 border-[#acf847]' : ($cday['isWeekend'] ? 'bg-[#eff4ff] border border-[#ba1a1a]/20' : 'bg-[#f8faff] border border-[#eef4ff]')) }}">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold {{ $cday['isToday'] ? 'text-white' : ($cday['isWeekend'] ? 'text-[#ba1a1a]' : 'text-[#0b1c30]') }}">
                                     {{ $cday['day'] }}
@@ -428,12 +426,14 @@
                                 @if ($cday['isToday'])
                                     <span class="text-[8px] px-1 rounded bg-[#acf847] text-[#102000] font-bold">Hari Ini</span>
                                 @elseif ($cday['isHoliday'])
-                                    <span class="text-[8px] px-1 rounded bg-[#acf847] text-[#102000] font-bold">Libur</span>
+                                    <span class="text-[8px] px-1 rounded bg-[#416900] text-white font-bold">Libur</span>
                                 @endif
                             </div>
-                            <span class="text-[9px] font-bold {{ $cday['isToday'] ? 'text-[#acf847]' : ($cday['isHoliday'] ? 'text-[#416900]' : ($cday['isWeekend'] ? 'text-[#ba1a1a]' : 'text-[#777682]')) }}">
-                                {{ $cday['rateText'] }}
-                            </span>
+                            @if ($cday['rateText'])
+                                <span class="text-[9px] font-bold text-[#416900] truncate" title="{{ $cday['rateText'] }}">
+                                    {{ $cday['rateText'] }}
+                                </span>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -442,8 +442,8 @@
             <!-- Right Side: Daftar Tanggal Merah (Real from Database $customPrices) -->
             <div class="lg:col-span-5 flex flex-col gap-3">
                 <div class="pb-1 border-b border-[#eff4ff]">
-                    <h3 class="text-xs font-bold text-[#0b1c30]">Daftar Tanggal Merah &amp; Custom Surcharge ({{ $customPrices->count() }})</h3>
-                    <p class="text-[11px] text-[#777682]">Data penyesuaian tarif aktif langsung dari tabel database HargaMaster.</p>
+                    <h3 class="text-xs font-bold text-[#0b1c30]">Daftar Hari Libur &amp; Tarif Khusus ({{ $customPrices->count() }})</h3>
+                    <p class="text-[11px] text-[#777682]">Tarif khusus yang berlaku pada hari libur nasional atau event khusus.</p>
                 </div>
 
                 <div class="flex flex-col gap-2.5">

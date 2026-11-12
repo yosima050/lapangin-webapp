@@ -43,6 +43,22 @@
         </div>
     @endif
 
+    @if ($errors->any() || ($errors->updatePassword && $errors->updatePassword->any()))
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-semibold space-y-1">
+            <p class="font-bold">Terjadi kesalahan pada data yang dimasukkan:</p>
+            <ul class="list-disc pl-5 space-y-0.5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+                @if ($errors->updatePassword)
+                    @foreach ($errors->updatePassword->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                @endif
+            </ul>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 gap-6">
         <div class="p-5 sm:p-8 bg-white shadow-xs rounded-3xl border border-[#e8edfa]">
             <div class="max-w-xl">

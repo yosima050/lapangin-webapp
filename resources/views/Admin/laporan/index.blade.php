@@ -9,7 +9,7 @@
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="text-xs font-semibold text-[#474651] flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                     Audit &amp; Rekonsiliasi Keuangan
                 </span>
             </div>

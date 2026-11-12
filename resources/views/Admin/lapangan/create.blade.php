@@ -29,7 +29,6 @@
                         <span class="material-symbols-outlined text-xl text-[#1a146b]">sports_soccer</span>
                         <span>Informasi Utama Lapangan</span>
                     </h2>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#777682]">FR-12 ENTITY</span>
                 </div>
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
@@ -100,6 +99,14 @@
                         <input type="file" name="foto" id="foto" accept="image/jpeg,image/png,image/jpg,image/webp"
                                class="w-full rounded-xl bg-[#eff4ff] border border-[#e5eeff] px-4 py-2.5 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#1a146b] file:text-white hover:file:bg-[#312e81] transition cursor-pointer @error('foto') border-[#ba1a1a] @enderror">
                         <p class="text-[11px] text-[#777682] mt-1">Format: JPG, PNG, WEBP. Maksimal 3MB. Jika dikosongkan, avatar placeholder akan otomatis digunakan.</p>
+                        
+                        {{-- Notifikasi Instan Client-side Validasi Ukuran File > 3MB --}}
+                        <div id="foto-size-error" class="hidden mt-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2"></div>
+                        <div id="foto-preview-box" class="hidden mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-emerald-600 shrink-0">check_circle</span>
+                            <span id="foto-preview-text"></span>
+                        </div>
+
                         @error('foto')
                             <p class="text-xs text-[#ba1a1a] mt-1 font-medium">{{ $message }}</p>
                         @enderror
@@ -128,9 +135,6 @@
                         <span class="material-symbols-outlined text-xl text-[#1a146b]">payments</span>
                         <span>Tarif Dasar (Harga Master)</span>
                     </h2>
-                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#acf847] text-[#102000]">
-                        Proteksi FormRequest (Anti-Minus)
-                    </span>
                 </div>
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
@@ -227,4 +231,45 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fotoInput = document.getElementById('foto');
+    const errorBox = document.getElementById('foto-size-error');
+    const previewBox = document.getElementById('foto-preview-box');
+    const previewText = document.getElementById('foto-preview-text');
+    const maxSizeBytes = 3 * 1024 * 1024; // 3MB
+
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+                if (file.size > maxSizeBytes) {
+                    // Reset input seketika
+                    this.value = '';
+                    if (previewBox) previewBox.classList.add('hidden');
+                    if (errorBox) {
+                        errorBox.innerHTML = `
+                            <span class="material-symbols-outlined text-base text-red-600 shrink-0">error</span>
+                            <span>Ukuran file terlalu besar (${fileSizeMB} MB). Maksimal ukuran foto adalah 3MB. Silakan pilih foto lain yang lebih kecil.</span>
+                        `;
+                        errorBox.classList.remove('hidden');
+                    }
+                } else {
+                    if (errorBox) errorBox.classList.add('hidden');
+                    if (previewBox && previewText) {
+                        previewText.textContent = `Foto siap diunggah: ${file.name} (${fileSizeMB} MB)`;
+                        previewBox.classList.remove('hidden');
+                    }
+                }
+            } else {
+                if (errorBox) errorBox.classList.add('hidden');
+                if (previewBox) previewBox.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
 @endsection

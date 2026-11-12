@@ -34,7 +34,7 @@ class PegawaiController extends Controller
             ->orderBy('tanggal_khusus')
             ->get();
 
-        // 3. Kalender dinamis bulan ini dengan tarif riil dari database
+        // 3. Kalender dinamis bulan ini hanya untuk hari libur & tanggal merah khusus dari database
         $now = Carbon::now();
         $daysInMonth = $now->daysInMonth;
         $startDayOfWeek = $now->copy()->startOfMonth()->dayOfWeek; // 0 = Minggu
@@ -47,9 +47,13 @@ class PegawaiController extends Controller
             $isToday = $dateStr === now()->toDateString();
 
             // Cek apakah ada tarif khusus di database untuk tanggal ini
-            $custom = $customPrices->firstWhere('tanggal_khusus', $dateStr);
+            $customs = $customPrices->filter(function ($item) use ($dateStr) {
+                return $item->tanggal_khusus?->toDateString() === $dateStr;
+            });
+            $custom = $customs->first();
 
-            $rate = $custom ? (float)$custom->harga : ($isWeekend ? 150000 : 120000);
+            // Hanya tampilkan teks harga jika ada tarif khusus hari libur/tanggal merah terdaftar
+            $rateText = $custom ? 'Rp ' . number_format((float) $custom->harga, 0, ',', '.') : null;
 
             $calendarDays[] = [
                 'day' => $d,
@@ -57,8 +61,9 @@ class PegawaiController extends Controller
                 'isToday' => $isToday,
                 'isWeekend' => $isWeekend,
                 'isHoliday' => (bool) $custom,
-                'rateText' => round($rate / 1000) . 'k/j',
+                'rateText' => $rateText,
                 'custom' => $custom,
+                'customCount' => $customs->count(),
             ];
         }
 

@@ -43,13 +43,18 @@
         </div>
     @endif
 
-    @if ($errors->any())
+    @if ($errors->any() || ($errors->updatePassword && $errors->updatePassword->any()))
         <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-semibold space-y-1">
             <p class="font-bold">Terjadi kesalahan pada data yang dimasukkan:</p>
             <ul class="list-disc pl-5 space-y-0.5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
+                @if ($errors->updatePassword)
+                    @foreach ($errors->updatePassword->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                @endif
             </ul>
         </div>
     @endif
@@ -273,34 +278,48 @@
                     @csrf
                     @method('put')
 
-                    {{-- Kata Sandi Saat Ini --}}
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label for="current_password" class="block text-[11px] font-extrabold uppercase tracking-wider text-[#474651]">
-                                Kata Sandi Saat Ini (Old Password)
-                            </label>
-                            @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-[#1a146b] hover:underline">
-                                    Lupa Kata Sandi?
-                                </a>
-                            @endif
+                    @if (session('status') === 'password-updated')
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-emerald-600 shrink-0">check_circle</span>
+                            <span>Kata sandi Anda berhasil diperbarui dan telah aktif.</span>
                         </div>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none text-sm">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
-                            </span>
-                            <input type="password"
-                                   id="current_password"
-                                   name="current_password"
-                                   placeholder="Masukkan kata sandi lama Anda"
-                                   autocomplete="current-password"
-                                   required
-                                   class="w-full rounded-xl border border-[#dce9ff] bg-[#fdfdff] py-2.5 pl-10 pr-10 text-xs sm:text-sm font-semibold text-[#0b1c30] shadow-2xs transition focus:border-[#1a146b] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1a146b]">
+                    @endif
+
+                    @if (session('login_provider') === 'google')
+                        <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-[#1a146b] text-xs font-semibold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-blue-600 shrink-0">info</span>
+                            <span>Anda masuk menggunakan Akun Google. Anda dapat langsung menentukan kata sandi baru untuk mengaktifkan login via Email &amp; Password tanpa memerlukan kata sandi lama.</span>
                         </div>
-                        @error('current_password', 'updatePassword')
-                            <p class="mt-1 text-[11px] text-red-600 font-semibold">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    @else
+                        {{-- Kata Sandi Saat Ini --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="current_password" class="block text-[11px] font-extrabold uppercase tracking-wider text-[#474651]">
+                                    Kata Sandi Saat Ini (Old Password)
+                                </label>
+                                @if (Route::has('password.request'))
+                                    <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-[#1a146b] hover:underline">
+                                        Lupa Kata Sandi?
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none text-sm">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                                </span>
+                                <input type="password"
+                                       id="current_password"
+                                       name="current_password"
+                                       placeholder="Masukkan kata sandi lama Anda"
+                                       autocomplete="current-password"
+                                       required
+                                       class="w-full rounded-xl border border-[#dce9ff] bg-[#fdfdff] py-2.5 pl-10 pr-10 text-xs sm:text-sm font-semibold text-[#0b1c30] shadow-2xs transition focus:border-[#1a146b] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1a146b]">
+                            </div>
+                            @error('current_password', 'updatePassword')
+                                <p class="mt-1 text-[11px] text-red-600 font-semibold">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
 
                     {{-- Grid 2 Kolom: Kata Sandi Baru & Konfirmasi --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

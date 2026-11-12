@@ -14,7 +14,7 @@
             </div>
 
             <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-black uppercase tracking-wider">
-                <span class="w-2 h-2 rounded-full bg-[#416900] animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
                 <span>Langkah Terakhir</span>
             </div>
         </div>

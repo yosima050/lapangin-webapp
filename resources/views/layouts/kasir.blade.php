@@ -85,7 +85,7 @@
 
             <!-- Terminal Connection Chip -->
             <div class="px-3 py-2 rounded-xl bg-[#e5eeff] flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#acf847] animate-pulse"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#acf847]"></span>
                 <span class="text-xs font-semibold text-[#0b1c30]">Kasir Terhubung</span>
             </div>
 

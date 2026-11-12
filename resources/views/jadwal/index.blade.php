@@ -142,28 +142,43 @@
                         @endforeach
                     </div>
 
-                    {{-- Dropdown Pilih Lapangan Spesifik (Instan 0 ms) --}}
+                    {{-- Dropdown Pilih Lapangan Spesifik (Modern & Elegan) --}}
                     <div class="flex items-center gap-2 flex-shrink-0">
-                        <select
-                            x-model="selectedLapangan"
-                            class="px-3 py-2 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#acf847]"
-                        >
-                            <option value="">-- Semua Lapangan --</option>
-                            @foreach ($allLapangans as $al)
-                                <option value="{{ $al->id }}">
-                                    {{ $al->nama }} ({{ $al->kategori }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="relative inline-flex items-center">
+                            {{-- Icon Lapangan di kiri --}}
+                            <span class="absolute left-3.5 flex items-center pointer-events-none transition-colors"
+                                  :class="selectedLapangan !== '' ? 'text-[#1a146b]' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-[18px]">stadium</span>
+                            </span>
+
+                            <select
+                                x-model="selectedLapangan"
+                                class="appearance-none pl-10 pr-9 py-2 rounded-xl border bg-white text-xs font-bold shadow-2xs hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#acf847] focus:border-[#1a146b] transition-all cursor-pointer"
+                                :class="selectedLapangan !== '' ? 'border-[#1a146b] bg-[#f4f7ff] text-[#1a146b]' : 'border-gray-200 text-gray-700 hover:border-gray-300'"
+                            >
+                                <option value="">Semua Lapangan</option>
+                                @foreach ($allLapangans as $al)
+                                    <option value="{{ $al->id }}">
+                                        {{ $al->nama }} ({{ $al->kategori }})
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            {{-- Chevron Icon di kanan --}}
+                            <span class="absolute right-3 flex items-center pointer-events-none text-gray-400">
+                                <span class="material-symbols-outlined text-base">expand_more</span>
+                            </span>
+                        </div>
 
                         <button
                             type="button"
                             x-show="selectedLapangan !== ''"
+                            x-cloak
                             @click="selectedLapangan = ''"
-                            class="p-2 text-gray-400 hover:text-red-500 transition rounded-lg"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition shadow-2xs"
                             title="Reset filter lapangan"
                         >
-                            <span class="material-symbols-outlined text-sm">close</span>
+                            <span class="material-symbols-outlined text-base">close</span>
                         </button>
                     </div>
                 </div>

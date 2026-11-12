@@ -13,11 +13,17 @@
         @csrf
         @method('put')
 
-        <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
-        </div>
+        @if (session('login_provider') === 'google')
+            <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[#1a146b] text-xs font-semibold">
+                Anda masuk menggunakan Akun Google. Anda dapat langsung menentukan kata sandi baru tanpa kata sandi lama.
+            </div>
+        @else
+            <div>
+                <x-input-label for="update_password_current_password" :value="__('Current Password')" />
+                <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+                <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+            </div>
+        @endif
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" />

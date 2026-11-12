@@ -111,6 +111,7 @@ class AuthLoginGoogle extends Controller
 
             Auth::login($pelanggan, true);
             $request->session()->regenerate();
+            $request->session()->put('login_provider', 'google');
 
             return redirect()->intended(route('dashboard', absolute: false));
         }
@@ -202,6 +203,7 @@ class AuthLoginGoogle extends Controller
         // Otomatis login ke aplikasi
         Auth::login($pelanggan, true);
         $request->session()->regenerate();
+        $request->session()->put('login_provider', 'google');
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
