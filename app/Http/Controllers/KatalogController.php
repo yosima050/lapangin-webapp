@@ -123,7 +123,7 @@ class KatalogController extends Controller
 
         $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
         $baseRate = (float) ($jadwalData['base_rate'] ?? ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000)));
-        $primeRate = (float) ($jadwalData['prime_rate'] ?? ($baseRate + 40000));
+        $primeRate = (float) ($jadwalData['prime_rate'] ?? $baseRate);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -181,7 +181,7 @@ class KatalogController extends Controller
                 }
 
                 $cBaseRate = (float) ($cSlotData['base_rate'] ?? ($cIsWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000)));
-                $cPrimeRate = (float) ($cSlotData['prime_rate'] ?? ($cBaseRate + 40000));
+                $cPrimeRate = (float) ($cSlotData['prime_rate'] ?? $cBaseRate);
 
                 $initialDaysCache[$cDateStr] = [
                     'slotsSiang' => $cSlotsSiang,

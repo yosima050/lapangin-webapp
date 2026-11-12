@@ -79,6 +79,8 @@ Route::middleware(['auth', 'IsAdmin'])
 
         Route::patch('/lapangan/{lapangan}/toggle-status', [LapanganController::class, 'toggleStatus'])
             ->name('lapangan.toggle-status');
+        Route::patch('/lapangan/{lapangan}/tarif', [LapanganController::class, 'updateTarif'])
+            ->name('lapangan.update-tarif');
         Route::resource('lapangan', LapanganController::class);
         Route::resource('harga', HargaMasterController::class);
         Route::resource('perlengkapan', PerlengkapanController::class);

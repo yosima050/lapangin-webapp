@@ -65,7 +65,7 @@ class JadwalService
         }) ?? $mastersJenisHari->first();
 
         $defaultBaseRate = (float) ($dayMaster?->harga ?? ($isWeekend ? 175000 : 125000));
-        $defaultPrimeRate = (float) ($nightMaster?->harga ?? ($defaultBaseRate + 40000));
+        $defaultPrimeRate = (float) ($nightMaster?->harga ?? $defaultBaseRate);
 
         $jamBuka = $baseDate->copy()->setTimeFromTimeString(substr($lapangan->jam_buka, 0, 5));
         $jamTutupStr = substr($lapangan->jam_tutup, 0, 5);

@@ -377,4 +377,63 @@ class AdminLapanganCrudTest extends TestCase
             'harga' => 195000,
         ]);
     }
+
+    public function test_admin_can_update_tarif_via_atur_tarif_drawer(): void
+    {
+        $lapangan = Lapangan::create([
+            'nama' => 'Lapangan Atur Tarif Test',
+            'kategori' => 'Badminton',
+            'jam_buka' => '07:00',
+            'jam_tutup' => '23:00',
+        ]);
+
+        HargaMaster::create([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 80000,
+        ]);
+
+        HargaMaster::create([
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'jam_mulai' => '07:00:00',
+            'jam_selesai' => '23:00:00',
+            'harga' => 100000,
+        ]);
+
+        // Kirim request update tarif via route lapangan.update-tarif
+        $payload = [
+            'harga_weekday' => 85000,
+            'harga_weekday_malam' => 110000,
+            'harga_weekend' => 105000,
+            'harga_weekend_malam' => 105000, // Sama dengan pagi (flat weekend)
+        ];
+
+        $response = $this->actingAs($this->admin)
+            ->patch(route('admin.lapangan.update-tarif', $lapangan->id), $payload);
+
+        $response->assertRedirect(route('admin.lapangan.index'));
+        $response->assertSessionHas('success');
+
+        // Weekday siang dan malam berbeda
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 85000,
+        ]);
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekday',
+            'harga' => 110000,
+        ]);
+
+        // Weekend karena malamnya sama, tersimpan 105000
+        $this->assertDatabaseHas('harga_masters', [
+            'lapangan_id' => $lapangan->id,
+            'jenis_hari' => 'weekend',
+            'harga' => 105000,
+        ]);
+    }
 }

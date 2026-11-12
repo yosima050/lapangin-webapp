@@ -9,6 +9,7 @@ use App\Models\HargaMaster;
 use App\Models\Lapangan;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -325,6 +326,140 @@ class LapanganController extends Controller
 
         return redirect()->route('admin.lapangan.index')
             ->with('success', 'Data lapangan dan tarif dasar berhasil diperbarui!');
+    }
+
+    public function updateTarif(Request $request, Lapangan $lapangan): RedirectResponse
+    {
+        $validated = $request->validate([
+            'harga_weekday' => ['required', 'numeric', 'min:0'],
+            'harga_weekday_malam' => ['nullable', 'numeric', 'min:0'],
+            'harga_weekend' => ['required', 'numeric', 'min:0'],
+            'harga_weekend_malam' => ['nullable', 'numeric', 'min:0'],
+        ], [
+            'harga_weekday.required' => 'Tarif weekday pagi wajib diisi.',
+            'harga_weekday.min' => 'Tarif weekday pagi tidak boleh minus.',
+            'harga_weekday_malam.min' => 'Tarif weekday malam tidak boleh minus.',
+            'harga_weekend.required' => 'Tarif weekend pagi wajib diisi.',
+            'harga_weekend.min' => 'Tarif weekend pagi tidak boleh minus.',
+            'harga_weekend_malam.min' => 'Tarif weekend malam tidak boleh minus.',
+        ]);
+
+        $jamBuka = strlen($lapangan->jam_buka) === 5 ? $lapangan->jam_buka . ':00' : $lapangan->jam_buka;
+        $jamTutup = strlen($lapangan->jam_tutup) === 5 ? $lapangan->jam_tutup . ':00' : $lapangan->jam_tutup;
+
+        $hargaWeekday = $validated['harga_weekday'];
+        $hargaWeekdayMalam = $validated['harga_weekday_malam'] ?? null;
+        $hargaWeekend = $validated['harga_weekend'];
+        $hargaWeekendMalam = $validated['harga_weekend_malam'] ?? null;
+
+        // Weekday
+        if ($hargaWeekdayMalam !== null && $hargaWeekdayMalam !== '' && (float) $hargaWeekdayMalam !== (float) $hargaWeekday) {
+            HargaMaster::updateOrCreate(
+                [
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => '18:00:00',
+                ],
+                ['harga' => $hargaWeekday]
+            );
+
+            HargaMaster::updateOrCreate(
+                [
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => '18:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                ],
+                ['harga' => $hargaWeekdayMalam]
+            );
+        } else {
+            $existingWeekday = HargaMaster::where('lapangan_id', $lapangan->id)
+                ->where('jenis_hari', 'weekday')
+                ->whereNull('tanggal_khusus')
+                ->first();
+
+            if ($existingWeekday) {
+                $existingWeekday->update([
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekday,
+                ]);
+
+                HargaMaster::where('lapangan_id', $lapangan->id)
+                    ->where('jenis_hari', 'weekday')
+                    ->whereNull('tanggal_khusus')
+                    ->where('id', '!=', $existingWeekday->id)
+                    ->delete();
+            } else {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekday',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekday,
+                ]);
+            }
+        }
+
+        // Weekend
+        if ($hargaWeekendMalam !== null && $hargaWeekendMalam !== '' && (float) $hargaWeekendMalam !== (float) $hargaWeekend) {
+            HargaMaster::updateOrCreate(
+                [
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => '18:00:00',
+                ],
+                ['harga' => $hargaWeekend]
+            );
+
+            HargaMaster::updateOrCreate(
+                [
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => '18:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                ],
+                ['harga' => $hargaWeekendMalam]
+            );
+        } else {
+            $existingWeekend = HargaMaster::where('lapangan_id', $lapangan->id)
+                ->where('jenis_hari', 'weekend')
+                ->whereNull('tanggal_khusus')
+                ->first();
+
+            if ($existingWeekend) {
+                $existingWeekend->update([
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekend,
+                ]);
+
+                HargaMaster::where('lapangan_id', $lapangan->id)
+                    ->where('jenis_hari', 'weekend')
+                    ->whereNull('tanggal_khusus')
+                    ->where('id', '!=', $existingWeekend->id)
+                    ->delete();
+            } else {
+                HargaMaster::create([
+                    'lapangan_id' => $lapangan->id,
+                    'jenis_hari' => 'weekend',
+                    'tanggal_khusus' => null,
+                    'jam_mulai' => $jamBuka ?: '07:00:00',
+                    'jam_selesai' => $jamTutup ?: '24:00:00',
+                    'harga' => $hargaWeekend,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.lapangan.index')
+            ->with('success', "Tarif sewa master untuk {$lapangan->nama} berhasil disimpan!");
     }
 
     public function toggleStatus(Lapangan $lapangan): RedirectResponse
