@@ -160,6 +160,9 @@ class JadwalService
                 $regularMaster = $lapangan->hargaMasters
                     ->whereNull('tanggal_khusus')
                     ->where('jenis_hari', $jenisHari)
+                    ->sortByDesc(function ($hm) {
+                        return $hm->jam_mulai ?: '00:00:00';
+                    })
                     ->first(function ($hm) use ($baseDate, $slotMulai, $slotSelesai): bool {
                         $matchesStart = true;
                         if (! empty($hm->jam_mulai)) {

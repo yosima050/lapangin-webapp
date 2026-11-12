@@ -34,10 +34,10 @@
         }
     }
 
-    // Tentukan estimasi harga dasar
+    // Tentukan estimasi harga dasar dari controller / jadwal data
     $isWeekend = in_array($selectedDateCarbon->dayOfWeek, [0, 6]);
-    $baseRate = (float) ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000));
-    $primeRate = (float) ($baseRate + 40000);
+    $baseRate = (float) ($baseRate ?? ($jadwalData['base_rate'] ?? ($isWeekend ? ($hargaWeekend ?? 175000) : ($hargaWeekday ?? 125000))));
+    $primeRate = (float) ($primeRate ?? ($jadwalData['prime_rate'] ?? $baseRate));
     // Auto-select slot jika dikirim lewat parameter query 'jam' dari Cek Jadwal
     $initialSelectedSlots = [];
     $paramJam = request('jam');

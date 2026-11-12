@@ -651,14 +651,13 @@ class CheckoutController extends Controller
             } else {
                 // Prioritas kedua: harga master weekday/weekend.
                 $defaultPrice = $lapangan->hargaMasters
-                    ->filter(function ($hm) use ($jenisHari, $baseDate, $slotStart, $slotEnd) {
-                        if (
-                            $hm->tanggal_khusus !== null
-                            || $hm->jenis_hari !== $jenisHari
-                        ) {
-                            return false;
-                        }
-
+                    ->filter(function ($hm) use ($jenisHari) {
+                        return $hm->tanggal_khusus === null && $hm->jenis_hari === $jenisHari;
+                    })
+                    ->sortByDesc(function ($hm) {
+                        return $hm->jam_mulai ?: '00:00:00';
+                    })
+                    ->first(function ($hm) use ($baseDate, $slotStart, $slotEnd) {
                         $matchesStart = true;
                         if (! empty($hm->jam_mulai)) {
                             $hmMulai = $baseDate->copy()->setTimeFromTimeString(
@@ -677,8 +676,7 @@ class CheckoutController extends Controller
                         }
 
                         return $matchesStart && $matchesEnd;
-                    })
-                    ->first();
+                    });
 
                 if (! $defaultPrice) {
                     $defaultPrice = $lapangan->hargaMasters

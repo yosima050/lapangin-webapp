@@ -1296,7 +1296,29 @@ for ($i = 0; $i < $durasi; $i++) {
                                 return $hm->tanggal_khusus === null
                                     && $hm->jenis_hari === $jenisHari;
                             })
-                            ->first();
+                            ->sortByDesc(function ($hm) {
+                                return $hm->jam_mulai ?: '00:00:00';
+                            })
+                            ->first(function ($hm) use ($tanggalBaru, $slotStart, $slotEnd) {
+                                $matchesStart = true;
+                                if (! empty($hm->jam_mulai)) {
+                                    $hmMulai = Carbon::parse($tanggalBaru . ' ' . substr($hm->jam_mulai, 0, 5));
+                                    $matchesStart = $slotStart->gte($hmMulai);
+                                }
+                                $matchesEnd = true;
+                                if (! empty($hm->jam_selesai)) {
+                                    $jamSelesai = substr($hm->jam_selesai, 0, 5);
+                                    $hmSelesai = in_array($jamSelesai, ['24:00', '00:00'], true)
+                                        ? Carbon::parse($tanggalBaru)->addDay()->startOfDay()
+                                        : Carbon::parse($tanggalBaru . ' ' . $jamSelesai);
+                                    $matchesEnd = $slotEnd->lte($hmSelesai);
+                                }
+                                return $matchesStart && $matchesEnd;
+                            })
+                            ?? $court->hargaMasters
+                                ->whereNull('tanggal_khusus')
+                                ->where('jenis_hari', $jenisHari)
+                                ->first();
 
                         $rate = (float) ($regular?->harga ?? 150000);
                     }
