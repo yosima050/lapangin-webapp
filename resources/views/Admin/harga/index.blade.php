@@ -11,7 +11,7 @@
             <div>
                 <h2 class="text-2xl font-extrabold text-gray-900">Aturan Tarif Harga Master</h2>
                 <p class="text-sm text-gray-500 mt-1">
-                    Atur tarif dasar operasional weekday, weekend, serta tarif khusus tanggal merah untuk setiap lapangan.
+                    Atur tarif dasar operasional reguler weekday (Senin–Jumat) dan weekend (Sabtu–Minggu) untuk setiap lapangan.
                 </p>
             </div>
 
@@ -21,6 +21,22 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 Tambah Aturan Tarif Baru
+            </a>
+        </div>
+
+        {{-- Banner Informasi Pengaturan Harga Khusus --}}
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 text-xs shadow-xs">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-amber-600 text-2xl shrink-0">info</span>
+                <div>
+                    <p class="font-bold">Mencari Pengaturan Tarif Khusus Tanggal Merah &amp; Hari Libur?</p>
+                    <p class="text-amber-700 mt-0.5">Halaman ini diperuntukkan untuk tarif master operasional dasar. Seluruh tarif tanggal merah dan penyesuaian khusus kini dikelola terpusat di menu <strong>Pengaturan Harga Khusus</strong>.</p>
+                </div>
+            </div>
+            <a href="{{ route('admin.harga-khusus.index') }}"
+               class="px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 transition shadow-2xs">
+                <span>Buka Pengaturan Harga Khusus</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
         </div>
 

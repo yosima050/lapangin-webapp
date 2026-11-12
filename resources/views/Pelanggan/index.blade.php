@@ -274,7 +274,38 @@
                     </span>
                 </div>
 
-                <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+                <form method="POST" action="{{ route('password.update') }}" class="space-y-5"
+                      x-data="{
+                          newPassword: '',
+                          confirmPassword: '',
+                          get hasMinLength() { return this.newPassword.length >= 8; },
+                          get hasLetterAndNumber() { return /[a-zA-Z]/.test(this.newPassword) && /[0-9]/.test(this.newPassword); },
+                          get isMatched() { return this.newPassword.length > 0 && this.newPassword === this.confirmPassword; },
+                          get score() {
+                              if (!this.newPassword) return 0;
+                              let s = 0;
+                              if (this.newPassword.length >= 8) s++;
+                              if (this.newPassword.length >= 10) s++;
+                              if (/[a-zA-Z]/.test(this.newPassword) && /[0-9]/.test(this.newPassword)) s++;
+                              if (/[^a-zA-Z0-9]/.test(this.newPassword)) s++;
+                              return s;
+                          },
+                          get strength() {
+                              if (!this.newPassword) {
+                                  return { label: 'Belum Diisi', textClass: 'text-gray-400', barClass: 'bg-gray-200', width: '0%' };
+                              }
+                              if (this.score <= 1) {
+                                  return { label: 'Sangat Lemah', textClass: 'text-red-500', barClass: 'bg-red-500', width: '25%' };
+                              }
+                              if (this.score === 2) {
+                                  return { label: 'Sedang', textClass: 'text-amber-500', barClass: 'bg-amber-500', width: '50%' };
+                              }
+                              if (this.score === 3) {
+                                  return { label: 'Kuat', textClass: 'text-blue-600', barClass: 'bg-blue-600', width: '75%' };
+                              }
+                              return { label: 'Sangat Kuat', textClass: 'text-[#416900]', barClass: 'bg-gradient-to-r from-[#acf847] to-[#22c55e]', width: '100%' };
+                          }
+                      }">
                     @csrf
                     @method('put')
 
@@ -334,6 +365,7 @@
                                 <input type="password"
                                        id="password"
                                        name="password"
+                                       x-model="newPassword"
                                        placeholder="Minimal 8 karakter baru"
                                        autocomplete="new-password"
                                        required
@@ -355,6 +387,7 @@
                                 <input type="password"
                                        id="password_confirmation"
                                        name="password_confirmation"
+                                       x-model="confirmPassword"
                                        placeholder="Ketik ulang kata sandi baru"
                                        autocomplete="new-password"
                                        required
@@ -366,43 +399,50 @@
                         </div>
                     </div>
 
-                    {{-- Box Kekuatan Sandi ala Figma --}}
+                    {{-- Box Kekuatan Sandi Interaktif (Real-time Dynamic Strength Meter) --}}
                     <div class="rounded-2xl border border-[#dce9ff] bg-[#f4f7ff] p-4 text-[#474651]">
                         <div class="flex items-center justify-between text-xs font-bold mb-2">
                             <span class="flex items-center gap-1.5 text-[#1a146b]">
-                                <svg class="w-4 h-4 text-[#1a146b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                                <span class="material-symbols-outlined text-base text-[#1a146b]">shield</span>
                                 <span>Kekuatan Sandi</span>
                             </span>
-                            <span class="text-[#416900] font-black">
-                                Kuat
-                            </span>
+                            <span :class="strength.textClass" class="font-black tracking-wide" x-text="strength.label"></span>
                         </div>
 
-                        {{-- Progress Bar --}}
+                        {{-- Progress Bar Dinamis --}}
                         <div class="h-2 w-full rounded-full bg-gray-200 overflow-hidden mb-3">
-                            <div class="h-full rounded-full bg-gradient-to-r from-[#acf847] to-[#22c55e]" style="width: 100%;"></div>
+                            <div :class="strength.barClass" :style="'width: ' + strength.width" class="h-full rounded-full transition-all duration-300"></div>
                         </div>
 
-                        {{-- Checklist Kriteria --}}
+                        {{-- Checklist Kriteria Dinamis --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasMinLength ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasMinLength ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasMinLength ? 'check_circle' : 'radio_button_unchecked'"></span>
                                 <span>Minimal 8 karakter</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasLetterAndNumber ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasLetterAndNumber ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasLetterAndNumber ? 'check_circle' : 'radio_button_unchecked'"></span>
                                 <span>Kombinasi huruf &amp; angka</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                <span>Disimpan menggunakan Hashing Bcrypt</span>
+                            <div class="flex items-center gap-1.5 transition-colors duration-200" :class="isMatched ? 'text-[#166534] font-bold' : 'text-gray-400'">
+                                <span class="material-symbols-outlined text-sm shrink-0" :class="isMatched ? 'text-[#22c55e]' : 'text-gray-400'" x-text="isMatched ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <span>Konfirmasi sandi cocok</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[#166534]">
-                                <svg class="w-3.5 h-3.5 text-[#22c55e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                <span>Sesi aktif di perangkat lain akan direset</span>
+                            <div class="flex items-center gap-1.5 text-gray-500">
+                                <span class="material-symbols-outlined text-sm text-[#1a146b] shrink-0">lock</span>
+                                <span>Disimpan dengan Hashing Bcrypt</span>
                             </div>
                         </div>
                     </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130d52] px-6 py-3 text-xs sm:text-sm font-extrabold text-white shadow-md transition cursor-pointer">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                            <span>Perbarui Kata Sandi</span>
+                        </button>
+                    </div>
+                </form>
 
                     <div class="pt-2 flex justify-end">
                         <button type="submit"

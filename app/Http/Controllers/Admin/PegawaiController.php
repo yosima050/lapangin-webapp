@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\HargaMaster;
 use App\Models\Pelanggan;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +13,7 @@ use Illuminate\View\View;
 class PegawaiController extends Controller
 {
     /**
-     * Tampilan Kelola Staf Kasir & Dynamic Pricing Hari Libur (Image 2)
+     * Tampilan Kelola Akun Pegawai & Kasir
      */
     public function index(Request $request): View
     {
@@ -28,52 +26,10 @@ class PegawaiController extends Controller
         $totalKasir = Pelanggan::where('role', 'kasir')->where('is_active', true)->count();
         $totalAdmin = Pelanggan::where('role', 'admin')->count();
 
-        // 2. Ambil data penyesuaian tarif dinamis tanggal merah riil dari database
-        $customPrices = HargaMaster::with('lapangan')
-            ->whereNotNull('tanggal_khusus')
-            ->orderBy('tanggal_khusus')
-            ->get();
-
-        // 3. Kalender dinamis bulan ini hanya untuk hari libur & tanggal merah khusus dari database
-        $now = Carbon::now();
-        $daysInMonth = $now->daysInMonth;
-        $startDayOfWeek = $now->copy()->startOfMonth()->dayOfWeek; // 0 = Minggu
-
-        $calendarDays = [];
-        for ($d = 1; $d <= $daysInMonth; $d++) {
-            $date = $now->copy()->day($d);
-            $dateStr = $date->toDateString();
-            $isWeekend = in_array($date->dayOfWeek, [0, 6]);
-            $isToday = $dateStr === now()->toDateString();
-
-            // Cek apakah ada tarif khusus di database untuk tanggal ini
-            $customs = $customPrices->filter(function ($item) use ($dateStr) {
-                return $item->tanggal_khusus?->toDateString() === $dateStr;
-            });
-            $custom = $customs->first();
-
-            // Hanya tampilkan teks harga jika ada tarif khusus hari libur/tanggal merah terdaftar
-            $rateText = $custom ? 'Rp ' . number_format((float) $custom->harga, 0, ',', '.') : null;
-
-            $calendarDays[] = [
-                'day' => $d,
-                'date' => $dateStr,
-                'isToday' => $isToday,
-                'isWeekend' => $isWeekend,
-                'isHoliday' => (bool) $custom,
-                'rateText' => $rateText,
-                'custom' => $custom,
-                'customCount' => $customs->count(),
-            ];
-        }
-
         return view('Admin.pegawai.index', compact(
             'pegawais',
             'totalKasir',
-            'totalAdmin',
-            'customPrices',
-            'calendarDays',
-            'startDayOfWeek'
+            'totalAdmin'
         ));
     }
 

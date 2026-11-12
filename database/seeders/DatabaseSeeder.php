@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\HargaKhusus;
 use App\Models\HargaMaster;
 use App\Models\Jadwal;
 use App\Models\Lapangan;
@@ -234,24 +235,25 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            // Surcharge Hari Libur Nasional
+            // Surcharge Hari Libur Nasional langsung ke tabel HargaKhusus
             $holidays = [
-                ['tanggal' => Carbon::parse('2026-08-17'), 'surcharge' => 25000],
-                ['tanggal' => Carbon::parse('2026-06-06'), 'surcharge' => 25000],
-                ['tanggal' => Carbon::parse('2026-07-08'), 'surcharge' => 25000],
+                ['tanggal' => Carbon::parse('2026-08-17'), 'surcharge' => 25000, 'ket' => 'HUT Kemerdekaan RI'],
+                ['tanggal' => Carbon::parse('2026-06-06'), 'surcharge' => 25000, 'ket' => 'Hari Libur Nasional'],
+                ['tanggal' => Carbon::parse('2026-07-08'), 'surcharge' => 25000, 'ket' => 'Tahun Baru Islam'],
             ];
 
             foreach ($holidays as $h) {
-                HargaMaster::firstOrCreate(
+                HargaKhusus::firstOrCreate(
                     [
                         'lapangan_id' => $lap->id,
-                        'tanggal_khusus' => $h['tanggal']->toDateString(),
-                        'jam_mulai' => '07:00',
-                        'jam_selesai' => '24:00',
+                        'tanggal' => $h['tanggal']->toDateString(),
+                        'jam_mulai' => '07:00:00',
+                        'jam_selesai' => '24:00:00',
                     ],
                     [
-                        'jenis_hari' => 'weekend',
                         'harga' => $rates[$lap->id]['weekend'] + $h['surcharge'],
+                        'keterangan' => $h['ket'],
+                        'is_active' => true,
                     ]
                 );
             }
