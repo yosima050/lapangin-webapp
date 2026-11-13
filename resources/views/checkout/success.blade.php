@@ -28,14 +28,23 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <button type="button" onclick="window.print()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-emerald-50 shadow-sm transition cursor-pointer">
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <a href="{{ route('checkout.tiketPdf', $transaksi->order_id) }}"
+                   target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs shadow-sm transition">
+                    <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <span>Unduh Tiket PDF</span>
+                </a>
+                <a href="{{ route('checkout.tiketPdf', $transaksi->order_id) }}?stream=1"
+                   target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-emerald-50 shadow-sm transition cursor-pointer">
                     <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.64-2.115-1.173-3.085m12.906 0a17.394 17.394 0 00-1.173 3.085m-10.56 0A17.917 17.917 0 0012 15c2.316 0 4.475-.436 6.44-1.171m-12.88 0C4.385 10.978 4 8.784 4 6.5 4 4.567 5.567 3 7.5 3h9C18.433 3 20 4.567 20 6.5c0 2.284-.385 4.478-1.56 7.329M6.72 13.829a17.92 17.92 0 00-1.173 3.085M6.72 13.829A17.92 17.92 0 0112 15m0 0v6m-4-3h8" />
                     </svg>
                     <span>Cetak E-Tiket</span>
-                </button>
+                </a>
             </div>
         </div>
 

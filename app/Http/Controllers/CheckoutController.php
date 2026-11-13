@@ -9,12 +9,14 @@ use App\Models\Transaksi;
 use App\Services\GuestAccountProvisioner;
 use App\Services\PaymentService;
 use App\Models\HargaKhusus;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CheckoutController extends Controller
 {
@@ -247,6 +249,99 @@ class CheckoutController extends Controller
             'isFull',
             'sisaBayar'
         ));
+    }
+
+    /**
+     * Unduh e-tiket PDF untuk pesanan sukses checkout.
+     */
+    public function downloadTiketPdf(Request $request, string $orderId)
+    {
+        $query = Transaksi::with(['jadwal.lapangan', 'jadwal.pelanggan', 'jadwal.detailSewaPerlengkapans', 'jadwal.transaksis'])
+            ->where('order_id', $orderId)
+            ->orWhere('referensi_midtrans', $orderId);
+
+        if (Str::isUuid($orderId)) {
+            $query->orWhere('id', $orderId);
+        }
+
+        $transaksi = $query->firstOrFail();
+        $jadwal = $transaksi->jadwal;
+
+        if (! $jadwal) {
+            abort(404, 'Data reservasi untuk pesanan ini tidak ditemukan.');
+        }
+
+        // Pastikan kode_qr dan token_manual terisi
+        $dirty = false;
+        if (empty($jadwal->kode_qr)) {
+            $jadwal->kode_qr = 'LPNG-QR-'.strtoupper(Str::random(12)).'-'.time();
+            $dirty = true;
+        }
+        if (empty($jadwal->token_manual) || !preg_match('/^[A-Z0-9]{6}$/', $jadwal->token_manual)) {
+            do {
+                $token = strtoupper(Str::random(6));
+            } while (Jadwal::where('token_manual', $token)->where('id', '!=', $jadwal->id)->exists());
+
+            $jadwal->token_manual = $token;
+            $dirty = true;
+        }
+        if ($dirty) {
+            $jadwal->save();
+        }
+
+        $namaPemesan = $jadwal->nama_tamu ?: ($jadwal->pelanggan?->nama ?? 'Tamu Lapangan');
+        $noHpPemesan = $jadwal->no_wa_tamu ?: ($jadwal->pelanggan?->no_hp ?? '');
+        $emailPemesan = $jadwal->email_tamu ?: ($jadwal->pelanggan?->email ?? '-');
+
+        $biayaSewa = (float) ($jadwal->harga_disepakati ?? 0);
+        $biayaLayanan = (float) ($jadwal->biaya_layanan ?? 0);
+        $totalPerlengkapan = (float) $jadwal->detailSewaPerlengkapans->sum('subtotal');
+        $totalTagihan = $biayaSewa + $biayaLayanan + $totalPerlengkapan;
+
+        $nominalTerbayar = (float) $jadwal->transaksis->where('status', 'berhasil')->sum('jumlah');
+        if ($nominalTerbayar <= 0) {
+            $nominalTerbayar = (float) $transaksi->jumlah;
+        }
+        $sisaTagihan = max(0, $totalTagihan - $nominalTerbayar);
+        $isLunas = ($sisaTagihan <= 0 || in_array($jadwal->status_pembayaran, ['lunas_online', 'lunas_kasir', 'lunas']));
+
+        $qrPayload = $jadwal->kode_qr ?: ($jadwal->token_manual ?: ('LPNG-' . $jadwal->id));
+        $qrSvg = (string) QrCode::size(115)->margin(0)->errorCorrection('M')->generate($qrPayload);
+        $qrBase64 = base64_encode($qrSvg);
+        $tokenManual = $jadwal->token_manual ?: strtoupper(substr($jadwal->id, 0, 6));
+
+        $data = compact(
+            'jadwal',
+            'namaPemesan',
+            'noHpPemesan',
+            'emailPemesan',
+            'biayaSewa',
+            'biayaLayanan',
+            'totalPerlengkapan',
+            'totalTagihan',
+            'nominalTerbayar',
+            'sisaTagihan',
+            'isLunas',
+            'qrBase64',
+            'tokenManual'
+        );
+
+        $pdf = Pdf::loadView('Pelanggan.tiket_pdf', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'Helvetica',
+            ]);
+
+        $safeKode = preg_replace('/[^A-Za-z0-9_-]/', '_', $tokenManual);
+        $filename = "E-Tiket_LapangIn_{$safeKode}.pdf";
+
+        if ($request->query('stream') == '1') {
+            return $pdf->stream($filename);
+        }
+
+        return $pdf->download($filename);
     }
 
     /**

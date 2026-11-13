@@ -125,4 +125,87 @@ class PelangganProfileAndRiwayatPaymentTest extends TestCase
         $response->assertSee('DP 50% Terverifikasi (Siap Main)');
         $response->assertSee('Lihat E-Tiket Masuk &amp; QR', false);
     }
+
+    public function test_pelanggan_can_download_official_tiket_pdf(): void
+    {
+        $jadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'pelanggan_id' => $this->pelanggan->id,
+            'tanggal' => now()->addDays(3)->toDateString(),
+            'jam_mulai' => '14:00',
+            'jam_selesai' => '16:00',
+            'harga_disepakati' => 300000,
+            'biaya_layanan' => 0,
+            'status' => 'terverifikasi',
+            'status_pembayaran' => 'lunas_online',
+            'kode_qr' => 'LPNG-QR-LUNAS-998877',
+            'token_manual' => 'LNS998',
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->pelanggan)
+            ->get(route('pelanggan.booking.tiketPdf', $jadwal->id));
+
+        $response->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+        $this->assertStringContainsString('.pdf', (string) $response->headers->get('content-disposition'));
+    }
+
+    public function test_pelanggan_cannot_download_other_user_tiket_pdf(): void
+    {
+        $otherPelanggan = Pelanggan::factory()->create([
+            'email' => 'other.user@sports.id',
+            'role' => 'pelanggan',
+        ]);
+
+        $otherJadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'pelanggan_id' => $otherPelanggan->id,
+            'tanggal' => now()->addDays(4)->toDateString(),
+            'jam_mulai' => '10:00',
+            'jam_selesai' => '12:00',
+            'harga_disepakati' => 300000,
+            'biaya_layanan' => 0,
+            'status' => 'terverifikasi',
+            'status_pembayaran' => 'lunas_online',
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->pelanggan)
+            ->get(route('pelanggan.booking.tiketPdf', $otherJadwal->id));
+
+        $response->assertStatus(403);
+    }
+
+    public function test_checkout_success_page_can_download_tiket_pdf(): void
+    {
+        $jadwal = Jadwal::create([
+            'lapangan_id' => $this->lapangan->id,
+            'pelanggan_id' => $this->pelanggan->id,
+            'tanggal' => now()->addDays(5)->toDateString(),
+            'jam_mulai' => '18:00',
+            'jam_selesai' => '20:00',
+            'harga_disepakati' => 300000,
+            'biaya_layanan' => 0,
+            'status' => 'terverifikasi',
+            'status_pembayaran' => 'lunas_online',
+            'created_at' => now(),
+        ]);
+
+        $trx = \App\Models\Transaksi::create([
+            'jadwal_id' => $jadwal->id,
+            'order_id' => 'LPNG-TEST-TRX-12345',
+            'jumlah' => 300000,
+            'metode' => 'online',
+            'status' => 'berhasil',
+            'jenis' => 'full',
+            'dibayar_pada' => now(),
+        ]);
+
+        $response = $this->get(route('checkout.tiketPdf', $trx->order_id));
+
+        $response->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+        $this->assertStringContainsString('.pdf', (string) $response->headers->get('content-disposition'));
+    }
 }
