@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('checkout.pay');
 Route::get('/checkout/success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/success/{orderId}/tiket-pdf', [CheckoutController::class, 'downloadTiketPdf'])->name('checkout.tiketPdf');
 Route::get('/checkout/status/{orderId}', [CheckoutController::class, 'status'])->name('checkout.status');
 Route::get('/checkout/check-status/{orderId}', [CheckoutController::class, 'checkStatus'])->name('checkout.checkStatus');
 Route::post('/checkout/expire/{id}', [CheckoutController::class, 'expire'])->name('checkout.expire');
@@ -195,6 +196,9 @@ Route::middleware(['auth', 'IsPelanggan'])->group(function () {
 
     Route::get('/pelanggan/booking', [RiwayatController::class, 'index'])
         ->name('pelanggan.booking.index');
+
+    Route::get('/pelanggan/booking/{id}/tiket-pdf', [RiwayatController::class, 'downloadTiketPdf'])
+        ->name('pelanggan.booking.tiketPdf');
 
     // Reschedule & Auto-Penalty Cancellation (Sprint 5)
     Route::get('/pelanggan/booking/{id}/reschedule', [BookingRescheduleController::class, 'create'])

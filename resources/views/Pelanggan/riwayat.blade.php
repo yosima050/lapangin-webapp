@@ -818,13 +818,19 @@
                    target="_blank"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.75 6.47 6.47 0 00.384-2.548C3.606 16.353 3 14.28 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
-                    <span>Bagikan Tiket ke WhatsApp Tim</span>
+                    <span>Bagikan ke WhatsApp</span>
                 </a>
-                <button type="button" 
-                        onclick="printTiketDocument('printable-ticket-{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')" 
-                        class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
+                <a href="{{ route('pelanggan.booking.tiketPdf', $jadwal->id) }}" 
+                   target="_blank"
+                   class="inline-flex items-center gap-2 rounded-2xl bg-[#1a146b] hover:bg-[#25207c] px-5 py-2.5 text-xs font-bold text-white transition shadow-xs">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                     <span>Unduh Tiket PDF</span>
+                </a>
+                <button type="button" 
+                        onclick="printTiketDocument('{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')" 
+                        class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.64-2.115-1.173-3.085m12.906 0a17.394 17.394 0 00-1.173 3.085m-10.56 0A17.917 17.917 0 0012 15c2.316 0 4.475-.436 6.44-1.171m-12.88 0C4.385 10.978 4 8.784 4 6.5 4 4.567 5.567 3 7.5 3h9C18.433 3 20 4.567 20 6.5c0 2.284-.385 4.478-1.56 7.329M6.72 13.829a17.92 17.92 0 00-1.173 3.085M6.72 13.829A17.92 17.92 0 0112 15m0 0v6m-4-3h8"/></svg>
+                    <span>Cetak Tiket</span>
                 </button>
             </div>
 
@@ -1364,84 +1370,22 @@
         }, 1000);
     });
 
-    // Fungsi cetak/unduh PDF tiket bersih 1 halaman terisolasi
-    window.printTiketDocument = function(elementId, docTitle) {
-        const ticketEl = document.getElementById(elementId);
-        if (!ticketEl) {
-            window.print();
-            return;
+    // Fungsi cetak/unduh PDF tiket resmi berstandar tinggi
+    window.printTiketDocument = function(targetId, docTitle) {
+        let jadwalId = targetId;
+        if (typeof targetId === 'string' && targetId.startsWith('printable-ticket-')) {
+            jadwalId = targetId.replace('printable-ticket-', '');
         }
 
-        // Buat clone dari tiket
-        const clone = ticketEl.cloneNode(true);
-        // Hilangkan elemen yang tidak perlu dicetak (tombol close, tombol action)
-        clone.querySelectorAll('.no-print').forEach(el => el.remove());
+        const pdfUrl = '/pelanggan/booking/' + encodeURIComponent(jadwalId) + '/tiket-pdf?stream=1';
         
-        // Pastikan style container pas dalam 1 halaman A4 tanpa scrolling modal
-        clone.style.maxHeight = 'none';
-        clone.style.overflow = 'visible';
-        clone.style.boxShadow = 'none';
-        clone.style.border = '1px solid #e5e7eb';
-        clone.style.margin = '0 auto';
-        clone.style.padding = '20px';
-        clone.style.width = '100%';
-
-        const printFrame = document.createElement('iframe');
-        printFrame.style.position = 'fixed';
-        printFrame.style.right = '0';
-        printFrame.style.bottom = '0';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = '0';
-        document.body.appendChild(printFrame);
-
-        const frameDoc = printFrame.contentWindow.document;
-        frameDoc.open();
-        frameDoc.write(`
-            <!DOCTYPE html>
-            <html lang="id">
-            <head>
-                <meta charset="UTF-8">
-                <title>${docTitle || 'E-Tiket LapangIn'}</title>
-                <script src="https://cdn.tailwindcss.com"><\/script>
-                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-                <style>
-                    @page {
-                        size: A4 portrait;
-                        margin: 8mm 10mm;
-                    }
-                    * {
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                        box-sizing: border-box;
-                    }
-                    body {
-                        font-family: 'Plus Jakarta Sans', sans-serif;
-                        background: #ffffff !important;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .no-print {
-                        display: none !important;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="p-2">
-                    ${clone.outerHTML}
-                </div>
-            </body>
-            </html>
-        `);
-        frameDoc.close();
-
-        printFrame.contentWindow.focus();
-        setTimeout(() => {
-            printFrame.contentWindow.print();
-            setTimeout(() => {
-                document.body.removeChild(printFrame);
-            }, 2000);
-        }, 400);
+        // Buka tab stream PDF resmi untuk pratinjau dan pencetakan langsung berstandar A4
+        const printWindow = window.open(pdfUrl, '_blank');
+        if (printWindow) {
+            printWindow.focus();
+        } else {
+            window.location.href = pdfUrl;
+        }
     };
 </script>
 
