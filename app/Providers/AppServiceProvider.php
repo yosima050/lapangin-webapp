@@ -52,6 +52,10 @@ class AppServiceProvider extends ServiceProvider
                 ->view('emails.password-reset', [
                     'url' => $url,
                     'nama' => $nama,
+                ])
+                ->text('emails.password-reset-text', [
+                    'url' => $url,
+                    'nama' => $nama,
                 ]);
         });
     }
