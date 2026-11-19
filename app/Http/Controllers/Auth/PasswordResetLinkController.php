@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -26,16 +27,24 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $status = Password::broker('Pelanggan')->sendResetLink(
-            $request->only('email')
-        );
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        try {
+            // Send the password reset link using the configured Pelanggan broker
+            $status = Password::broker('Pelanggan')->sendResetLink(
+                $request->only('email')
+            );
+        } catch (\Throwable $e) {
+            Log::error('Password reset email failed: ' . $e->getMessage(), [
+                'email' => $request->input('email'),
+                'exception' => $e,
+            ]);
+
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'Gagal mengirim email reset kata sandi. Pastikan konfigurasi mail server sudah aktif atau hubungi administrator.']);
+        }
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))
