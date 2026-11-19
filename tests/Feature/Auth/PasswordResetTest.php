@@ -78,4 +78,28 @@ class PasswordResetTest extends TestCase
             }
         );
     }
+
+    public function test_reset_password_email_uses_custom_official_template(): void
+    {
+        $pelanggan = Pelanggan::factory()->create([
+            'nama' => 'Budi Santoso',
+            'email' => 'budi@example.com',
+        ]);
+
+        $notification = new ResetPassword('sample-token-123');
+        $mailMessage = $notification->toMail($pelanggan);
+
+        $this->assertEquals('[LapangIn] Atur Ulang Kata Sandi Akun Anda', $mailMessage->subject);
+        $this->assertEquals([
+            'html' => 'emails.password-reset',
+            'text' => 'emails.password-reset-text',
+        ], $mailMessage->view);
+        $this->assertEquals('Budi Santoso', $mailMessage->viewData['nama']);
+        $this->assertStringContainsString('sample-token-123', $mailMessage->viewData['url']);
+
+        $renderedHtml = (string) $mailMessage->render();
+        $this->assertStringContainsString('Lapang', $renderedHtml);
+        $this->assertStringContainsString('Budi Santoso', $renderedHtml);
+        $this->assertStringContainsString('Atur Ulang Kata Sandi', $renderedHtml);
+    }
 }
