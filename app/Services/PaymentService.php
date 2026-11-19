@@ -35,9 +35,9 @@ class PaymentService
      * @param  array  $itemDetails
      * @param  array  $enabledPayments
      */
-    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = [], array $enabledPayments = []): string
+    public function createSnapToken(Transaksi $transaksi, $customerDetails, array $itemDetails = [], array $enabledPayments = [], bool $forceNew = false): string
     {
-        if (! empty($transaksi->snap_token)) {
+        if (! empty($transaksi->snap_token) && ! $forceNew) {
             return $transaksi->snap_token;
         }
 
@@ -100,10 +100,11 @@ class PaymentService
             return Snap::getSnapToken($params);
         };
 
-        // Pastikan order_id terisi
-        if (empty($transaksi->order_id)) {
+        // Pastikan order_id terisi, atau regenerate jika forceNew aktif (agar Midtrans merilis lock metode pembayaran sebelumnya)
+        if (empty($transaksi->order_id) || $forceNew) {
             $transaksi->order_id = 'LPNG-'.date('Ymd').'-'.strtoupper(Str::random(6));
             $transaksi->referensi_midtrans = $transaksi->order_id;
+            $transaksi->snap_token = null;
             $transaksi->save();
         }
 
