@@ -1207,9 +1207,9 @@
                     </p>
                 </div>
 
-                <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <button type="button" onclick="printRiwayatTransaksi()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
                     Ekspor Laporan (PDF)
                 </button>
@@ -1249,6 +1249,23 @@
         ->values();
 
     $totalTrxCount = $riwayatTransaksi->count();
+
+    $riwayatPrintData = $riwayatTransaksi->map(function ($item) {
+        $j = $item['jadwal'];
+        $t = $item['transaksi'];
+        return [
+            'invoice' => $t->order_id ? '#' . $t->order_id : '#INV-' . strtoupper(substr((string) ($t->id ?? $j->id), 0, 8)),
+            'lapangan' => $j->lapangan->nama ?? 'Lapangan',
+            'jenis' => ucfirst($t->jenis),
+            'tanggal' => $j->tanggal ? \Carbon\Carbon::parse($j->tanggal)->translatedFormat('d M Y') : '-',
+            'jam' => substr((string) $j->jam_mulai, 0, 5) . ' - ' . substr((string) $j->jam_selesai, 0, 5) . ' WIB',
+            'jumlah' => 'Rp ' . number_format((float) $t->jumlah, 0, ',', '.'),
+            'metode' => ucfirst($t->metode),
+            'status' => ucfirst($t->status),
+            'status_color' => $t->status === 'berhasil' ? '#166534' : ($t->status === 'gagal' ? '#991b1b' : '#854d0e'),
+            'status_bg' => $t->status === 'berhasil' ? '#dcfce7' : ($t->status === 'gagal' ? '#fee2e2' : '#fef9c3'),
+        ];
+    })->values();
 @endphp
 
 @forelse ($riwayatTransaksi as $index => $item)
@@ -1424,6 +1441,93 @@
             }
         }, 1000);
     });
+
+    // Fungsi cetak laporan riwayat transaksi resmi A4
+    window.printRiwayatTransaksi = function() {
+        const rows = @json($riwayatPrintData ?? []);
+
+        let tableHtml = '';
+        rows.forEach(function(r) {
+            tableHtml += `
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px 12px; font-family: monospace; font-weight: bold; font-size: 11px;">${r.invoice}</td>
+                    <td style="padding: 10px 12px;"><strong>${r.lapangan}</strong><br><span style="font-size: 10px; color: #6b7280;">${r.jenis}</span></td>
+                    <td style="padding: 10px 12px;">${r.tanggal}<br><span style="font-size: 10px; color: #6b7280;">${r.jam}</span></td>
+                    <td style="padding: 10px 12px; font-weight: bold;">${r.jumlah}<br><span style="font-size: 10px; color: #6b7280;">${r.metode}</span></td>
+                    <td style="padding: 10px 12px; text-align: right;">
+                        <span style="display: inline-block; padding: 3px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; background: ${r.status_bg}; color: ${r.status_color};">
+                            ${r.status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        const printContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Transaksi - LapangIn</title>
+                <style>
+                    @page { size: A4 portrait; margin: 15mm; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 0; padding: 20px; font-size: 12px; }
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a146b; padding-bottom: 12px; margin-bottom: 20px; }
+                    .brand { font-size: 20px; font-weight: 800; color: #1a146b; }
+                    .brand span { color: #416900; }
+                    .title { font-size: 14px; font-weight: bold; text-transform: uppercase; color: #374151; margin-top: 4px; }
+                    table { width: 100%; border-collapse: collapse; text-align: left; }
+                    th { background: #f3f4f6; color: #4b5563; font-size: 10px; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid #d1d5db; }
+                    .footer { margin-top: 30px; font-size: 10px; color: #6b7280; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div>
+                        <div class="brand">Lapang<span>In</span></div>
+                        <div class="title">Laporan Riwayat Transaksi &amp; Invoice Resmi</div>
+                    </div>
+                    <div style="text-align: right; font-size: 11px; color: #6b7280;">
+                        Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB<br>
+                        Pengguna: {{ auth()->user()?->nama ?? 'Pelanggan LapangIn' }}
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>INVOICE</th>
+                            <th>LAPANGAN &amp; FASILITAS</th>
+                            <th>WAKTU MAIN</th>
+                            <th>TOTAL BIAYA</th>
+                            <th style="text-align: right;">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableHtml || '<tr><td colspan="5" style="text-align: center; padding: 20px;">Belum ada data transaksi.</td></tr>'}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    Dokumen ini sah dan diterbitkan secara digital oleh Sistem Reservasi LapangIn.
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        window.onafterprint = function() { window.close(); };
+                    };
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.open();
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+        }
+    };
 
     // Fungsi cetak/unduh PDF tiket resmi berstandar tinggi
     window.printTiketDocument = function(targetId, docTitle) {
