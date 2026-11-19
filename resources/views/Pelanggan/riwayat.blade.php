@@ -1191,19 +1191,24 @@
     </div>
 
         {{-- Bagian Tabel Riwayat Transaksi Lalu ala Figma --}}
-        <div class="mt-12 pt-6 border-t border-gray-200">
+        <div class="mt-12 pt-6 border-t border-gray-200"
+             x-data="{
+                trxPage: 1,
+                trxPerPage: 5,
+                trxTotal: 0
+             }">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                     <h2 class="text-sm font-extrabold uppercase tracking-wider text-gray-900">
                         RIWAYAT TRANSAKSI LALU
                     </h2>
                     <p class="text-xs text-gray-500">
-                        Catatan pemakaian lapangan dan arsip tanda terima digital resmi.
+                        Catatan pemakaian lapangan dan arsip invoice digital resmi.
                     </p>
                 </div>
 
                 <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Ekspor Laporan (PDF)
@@ -1215,12 +1220,11 @@
                 <table class="w-full text-left text-xs">
                     <thead class="border-b border-gray-100 bg-gray-50/80 font-bold uppercase text-gray-500">
                         <tr>
-                            <th scope="col" class="px-5 py-3.5">KODE BOOKING</th>
+                            <th scope="col" class="px-5 py-3.5">INVOICE</th>
                             <th scope="col" class="px-5 py-3.5">LAPANGAN &amp; FASILITAS</th>
                             <th scope="col" class="px-5 py-3.5">WAKTU MAIN</th>
                             <th scope="col" class="px-5 py-3.5">TOTAL BIAYA</th>
-                            <th scope="col" class="px-5 py-3.5">STATUS</th>
-                            <th scope="col" class="px-5 py-3.5 text-right">AKSI</th>
+                            <th scope="col" class="px-5 py-3.5 text-right">STATUS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-gray-700">
@@ -1241,10 +1245,13 @@
         })
         ->sortByDesc(function ($item) {
             return $item['transaksi']->dibayar_pada;
-        });
+        })
+        ->values();
+
+    $totalTrxCount = $riwayatTransaksi->count();
 @endphp
 
-@forelse ($riwayatTransaksi as $item)
+@forelse ($riwayatTransaksi as $index => $item)
     @php
         $jadwal = $item['jadwal'];
         $transaksi = $item['transaksi'];
@@ -1254,11 +1261,18 @@
             'gagal' => 'bg-red-50 text-red-700 border-red-200/60',
             default => 'bg-yellow-50 text-yellow-700 border-yellow-200/60',
         };
+
+        $invoiceCode = $transaksi->order_id 
+            ? '#' . $transaksi->order_id 
+            : '#INV-' . strtoupper(substr((string) ($transaksi->id ?? $jadwal->id), 0, 8));
     @endphp
 
-    <tr class="hover:bg-gray-50/60 transition">
+    <tr x-show="Math.floor({{ $index }} / trxPerPage) + 1 === trxPage"
+        class="hover:bg-gray-50/60 transition">
         <td class="px-5 py-4 font-mono font-bold text-gray-900">
-            #{{ strtoupper(substr((string) $jadwal->id, 0, 8)) }}
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-[11px] font-mono">
+                {{ $invoiceCode }}
+            </span>
         </td>
 
         <td class="px-5 py-4">
@@ -1275,7 +1289,7 @@
                 {{ $jadwal->tanggal?->format('d M Y') ?? '-' }}
             </p>
             <p class="text-[11px] text-gray-400">
-                {{ $transaksi->dibayar_pada?->format('H:i') ?? 'Waktu belum tersedia' }}
+                {{ substr((string) $jadwal->jam_mulai, 0, 5) }} – {{ substr((string) $jadwal->jam_selesai, 0, 5) }} WIB
             </p>
         </td>
 
@@ -1288,19 +1302,15 @@
             </p>
         </td>
 
-        <td class="px-5 py-4">
+        <td class="px-5 py-4 text-right">
             <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold {{ $statusClass }}">
                 {{ ucfirst($transaksi->status) }}
             </span>
         </td>
-
-        <td class="px-5 py-4 text-right text-xs text-gray-500">
-            {{ $transaksi->dibayar_pada?->format('d/m/Y') ?? '-' }}
-        </td>
     </tr>
 @empty
     <tr>
-        <td colspan="6" class="px-5 py-10 text-center">
+        <td colspan="5" class="px-5 py-10 text-center">
             <p class="font-semibold text-gray-700">Belum ada transaksi</p>
             <p class="mt-1 text-sm text-gray-500">
                 Riwayat pembayaran akan muncul di sini setelah tersedia.
@@ -1311,6 +1321,51 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Navigasi Pagination Tabel Transaksi --}}
+            @if ($totalTrxCount > 5)
+                <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 px-2"
+                     x-init="trxTotal = {{ $totalTrxCount }}">
+                    <div>
+                        Menampilkan 
+                        <span class="font-bold text-gray-900" x-text="((trxPage - 1) * trxPerPage) + 1"></span>
+                        -
+                        <span class="font-bold text-gray-900" x-text="Math.min(trxPage * trxPerPage, {{ $totalTrxCount }})"></span>
+                        dari 
+                        <span class="font-bold text-gray-900">{{ $totalTrxCount }}</span> transaksi
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                        <button type="button"
+                                @click="if (trxPage > 1) trxPage--"
+                                :disabled="trxPage === 1"
+                                :class="trxPage === 1 ? 'opacity-40 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-2xs cursor-pointer'"
+                                class="px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1">
+                            &larr; Prev
+                        </button>
+
+                        <div class="flex items-center gap-1 px-1">
+                            <template x-for="p in Math.ceil({{ $totalTrxCount }} / trxPerPage)" :key="p">
+                                <button type="button"
+                                        @click="trxPage = p"
+                                        :class="trxPage === p ? 'bg-[#1a146b] text-white font-extrabold shadow-2xs' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'"
+                                        class="h-7 w-7 rounded-lg text-xs flex items-center justify-center transition cursor-pointer"
+                                        x-text="p">
+                                </button>
+                            </template>
+                        </div>
+
+                        <button type="button"
+                                @click="if (trxPage < Math.ceil({{ $totalTrxCount }} / trxPerPage)) trxPage++"
+                                :disabled="trxPage === Math.ceil({{ $totalTrxCount }} / trxPerPage)"
+                                :class="trxPage === Math.ceil({{ $totalTrxCount }} / trxPerPage) ? 'opacity-40 cursor-not-allowed bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-2xs cursor-pointer'"
+                                class="px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1">
+                            Next &rarr;
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </div>
 
 
 {{-- Midtrans Snap SDK --}}
