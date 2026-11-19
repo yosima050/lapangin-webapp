@@ -171,150 +171,152 @@
                     <div class="space-y-3.5" id="accordion-payment-methods">
 
                         {{-- 1. QRIS (All E-Wallet & Mobile Banking) --}}
-                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-qris">
+                        <div class="rounded-2xl border border-gray-200/80 bg-[#f8f9fc] overflow-hidden shadow-2xs transition" id="group-qris">
                             {{-- Header Accordion --}}
                             <button type="button" onclick="togglePaymentGroup('qris')"
-                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
-                                        QR
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-sm font-extrabold text-[#0b1c30]">QRIS (Semua E-Wallet & M-Banking)</span>
-                                            <span class="rounded bg-[#acf847] px-1.5 py-0.5 text-[9px] font-black uppercase text-[#304f00]">Best Choice</span>
-                                        </div>
-                                        <p class="text-xs text-[#777682] mt-0.5">GoPay, ShopeePay, OVO, Dana, LinkAja, BCA, dll</p>
-                                    </div>
+                                    class="flex w-full flex-col p-4 text-left hover:bg-gray-100/70 transition">
+                                <div class="flex w-full items-center justify-between">
+                                    <span class="text-sm sm:text-base font-extrabold text-[#0b1c30]">QRIS</span>
+                                    <svg id="chevron-qris" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black tracking-wider text-slate-800">QRIS</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
-                                    </div>
-                                    <svg id="chevron-qris" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <div class="mt-2.5 flex flex-wrap items-center gap-1.5 opacity-90">
+                                    <img src="{{ asset('images/payments/QRIS_logo.svg') }}" alt="QRIS" width="55" height="16" class="h-4 w-auto object-contain shrink-0">
                                 </div>
                             </button>
 
                             {{-- Sub-items Grid --}}
-                            <div id="content-qris" class="p-4 pt-1 border-t border-gray-100">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                            <div id="content-qris" class="p-4 pt-3 border-t border-gray-200/60 bg-white hidden">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {{-- Sub Card: QRIS Instant --}}
-                                    <div onclick="selectPaymentChannel('qris', 'QRIS Universal')"
+                                    <div onclick="selectPaymentChannel('qris', 'QRIS (Semua E-Wallet & M-Banking)')"
                                          id="channel-box-qris"
-                                         class="payment-channel-card cursor-pointer rounded-xl border-2 border-[#1a146b] bg-[#eff4ff] p-3.5 transition flex items-center justify-between shadow-xs">
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between shadow-2xs">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center font-black text-xs text-slate-900 shadow-2xs">
-                                                QRIS
+                                            <div class="h-9 px-2.5 rounded-lg bg-white border border-gray-200 flex items-center justify-center font-black text-xs text-slate-900 shadow-2xs">
+                                                <img src="{{ asset('images/payments/QRIS_logo.svg') }}" 
+                                                     alt="QRIS" 
+                                                     width="60"
+                                                     height="20"
+                                                     class="h-5 w-auto object-contain" 
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="font-black text-xs text-slate-900">QRIS</span>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-extrabold text-[#0b1c30]">QRIS Universal</p>
-                                                <p class="text-[11px] text-[#416900] font-semibold">Diverifikasi Otomatis</p>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">QRIS (Semua E-Wallet &amp; M-Banking)</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">GoPay, ShopeePay, OVO, DANA, BCA, dll.</p>
                                             </div>
                                         </div>
                                         <div class="text-right">
                                             <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
-                                            <span class="inline-block mt-0.5 text-[10px] text-gray-500">Scan via m-Banking/E-Wallet</span>
+                                            <span class="inline-block mt-0.5 text-[10px] text-gray-500">Scan QR</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- 2. Virtual Account (BCA, Mandiri, BNI, BRI, Permata, dll) --}}
-                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-va">
+                        {{-- 2. Virtual Account (Transfer Bank) --}}
+                        <div class="rounded-2xl border border-gray-200/80 bg-[#f8f9fc] overflow-hidden shadow-2xs transition" id="group-va">
                             {{-- Header Accordion --}}
                             <button type="button" onclick="togglePaymentGroup('va')"
-                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
-                                        VA
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-sm font-extrabold text-[#0b1c30]">Virtual Account (Transfer Bank)</span>
-                                            <span class="rounded bg-sky-100 px-1.5 py-0.5 text-[9px] font-bold text-sky-800">Otomatis 24 Jam</span>
-                                        </div>
-                                        <p class="text-xs text-[#777682] mt-0.5">BCA, Mandiri, BRI, BNI, Permata &amp; ATM Lainnya</p>
-                                    </div>
+                                    class="flex w-full flex-col p-4 text-left hover:bg-gray-100/70 transition">
+                                <div class="flex w-full items-center justify-between">
+                                    <span class="text-sm sm:text-base font-extrabold text-[#0b1c30]">Virtual Account</span>
+                                    <svg id="chevron-va" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#0060af]">BCA</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#003d79]">MANDIRI</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#00529c]">BRI</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-[#e05828]">BNI</span>
-                                    </div>
-                                    <svg id="chevron-va" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <div class="mt-2.5 flex flex-wrap items-center gap-2 opacity-90">
+                                    <img src="{{ asset('images/payments/Bank_Central_Asia.svg') }}" alt="BCA" width="44" height="14" class="h-3.5 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Bank_Mandiri_logo.svg') }}" alt="Mandiri" width="40" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/BANK_BRI_logo.svg') }}" alt="BRI" width="40" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Bank_Negara_Indonesia_logo.svg') }}" alt="BNI" width="38" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Permata_Bank.svg') }}" alt="Permata" width="45" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/CIMB_Niaga_logo.svg') }}" alt="CIMB" width="50" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Danamon.svg') }}" alt="Danamon" width="50" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Bank_Syariah_Indonesia.svg') }}" alt="BSI" width="45" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/SeaBank.svg') }}" alt="SeaBank" width="42" height="12" class="h-3 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Bank_Saqu.svg') }}" alt="Bank Saqu" width="42" height="12" class="h-3 w-auto object-contain shrink-0">
                                 </div>
                             </button>
 
                             {{-- Sub-items Grid --}}
-                            <div id="content-va" class="p-4 pt-1 border-t border-gray-100">
+                            <div id="content-va" class="p-4 pt-3 border-t border-gray-200/60 bg-white hidden">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                                    {{-- BCA VA --}}
+                                    {{-- 1. BCA VA --}}
                                     <div onclick="selectPaymentChannel('bca_va', 'BCA Virtual Account')"
                                          id="channel-box-bca_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
                                         <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#0060af]">BCA</span>
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Bank_Central_Asia.svg') }}" 
+                                                     alt="BCA" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#0060af]">BCA</span>
+                                            </div>
                                             <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
                                         </div>
                                         <div class="mt-3">
-                                            <p class="text-xs font-extrabold text-[#0b1c30]">BCA Virtual Account</p>
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BCA VA</p>
                                             <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
 
-                                    {{-- Mandiri VA --}}
-                                    <div onclick="selectPaymentChannel('mandiri_va', 'Mandiri Virtual Account')"
-                                         id="channel-box-mandiri_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
-                                        <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#003d79]">MANDIRI</span>
-                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
-                                        </div>
-                                        <div class="mt-3">
-                                            <p class="text-xs font-extrabold text-[#0b1c30]">Mandiri Bill Payment</p>
-                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
-                                        </div>
-                                    </div>
-
-                                    {{-- BRI VA --}}
+                                    {{-- 2. BRI VA --}}
                                     <div onclick="selectPaymentChannel('bri_va', 'BRI Virtual Account')"
                                          id="channel-box-bri_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
                                         <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#00529c]">BRI</span>
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/BANK_BRI_logo.svg') }}" 
+                                                     alt="BRI" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#00529c]">BRI</span>
+                                            </div>
                                             <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
                                         </div>
                                         <div class="mt-3">
-                                            <p class="text-xs font-extrabold text-[#0b1c30]">BRI (BRIVA)</p>
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BRI VA</p>
                                             <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
 
-                                    {{-- BNI VA --}}
+                                    {{-- 3. BNI VA --}}
                                     <div onclick="selectPaymentChannel('bni_va', 'BNI Virtual Account')"
                                          id="channel-box-bni_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
                                         <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#e05828]">BNI</span>
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Bank_Negara_Indonesia_logo.svg') }}" 
+                                                     alt="BNI" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#e05828]">BNI</span>
+                                            </div>
                                             <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
                                         </div>
                                         <div class="mt-3">
-                                            <p class="text-xs font-extrabold text-[#0b1c30]">BNI Virtual Account</p>
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BNI VA</p>
                                             <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
 
-                                    {{-- Permata VA --}}
+                                    {{-- 4. Permata VA --}}
                                     <div onclick="selectPaymentChannel('permata_va', 'Permata Virtual Account')"
                                          id="channel-box-permata_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
                                         <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#1a7f37]">PERMATA</span>
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Permata_Bank.svg') }}" 
+                                                     alt="Permata" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#1a7f37]">PERMATA</span>
+                                            </div>
                                             <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
                                         </div>
                                         <div class="mt-3">
@@ -323,16 +325,122 @@
                                         </div>
                                     </div>
 
-                                    {{-- ATM Bersama / Prima (Other VA) --}}
-                                    <div onclick="selectPaymentChannel('other_va', 'ATM Bersama / Prima')"
-                                         id="channel-box-other_va"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between">
+                                    {{-- 5. CIMB VA --}}
+                                    <div onclick="selectPaymentChannel('cimb_va', 'CIMB Niaga Virtual Account')"
+                                         id="channel-box-cimb_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
                                         <div class="flex items-center justify-between">
-                                            <span class="rounded border border-gray-200 bg-slate-50 px-2 py-0.5 text-xs font-black text-[#304f00]">ATM BERSAMA</span>
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/CIMB_Niaga_logo.svg') }}" 
+                                                     alt="CIMB Niaga" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#7a0019]">CIMB NIAGA</span>
+                                            </div>
                                             <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
                                         </div>
                                         <div class="mt-3">
-                                            <p class="text-xs font-extrabold text-[#0b1c30]">Bank Lainnya (Prima)</p>
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">CIMB VA</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- 6. Mandiri Bill --}}
+                                    <div onclick="selectPaymentChannel('mandiri_va', 'Mandiri Bill Payment')"
+                                         id="channel-box-mandiri_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Bank_Mandiri_logo.svg') }}" 
+                                                     alt="Mandiri" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#003d79]">MANDIRI</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Mandiri Bill</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- 7. Danamon VA --}}
+                                    <div onclick="selectPaymentChannel('danamon_va', 'Danamon Virtual Account')"
+                                         id="channel-box-danamon_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Danamon.svg') }}" 
+                                                     alt="Danamon" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#e87722]">DANAMON</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Danamon VA</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- 8. BSI VA --}}
+                                    <div onclick="selectPaymentChannel('bsi_va', 'BSI Virtual Account')"
+                                         id="channel-box-bsi_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Bank_Syariah_Indonesia.svg') }}" 
+                                                     alt="BSI" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#00a39d]">BSI</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">BSI VA</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- 9. SeaBank VA --}}
+                                    <div onclick="selectPaymentChannel('seabank_va', 'SeaBank Virtual Account')"
+                                         id="channel-box-seabank_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/SeaBank.svg') }}" 
+                                                     alt="SeaBank" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#ff5722]">SEABANK</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">SeaBank VA</p>
+                                            <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- 10. Saqu VA (Bank Saqu) --}}
+                                    <div onclick="selectPaymentChannel('saqu_va', 'Bank Saqu Virtual Account')"
+                                         id="channel-box-saqu_va"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3 transition flex flex-col justify-between shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="h-7 px-2 rounded bg-white border border-gray-200 flex items-center justify-center">
+                                                <img src="{{ asset('images/payments/Bank_Saqu.svg') }}" 
+                                                     alt="Bank Saqu" 
+                                                     class="h-4 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-[#6c5ce7]">BANK SAQU</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-[#416900]">Otomatis</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-xs font-extrabold text-[#0b1c30]">Saqu VA</p>
                                             <p class="channel-nominal-display text-xs font-bold text-[#1a146b] mt-1">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
                                         </div>
                                     </div>
@@ -340,111 +448,70 @@
                             </div>
                         </div>
 
-                        {{-- 3. E-Wallet Langsung (GoPay & ShopeePay App) --}}
-                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-ewallet">
+                        {{-- 3. Convenience Store (Indomaret & Alfamart) --}}
+                        <div class="rounded-2xl border border-gray-200/80 bg-[#f8f9fc] overflow-hidden shadow-2xs transition" id="group-cstore">
                             {{-- Header Accordion --}}
-                            <button type="button" onclick="togglePaymentGroup('ewallet')"
-                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
-                                        EW
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-sm font-extrabold text-[#0b1c30]">E-Wallet Langsung</span>
-                                            <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">Buka Aplikasi</span>
-                                        </div>
-                                        <p class="text-xs text-[#777682] mt-0.5">GoPay Apps, GoPay Later &amp; ShopeePay</p>
-                                    </div>
+                            <button type="button" onclick="togglePaymentGroup('cstore')"
+                                    class="flex w-full flex-col p-4 text-left hover:bg-gray-100/70 transition">
+                                <div class="flex w-full items-center justify-between">
+                                    <span class="text-sm sm:text-base font-extrabold text-[#0b1c30]">Convenience Store</span>
+                                    <svg id="chevron-cstore" class="w-5 h-5 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-sky-600">GOPAY</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-500">SHOPEEPAY</span>
-                                    </div>
-                                    <svg id="chevron-ewallet" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <div class="mt-2.5 flex flex-wrap items-center gap-2 opacity-90">
+                                    <img src="{{ asset('images/payments/Indomaret.svg') }}" alt="Indomaret" width="55" height="16" class="h-4 w-auto object-contain shrink-0">
+                                    <img src="{{ asset('images/payments/Alfamart_logo.svg') }}" alt="Alfamart" width="55" height="16" class="h-4 w-auto object-contain shrink-0">
                                 </div>
                             </button>
 
                             {{-- Sub-items Grid --}}
-                            <div id="content-ewallet" class="p-4 pt-1 border-t border-gray-100 hidden">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                                    {{-- GoPay --}}
-                                    <div onclick="selectPaymentChannel('gopay', 'GoPay')"
-                                         id="channel-box-gopay"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
+                            <div id="content-cstore" class="p-4 pt-3 border-t border-gray-200/60 bg-white hidden">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {{-- Indomaret --}}
+                                    <div onclick="selectPaymentChannel('indomaret', 'Indomaret')"
+                                         id="channel-box-indomaret"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between shadow-2xs">
                                         <div class="flex items-center gap-3">
-                                            <span class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-black text-sky-600 shadow-2xs">GOPAY</span>
-                                            <div>
-                                                <p class="text-xs font-extrabold text-[#0b1c30]">GoPay / GoPay Later</p>
-                                                <p class="text-[11px] text-[#416900] font-semibold">Buka Otomatis Aplikasi</p>
-                                            </div>
-                                        </div>
-                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
-                                    </div>
-
-                                    {{-- ShopeePay --}}
-                                    <div onclick="selectPaymentChannel('shopeepay', 'ShopeePay')"
-                                         id="channel-box-shopeepay"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <span class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-black text-orange-500 shadow-2xs">SHOPEE</span>
-                                            <div>
-                                                <p class="text-xs font-extrabold text-[#0b1c30]">ShopeePay / SPayLater</p>
-                                                <p class="text-[11px] text-[#416900] font-semibold">Buka Otomatis Aplikasi</p>
-                                            </div>
-                                        </div>
-                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- 4. Kartu Kredit / Debit --}}
-                        <div class="rounded-xl border border-[#e8edfa] bg-white shadow-xs transition" id="group-cc">
-                            {{-- Header Accordion --}}
-                            <button type="button" onclick="togglePaymentGroup('cc')"
-                                    class="flex w-full items-center justify-between p-4 text-left hover:bg-slate-50 transition rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff4ff] text-[#1a146b] font-black text-xs">
-                                        CC
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-sm font-extrabold text-[#0b1c30]">Kartu Kredit &amp; Debit Online</span>
-                                            <span class="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold text-violet-800">3D Secure</span>
-                                        </div>
-                                        <p class="text-xs text-[#777682] mt-0.5">Visa, Mastercard, JCB, American Express</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="hidden sm:flex items-center gap-1.5 opacity-80">
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
-                                        <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-emerald-700">JCB</span>
-                                    </div>
-                                    <svg id="chevron-cc" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </div>
-                            </button>
-
-                            {{-- Sub-items Grid --}}
-                            <div id="content-cc" class="p-4 pt-1 border-t border-gray-100 hidden">
-                                <div class="grid grid-cols-1 gap-3 mt-2">
-                                    {{-- Credit Card Channel Card --}}
-                                    <div onclick="selectPaymentChannel('credit_card', 'Kartu Kredit / Debit')"
-                                         id="channel-box-credit_card"
-                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="flex items-center gap-1">
-                                                <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-blue-800">VISA</span>
-                                                <span class="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-red-600">MC</span>
+                                            <div class="h-9 px-2.5 rounded-lg border border-gray-200 bg-white flex items-center justify-center shadow-2xs">
+                                                <img src="{{ asset('images/payments/Indomaret.svg') }}" 
+                                                     alt="Indomaret" 
+                                                     class="h-5 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-blue-700">INDOMARET</span>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-extrabold text-[#0b1c30]">Semua Kartu Kredit / Debit Visa &amp; Mastercard</p>
-                                                <p class="text-[11px] text-[#416900] font-semibold">Proteksi OTP 3D Secure</p>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">Indomaret</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Bayar di Kasir Indomaret</p>
                                             </div>
                                         </div>
-                                        <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                        <div class="text-right">
+                                            <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                            <span class="inline-block mt-0.5 text-[10px] text-gray-500">Kode Pembayaran</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Alfamart --}}
+                                    <div onclick="selectPaymentChannel('alfamart', 'Alfamart')"
+                                         id="channel-box-alfamart"
+                                         class="payment-channel-card cursor-pointer rounded-xl border border-[#e8edfa] bg-white hover:border-[#1a146b] p-3.5 transition flex items-center justify-between shadow-2xs">
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-9 px-2.5 rounded-lg border border-gray-200 bg-white flex items-center justify-center shadow-2xs">
+                                                <img src="{{ asset('images/payments/Alfamart_logo.svg') }}" 
+                                                     alt="Alfamart" 
+                                                     class="h-5 w-auto object-contain"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <span style="display:none;" class="text-xs font-black text-red-600">ALFAMART</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-extrabold text-[#0b1c30]">Alfamart / Alfamidi</p>
+                                                <p class="text-[11px] text-[#416900] font-semibold">Bayar di Kasir Alfamart</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="channel-nominal-display text-xs font-black text-[#1a146b]">Rp{{ number_format($nominalBayar, 0, ',', '.') }}</p>
+                                            <span class="inline-block mt-0.5 text-[10px] text-gray-500">Kode Pembayaran</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -674,8 +741,8 @@
     const totalHarga = {{ (float) $totalHarga }};
     const nominalDp = {{ (float) $nominalDp }};
     window.currentTipeBayar = "{{ $tipeBayar }}";
-    window.selectedPaymentMethod = 'qris';
-    window.selectedPaymentLabel = 'QRIS Universal';
+    window.selectedPaymentMethod = null;
+    window.selectedPaymentLabel = null;
     window.currentModalCallback = null;
 
     // Toggle Accordion Group (Buka / Tutup dropdown per kategori)
@@ -1026,6 +1093,22 @@
                     });
                     return;
                 }
+            }
+
+            if (!window.selectedPaymentMethod) {
+                showNotificationModal({
+                    title: 'Metode Pembayaran Belum Dipilih',
+                    message: 'Silakan klik dan pilih salah satu metode pembayaran terlebih dahulu (QRIS, Bank Virtual Account, atau E-Wallet).',
+                    type: 'warning',
+                    confirmText: 'Pilih Metode Pembayaran',
+                    onConfirm: function() {
+                        const targetSection = document.getElementById('accordion-payment-methods');
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+                return;
             }
 
             payButton.disabled = true;
