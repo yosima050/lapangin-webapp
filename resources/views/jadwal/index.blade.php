@@ -7,6 +7,7 @@
      x-data="{
          selectedKategori: '{{ $kategori }}',
          selectedLapangan: '{{ $selectedLapanganId ?? '' }}',
+         searchLapangan: '',
          activeDate: '{{ $tanggal }}',
          matrix: {{ Js::from($matrix) }},
          totalTersedia: {{ $totalSlotTersedia }},
@@ -16,7 +17,11 @@
              return this.matrix.filter(row => {
                  const matchKategori = (this.selectedKategori === 'Semua' || !this.selectedKategori || row.lapangan.kategori === this.selectedKategori);
                  const matchLapangan = (!this.selectedLapangan || row.lapangan.id === this.selectedLapangan);
-                 return matchKategori && matchLapangan;
+                 const matchSearch = (!this.searchLapangan.trim() || 
+                     (row.lapangan.nama && row.lapangan.nama.toLowerCase().includes(this.searchLapangan.toLowerCase().trim())) ||
+                     (row.lapangan.kategori && row.lapangan.kategori.toLowerCase().includes(this.searchLapangan.toLowerCase().trim()))
+                 );
+                 return matchKategori && matchLapangan && matchSearch;
              });
          },
 
@@ -142,44 +147,28 @@
                         @endforeach
                     </div>
 
-                    {{-- Dropdown Pilih Lapangan Spesifik (Modern & Elegan) --}}
+                    {{-- Search Bar Lapangan (Modern & Elegan) --}}
                     <div class="flex items-center gap-2 flex-shrink-0">
-                        <div class="relative inline-flex items-center">
-                            {{-- Icon Lapangan di kiri --}}
-                            <span class="absolute left-3.5 flex items-center pointer-events-none transition-colors"
-                                  :class="selectedLapangan !== '' ? 'text-[#1a146b]' : 'text-gray-400'">
-                                <span class="material-symbols-outlined text-[18px]">stadium</span>
+                        <div class="relative w-full sm:w-64 md:w-72">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                <span class="material-symbols-outlined text-[18px]">search</span>
                             </span>
-
-                            <select
-                                x-model="selectedLapangan"
-                                class="appearance-none pl-10 pr-9 py-2 rounded-xl border bg-white text-xs font-bold shadow-2xs hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#acf847] focus:border-[#1a146b] transition-all cursor-pointer"
-                                :class="selectedLapangan !== '' ? 'border-[#1a146b] bg-[#f4f7ff] text-[#1a146b]' : 'border-gray-200 text-gray-700 hover:border-gray-300'"
+                            <input
+                                type="text"
+                                x-model="searchLapangan"
+                                placeholder="Cari nama lapangan..."
+                                class="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-8 text-xs font-bold text-gray-800 placeholder-gray-400 shadow-2xs transition focus:border-[#1a146b] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1a146b]"
                             >
-                                <option value="">Semua Lapangan</option>
-                                @foreach ($allLapangans as $al)
-                                    <option value="{{ $al->id }}">
-                                        {{ $al->nama }} ({{ $al->kategori }})
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            {{-- Chevron Icon di kanan --}}
-                            <span class="absolute right-3 flex items-center pointer-events-none text-gray-400">
-                                <span class="material-symbols-outlined text-base">expand_more</span>
-                            </span>
+                            <button
+                                type="button"
+                                x-show="searchLapangan.trim().length > 0"
+                                @click="searchLapangan = ''"
+                                class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                                title="Hapus pencarian"
+                            >
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
                         </div>
-
-                        <button
-                            type="button"
-                            x-show="selectedLapangan !== ''"
-                            x-cloak
-                            @click="selectedLapangan = ''"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition shadow-2xs"
-                            title="Reset filter lapangan"
-                        >
-                            <span class="material-symbols-outlined text-base">close</span>
-                        </button>
                     </div>
                 </div>
 
@@ -251,7 +240,7 @@
                         $slots = $row['slots'];
                     @endphp
                     <div
-                        x-show="(selectedKategori === 'Semua' || !selectedKategori || '{{ $lap->kategori }}' === selectedKategori) && (!selectedLapangan || '{{ $lap->id }}' === selectedLapangan)"
+                        x-show="(selectedKategori === 'Semua' || !selectedKategori || '{{ $lap->kategori }}' === selectedKategori) && (!selectedLapangan || '{{ $lap->id }}' === selectedLapangan) && (!searchLapangan.trim() || '{{ strtolower(addslashes($lap->nama . ' ' . $lap->kategori)) }}'.includes(searchLapangan.toLowerCase().trim()))"
                         x-transition
                         class="bg-white rounded-2xl border border-gray-150 shadow-xs hover:shadow-md transition-shadow overflow-hidden"
                     >
@@ -380,6 +369,28 @@
                         </div>
                     </div>
                 @endforeach
+
+                {{-- Empty state saat hasil pencarian / filter kosong --}}
+                <div
+                    x-show="filterMatrix().length === 0"
+                    class="bg-white rounded-2xl border border-gray-100 p-12 text-center"
+                    style="display: none;"
+                >
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl">search_off</span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-800">Tidak ada lapangan yang cocok</h3>
+                    <p class="mt-1 text-xs sm:text-sm text-gray-500">
+                        Tidak ditemukan venue yang sesuai dengan filter atau kata kunci pencarian Anda.
+                    </p>
+                    <button
+                        type="button"
+                        @click="selectedKategori = 'Semua'; selectedLapangan = ''; searchLapangan = ''"
+                        class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a146b] text-white text-xs font-bold hover:bg-indigo-900 transition cursor-pointer shadow-xs"
+                    >
+                        Reset Filter &amp; Pencarian
+                    </button>
+                </div>
             </div>
         @endif
     </section>

@@ -386,7 +386,7 @@ class CheckoutController extends Controller
         // Metode pembayaran spesifik (opsional dari UI direct payment)
         $metodeBayar = $request->input('metode_bayar');
         $channelPayments = match ($metodeBayar) {
-            'qris' => ['gopay', 'shopeepay'],
+            'qris' => ['other_qris', 'gopay', 'shopeepay'],
             'gopay' => ['gopay'],
             'shopeepay' => ['shopeepay'],
             'bca_va' => ['bca_va'],
@@ -394,7 +394,14 @@ class CheckoutController extends Controller
             'bri_va' => ['bri_va'],
             'mandiri_va' => ['echannel'],
             'permata_va' => ['permata_va'],
+            'cimb_va' => ['cimb_va'],
+            'danamon_va' => ['danamon_va'],
+            'bsi_va' => ['other_va'],
+            'seabank_va' => ['other_va'],
+            'saqu_va' => ['other_va'],
             'other_va' => ['other_va'],
+            'indomaret' => ['indomaret'],
+            'alfamart' => ['alfamart'],
             'credit_card' => ['credit_card'],
             default => []
         };
@@ -460,8 +467,18 @@ class CheckoutController extends Controller
                     ],
                 ];
 
+                // Jika request menentukan metode pembayaran tertentu atau ada transaksi dengan payment_type berbeda,
+                // generate ulang order_id baru agar Midtrans merilis VA / payment channel sebelumnya.
+                $forceNewToken = false;
+                if (! empty($metodeBayar)) {
+                    if ($transaksi->payment_type !== $metodeBayar || ! empty($transaksi->snap_token)) {
+                        $forceNewToken = true;
+                    }
+                    $transaksi->payment_type = $metodeBayar;
+                }
+
                 try {
-                    $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+                    $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments, $forceNewToken);
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Midtrans createSnapToken error: ' . $e->getMessage(), [
                         'order_id' => $transaksi->order_id,
@@ -589,8 +606,18 @@ class CheckoutController extends Controller
             ],
         ];
 
+        // Jika request menentukan metode pembayaran tertentu atau ada transaksi dengan payment_type berbeda,
+        // generate ulang order_id baru agar Midtrans merilis VA / payment channel sebelumnya.
+        $forceNewToken = false;
+        if (! empty($metodeBayar)) {
+            if ($transaksi->payment_type !== $metodeBayar || ! empty($transaksi->snap_token)) {
+                $forceNewToken = true;
+            }
+            $transaksi->payment_type = $metodeBayar;
+        }
+
         try {
-            $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments);
+            $snapToken = $paymentService->createSnapToken($transaksi, $user, $itemDetails, $channelPayments, $forceNewToken);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Midtrans createSnapToken error: ' . $e->getMessage(), [
                 'order_id' => $transaksi->order_id,
