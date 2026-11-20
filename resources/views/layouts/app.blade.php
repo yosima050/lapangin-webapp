@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>@hasSection('title')@yield('title') &bull; LapangIn @else LapangIn &bull; Platform Sewa Lapangan Olahraga @endif</title>
+    <meta name="description" content="Platform pemesanan dan jadwal lapangan olahraga modern berstandar kompetisi. Booking lapangan futsal, badminton, basket, dan mini soccer cepat dan mudah dengan DP 50% di LapangIn.">
     <link rel="icon" type="image/png" href="{{ asset('images/02_Icon_App.png') }}">
     <link rel="shortcut icon" href="{{ asset('images/02_Icon_App.png') }}">
 
     @stack('head')
 
-    <!-- Google Fonts & Material Symbols (Optimized Non-blocking) -->
+    <!-- Google Fonts: Plus Jakarta Sans (Utama & Bersih) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" media="print" onload="this.media='all'" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Google Material Symbols (Subsetting Spesifik: Pangkas 3,932 KiB -> < 15 KiB) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_balance_wallet,account_circle,add,add_circle,admin_panel_settings,all_inclusive,app_registration,arrow_back,arrow_downward,arrow_forward,arrow_outward,badge,barcode_scanner,bolt,calendar_month,calendar_today,call,cancel,chat,check,check_circle,chevron_left,chevron_right,close,confirmation_number,credit_card,database,delete,desktop_windows,dialpad,edit,error,event,event_available,event_busy,expand_more,filter_list,flash_on,forward_to_inbox,gavel,groups,help,history,history_edu,home,how_to_reg,info,key,keyboard_return,local_parking,location_on,lock,lock_clock,lock_reset,login,logout,mail,mark_email_read,mark_email_unread,monitoring,notes,notifications,open_in_new,payments,pending_actions,person_add,photo_camera,picture_as_pdf,pin,point_of_sale,print,priority_high,progress_activity,qr_code,qr_code_2,qr_code_scanner,receipt,receipt_long,refresh,restart_alt,save,schedule,search,search_check,search_off,security,send,shield,shower,space_dashboard,sports,sports_score,sports_soccer,sports_tennis,stadium,storefront,support_agent,sync,task_alt,timelapse,trending_up,tune,update,verified,verified_user,videocam,videocam_off,warning,wifi,wifi_off&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_balance_wallet,account_circle,add,add_circle,admin_panel_settings,all_inclusive,app_registration,arrow_back,arrow_downward,arrow_forward,arrow_outward,badge,barcode_scanner,bolt,calendar_month,calendar_today,call,cancel,chat,check,check_circle,chevron_left,chevron_right,close,confirmation_number,credit_card,database,delete,desktop_windows,dialpad,edit,error,event,event_available,event_busy,expand_more,filter_list,flash_on,forward_to_inbox,gavel,groups,help,history,history_edu,home,how_to_reg,info,key,keyboard_return,local_parking,location_on,lock,lock_clock,lock_reset,login,logout,mail,mark_email_read,mark_email_unread,monitoring,notes,notifications,open_in_new,payments,pending_actions,person_add,photo_camera,picture_as_pdf,pin,point_of_sale,print,priority_high,progress_activity,qr_code,qr_code_2,qr_code_scanner,receipt,receipt_long,refresh,restart_alt,save,schedule,search,search_check,search_off,security,send,shield,shower,space_dashboard,sports,sports_score,sports_soccer,sports_tennis,stadium,storefront,support_agent,sync,task_alt,timelapse,trending_up,tune,update,verified,verified_user,videocam,videocam_off,warning,wifi,wifi_off&display=swap" media="print" onload="this.media='all'" />
     <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_balance_wallet,account_circle,add,add_circle,admin_panel_settings,all_inclusive,app_registration,arrow_back,arrow_downward,arrow_forward,arrow_outward,badge,barcode_scanner,bolt,calendar_month,calendar_today,call,cancel,chat,check,check_circle,chevron_left,chevron_right,close,confirmation_number,credit_card,database,delete,desktop_windows,dialpad,edit,error,event,event_available,event_busy,expand_more,filter_list,flash_on,forward_to_inbox,gavel,groups,help,history,history_edu,home,how_to_reg,info,key,keyboard_return,local_parking,location_on,lock,lock_clock,lock_reset,login,logout,mail,mark_email_read,mark_email_unread,monitoring,notes,notifications,open_in_new,payments,pending_actions,person_add,photo_camera,picture_as_pdf,pin,point_of_sale,print,priority_high,progress_activity,qr_code,qr_code_2,qr_code_scanner,receipt,receipt_long,refresh,restart_alt,save,schedule,search,search_check,search_off,security,send,shield,shower,space_dashboard,sports,sports_score,sports_soccer,sports_tennis,stadium,storefront,support_agent,sync,task_alt,timelapse,trending_up,tune,update,verified,verified_user,videocam,videocam_off,warning,wifi,wifi_off&display=swap" />
     </noscript>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -24,9 +28,9 @@
 
 <body class="bg-[#f8f9ff] text-[#0b1c30] min-h-screen flex flex-col font-sans antialiased">
 
-    {{-- Top Slim High-Speed Loading Bar for Page Transitions --}}
+    {{-- Top Slim High-Speed Loading Bar for Page Transitions (GPU Composited) --}}
     <div id="global-page-progress" class="fixed top-0 left-0 right-0 h-[3px] z-[9999] pointer-events-none opacity-0 transition-opacity duration-150">
-        <div id="global-progress-bar" class="h-full bg-gradient-to-r from-[#1a146b] via-[#acf847] to-[#416900] w-0 transition-all duration-200 ease-out shadow-[0_0_10px_#acf847]"></div>
+        <div id="global-progress-bar" class="h-full w-full bg-gradient-to-r from-[#1a146b] via-[#acf847] to-[#416900] origin-left scale-x-0 transition-transform duration-200 ease-out shadow-[0_0_10px_#acf847]"></div>
     </div>
 
     {{-- Unified Pelanggan Navbar --}}
@@ -70,15 +74,15 @@
                     mainContent.style.opacity = '0.75';
                 }
 
-                // 3. Gerakkan progress bar dengan sangat cepat
+                // 3. Gerakkan progress bar dengan GPU-composited transform scaleX
                 progressContainer.style.opacity = '1';
-                progressBar.style.transition = 'width 150ms ease-out';
-                progressBar.style.width = '75%';
+                progressBar.style.transition = 'transform 150ms ease-out';
+                progressBar.style.transform = 'scaleX(0.75)';
 
                 setTimeout(() => {
                     if (isNavigating) {
-                        progressBar.style.transition = 'width 300ms ease-out';
-                        progressBar.style.width = '92%';
+                        progressBar.style.transition = 'transform 300ms ease-out';
+                        progressBar.style.transform = 'scaleX(0.92)';
                     }
                 }, 160);
             }

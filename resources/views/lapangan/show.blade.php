@@ -682,17 +682,7 @@
                                         </template>
                                     </div>
                                 </div>
-
-                                <div class="flex items-center justify-between text-gray-600 pt-1">
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">timelapse</span>
-                                        <span>Durasi Total:</span>
-                                    </span>
-                                    <strong class="text-[#1a146b]" x-text="durationHours > 0 ? (durationHours + ' Jam Sesi') : '-'"></strong>
-                                </div>
                             </div>
-
-
 
                             {{-- Cost Breakdown --}}
                             <div class="flex flex-col gap-2 text-xs text-gray-600 pt-1">
@@ -707,14 +697,6 @@
                                         <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
                                     </div>
                                 </template>
-
-                                <div class="flex items-center justify-between">
-                                    <span class="flex items-center gap-1">
-                                        <span>Biaya Layanan &amp; Pemeliharaan</span>
-                                        <span class="material-symbols-outlined text-xs text-gray-400">info</span>
-                                    </span>
-                                    <span class="font-bold text-[#416900] uppercase text-[10px]">GRATIS</span>
-                                </div>
 
                                 <div class="border-t border-gray-100 my-1"></div>
 
@@ -890,12 +872,6 @@
                                 <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
                             </div>
                         </template>
-
-                        {{-- Baris 3: Biaya Layanan --}}
-                        <div class="flex items-center justify-between">
-                            <span>Biaya Layanan:</span>
-                            <span class="font-bold text-[#416900] uppercase text-[10px]">Gratis</span>
-                        </div>
 
                         {{-- Garis Pemisah (Divider) --}}
                         <div class="border-t border-gray-100 my-1"></div>

@@ -3,7 +3,7 @@
 @section('title', 'Cek Jadwal Lapangan - LapangIn')
 
 @section('content')
-<div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16"
+<div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16 relative"
      x-data="{
          selectedKategori: '{{ $kategori }}',
          selectedLapangan: '{{ $selectedLapanganId ?? '' }}',
@@ -12,6 +12,25 @@
          matrix: {{ Js::from($matrix) }},
          totalTersedia: {{ $totalSlotTersedia }},
          totalBooked: {{ $totalSlotDibooking }},
+         clickedSlotKey: null,
+         currentPage: 1,
+         perPage: 10,
+
+         init() {
+             // Reset state ketika pengguna kembali via tombol Back browser (bfcache)
+             window.addEventListener('pageshow', (event) => {
+                 this.clickedSlotKey = null;
+             });
+             this.$watch('selectedKategori', () => { this.currentPage = 1; });
+             this.$watch('selectedLapangan', () => { this.currentPage = 1; });
+             this.$watch('searchLapangan', () => { this.currentPage = 1; });
+         },
+
+         selectSlot(url, slotKey) {
+             if (this.clickedSlotKey) return;
+             this.clickedSlotKey = slotKey;
+             window.location.href = url;
+         },
 
          filterMatrix() {
              return this.matrix.filter(row => {
@@ -23,6 +42,16 @@
                  );
                  return matchKategori && matchLapangan && matchSearch;
              });
+         },
+
+         totalPages() {
+             return Math.max(1, Math.ceil(this.filterMatrix().length / this.perPage));
+         },
+
+         isItemInCurrentPage(indexInFiltered) {
+             const start = (this.currentPage - 1) * this.perPage;
+             const end = start + this.perPage;
+             return indexInFiltered >= start && indexInFiltered < end;
          },
 
          countFilteredTersedia() {
@@ -72,50 +101,24 @@
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 sm:p-5">
             <div class="flex flex-col gap-5">
 
-                {{-- Baris 1: Date Quick Selector (7 Hari) + Date Picker --}}
-                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-4 border-b border-gray-100">
-                    {{-- Carousel 7 Hari --}}
-                    <div class="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
-                        @foreach ($dateOptions as $dOpt)
-                            <a
-                                href="{{ route('jadwal.index', array_merge(request()->query(), ['tanggal' => $dOpt['date']])) }}"
-                                class="flex-shrink-0 flex flex-col items-center justify-center min-w-[80px] sm:min-w-[92px] px-3 py-2.5 rounded-xl border transition-all text-center {{ $dOpt['is_active'] ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-sm' : 'bg-gray-50/80 hover:bg-gray-100 text-gray-700 border-gray-200' }}"
-                            >
-                                <span class="text-[10px] font-extrabold tracking-wider {{ $dOpt['is_active'] ? 'text-[#acf847]' : 'text-gray-500' }}">
-                                    {{ $dOpt['label_top'] }}
-                                </span>
-                                <span class="text-lg font-black leading-tight mt-0.5">
-                                    {{ $dOpt['day_num'] }}
-                                </span>
-                                <span class="text-[11px] font-medium opacity-80">
-                                    {{ $dOpt['month_name'] }}
-                                </span>
-                            </a>
-                        @endforeach
-                    </div>
-
-                    {{-- Manual Date Picker Form --}}
-                    <form method="GET" action="{{ route('jadwal.index') }}" class="flex items-center gap-2 flex-shrink-0">
-                        @if(request('kategori'))
-                            <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                        @endif
-                        @if(request('lapangan_id'))
-                            <input type="hidden" name="lapangan_id" value="{{ request('lapangan_id') }}">
-                        @endif
-                        <label for="tanggal_picker" class="text-xs font-bold text-gray-600 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_month</span>
-                            Pilih Tanggal:
-                        </label>
-                        <input
-                            id="tanggal_picker"
-                            name="tanggal"
-                            type="date"
-                            min="{{ $today }}"
-                            value="{{ $tanggal }}"
-                            onchange="this.form.submit()"
-                            class="px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#acf847]"
+                {{-- Baris 1: Date Quick Selector (7 Hari Full Width Grid) --}}
+                <div class="grid grid-cols-7 gap-2 sm:gap-3 pb-4 border-b border-gray-100 w-full">
+                    @foreach ($dateOptions as $dOpt)
+                        <a
+                            href="{{ route('jadwal.index', array_merge(request()->query(), ['tanggal' => $dOpt['date']])) }}"
+                            class="flex flex-col items-center justify-center w-full py-3 sm:py-3.5 px-1 sm:px-2 rounded-2xl border transition-all text-center {{ $dOpt['is_active'] ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md transform -translate-y-0.5' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs' }}"
                         >
-                    </form>
+                            <span class="text-[10px] sm:text-xs font-extrabold tracking-wider {{ $dOpt['is_active'] ? 'text-[#acf847]' : 'text-gray-500' }}">
+                                {{ $dOpt['label_top'] }}
+                            </span>
+                            <span class="text-xl sm:text-2xl font-black leading-tight mt-1">
+                                {{ $dOpt['day_num'] }}
+                            </span>
+                            <span class="text-[11px] sm:text-xs font-semibold opacity-80 mt-0.5">
+                                {{ $dOpt['month_name'] }}
+                            </span>
+                        </a>
+                    @endforeach
                 </div>
 
                 {{-- Baris 2: Filter Kategori & Filter Spesifik Lapangan (Instan Client-side) --}}
@@ -240,15 +243,21 @@
                         $slots = $row['slots'];
                     @endphp
                     <div
-                        x-show="(selectedKategori === 'Semua' || !selectedKategori || '{{ $lap->kategori }}' === selectedKategori) && (!selectedLapangan || '{{ $lap->id }}' === selectedLapangan) && (!searchLapangan.trim() || '{{ strtolower(addslashes($lap->nama . ' ' . $lap->kategori)) }}'.includes(searchLapangan.toLowerCase().trim()))"
+                        x-show="(function() {
+                            const filtered = filterMatrix();
+                            const idx = filtered.findIndex(r => r.lapangan.id === '{{ $lap->id }}');
+                            if (idx === -1) return false;
+                            return idx >= (currentPage - 1) * perPage && idx < currentPage * perPage;
+                        })()"
                         x-transition
+                        style="content-visibility: auto; contain-intrinsic-size: 1px 260px;"
                         class="bg-white rounded-2xl border border-gray-150 shadow-xs hover:shadow-md transition-shadow overflow-hidden"
                     >
                         {{-- Header Bar Lapangan --}}
                         <div class="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-3">
                                 <img
-                                    src="{{ $lap->foto_url }}"
+                                    src="{{ $lap->foto_thumbnail_url }}"
                                     alt="{{ $lap->nama }}"
                                     width="48"
                                     height="48"
@@ -302,20 +311,41 @@
                                     @endphp
 
                                     @if ($isTersedia)
+                                        @php
+                                            $slotKey = $lap->id . '_' . $slot['jam_mulai'];
+                                        @endphp
                                         <a
                                             href="{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal, 'jam' => $slot['jam_mulai']]) }}"
-                                            class="group relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 border-[#acf847] bg-[#f7fee7] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] transition transform hover:-translate-y-0.5 hover:shadow-md cursor-pointer text-center"
-                                            title="Slot Kosong: {{ $slot['jam_label'] }} (Klik untuk Booking)"
+                                            @click.prevent="selectSlot('{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal, 'jam' => $slot['jam_mulai']]) }}', '{{ $slotKey }}')"
+                                            :class="{
+                                                'pointer-events-none': clickedSlotKey !== null,
+                                                'animate-pulse bg-gray-200 border-gray-300': clickedSlotKey === '{{ $slotKey }}',
+                                                'opacity-40': clickedSlotKey !== null && clickedSlotKey !== '{{ $slotKey }}',
+                                                'bg-[#f7fee7] border-[#acf847] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] hover:-translate-y-0.5 hover:shadow-md': clickedSlotKey !== '{{ $slotKey }}'
+                                            }"
+                                            class="group relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition transform cursor-pointer text-center"
+                                            title="Slot Kosong: {{ $slot['jam_label'] }}"
                                         >
-                                            <span class="text-xs font-black tracking-tight group-hover:scale-105 transition-transform">
-                                                {{ $slot['jam_mulai'] }}
-                                            </span>
-                                            <span class="text-[10px] font-bold text-[#416900] group-hover:text-[#102000]">
-                                                s/d {{ $slot['jam_selesai'] }}
-                                            </span>
-                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
-                                                KOSONG
-                                            </span>
+                                            <template x-if="clickedSlotKey === '{{ $slotKey }}'">
+                                                <div class="flex flex-col items-center justify-center gap-1.5 py-0.5">
+                                                    <div class="w-10 h-3.5 bg-gray-300 rounded-md"></div>
+                                                    <div class="w-12 h-2.5 bg-gray-300 rounded-md"></div>
+                                                    <div class="w-8 h-2.5 bg-gray-300 rounded-md mt-0.5"></div>
+                                                </div>
+                                            </template>
+                                            <template x-if="clickedSlotKey !== '{{ $slotKey }}'">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <span class="text-xs font-black tracking-tight group-hover:scale-105 transition-transform">
+                                                        {{ $slot['jam_mulai'] }}
+                                                    </span>
+                                                    <span class="text-[10px] font-bold text-[#416900] group-hover:text-[#102000]">
+                                                        s/d {{ $slot['jam_selesai'] }}
+                                                    </span>
+                                                    <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
+                                                        KOSONG
+                                                    </span>
+                                                </div>
+                                            </template>
                                         </a>
                                     @elseif ($isPending)
                                         <div
@@ -394,6 +424,57 @@
                     >
                         Reset Filter &amp; Pencarian
                     </button>
+                </div>
+
+                {{-- Pagination Controls (10 Baris per Halaman) --}}
+                <div
+                    x-show="filterMatrix().length > perPage"
+                    class="bg-white rounded-2xl border border-gray-150 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 mt-2"
+                >
+                    <div class="text-xs text-gray-500 font-medium">
+                        Menampilkan <span class="font-bold text-[#1a146b]" x-text="((currentPage - 1) * perPage) + 1"></span>
+                        – <span class="font-bold text-[#1a146b]" x-text="Math.min(currentPage * perPage, filterMatrix().length)"></span>
+                        dari <span class="font-bold text-[#1a146b]" x-text="filterMatrix().length"></span> venue lapangan
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                        {{-- Tombol Sebelumnya --}}
+                        <button
+                            type="button"
+                            @click="currentPage > 1 ? currentPage-- : null"
+                            :disabled="currentPage <= 1"
+                            :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 cursor-pointer shadow-2xs'"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
+                        >
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        {{-- Page Number Badges --}}
+                        <div class="flex items-center gap-1 px-1">
+                            <template x-for="p in totalPages()" :key="p">
+                                <button
+                                    type="button"
+                                    @click="currentPage = p"
+                                    :class="currentPage === p ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'"
+                                    class="w-7 h-7 rounded-lg text-xs font-black transition flex items-center justify-center cursor-pointer"
+                                    x-text="p"
+                                ></button>
+                            </template>
+                        </div>
+
+                        {{-- Tombol Selanjutnya --}}
+                        <button
+                            type="button"
+                            @click="currentPage < totalPages() ? currentPage++ : null"
+                            :disabled="currentPage >= totalPages()"
+                            :class="currentPage >= totalPages() ? 'opacity-40 cursor-not-allowed bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 cursor-pointer shadow-2xs'"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
+                        >
+                            <span>Selanjutnya</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         @endif

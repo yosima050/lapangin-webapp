@@ -7,19 +7,19 @@
         [
             'nama' => 'Lapangan 1 - Vinyl Pro (Futsal Indoor)',
             'kategori' => 'Futsal',
-            'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&h=380&q=75',
+            'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&h=480&fm=webp&q=75',
             'url' => route('katalog.index'),
         ],
         [
             'nama' => 'Lapangan 2 - Interlock Premium (Futsal & Basket)',
             'kategori' => 'Futsal & Basket',
-            'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&h=380&q=75',
+            'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&h=480&fm=webp&q=75',
             'url' => route('katalog.index'),
         ],
         [
             'nama' => 'Badminton Court 1 & 2 (Karpet Yonex)',
             'kategori' => 'Badminton',
-            'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&h=380&q=75',
+            'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=800&h=480&fm=webp&q=75',
             'url' => route('katalog.index'),
         ],
     ];
@@ -141,15 +141,20 @@
                                          class="absolute inset-0 w-full h-full"
                                          style="{{ $idx > 0 ? 'display: none;' : '' }}">
 
-                                        {{-- Image Background (Hero Slide: Tanpa lazy-loading agar LCP instan) --}}
+                                        {{-- Image Background (Hero Slide: Prioritas tertinggi untuk LCP, lazy untuk slide selanjutnya) --}}
                                         <img src="{{ $slide['foto'] }}"
                                              alt="{{ $slide['nama'] }}"
-                                             width="600"
-                                             height="380"
-                                             fetchpriority="{{ $idx === 0 ? 'high' : 'auto' }}"
-                                             decoding="sync"
+                                             width="800"
+                                             height="480"
+                                             fetchpriority="{{ $idx === 0 ? 'high' : 'low' }}"
+                                             @if($idx === 0)
+                                                decoding="sync"
+                                             @else
+                                                loading="lazy"
+                                                decoding="async"
+                                             @endif
                                              class="w-full h-full object-cover object-center filter brightness-[0.78] contrast-[1.05]"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&h=380&q=75';">
+                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&h=480&fm=webp&q=75';">
 
                                         {{-- Dark Vignette Gradient --}}
                                         <div class="absolute inset-0 bg-gradient-to-t from-[#0e0a40]/95 via-[#1a146b]/40 to-black/30"></div>
@@ -205,14 +210,15 @@
                                 </button>
                             </div>
 
-                            {{-- Slider Pagination Dots (Bawah) --}}
-                            <div class="py-2.5 bg-black/80 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-2">
+                            {{-- Slider Pagination Dots (Bawah) dengan area klik yang memenuhi standar aksesibilitas --}}
+                            <div class="py-2.5 bg-black/80 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-1">
                                 @foreach ($carouselSlides as $idx => $slide)
                                     <button type="button"
                                             @click="currentSlide = {{ $idx }}"
                                             aria-label="Pindah ke Slide {{ $idx + 1 }}"
-                                            class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                                            :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-2 bg-white/40 hover:bg-white/70'">
+                                            class="p-2 flex items-center justify-center cursor-pointer group">
+                                        <span class="h-2 rounded-full transition-all duration-300 block"
+                                              :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-2 bg-white/40 group-hover:bg-white/70'"></span>
                                     </button>
                                 @endforeach
                             </div>
