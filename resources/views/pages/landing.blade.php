@@ -2,6 +2,52 @@
 
 @section('title', 'LapangIn - Booking Lapangan Olahraga Cepat, Mudah, dan Terjadwal')
 
+@php
+    $carouselSlides = [
+        [
+            'nama' => 'Lapangan 1 - Vinyl Pro (Futsal Indoor)',
+            'kategori' => 'Futsal',
+            'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&h=380&q=75',
+            'url' => route('katalog.index'),
+        ],
+        [
+            'nama' => 'Lapangan 2 - Interlock Premium (Futsal & Basket)',
+            'kategori' => 'Futsal & Basket',
+            'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&h=380&q=75',
+            'url' => route('katalog.index'),
+        ],
+        [
+            'nama' => 'Badminton Court 1 & 2 (Karpet Yonex)',
+            'kategori' => 'Badminton',
+            'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&h=380&q=75',
+            'url' => route('katalog.index'),
+        ],
+    ];
+
+    if (isset($lapangans) && $lapangans->isNotEmpty()) {
+        $dbSlides = [];
+        foreach ($lapangans as $l) {
+            $dbSlides[] = [
+                'nama' => $l->nama,
+                'kategori' => $l->kategori ?? 'Sports Arena',
+                'foto' => $l->foto_url,
+                'url' => route('katalog.show', $l->id),
+            ];
+        }
+        if (!empty($dbSlides)) {
+            $carouselSlides = $dbSlides;
+        }
+    }
+
+    $heroLcpImage = $carouselSlides[0]['foto'] ?? null;
+@endphp
+
+@push('head')
+    @if($heroLcpImage)
+        <link rel="preload" as="image" href="{{ $heroLcpImage }}" fetchpriority="high" />
+    @endif
+@endpush
+
 @section('content')
 <div class="bg-[#f8f9ff] text-[#0b1c30]">
 
@@ -55,45 +101,6 @@
                     </div>
                 </div>
 
-                                {{-- Hero Visual / Dynamic Banner Carousel (Ala Gelora / Ganesha Tanah Mas) --}}
-                @php
-                    $carouselSlides = [
-                        [
-                            'nama' => 'Lapangan 1 - Vinyl Pro (Futsal Indoor)',
-                            'kategori' => 'Futsal',
-                            'foto' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
-                            'url' => route('katalog.index'),
-                        ],
-                        [
-                            'nama' => 'Lapangan 2 - Interlock Premium (Futsal & Basket)',
-                            'kategori' => 'Futsal & Basket',
-                            'foto' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
-                            'url' => route('katalog.index'),
-                        ],
-                        [
-                            'nama' => 'Badminton Court 1 & 2 (Karpet Yonex)',
-                            'kategori' => 'Badminton',
-                            'foto' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',
-                            'url' => route('katalog.index'),
-                        ],
-                    ];
-
-                    if (isset($lapangans) && $lapangans->isNotEmpty()) {
-                        $dbSlides = [];
-                        foreach ($lapangans as $l) {
-                            $dbSlides[] = [
-                                'nama' => $l->nama,
-                                'kategori' => $l->kategori ?? 'Sports Arena',
-                                'foto' => $l->foto_url,
-                                'url' => route('katalog.show', $l->id),
-                            ];
-                        }
-                        if (!empty($dbSlides)) {
-                            $carouselSlides = $dbSlides;
-                        }
-                    }
-                @endphp
-
                 <div class="lg:col-span-5 relative w-full"
                      x-data="{
                         currentSlide: 0,
@@ -134,11 +141,15 @@
                                          class="absolute inset-0 w-full h-full"
                                          style="{{ $idx > 0 ? 'display: none;' : '' }}">
 
-                                        {{-- Image Background --}}
+                                        {{-- Image Background (Hero Slide: Tanpa lazy-loading agar LCP instan) --}}
                                         <img src="{{ $slide['foto'] }}"
                                              alt="{{ $slide['nama'] }}"
+                                             width="600"
+                                             height="380"
+                                             fetchpriority="{{ $idx === 0 ? 'high' : 'auto' }}"
+                                             decoding="sync"
                                              class="w-full h-full object-cover object-center filter brightness-[0.78] contrast-[1.05]"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80';">
+                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&h=380&q=75';">
 
                                         {{-- Dark Vignette Gradient --}}
                                         <div class="absolute inset-0 bg-gradient-to-t from-[#0e0a40]/95 via-[#1a146b]/40 to-black/30"></div>
@@ -179,6 +190,7 @@
                                 {{-- Slider Navigation Arrow Buttons --}}
                                 <button type="button"
                                         @click="prev()"
+                                        aria-label="Slide Sebelumnya"
                                         class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
                                         title="Slide Sebelumnya">
                                     <span class="material-symbols-outlined text-base">chevron_left</span>
@@ -186,6 +198,7 @@
 
                                 <button type="button"
                                         @click="next()"
+                                        aria-label="Slide Selanjutnya"
                                         class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
                                         title="Slide Selanjutnya">
                                     <span class="material-symbols-outlined text-base">chevron_right</span>
@@ -197,6 +210,7 @@
                                 @foreach ($carouselSlides as $idx => $slide)
                                     <button type="button"
                                             @click="currentSlide = {{ $idx }}"
+                                            aria-label="Pindah ke Slide {{ $idx + 1 }}"
                                             class="h-2 rounded-full transition-all duration-300 cursor-pointer"
                                             :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-2 bg-white/40 hover:bg-white/70'">
                                     </button>
@@ -300,10 +314,13 @@
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                     <div class="relative h-48 overflow-hidden bg-gray-900">
                         <img
-                            src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=700&q=80"
+                            src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=500&q=75"
                             alt="Futsal"
+                            width="350"
+                            height="192"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#1a146b] text-white text-xs font-semibold">
@@ -331,10 +348,13 @@
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                     <div class="relative h-48 overflow-hidden bg-gray-900">
                         <img
-                            src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=700&q=80"
+                            src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=500&q=75"
                             alt="Badminton"
+                            width="350"
+                            height="192"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#416900] text-white text-xs font-semibold">
@@ -362,10 +382,13 @@
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                     <div class="relative h-48 overflow-hidden bg-gray-900">
                         <img
-                            src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=80"
+                            src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=500&q=75"
                             alt="Basket"
+                            width="350"
+                            height="192"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#1a146b] text-white text-xs font-semibold">
@@ -393,10 +416,13 @@
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                     <div class="relative h-48 overflow-hidden bg-gray-900">
                         <img
-                            src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=700&q=80"
+                            src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=500&q=75"
                             alt="Mini Soccer"
+                            width="350"
+                            height="192"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#416900] text-white text-xs font-semibold">

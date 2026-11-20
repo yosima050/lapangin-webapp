@@ -22,7 +22,9 @@ use App\Http\Controllers\Kasir\CheckinController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $lapangans = \App\Models\Lapangan::where('is_active', true)->get();
+    $lapangans = \App\Models\Lapangan::with('hargaMasters')
+        ->where('is_active', true)
+        ->get();
     return view('pages.landing', compact('lapangans'));
 })->name('home');
 

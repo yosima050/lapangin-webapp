@@ -250,6 +250,10 @@
                                 <img
                                     src="{{ $lap->foto_url }}"
                                     alt="{{ $lap->nama }}"
+                                    width="48"
+                                    height="48"
+                                    loading="lazy"
+                                    decoding="async"
                                     class="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-xs"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($lap->nama) }}&background=1a146b&color=acf847&size=200';"
                                 >

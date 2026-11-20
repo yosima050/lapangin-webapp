@@ -523,7 +523,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
                                         @if($p->gambar)
-                                            <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" class="w-full h-full object-cover">
+                                            <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-[#1a146b]">
                                                 <span class="material-symbols-outlined text-2xl">sports_soccer</span>
@@ -625,7 +625,7 @@
 
                         <div class="flex items-center gap-3 mt-3">
                             <div class="w-12 h-12 rounded-xl bg-gray-900 overflow-hidden shrink-0 border border-gray-200 shadow-2xs">
-                                <img src="{{ $lapangan->foto_url }}" alt="{{ $lapangan->nama }}" class="w-full h-full object-cover">
+                                <img src="{{ $lapangan->foto_url }}" alt="{{ $lapangan->nama }}" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover">
                             </div>
                             <div class="min-w-0">
                                 <h3 class="text-sm font-headline font-bold text-[#0b1c30] truncate">

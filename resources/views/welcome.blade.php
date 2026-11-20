@@ -186,6 +186,10 @@
                                 <img
                                     src="https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=E0E7FF&color=3730A3&size=512"
                                     alt="{{ $item['lapangan_nama'] }}"
+                                    width="220"
+                                    height="240"
+                                    loading="lazy"
+                                    decoding="async"
                                     class="w-full h-full object-cover"
                                 >
                                 <span class="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 text-[#1a146b] text-xs font-bold shadow-sm">
