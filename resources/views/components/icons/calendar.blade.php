@@ -1,35 +1,24 @@
+{{-- Calendar icon by tezar tantular (Noun Project) --}}
 @props(['class' => 'w-5 h-5'])
 
 <svg {{ $attributes->merge(['class' => $class]) }}
-     viewBox="0 0 24 24"
-     fill="none"
+     viewBox="0 4 64 56"
+     fill="currentColor"
      xmlns="http://www.w3.org/2000/svg"
      aria-hidden="true">
-    {{-- Ring Spiral Lengkung Atas --}}
-    <path d="M7.5 6.8V4.9C7.5 3.7 8.4 2.8 9.5 2.8C10.5 2.8 11.3 3.5 11.5 4.4"
-          stroke="currentColor"
-          stroke-width="1.9"
-          stroke-linecap="round"
-          stroke-linejoin="round" />
-    <path d="M14.2 6.8V4.9C14.2 3.7 15.1 2.8 16.2 2.8C17.2 2.8 18 3.5 18.2 4.4"
-          stroke="currentColor"
-          stroke-width="1.9"
-          stroke-linecap="round"
-          stroke-linejoin="round" />
-    {{-- Halaman Depan Kalender --}}
-    <rect x="3" y="6.5" width="15" height="14.5" rx="3"
-          stroke="currentColor"
-          stroke-width="1.9"
-          stroke-linejoin="round" />
-    {{-- Sisi Kanan Berlapis (Efek 3D Kalender Meja) --}}
-    <path d="M18 7.5C19.7 7.8 21 9.1 21 10.9V17.9C21 19.6 19.6 21 17.9 21H16.5"
-          stroke="currentColor"
-          stroke-width="1.9"
-          stroke-linecap="round"
-          stroke-linejoin="round" />
-    {{-- Kisi Garis Tengah Membulat --}}
-    <path d="M6.3 11H14.7M6.3 14.3H14.7M6.3 17.6H14.7M9 10.1V18.5M12 10.1V18.5"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round" />
+    <g>
+        <path d="M63,48.61l-4.9-29.42h0A3,3,0,0,0,59,17V13a3,3,0,0,0-3-3H54.58a5,5,0,0,0-9.16,0H42.58a5,5,0,0,0-9.16,0H30.58a5,5,0,0,0-9.16,0H20a3,3,0,0,0-3,3v4a3,3,0,0,0,.84,2.08l-.54,1.08L14.88,25H4a3,3,0,0,0-3,3v1.44A6.56,6.56,0,0,0,7.56,36H15.7L13.32,53.6a3,3,0,0,0,3,3.4h34a3,3,0,0,0,3-2.6l.19-1.4h5.81A3.77,3.77,0,0,0,63,49.23,4.21,4.21,0,0,0,63,48.61ZM45.56,34A4.58,4.58,0,0,1,41,29.44V28a3,3,0,0,0-3-3H17.12l2.5-5H55.38L49.66,31.45h0v0l0,.08A4.54,4.54,0,0,1,45.56,34ZM50,9a3,3,0,0,1,2.23,1H47.77A3,3,0,0,1,50,9ZM38,9a3,3,0,0,1,2.23,1H35.77A3,3,0,0,1,38,9ZM26,9a3,3,0,0,1,2.23,1H23.77A3,3,0,0,1,26,9Zm-7,4a1,1,0,0,1,1-1h1a5,5,0,0,0,5,5,1,1,0,0,0,0-2,3,3,0,0,1-3-3H33a5,5,0,0,0,5,5,1,1,0,0,0,0-2,3,3,0,0,1-3-3H45a5,5,0,0,0,5,5,1,1,0,0,0,0-2,3,3,0,0,1-3-3h9a1,1,0,0,1,1,1v4a1,1,0,0,1-1,1H20a1,1,0,0,1-1-1ZM51.55,51.87l-.31,2.26a1,1,0,0,1-1,.87h-34a1,1,0,0,1-.75-.34,1,1,0,0,1-.24-.79L17.71,36H45.56a6.58,6.58,0,0,0,3.41-1,6.49,6.49,0,0,0,2.41-2.57l0-.1,3.77-7.54Z" />
+        <path d="M25,38H22a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M33,38H30a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M41,38H38a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M49,38H46a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M24,43H21a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M32,43H29a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M40,43H37a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M48,43H45a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M23,48H20a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M31,48H28a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M39,48H36a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+        <path d="M47,48H44a1,1,0,0,0,0,2h3a1,1,0,0,0,0-2Z" />
+    </g>
 </svg>

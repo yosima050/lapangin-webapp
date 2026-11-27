@@ -441,32 +441,32 @@
                 
                 {{-- Slot Tersedia --}}
                 <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="w-4 h-4 rounded-md bg-[#eaf7d8] border border-[#acf847] text-[#416900] flex items-center justify-center font-bold text-[10px] shrink-0">
-                        ✓
+                    <span class="w-5 h-5 rounded-md bg-[#eaf7d8] border border-[#acf847] text-[#416900] flex items-center justify-center shrink-0">
+                        <x-lucide-check class="w-3 h-3" stroke-width="2.75" />
                     </span>
                     <span class="font-medium text-gray-700"><span class="sm:hidden">Tersedia</span><span class="hidden sm:inline">Tersedia (Bisa Dipesan)</span></span>
                 </div>
 
                 {{-- Slot Terisi --}}
                 <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="w-4 h-4 rounded-md bg-red-100 border border-red-200 text-red-600 flex items-center justify-center font-bold text-[10px] shrink-0">
-                        ✕
+                    <span class="w-5 h-5 rounded-md bg-red-100 border border-red-200 text-red-600 flex items-center justify-center shrink-0">
+                        <x-lucide-x class="w-3 h-3" stroke-width="2.75" />
                     </span>
                     <span class="font-medium text-gray-700"><span class="sm:hidden">Terisi</span><span class="hidden sm:inline">Terisi / Dibooking</span></span>
                 </div>
 
                 {{-- Slot Pending --}}
                 <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="w-4 h-4 rounded-md bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                        ⏳
+                    <span class="w-5 h-5 rounded-md bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center shrink-0">
+                        <x-lucide-hourglass class="w-3 h-3" stroke-width="2.25" />
                     </span>
                     <span class="font-medium text-gray-700"><span class="sm:hidden">Menunggu Bayar</span><span class="hidden sm:inline">Menunggu Pembayaran</span></span>
                 </div>
 
                 {{-- Slot Lewat --}}
                 <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="w-4 h-4 rounded-md bg-gray-100 border border-gray-200 text-gray-400 flex items-center justify-center font-bold text-[10px] shrink-0">
-                        -
+                    <span class="w-5 h-5 rounded-md bg-gray-100 border border-gray-200 text-gray-400 flex items-center justify-center shrink-0">
+                        <x-lucide-minus class="w-3 h-3" stroke-width="2.5" />
                     </span>
                     <span class="font-medium text-gray-400">Lewat Jam</span>
                 </div>

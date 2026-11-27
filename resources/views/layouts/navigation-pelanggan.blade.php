@@ -1,5 +1,58 @@
 {{-- Unified Responsive Navigation Bar untuk Pelanggan LapangIn --}}
-<div x-data="{ mobileMenuOpen: false }"
+@php
+    $initialActiveNav = request()->routeIs('home')
+        ? 'home'
+        : ((request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*'))
+            ? 'katalog'
+            : (request()->routeIs('jadwal.*')
+                ? 'jadwal'
+                : ((request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat'))
+                    ? 'riwayat'
+                    : (request()->routeIs('bantuan') ? 'bantuan' : ''))));
+@endphp
+<div x-data="{
+        mobileMenuOpen: false,
+        activeNav: '{{ $initialActiveNav }}',
+        resolveNav(urlStr) {
+            try {
+                const u = new URL(urlStr, window.location.origin);
+                if (u.origin !== window.location.origin) return null;
+                const p = u.pathname.replace(/\/+$/, '') || '/';
+                if (p === '/') return 'home';
+                if (p === '/katalog' || p.startsWith('/katalog/') || p.startsWith('/lapangan/')) return 'katalog';
+                if (p === '/jadwal' || p.startsWith('/jadwal/')) return 'jadwal';
+                if (p.startsWith('/pelanggan/booking') || p.startsWith('/pelanggan/riwayat')) return 'riwayat';
+                if (p === '/bantuan') return 'bantuan';
+                return '';
+            } catch (e) {
+                return null;
+            }
+        },
+        init() {
+            document.addEventListener('click', (e) => {
+                if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                const a = e.target.closest('a[href]');
+                if (!a || a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-progress')) return;
+                const href = a.getAttribute('href') || '';
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                const next = this.resolveNav(a.href);
+                if (next !== null) this.activeNav = next;
+            }, true);
+            document.addEventListener('submit', (e) => {
+                const form = e.target;
+                if (!form || !form.action || form.hasAttribute('data-no-progress')) return;
+                if ((form.method || 'get').toLowerCase() === 'get') {
+                    const next = this.resolveNav(form.action);
+                    if (next !== null) this.activeNav = next;
+                }
+            }, true);
+            window.addEventListener('pageshow', () => {
+                this.mobileMenuOpen = false;
+                const cur = this.resolveNav(window.location.href);
+                if (cur !== null) this.activeNav = cur;
+            });
+        }
+     }"
      @keydown.escape.window="mobileMenuOpen = false"
      @pagehide.window="mobileMenuOpen = false">
     {{-- Backdrop Redup Halus saat Mobile Menu Terbuka (mulai di bawah header agar warna putih header & drawer menyatu 100%) --}}
@@ -39,21 +92,24 @@
 
                 <a
                     href="{{ route('home') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'home' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Beranda
                 </a>
 
                 <a
                     href="{{ route('katalog.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'katalog' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Jelajahi Lapangan
                 </a>
 
                 <a
                     href="{{ route('jadwal.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('jadwal.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'jadwal' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Cek Jadwal
                 </a>
@@ -62,7 +118,8 @@
                     @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
                         <a
                             href="{{ route('pelanggan.booking.index') }}"
-                            class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                            class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                            :class="activeNav === 'riwayat' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                         >
                             Riwayat Booking
                         </a>
@@ -71,7 +128,8 @@
 
                 <a
                     href="{{ route('bantuan') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('bantuan') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'bantuan' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Pusat Bantuan
                 </a>
@@ -141,12 +199,12 @@
                                     <x-lucide-circle-user class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Profil &amp; Pengaturan Akun</span>
                                 </a>
-                                <a href="{{ route('pelanggan.booking.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : '' }}">
-                                    <x-lucide-receipt-text class="w-4 h-4 text-[#1a146b] shrink-0" />
+                                <a href="{{ route('pelanggan.booking.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]" :class="activeNav === 'riwayat' ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : ''">
+                                    <x-icons.history class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Riwayat Booking &amp; Jadwal</span>
                                 </a>
                                 <a href="{{ route('katalog.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <x-lucide-dribbble class="w-4 h-4 text-[#1a146b] shrink-0" />
+                                    <x-icons.sport class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Cari &amp; Pesan Lapangan</span>
                                 </a>
                             @endif
@@ -230,71 +288,76 @@
                 <div class="flex flex-col gap-1.5">
                     <a
                         href="{{ route('home') }}"
-                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('home') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'home' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                     >
                         <span class="flex items-center gap-3">
-                            <x-lucide-house class="w-4 h-4 shrink-0 {{ request()->routeIs('home') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span class="shrink-0" :class="activeNav === 'home' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-lucide-house class="w-4 h-4" />
+                            </span>
                             <span>Beranda</span>
                         </span>
-                        @if (request()->routeIs('home'))
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                        @endif
+                        <span x-show="activeNav === 'home'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                     </a>
 
                     <a
                         href="{{ route('katalog.index') }}"
-                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'katalog' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                     >
                         <span class="flex items-center gap-3">
-                            <x-lucide-dribbble class="w-4 h-4 shrink-0 {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span class="shrink-0" :class="activeNav === 'katalog' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-icons.sport class="w-4 h-4" />
+                            </span>
                             <span>Jelajahi Lapangan</span>
                         </span>
-                        @if (request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*'))
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                        @endif
+                        <span x-show="activeNav === 'katalog'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                     </a>
 
                     <a
                         href="{{ route('jadwal.index') }}"
-                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('jadwal.*') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'jadwal' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                     >
                         <span class="flex items-center gap-3">
-                            <x-icons.calendar class="w-4 h-4 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span class="shrink-0" :class="activeNav === 'jadwal' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-icons.time class="w-4 h-4" />
+                            </span>
                             <span>Cek Jadwal</span>
                         </span>
-                        @if (request()->routeIs('jadwal.*'))
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                        @endif
+                        <span x-show="activeNav === 'jadwal'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                     </a>
 
                     @auth
                         @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
                             <a
                                 href="{{ route('pelanggan.booking.index') }}"
-                                class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                                class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                                :class="activeNav === 'riwayat' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                             >
                                 <span class="flex items-center gap-3">
-                                    <x-lucide-receipt-text class="w-4 h-4 shrink-0 {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                                    <span class="shrink-0" :class="activeNav === 'riwayat' ? 'text-[#acf847]' : 'text-gray-400'">
+                                        <x-icons.history class="w-4 h-4" />
+                                    </span>
                                     <span>Riwayat Booking</span>
                                 </span>
-                                @if (request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat'))
-                                    <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                                @endif
+                                <span x-show="activeNav === 'riwayat'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                             </a>
                         @endif
                     @endauth
 
                     <a
                         href="{{ route('bantuan') }}"
-                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('bantuan') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'bantuan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                     >
                         <span class="flex items-center gap-3">
-                            <x-lucide-circle-help class="w-4 h-4 shrink-0 {{ request()->routeIs('bantuan') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span class="shrink-0" :class="activeNav === 'bantuan' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-lucide-circle-help class="w-4 h-4" />
+                            </span>
                             <span>Pusat Bantuan</span>
                         </span>
-                        @if (request()->routeIs('bantuan'))
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                        @endif
+                        <span x-show="activeNav === 'bantuan'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                     </a>
                 </div>
             </div>

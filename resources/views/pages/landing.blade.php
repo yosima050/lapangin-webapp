@@ -42,7 +42,7 @@
     $heroLcpImage = $carouselSlides[0]['foto'] ?? null;
     $heroCategories = isset($lapangans) && $lapangans->isNotEmpty()
         ? $lapangans->pluck('kategori')->filter()->unique()->sort()->values()
-        : collect(['Futsal', 'Badminton', 'Futsal & Basket']);
+        : collect(['Futsal', 'Badminton', 'Basket', 'Mini Soccer']);
     $todayDate = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
     $totalLapanganAktif = isset($lapangans) ? $lapangans->count() : count($carouselSlides);
 @endphp
@@ -81,7 +81,7 @@
                  @mouseenter="if (timer) clearInterval(timer)"
                  @mouseleave="if (totalSlides > 1) timer = setInterval(() => next(), 5500)">
 
-                <div class="relative w-full h-[330px] sm:h-[420px] lg:h-[460px] overflow-hidden">
+                <div class="relative w-full h-[350px] sm:h-[450px] lg:h-[520px] xl:h-[550px] overflow-hidden">
                     @foreach ($carouselSlides as $idx => $slide)
                         <div x-show="currentSlide === {{ $idx }}"
                              x-transition:enter="transition ease-out duration-500"
@@ -139,19 +139,19 @@
                     @endforeach
 
                     {{-- Editorial Left-Aligned Copy Overlay (di atas foto arena) --}}
-                    <div class="absolute inset-x-0 bottom-0 z-10 p-5 pb-12 sm:p-8 sm:pb-16 lg:p-10 lg:pb-16 flex flex-col justify-end pointer-events-none">
-                        <div class="max-w-xl space-y-2 sm:space-y-3">
-                            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-headline font-black text-white tracking-tight leading-[1.12]">
+                    <div class="absolute inset-x-0 bottom-0 z-10 p-5 pb-12 sm:p-10 sm:pb-20 lg:p-12 lg:pb-20 flex flex-col justify-end pointer-events-none">
+                        <div class="max-w-2xl space-y-2.5 sm:space-y-3.5">
+                            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-headline font-black text-white tracking-tight leading-[1.08]">
                                 Pesan Lapangan.<br>
                                 <span class="text-[#acf847]">Langsung Main.</span>
                             </h1>
-                            <p class="text-xs sm:text-base text-indigo-100/90 leading-relaxed max-w-md">
+                            <p class="text-xs sm:text-base lg:text-lg text-indigo-100/90 leading-relaxed max-w-lg">
                                 Cek slot kosong real-time, kunci jadwal mulai DP 50%, dan check-in di gerbang cukup pakai QR Code.
                             </p>
                         </div>
 
                         {{-- Slide Dots (Pojok Kanan Bawah di Desktop, Bawah Kiri di HP) --}}
-                        <div class="mt-3.5 sm:mt-0 sm:absolute sm:bottom-14 sm:right-8 lg:right-10 flex items-center gap-1.5 pointer-events-auto">
+                        <div class="mt-3.5 sm:mt-0 sm:absolute sm:bottom-16 sm:right-10 lg:right-12 flex items-center gap-1.5 pointer-events-auto">
                             @foreach ($carouselSlides as $idx => $slide)
                                 <button type="button"
                                         @click="currentSlide = {{ $idx }}"
@@ -167,7 +167,7 @@
             </div>
 
             {{-- Floating Interactive Quick-Book Search Dock (Custom Dropdown & Calendar, Tanpa Popup Bawaan Browser) --}}
-            <div class="relative z-20 -mt-7 sm:-mt-9 mx-2 sm:mx-6 lg:mx-10"
+            <div class="relative z-20 -mt-8 sm:-mt-11 mx-2 sm:mx-6 lg:mx-8"
                  x-data="{
                     katOpen: false,
                     dateOpen: false,
@@ -241,26 +241,28 @@
                  @keydown.escape.window="katOpen = false; dateOpen = false">
                 <form method="GET"
                       action="{{ route('jadwal.index') }}"
-                      class="rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/10 p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-end">
+                      class="rounded-2xl sm:rounded-3xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/12 p-4 sm:p-5 lg:p-6 grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
 
                     {{-- Pilih Cabang Olahraga (Custom Dropdown) --}}
                     <div class="sm:col-span-5 relative" @click.outside="katOpen = false">
-                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1 px-1">
+                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-400 mb-1.5 px-1">
                             Cabang Olahraga
                         </label>
                         <input type="hidden" name="kategori" :value="selectedKat">
                         <button type="button"
                                 @click="katOpen = !katOpen; dateOpen = false"
                                 :aria-expanded="katOpen"
-                                class="w-full flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-3 text-left text-xs sm:text-sm font-bold text-[#0b1c30] transition cursor-pointer"
+                                class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
                                 :class="katOpen ? 'border-[#1a146b] bg-white ring-1 ring-[#1a146b]' : 'border-gray-200 bg-[#f8faff] hover:border-gray-300'">
-                            <span class="flex items-center gap-2.5 min-w-0">
-                                <x-lucide-dribbble class="w-4 h-4 text-[#1a146b] shrink-0" />
+                            <span class="flex items-center gap-3 min-w-0">
+                                <span class="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#1a146b] inline-flex items-center justify-center">
+                                    <x-icons.sport class="w-full h-full" />
+                                </span>
                                 <span class="truncate" x-text="selectedKat || 'Semua Olahraga'"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
                                   :class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
-                                <x-lucide-chevron-down class="w-4 h-4" />
+                                <x-lucide-chevron-down class="w-4 h-4 sm:w-5 sm:h-5" />
                             </span>
                         </button>
 
@@ -299,22 +301,24 @@
 
                     {{-- Pilih Tanggal Main (Custom Calendar Popover) --}}
                     <div class="sm:col-span-4 relative" @click.outside="dateOpen = false">
-                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1 px-1">
+                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-400 mb-1.5 px-1">
                             Tanggal Main
                         </label>
                         <input type="hidden" name="tanggal" :value="selectedDate">
                         <button type="button"
                                 @click="dateOpen = !dateOpen; katOpen = false"
                                 :aria-expanded="dateOpen"
-                                class="w-full flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-3 text-left text-xs sm:text-sm font-bold text-[#0b1c30] transition cursor-pointer"
+                                class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
                                 :class="dateOpen ? 'border-[#1a146b] bg-white ring-1 ring-[#1a146b]' : 'border-gray-200 bg-[#f8faff] hover:border-gray-300'">
-                            <span class="flex items-center gap-2.5 min-w-0">
-                                <x-icons.calendar class="w-4 h-4 text-[#1a146b] shrink-0" />
+                            <span class="flex items-center gap-3 min-w-0">
+                                <span class="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#1a146b] inline-flex items-center justify-center">
+                                    <x-icons.calendar class="w-full h-full" />
+                                </span>
                                 <span class="truncate" x-text="dateLabel"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
                                   :class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
-                                <x-lucide-chevron-down class="w-4 h-4" />
+                                <x-lucide-chevron-down class="w-4 h-4 sm:w-5 sm:h-5" />
                             </span>
                         </button>
 
@@ -399,18 +403,20 @@
                     {{-- Submit CTA --}}
                     <div class="sm:col-span-3">
                         <button type="submit"
-                                class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] active:scale-[0.98] px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold text-white shadow-md shadow-[#1a146b]/20 transition cursor-pointer">
-                            <x-lucide-search class="w-4 h-4 text-[#acf847] shrink-0" />
+                                class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] active:scale-[0.98] px-6 py-3 sm:py-3.5 text-sm sm:text-[15px] font-extrabold text-white shadow-md shadow-[#1a146b]/20 transition cursor-pointer">
+                            <x-lucide-search class="w-4 h-4 sm:w-5 sm:h-5 text-[#acf847] shrink-0" />
                             <span>Cari Jadwal</span>
                         </button>
                     </div>
                 </form>
 
                 {{-- Quick Action Strip di Bawah Dock --}}
-                <div class="mt-3.5 flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-xs sm:text-sm">
                     <a href="{{ route('jadwal.index') }}"
                        class="inline-flex items-center gap-1.5 font-bold text-[#1a146b] hover:underline">
-                        <x-lucide-clock class="w-3.5 h-3.5 text-[#416900] shrink-0" />
+                        <span class="w-4 h-4 sm:w-5 sm:h-5 text-[#416900] shrink-0 inline-flex items-center justify-center">
+                            <x-icons.time class="w-full h-full" />
+                        </span>
                         <span>Lihat Matriks Jadwal Hari Ini</span>
                         <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                     </a>
