@@ -258,8 +258,10 @@
                                 <x-lucide-dribbble class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span class="truncate" x-text="selectedKat || 'Semua Olahraga'"></span>
                             </span>
-                            <x-lucide-chevron-down class="w-4 h-4 shrink-0 transition-transform duration-200"
-                                                   ::class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'" />
+                            <span class="shrink-0 transition-transform duration-200"
+                                  :class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
+                                <x-lucide-chevron-down class="w-4 h-4" />
+                            </span>
                         </button>
 
                         {{-- Panel Pilihan Cabang Olahraga --}}
@@ -277,7 +279,9 @@
                                     class="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-xs sm:text-sm transition cursor-pointer"
                                     :class="selectedKat === '' ? 'bg-[#1a146b] text-white font-bold shadow-xs' : 'text-[#0b1c30] font-semibold hover:bg-[#f4f7ff] hover:text-[#1a146b]'">
                                 <span>Semua Olahraga</span>
-                                <x-lucide-check x-show="selectedKat === ''" class="w-4 h-4 text-[#acf847] shrink-0" />
+                                <span x-show="selectedKat === ''" class="shrink-0">
+                                    <x-lucide-check class="w-4 h-4 text-[#acf847]" />
+                                </span>
                             </button>
                             @foreach ($heroCategories as $kat)
                                 <button type="button"
@@ -285,7 +289,9 @@
                                         class="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-xs sm:text-sm transition cursor-pointer"
                                         :class="selectedKat === @js($kat) ? 'bg-[#1a146b] text-white font-bold shadow-xs' : 'text-[#0b1c30] font-semibold hover:bg-[#f4f7ff] hover:text-[#1a146b]'">
                                     <span class="truncate">{{ $kat }}</span>
-                                    <x-lucide-check x-show="selectedKat === @js($kat)" class="w-4 h-4 text-[#acf847] shrink-0" />
+                                    <span x-show="selectedKat === @js($kat)" class="shrink-0">
+                                        <x-lucide-check class="w-4 h-4 text-[#acf847]" />
+                                    </span>
                                 </button>
                             @endforeach
                         </div>
@@ -306,8 +312,10 @@
                                 <x-lucide-calendar-days class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span class="truncate" x-text="dateLabel"></span>
                             </span>
-                            <x-lucide-chevron-down class="w-4 h-4 shrink-0 transition-transform duration-200"
-                                                   ::class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'" />
+                            <span class="shrink-0 transition-transform duration-200"
+                                  :class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
+                                <x-lucide-chevron-down class="w-4 h-4" />
+                            </span>
                         </button>
 
                         {{-- Panel Kalender Custom --}}

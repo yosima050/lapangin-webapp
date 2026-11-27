@@ -125,9 +125,9 @@ class DatabaseSeeder extends Seeder
         );
 
         $lapangan2 = Lapangan::firstOrCreate(
-            ['nama' => 'Lapangan 2 - Interlock Premium (Futsal & Basket)'],
+            ['nama' => 'Lapangan 2 - Interlock Premium (Basket)'],
             [
-                'kategori' => 'Futsal & Basket',
+                'kategori' => 'Basket',
                 'jam_buka' => '07:00',
                 'jam_tutup' => '24:00',
                 'deskripsi' => 'Lantai Interlock Modular Polypropylene anti-slip, ring basket hidrolik standar Perbasi, LED Sports Floodlight 400W.',
