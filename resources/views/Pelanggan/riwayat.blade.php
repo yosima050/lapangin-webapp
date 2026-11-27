@@ -242,34 +242,34 @@
             self.isProcessing = false;
         });
     }
-}" class="space-y-6" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+}" class="space-y-4 sm:space-y-6" style="font-family: 'Plus Jakarta Sans', sans-serif;">
 
         {{-- Header Riwayat Booking --}}
-        <div class="mb-8 overflow-hidden rounded-2xl bg-[#1a146b] text-white shadow-lg sm:rounded-3xl">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between px-5 py-7 sm:px-8 sm:py-9 lg:px-10 gap-6">
+        <div class="mb-4 sm:mb-8 overflow-hidden rounded-2xl bg-[#1a146b] text-white shadow-lg sm:rounded-3xl">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between px-4 py-4 sm:px-8 sm:py-9 lg:px-10 gap-3.5 sm:gap-6">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                    <h1 class="text-lg font-extrabold tracking-tight sm:text-3xl sm:font-bold lg:text-4xl leading-snug">
                         Riwayat Booking &amp; Jadwal Saya
                     </h1>
 
-                    <p class="mt-3 max-w-xl text-sm leading-6 text-indigo-100 sm:text-base">
+                    <p class="mt-1.5 sm:mt-3 max-w-xl text-xs leading-relaxed text-indigo-100/90 sm:text-base sm:leading-6 sm:text-indigo-100">
                         Pantau tiket akses gerbang, unduh bukti pembayaran lunas, atau kelola permohonan penjadwalan ulang lapangan secara mandiri.
                     </p>
                 </div>
 
                 {{-- Statistik Ringkasan ala Figma --}}
-                <div class="grid grid-cols-2 gap-3 rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 shrink-0">
-                    <div class="text-center px-4 border-r border-white/10">
-                        <p class="text-xl sm:text-2xl font-extrabold text-white">
+                <div class="grid grid-cols-2 gap-2 sm:gap-3 rounded-xl sm:rounded-2xl bg-white/10 py-2.5 px-3 sm:p-4 backdrop-blur-md border border-white/10 shrink-0">
+                    <div class="flex sm:block items-center justify-center gap-2 text-center px-2 sm:px-4 border-r border-white/15">
+                        <p class="text-lg sm:text-2xl font-extrabold text-white leading-none sm:leading-normal">
                             {{ $countAktif }}
                         </p>
-                        <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
+                        <p class="sm:mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200 whitespace-nowrap">
                             Jadwal Aktif
                         </p>
                     </div>
-                    <div class="text-center px-4">
-                        <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $countSelesai }}</p>
-                        <p class="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200">
+                    <div class="flex sm:block items-center justify-center gap-2 text-center px-2 sm:px-4">
+                        <p class="text-lg sm:text-2xl font-extrabold text-white leading-none sm:leading-normal">{{ $countSelesai }}</p>
+                        <p class="sm:mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-200 whitespace-nowrap">
                             Selesai
                         </p>
                     </div>
@@ -279,29 +279,29 @@
 
         {{-- Notifikasi --}}
         @if (session('success'))
-            <div class="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
+            <div class="mb-4 sm:mb-6 flex items-start gap-2.5 sm:gap-3 rounded-xl border border-green-200 bg-green-50 p-3.5 sm:p-4 text-green-800">
                 <svg class="w-5 h-5 shrink-0 stroke-current text-green-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-sm font-semibold">{{ session('success') }}</p>
+                <p class="text-xs sm:text-sm font-semibold">{{ session('success') }}</p>
             </div>
         @endif
 
         {{-- Filter & Pencarian ala Figma --}}
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            {{-- Tab Filter Status --}}
-            <div class="flex flex-wrap items-center gap-2 rounded-2xl bg-gray-200/60 p-1.5 text-xs font-semibold text-gray-600">
+        <div class="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+            {{-- Tab Filter Status (1 baris kompak 4 kolom di HP, pill fleksibel di Desktop) --}}
+            <div class="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl bg-gray-200/70 sm:bg-gray-200/60 p-1 sm:p-1.5 text-[11px] sm:text-xs font-semibold text-gray-600">
                 <button type="button"
                         @click="activeTab = 'all'"
                         :class="activeTab === 'all' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
                     Semua ({{ $countSemua }})
                 </button>
                 <button type="button"
                         @click="activeTab = 'aktif'"
                         :class="activeTab === 'aktif' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 transition cursor-pointer">
-                    Aktif &amp; Mendatang
+                        class="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                    <span>Aktif<span class="hidden sm:inline"> &amp; Mendatang</span></span>
                     <span :class="activeTab === 'aktif' ? 'bg-[#acf847] text-[#1a146b]' : 'bg-gray-300 text-gray-700'"
                           class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[10px] font-extrabold">
                         {{ $countAktif }}
@@ -310,14 +310,14 @@
                 <button type="button"
                         @click="activeTab = 'selesai'"
                         :class="activeTab === 'selesai' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="rounded-xl px-4 py-2 transition cursor-pointer">
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
                     Selesai ({{ $countSelesai }})
                 </button>
                 <button type="button"
                         @click="activeTab = 'dibatalkan'"
                         :class="activeTab === 'dibatalkan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="rounded-xl px-4 py-2 transition cursor-pointer">
-                    Dibatalkan ({{ $countDibatalkan }})
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                    <span class="sm:hidden">Batal</span><span class="hidden sm:inline">Dibatalkan</span>&nbsp;({{ $countDibatalkan }})
                 </button>
             </div>
 
@@ -326,7 +326,7 @@
                 <input type="text"
                        x-model="searchQuery"
                        placeholder="Cari lapangan..."
-                       class="w-full rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                       class="w-full rounded-xl sm:rounded-2xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-xs shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -342,16 +342,16 @@
         </div>
 
         {{-- Sub-header Judul Bagian --}}
-        <div class="mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-800"
+        <div class="mb-3 sm:mb-4 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0 rounded-full bg-green-500"></span>
+                <h2 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-800 truncate"
                     x-text="activeTab === 'all' ? 'Semua Jadwal Reservasi' : (activeTab === 'aktif' ? 'Jadwal Pertandingan Aktif & Mendatang' : (activeTab === 'selesai' ? 'Riwayat Pertandingan Selesai' : 'Daftar Booking Dibatalkan'))">
                     Jadwal Pertandingan Terdekat
                 </h2>
             </div>
-            <p class="text-[11px] text-gray-400">
-                Update sinkronisasi: Baru saja
+            <p class="text-[10px] sm:text-[11px] text-gray-400 shrink-0 whitespace-nowrap">
+                <span class="hidden sm:inline">Update sinkronisasi: </span>Baru saja
             </p>
         </div>
 
@@ -410,33 +410,33 @@
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 translate-y-1"
                      x-transition:enter-end="opacity-100 translate-y-0"
-                     class="mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all">
+                     class="mb-4 sm:mb-6 overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all">
 
                 {{-- Baris Atas: Waktu Pemesanan & Badge Status --}}
-                <div class="flex flex-wrap items-center justify-between border-b border-gray-100 bg-indigo-50/30 px-5 py-3 gap-2">
-                    <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="flex flex-wrap items-center justify-between border-b border-gray-100 bg-indigo-50/30 px-3.5 py-2.5 sm:px-5 sm:py-3 gap-2">
+                    <div class="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-500">
+                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>Dipesan: {{ \Carbon\Carbon::parse($jadwal->created_at)->translatedFormat('d M Y, H:i') }} WIB</span>
                     </div>
 
                     {{-- Badge Status Utama --}}
                     @if ($isDibatalkan)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold bg-red-100 text-red-800 border border-red-200">
                             <span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
                             Dibatalkan
                         </span>
                     @elseif ($jIsSelesai)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">
                             <span class="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
                             Pertandingan Selesai
                         </span>
                     @elseif ($isLunas)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold bg-green-100 text-green-800 border border-green-200">
                             <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
                             Lunas 100% (Siap Main)
                         </span>
                     @elseif ($isDP)
-                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-[#acf847]/40 text-emerald-950 border border-[#acf847]">
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold bg-[#acf847]/40 text-emerald-950 border border-[#acf847]">
                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
                             DP 50% Terverifikasi (Siap Main)
                         </span>
@@ -445,15 +445,15 @@
                             $elapsedSec = abs(now()->diffInSeconds(\Carbon\Carbon::parse($jadwal->created_at)));
                             $remainingSec = max(0, 600 - $elapsedSec);
                         @endphp
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
                                 <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                                 Belum Dibayar
                             </span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                            <span class="inline-flex items-center gap-1 sm:gap-1.5 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
                                   data-card-timer="{{ $jadwal->id }}"
                                   data-remaining="{{ $remainingSec }}">
-                                <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span class="font-mono">{{ sprintf('%02d:%02d', floor($remainingSec / 60), $remainingSec % 60) }}</span>
                             </span>
                         </div>
@@ -461,13 +461,13 @@
                 </div>
 
                 {{-- Konten Utama 3 Kolom ala Figma --}}
-                <div class="p-5">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+                <div class="p-3.5 sm:p-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 items-center">
                         
                         {{-- Kolom 1: Thumbnail Venue & Nama Lapangan --}}
-                        <div class="lg:col-span-4 flex items-stretch gap-4">
+                        <div class="lg:col-span-4 flex items-stretch gap-3 sm:gap-4">
                         {{-- Gambar Full Height ala Katalog --}}
-                        <div class="relative w-28 sm:w-32 shrink-0 overflow-hidden rounded-xl bg-gray-900 border border-gray-100 self-stretch flex items-center justify-center">
+                        <div class="relative w-20 min-h-[84px] sm:w-32 shrink-0 overflow-hidden rounded-xl bg-gray-900 border border-gray-100 self-stretch flex items-center justify-center">
                             @php
                                 $fotoUrl = $jadwal->lapangan?->foto_url ?? asset('storage/' . $jadwal->lapangan?->foto);
                                 $fallbackAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($namaLapangan) . '&background=1a146b&color=acf847&size=512';
@@ -478,56 +478,56 @@
                                 class="h-full w-full object-cover object-center transition duration-300 hover:scale-105"
                                 onerror="this.onerror=null; this.src='{{ $fallbackAvatar }}';">
 
-                            <span class="absolute top-2 left-2 rounded-md bg-[#1a146b]/90 backdrop-blur-md px-2 py-0.5 text-[8px] font-bold text-[#acf847] uppercase tracking-wider shadow-xs">
+                            <span class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 rounded-md bg-[#1a146b]/90 backdrop-blur-md px-1.5 sm:px-2 py-0.5 text-[8px] font-bold text-[#acf847] uppercase tracking-wider shadow-xs">
                                 {{ $jadwal->lapangan?->kategori ?? 'VENUE' }}
                             </span>
                         </div>
 
                         {{-- Detail Nama & Spesifikasi --}}
-                        <div class="min-w-0 flex-1 py-1">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">GELANGGANG UTAMA</p>
-                            <h3 class="text-base font-bold text-gray-900 leading-snug truncate">
+                        <div class="min-w-0 flex-1 py-0.5 sm:py-1">
+                            <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">GELANGGANG UTAMA</p>
+                            <h3 class="text-sm sm:text-base font-bold text-gray-900 leading-snug line-clamp-2 sm:truncate">
                                 {{ $jadwal->lapangan?->nama ?? 'Lapangan Tidak Tersedia' }}
                             </h3>
-                            <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
+                            <p class="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-gray-500 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-                                <span>{{ $jadwal->lapangan?->tipe_lantai ?? 'Standard FIFA Flooring' }}</span>
+                                <span class="truncate">{{ $jadwal->lapangan?->tipe_lantai ?? 'Standard FIFA Flooring' }}</span>
                             </p>
-                            <p class="mt-0.5 text-xs text-gray-500 flex items-center gap-1.5">
+                            <p class="mt-0.5 text-[11px] sm:text-xs text-gray-500 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                <span>Rompi &amp; Bola Termasuk</span>
+                                <span class="truncate">Rompi &amp; Bola Termasuk</span>
                             </p>
                         </div>
                     </div>
 
                         {{-- Kolom 2: Detail Jadwal & Pembayaran --}}
-                        <div class="lg:col-span-5 rounded-2xl bg-indigo-50/40 border border-indigo-50 p-4">
-                            <div class="flex items-start justify-between">
-                                <div>
+                        <div class="lg:col-span-5 rounded-xl sm:rounded-2xl bg-indigo-50/40 border border-indigo-50 p-3 sm:p-4">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0">
                                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Jadwal Kickoff</p>
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#1a146b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div class="mt-1 flex items-center gap-1.5 sm:gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#1a146b] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" />
                                         </svg>
-                                        <span class="text-sm font-bold text-gray-900">
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900 truncate">
                                             {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}
                                         </span>
                                     </div>
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#1a146b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div class="mt-1 flex items-center gap-1.5 sm:gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#1a146b] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="text-sm font-extrabold text-[#1a146b]">
-                                            {{ substr((string) $jadwal->jam_mulai, 0, 5) }} – {{ substr((string) $jadwal->jam_selesai, 0, 5) }} <span class="text-xs font-normal text-gray-500">WIB</span>
+                                        <span class="text-xs sm:text-sm font-extrabold text-[#1a146b]">
+                                            {{ substr((string) $jadwal->jam_mulai, 0, 5) }} – {{ substr((string) $jadwal->jam_selesai, 0, 5) }} <span class="text-[11px] sm:text-xs font-normal text-gray-500">WIB</span>
                                         </span>
                                     </div>
                                 </div>
-                                <span class="rounded-lg bg-indigo-100 px-2.5 py-1 text-[11px] font-bold text-indigo-900">
+                                <span class="shrink-0 whitespace-nowrap rounded-lg bg-indigo-100 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-bold text-indigo-900">
                                     {{ $durasiJam }} Jam Sesi
                                 </span>
                             </div>
 
-                            <div class="mt-3 border-t border-indigo-100/60 pt-2 flex justify-between text-xs">
+                            <div class="mt-2.5 sm:mt-3 border-t border-indigo-100/60 pt-2 flex justify-between items-center text-xs">
                                 <span class="text-gray-500">Total Harga:</span>
                                 <span class="font-bold text-gray-900">Rp{{ number_format((float) $jadwal->harga_disepakati, 0, ',', '.') }}</span>
                             </div>
@@ -920,53 +920,53 @@
          style="display: none;">
 
         <div @click.away="if (!isProcessing) payModalOpen = false"
-             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-7 text-left border border-gray-100">
+             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-4 sm:p-7 text-left border border-gray-100">
 
             {{-- Tombol Close X --}}
             <button @click="payModalOpen = false"
                     :disabled="isProcessing"
                     type="button"
-                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
+                    class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             {{-- Header Modal --}}
-            <div class="flex items-start gap-3">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#acf847] text-[#1a146b] shadow-xs">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
+            <div class="flex items-start gap-3 pr-8">
+                <span class="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-[#acf847] text-[#1a146b] shadow-xs">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-6-10.5h16.5a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 18V7.5a1.5 1.5 0 011.5-1.5z"/></svg>
                 </span>
                 <div>
-                    <h3 class="text-lg font-extrabold text-[#1a146b]">
+                    <h3 class="text-base sm:text-lg font-extrabold text-[#1a146b]">
                         Selesaikan Pembayaran Booking
                     </h3>
-                    <p class="text-xs text-gray-500 mt-0.5">
+                    <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5">
                         Pilih skema pembayaran untuk mengaktifkan kode QR dan e-tiket masuk lapangan.
                     </p>
                 </div>
             </div>
 
             {{-- Banner Timer 10 Menit di Modal --}}
-            <div class="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3.5 text-amber-900 shadow-2xs">
-                <div class="flex items-center gap-2.5">
-                    <svg class="w-5 h-5 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div>
-                        <p class="text-xs font-black uppercase tracking-wide">Batas Waktu Pembayaran:</p>
-                        <p class="text-[11px] text-amber-700">Slot dikunci sementara selama waktu ini</p>
+            <div class="mt-3.5 sm:mt-4 flex items-center justify-between gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl border-2 border-amber-300 bg-amber-50 p-3 sm:p-3.5 text-amber-900 shadow-2xs">
+                <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="min-w-0">
+                        <p class="text-[11px] sm:text-xs font-black uppercase tracking-wide">Batas Waktu Pembayaran:</p>
+                        <p class="text-[10px] sm:text-[11px] text-amber-700 leading-tight">Slot dikunci sementara selama waktu ini</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-1.5 border border-amber-200 shadow-2xs">
-                    <span class="font-mono text-base font-black text-amber-900" x-text="formatTimerText(modalRemainingSec)"></span>
+                <div class="flex items-center gap-1.5 rounded-xl bg-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 border border-amber-200 shadow-2xs shrink-0">
+                    <span class="font-mono text-sm sm:text-base font-black text-amber-900" x-text="formatTimerText(modalRemainingSec)"></span>
                 </div>
             </div>
 
             {{-- Rincian Booking Ringkas --}}
-            <div class="mt-4 rounded-2xl bg-[#f8faff] border border-[#dce9ff] p-4 text-xs space-y-2">
-                <div class="flex justify-between items-start">
-                    <span class="text-gray-500 font-semibold">Lapangan:</span>
+            <div class="mt-3.5 sm:mt-4 rounded-xl sm:rounded-2xl bg-[#f8faff] border border-[#dce9ff] p-3.5 sm:p-4 text-xs space-y-2">
+                <div class="flex justify-between items-start gap-2">
+                    <span class="text-gray-500 font-semibold shrink-0">Lapangan:</span>
                     <span class="font-bold text-[#0b1c30] text-right" x-text="selectedLapanganNama"></span>
                 </div>
-                <div class="flex justify-between items-start">
-                    <span class="text-gray-500 font-semibold">Jadwal:</span>
+                <div class="flex justify-between items-start gap-2">
+                    <span class="text-gray-500 font-semibold shrink-0">Jadwal:</span>
                     <span class="font-bold text-[#1a146b] text-right">
                         <span x-text="selectedTanggal"></span>, <span x-text="selectedJamMulai"></span> – <span x-text="selectedJamSelesai"></span> WIB
                     </span>
@@ -978,26 +978,26 @@
             </div>
 
             {{-- Pilihan Tipe Pembayaran (Radio Cards) --}}
-            <div class="mt-4 space-y-2.5">
+            <div class="mt-3.5 sm:mt-4 space-y-2">
                 <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
                     Pilih Skema Pembayaran:
                 </label>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
                     {{-- Opsi 1: DP 50% --}}
                     <div @click="tipeBayar = 'dp'"
                          :class="tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 hover:border-gray-300 bg-white'"
-                         class="cursor-pointer rounded-2xl border-2 p-3.5 transition flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold" :class="tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-gray-700'">
+                         class="cursor-pointer rounded-xl sm:rounded-2xl border-2 p-3 sm:p-3.5 transition flex flex-col justify-between">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] sm:text-xs font-bold" :class="tipeBayar === 'dp' ? 'text-[#1a146b]' : 'text-gray-700'">
                                 Bayar DP (50%)
                             </span>
-                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0"
                                   :class="tipeBayar === 'dp' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300'">
                                 <span x-show="tipeBayar === 'dp'" class="h-1.5 w-1.5 rounded-full bg-white"></span>
                             </span>
                         </div>
-                        <p class="mt-2 text-base font-black text-[#0b1c30]" x-text="formatRupiah(Math.round(selectedHarga * 0.5))"></p>
+                        <p class="mt-1.5 sm:mt-2 text-sm sm:text-base font-black text-[#0b1c30]" x-text="formatRupiah(Math.round(selectedHarga * 0.5))"></p>
                         <p class="mt-1 text-[10px] text-gray-500 leading-tight">
                             Sisa dilunasi di meja kasir saat datang.
                         </p>
@@ -1006,17 +1006,17 @@
                     {{-- Opsi 2: Lunas 100% --}}
                     <div @click="tipeBayar = 'full'"
                          :class="tipeBayar === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 hover:border-gray-300 bg-white'"
-                         class="cursor-pointer rounded-2xl border-2 p-3.5 transition flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold" :class="tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-gray-700'">
+                         class="cursor-pointer rounded-xl sm:rounded-2xl border-2 p-3 sm:p-3.5 transition flex flex-col justify-between">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] sm:text-xs font-bold" :class="tipeBayar === 'full' ? 'text-[#1a146b]' : 'text-gray-700'">
                                 Bayar Lunas (100%)
                             </span>
-                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                            <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0"
                                   :class="tipeBayar === 'full' ? 'border-[#1a146b] bg-[#1a146b]' : 'border-gray-300'">
                                 <span x-show="tipeBayar === 'full'" class="h-1.5 w-1.5 rounded-full bg-white"></span>
                             </span>
                         </div>
-                        <p class="mt-2 text-base font-black text-[#0b1c30]" x-text="formatRupiah(selectedHarga)"></p>
+                        <p class="mt-1.5 sm:mt-2 text-sm sm:text-base font-black text-[#0b1c30]" x-text="formatRupiah(selectedHarga)"></p>
                         <p class="mt-1 text-[10px] text-[#416900] font-semibold leading-tight">
                             Langsung check-in tanpa antre kasir.
                         </p>
@@ -1081,26 +1081,26 @@
          style="display: none;">
 
         <div @click.away="if (!cancelSubmitting) cancelModalOpen = false"
-             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-8 space-y-5 text-left border border-gray-100">
+             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-4 sm:p-8 space-y-4 sm:space-y-5 text-left border border-gray-100">
             
             {{-- Close Button --}}
             <button @click="cancelModalOpen = false"
                     :disabled="cancelSubmitting"
                     type="button"
-                    class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
+                    class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
             {{-- Modal Header --}}
-            <div class="flex items-center gap-3">
-                <div class="h-11 w-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            <div class="flex items-center gap-3 pr-8">
+                <div class="h-10 w-10 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                 </div>
-                <div>
-                    <h3 class="text-lg font-extrabold text-gray-900">
+                <div class="min-w-0">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">
                         Konfirmasi Pembatalan Sewa
                     </h3>
-                    <p class="text-xs text-gray-500" x-text="cancelLapanganNama + ' • ' + cancelTanggal"></p>
+                    <p class="text-[11px] sm:text-xs text-gray-500 truncate" x-text="cancelLapanganNama + ' • ' + cancelTanggal"></p>
                 </div>
             </div>
 
@@ -1170,15 +1170,15 @@
                         Slot jadwal Anda akan otomatis <strong>dilepaskan kembali ke publik</strong> dan status diubah menjadi <strong>Dibatalkan</strong>.
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
                         <button type="button"
                                 @click="cancelModalOpen = false"
-                                class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">
+                                class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition text-center">
                             Batal, Simpan Jadwal
                         </button>
                         <button type="submit"
                                 :disabled="cancelSubmitting"
-                                class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                                class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
                             <span x-show="!cancelSubmitting">Ya, Batalkan Booking</span>
                             <span x-show="cancelSubmitting" x-cloak>Memproses...</span>
                         </button>
@@ -1191,23 +1191,23 @@
     </div>
 
         {{-- Bagian Tabel Riwayat Transaksi Lalu ala Figma --}}
-        <div class="mt-12 pt-6 border-t border-gray-200"
+        <div class="mt-8 sm:mt-12 pt-5 sm:pt-6 border-t border-gray-200"
              x-data="{
                 trxPage: 1,
                 trxPerPage: 5,
                 trxTotal: 0
              }">
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="mb-3.5 sm:mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-2">
                 <div>
-                    <h2 class="text-sm font-extrabold uppercase tracking-wider text-gray-900">
+                    <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-gray-900">
                         RIWAYAT TRANSAKSI LALU
                     </h2>
-                    <p class="text-xs text-gray-500">
+                    <p class="text-[11px] sm:text-xs text-gray-500">
                         Catatan pemakaian lapangan dan arsip invoice digital resmi.
                     </p>
                 </div>
 
-                <button type="button" onclick="printRiwayatTransaksi()" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-fit cursor-pointer">
+                <button type="button" onclick="printRiwayatTransaksi()" class="inline-flex items-center justify-center sm:justify-start gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition w-full sm:w-fit cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
@@ -1215,20 +1215,6 @@
                 </button>
             </div>
 
-            {{-- Container Tabel Responsive --}}
-            <div class="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs">
-                <table class="w-full text-left text-xs">
-                    <thead class="border-b border-gray-100 bg-gray-50/80 font-bold uppercase text-gray-500">
-                        <tr>
-                            <th scope="col" class="px-5 py-3.5">INVOICE</th>
-                            <th scope="col" class="px-5 py-3.5">LAPANGAN &amp; FASILITAS</th>
-                            <th scope="col" class="px-5 py-3.5">WAKTU MAIN</th>
-                            <th scope="col" class="px-5 py-3.5">TOTAL BIAYA</th>
-                            <th scope="col" class="px-5 py-3.5 text-right">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-gray-700">
-                       
 @php
     $jadwalItems = ($jadwals instanceof \Illuminate\Pagination\AbstractPaginator)
         ? $jadwals->getCollection()
@@ -1267,6 +1253,70 @@
         ];
     })->values();
 @endphp
+
+            {{-- Tampilan Kartu Kompak Khusus HP (tanpa scroll samping) --}}
+            <div class="sm:hidden space-y-2.5">
+                @forelse ($riwayatTransaksi as $index => $item)
+                    @php
+                        $jadwal = $item['jadwal'];
+                        $transaksi = $item['transaksi'];
+                        $statusClass = match ($transaksi->status) {
+                            'berhasil' => 'bg-green-50 text-green-700 border-green-200/60',
+                            'gagal' => 'bg-red-50 text-red-700 border-red-200/60',
+                            default => 'bg-yellow-50 text-yellow-700 border-yellow-200/60',
+                        };
+                        $invoiceCode = $transaksi->order_id
+                            ? '#' . $transaksi->order_id
+                            : '#INV-' . strtoupper(substr((string) ($transaksi->id ?? $jadwal->id), 0, 8));
+                    @endphp
+                    <div x-show="Math.floor({{ $index }} / trxPerPage) + 1 === trxPage"
+                         class="rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-2xs space-y-2">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-gray-900 truncate">{{ $jadwal->lapangan->nama ?? 'Lapangan' }}</p>
+                                <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-mono font-bold">
+                                    {{ $invoiceCode }}
+                                </span>
+                            </div>
+                            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold shrink-0 {{ $statusClass }}">
+                                {{ ucfirst($transaksi->status) }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-gray-100">
+                            <div>
+                                <p class="font-medium text-gray-700">
+                                    {{ $jadwal->tanggal?->format('d M Y') ?? '-' }} · {{ substr((string) $jadwal->jam_mulai, 0, 5) }}–{{ substr((string) $jadwal->jam_selesai, 0, 5) }}
+                                </p>
+                                <p class="text-[10px] text-gray-400">
+                                    {{ ucfirst($transaksi->jenis) }} · {{ ucfirst($transaksi->metode) }}
+                                </p>
+                            </div>
+                            <p class="text-xs font-extrabold text-[#1a146b] shrink-0">
+                                Rp {{ number_format((float) $transaksi->jumlah, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-2xl border border-gray-200 bg-white px-4 py-8 text-center">
+                        <p class="text-xs font-semibold text-gray-700">Belum ada transaksi</p>
+                        <p class="mt-1 text-[11px] text-gray-500">Riwayat pembayaran akan muncul di sini setelah tersedia.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- Container Tabel Responsive (Desktop) --}}
+            <div class="hidden sm:block overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs">
+                <table class="w-full text-left text-xs">
+                    <thead class="border-b border-gray-100 bg-gray-50/80 font-bold uppercase text-gray-500">
+                        <tr>
+                            <th scope="col" class="px-5 py-3.5">INVOICE</th>
+                            <th scope="col" class="px-5 py-3.5">LAPANGAN &amp; FASILITAS</th>
+                            <th scope="col" class="px-5 py-3.5">WAKTU MAIN</th>
+                            <th scope="col" class="px-5 py-3.5">TOTAL BIAYA</th>
+                            <th scope="col" class="px-5 py-3.5 text-right">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
 
 @forelse ($riwayatTransaksi as $index => $item)
     @php
