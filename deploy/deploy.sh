@@ -100,9 +100,11 @@ echo "[4/8] Membangun image Docker menggunakan layer cache lokal..."
 docker network create lapangin_net 2>/dev/null || true
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" build app
 
-# ── 6. Update Kontainer (Atomic Container Swap — Tanpa HTTP 503) ──────────────
+# ── 6. Update Kontainer (Atomic Container Swap — Renew Anonymous Volume vendor/) ─
 echo "[5/8] Memperbarui service kontainer Docker secara atomik..."
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --remove-orphans
+# --renew-anon-volumes (-V) menyegarkan anonymous volume /var/www/lapangin/vendor dari image baru
+# tanpa menyentuh named volumes (database PostgreSQL & storage tetap aman 100%)
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" up -d --renew-anon-volumes --remove-orphans
 
 # ── 7. Jalankan Migrasi Database & Storage Symlink ────────────────────────────
 echo "[6/8] Menjalankan migrasi database & symlink storage..."
@@ -120,8 +122,10 @@ docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php arti
 
 # ── 8. Optimasi Cache & Mematikan Maintenance Mode ───────────────────────────
 echo "[7/8] Mengoptimasi cache Laravel & menyalakan aplikasi..."
-docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan package:discover --ansi 2>/dev/null || true
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/blade-icons.php
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan package:discover --ansi
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize:clear
+docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan icons:cache
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan optimize
 docker compose -p "${COMPOSE_PROJECT}" -f "${COMPOSE_FILE}" exec -T app php artisan up 2>/dev/null || true
 
