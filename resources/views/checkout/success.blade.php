@@ -3,16 +3,54 @@
 @section('title', 'Pembayaran Berhasil & E-Tiket Masuk')
 
 @section('content')
+<style>
+    @keyframes lapangin-circle-draw {
+        0% { stroke-dashoffset: 152; opacity: 0.35; }
+        100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+    @keyframes lapangin-check-draw {
+        0% { stroke-dashoffset: 36; }
+        100% { stroke-dashoffset: 0; }
+    }
+    @keyframes lapangin-check-pop {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.09); }
+    }
+    .lapangin-success-icon {
+        animation: lapangin-check-pop 0.35s ease-out 0.62s both;
+    }
+    .lapangin-success-circle {
+        stroke-dasharray: 152;
+        stroke-dashoffset: 152;
+        animation: lapangin-circle-draw 0.52s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .lapangin-success-check {
+        stroke-dasharray: 36;
+        stroke-dashoffset: 36;
+        animation: lapangin-check-draw 0.32s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .lapangin-success-icon,
+        .lapangin-success-circle,
+        .lapangin-success-check {
+            animation: none;
+            stroke-dashoffset: 0;
+            opacity: 1;
+        }
+    }
+</style>
+
 <div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] py-4 sm:py-12 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white"
      style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
 
         {{-- Success Notice Banner --}}
         <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 print:hidden">
-            <div class="flex items-start sm:items-center gap-3 sm:gap-4 text-left">
-                <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div class="flex items-center gap-3.5 sm:gap-4 text-left">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">
+                    <svg class="lapangin-success-icon w-full h-full text-white" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                        <circle class="lapangin-success-circle" cx="26" cy="26" r="24" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" transform="rotate(-90 26 26)" />
+                        <path class="lapangin-success-check" d="M15.5 26.8 L22.6 33.8 L36.8 19.2" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <div class="min-w-0 flex-1">
