@@ -662,88 +662,92 @@
          class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6" 
          style="display: none;">
         
-        <div @click.away="showModal = false" 
+        <div @click.away="showModal = false"
              id="printable-ticket-{{ $jadwal->id }}"
-             class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto text-left border border-gray-100">
-            
+             class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-6 max-h-[92vh] overflow-y-auto text-left border border-gray-100">
+
             {{-- Tombol Close X --}}
-            <button @click="showModal = false" 
-                    type="button" 
-                    class="no-print absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition z-10">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button @click="showModal = false"
+                    type="button"
+                    class="no-print absolute top-3.5 right-3.5 sm:top-5 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition active:scale-95 z-10 cursor-pointer">
+                <x-lucide-x class="w-4 h-4" />
             </button>
 
-            {{-- Header Status --}}
-            <div class="text-center space-y-2 pt-2">
-                <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#acf847] text-[#1a146b] shadow-xs">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            {{-- Header Status (Ringkas 1 baris di HP agar QR langsung terlihat di atas) --}}
+            <div class="flex sm:flex-col items-center gap-2.5 sm:gap-2 text-left sm:text-center pr-10 sm:pr-0 pt-0.5 sm:pt-2">
+                <div class="inline-flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#acf847] text-[#1a146b] shadow-xs">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                 </div>
-                <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
+                <div class="min-w-0">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
                         ● Akses Lapangan Aktif
                     </span>
-                    <h2 class="text-xl sm:text-2xl font-extrabold text-[#1a146b] mt-1">
+                    <h2 class="text-sm sm:text-2xl font-extrabold text-[#1a146b] sm:mt-1 leading-snug">
                         Reservasi Berhasil Dikonfirmasi!
                     </h2>
+                    <p class="sm:hidden text-[11px] font-semibold text-gray-500 truncate">
+                        {{ $jadwal->lapangan?->nama }}
+                    </p>
                 </div>
             </div>
 
-            {{-- Boarding Pass Card (Grid 2 Kolom) --}}
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-                
-                {{-- Kiri: Detail Match Pass --}}
-                <div class="lg:col-span-8 p-6 space-y-5">
-                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+            {{-- Boarding Pass Card (QR langsung di atas pada HP, 2 kolom pada Desktop) --}}
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+
+                {{-- Kiri (Desktop) / Bawah (Mobile): Detail Match Pass --}}
+                <div class="order-2 lg:order-1 lg:col-span-8 p-4 sm:p-6 space-y-3.5 sm:space-y-5">
+                    <div class="hidden sm:flex items-center justify-between border-b border-gray-100 pb-3">
                         <span class="px-3 py-1 rounded-full bg-[#1a146b] text-white text-[10px] font-extrabold uppercase tracking-wider">
                             OFFICIAL MATCH PASS
                         </span>
                     </div>
 
                     <div>
-                        <h3 class="text-lg sm:text-xl font-extrabold text-[#1a146b]">
+                        <span class="sm:hidden inline-block mb-1.5 px-2.5 py-0.5 rounded-full bg-[#1a146b] text-white text-[9px] font-extrabold uppercase tracking-wider">
+                            OFFICIAL MATCH PASS
+                        </span>
+                        <h3 class="text-base sm:text-xl font-extrabold text-[#1a146b] leading-snug">
                             {{ $jadwal->lapangan?->nama }}
                         </h3>
-                        <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                        <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m-9-9h18"/></svg>
-                            <span>{{ $jadwal->lapangan?->kategori }}</span> 
+                            <span>{{ $jadwal->lapangan?->kategori }}</span>
                             @if($jadwal->lapangan?->tipe_lantai)
                                 • <span>{{ $jadwal->lapangan?->tipe_lantai }}</span>
                             @endif
                         </p>
                     </div>
 
-                    {{-- Pemesan & Tim --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#f8f9ff] p-3.5 rounded-2xl border border-indigo-50">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-[#1a146b] text-white flex items-center justify-center font-bold text-xs shrink-0 uppercase">
+                    {{-- Pemesan & Tim (2 kolom sejajar di HP & Desktop) --}}
+                    <div class="grid grid-cols-2 gap-2.5 sm:gap-3 bg-[#f8f9ff] p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-indigo-50">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-[#1a146b] text-white flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0 uppercase">
                                 {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
                             </div>
                             <div class="min-w-0">
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">PEMESAN RESMI</p>
-                                <p class="text-xs font-bold text-gray-800 truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
+                                <p class="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-wider">PEMESAN</p>
+                                <p class="text-[11px] sm:text-xs font-bold text-gray-800 truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-100">
-                            <svg class="w-4 h-4 text-[#1a146b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                            <div class="min-w-0">
-                                <p class="text-xs font-bold text-gray-800 truncate">{{ $jadwal->nama_tim ?? 'Pemain Umum' }}</p>
-                            </div>
+                        <div class="flex items-center gap-1.5 sm:gap-2 bg-white px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border border-gray-100 min-w-0">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1a146b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                            <p class="text-[11px] sm:text-xs font-bold text-gray-800 truncate">{{ $jadwal->nama_tim ?? 'Pemain Umum' }}</p>
                         </div>
                     </div>
 
-                    {{-- Schedule Grid --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                        <div class="bg-[#f8f9ff] p-3 rounded-2xl border border-indigo-50">
+                    {{-- Schedule Grid (2 kolom di HP, 3 kolom di Desktop) --}}
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 text-xs">
+                        <div class="bg-[#f8f9ff] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-indigo-50">
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">TANGGAL MAIN</p>
-                            <p class="font-bold text-gray-800 mt-1">{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}</p>
+                            <p class="font-bold text-gray-800 mt-0.5 sm:mt-1 text-[11px] sm:text-xs leading-snug">{{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('d M Y') }}</p>
                         </div>
-                        <div class="bg-[#f8f9ff] p-3 rounded-2xl border border-indigo-50">
+                        <div class="bg-[#f8f9ff] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-indigo-50">
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">WAKTU KICK-OFF</p>
-                            <p class="font-bold text-[#1a146b] mt-1">{{ substr((string) $jadwal->jam_mulai, 0, 5) }} – {{ substr((string) $jadwal->jam_selesai, 0, 5) }} WIB</p>
+                            <p class="font-bold text-[#1a146b] mt-0.5 sm:mt-1 text-[11px] sm:text-xs whitespace-nowrap">{{ substr((string) $jadwal->jam_mulai, 0, 5) }} – {{ substr((string) $jadwal->jam_selesai, 0, 5) }} WIB</p>
                         </div>
-                        <div class="bg-[#f8f9ff] p-3 rounded-2xl border border-indigo-50">
+                        <div class="col-span-2 sm:col-span-1 bg-[#f8f9ff] p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-indigo-50 flex sm:block items-center justify-between">
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">STATUS PEMBAYARAN</p>
-                            <p class="font-bold text-emerald-600 mt-1">
+                            <p class="font-bold text-emerald-600 sm:mt-1 text-[11px] sm:text-xs">
                                 {{ strtolower($jadwal->status_pembayaran ?? '') === 'dp_terverifikasi' ? 'DP 50% Lunas' : 'Lunas 100%' }}
                             </p>
                         </div>
@@ -759,20 +763,19 @@
                         $onlineTerbayar = $isDP ? ($totalHarga / 2) : $totalHarga;
                         $sisaBayar = $isDP ? ($totalHarga / 2) : 0;
                     @endphp
-                    <div class="flex items-center justify-between bg-indigo-50/50 p-3.5 rounded-2xl border border-indigo-100">
-                        <div>
+                    <div class="flex items-center justify-between gap-2 bg-indigo-50/50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-indigo-100">
+                        <div class="min-w-0">
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">RINCIAN PELUNASAN</p>
-                            <p class="text-xs font-semibold text-gray-600">
-                                Online Terbayar: <span class="font-bold text-gray-800">Rp {{ number_format($onlineTerbayar, 0, ',', '.') }}</span>
+                            <p class="text-[11px] sm:text-xs font-semibold text-gray-600">
+                                Terbayar: <span class="font-bold text-gray-800 whitespace-nowrap">Rp {{ number_format($onlineTerbayar, 0, ',', '.') }}</span>
                             </p>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right shrink-0">
                             @if($sisaBayar > 0)
-                                <p class="text-[9px] text-gray-400 font-bold uppercase">Sisa Bayar di Kasir</p>
-                                <p class="text-sm font-extrabold text-[#1a146b]">Rp {{ number_format($sisaBayar, 0, ',', '.') }}</p>
-                                <p class="text-[8px] text-gray-400">(Tunai / QRIS saat check-in)</p>
+                                <p class="text-[9px] text-gray-400 font-bold uppercase">Sisa di Kasir</p>
+                                <p class="text-xs sm:text-sm font-extrabold text-[#1a146b] whitespace-nowrap">Rp {{ number_format($sisaBayar, 0, ',', '.') }}</p>
                             @else
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold whitespace-nowrap">
                                     <svg class="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
@@ -783,24 +786,24 @@
                     </div>
                 </div>
 
-                {{-- Kanan: Boarding Pass Gate (QR Code) --}}
-                <div class="lg:col-span-4 bg-[#f4f7ff] p-6 flex flex-col items-center justify-center text-center border-t lg:border-t-0 lg:border-l border-gray-100">
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-3">BOARDING PASS GATE</span>
-                    
+                {{-- Kanan (Desktop) / Atas Highlight (Mobile): Boarding Pass Gate (QR Code) --}}
+                <div class="order-1 lg:order-2 lg:col-span-4 bg-[#f4f7ff] p-4 sm:p-6 flex flex-col items-center justify-center text-center border-b border-dashed border-gray-200 lg:border-b-0 lg:border-l lg:border-solid lg:border-gray-100">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2.5 sm:mb-3">BOARDING PASS GATE</span>
+
                     {{-- QR Code Image / SimpleSoftwareIO (High-resolution, clean vector SVG) --}}
                     @php
                         $qrPayload = $jadwal->kode_qr ?: ($jadwal->kode_booking ?: ('LPNG-' . $jadwal->id));
                     @endphp
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-2.5">
+                    <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-2">
                         <div class="w-36 h-36 flex items-center justify-center">
                             {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(144)->style('round', 0.7)->eye('circle')->color(26, 20, 107)->margin(1)->errorCorrection('M')->generate($qrPayload) !!}
                         </div>
                     </div>
 
                     <p class="text-[10px] text-gray-500 font-medium">Scan di Meja Resepsionis</p>
-                    
+
                     {{-- Token Manual --}}
-                    <div class="mt-3 w-full bg-white py-2 px-3 rounded-xl border border-gray-200">
+                    <div class="mt-2.5 w-full max-w-[220px] bg-white py-2 px-3 rounded-xl border border-gray-200">
                         <p class="text-[8px] font-bold text-gray-400 uppercase">TOKEN MANUAL (6 KARAKTER)</p>
                         <p class="font-mono text-base font-extrabold text-[#1a146b] tracking-widest">
                             {{ $jadwal->token_manual ?? 'Token belum tersedia' }}
@@ -810,51 +813,48 @@
 
             </div>
 
-            {{-- Tombol Action --}}
-            <div class="no-print flex flex-wrap items-center justify-center gap-3 pt-2">
-                <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}" 
+            {{-- Tombol Action (2 kolom sejajar di HP, 3 tombol lengkap di Desktop) --}}
+            <div class="no-print grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
+                <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}"
                    target="_blank"
-                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition shadow-xs">
+                   class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-extrabold text-xs transition active:scale-[0.98] shadow-xs whitespace-nowrap">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.75 6.47 6.47 0 00.384-2.548C3.606 16.353 3 14.28 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
-                    <span>Bagikan ke WhatsApp</span>
+                    <span>Bagikan WA</span>
                 </a>
-                <a href="{{ route('pelanggan.booking.tiketPdf', $jadwal->id) }}" 
+                <a href="{{ route('pelanggan.booking.tiketPdf', $jadwal->id) }}"
                    target="_blank"
-                   class="inline-flex items-center gap-2 rounded-2xl bg-[#1a146b] hover:bg-[#25207c] px-5 py-2.5 text-xs font-bold text-white transition shadow-xs">
+                   class="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl bg-[#1a146b] hover:bg-[#25207c] px-3 sm:px-5 py-2.5 text-xs font-bold text-white transition active:scale-[0.98] shadow-xs whitespace-nowrap">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                    <span>Unduh Tiket PDF</span>
+                    <span>Unduh PDF</span>
                 </a>
-                <button type="button" 
-                        onclick="printTiketDocument('{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')" 
-                        class="inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs">
+                <button type="button"
+                        onclick="printTiketDocument('{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')"
+                        class="hidden sm:inline-flex items-center justify-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs cursor-pointer">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.64-2.115-1.173-3.085m12.906 0a17.394 17.394 0 00-1.173 3.085m-10.56 0A17.917 17.917 0 0012 15c2.316 0 4.475-.436 6.44-1.171m-12.88 0C4.385 10.978 4 8.784 4 6.5 4 4.567 5.567 3 7.5 3h9C18.433 3 20 4.567 20 6.5c0 2.284-.385 4.478-1.56 7.329M6.72 13.829a17.92 17.92 0 00-1.173 3.085M6.72 13.829A17.92 17.92 0 0112 15m0 0v6m-4-3h8"/></svg>
                     <span>Cetak Tiket</span>
                 </button>
             </div>
 
-            {{-- Panduan & Protokol --}}
-            <div class="no-print pt-4 border-t border-gray-100">
-                <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-3">
+            {{-- Panduan & Protokol (Ringkas di HP, 3 kartu di Desktop) --}}
+            <div class="no-print pt-3 sm:pt-4 border-t border-gray-100">
+                <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-2.5 sm:mb-3">
                     <svg class="w-4 h-4 text-[#416900] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                     <span>Panduan &amp; Protokol Hari Pertandingan</span>
                 </h4>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-                    <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 01</p>
-                        <h5 class="text-xs font-extrabold text-gray-900">Hadir 15 Menit Awal</h5>
-                        <p class="text-gray-500 leading-relaxed text-[10px]">Pemanasan dan registrasi pengambilan rompi tim dapat dilakukan langsung di meja kasir sebelum kick-off.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-left">
+                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
+                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 01 · HADIR 15 MENIT AWAL</p>
+                        <p class="text-gray-500 leading-relaxed text-[10px]">Registrasi &amp; pengambilan rompi tim dapat dilakukan langsung di meja kasir sebelum kick-off.</p>
                     </div>
 
-                    <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 02</p>
-                        <h5 class="text-xs font-extrabold text-gray-900">Wajib Sepatu Sol Karet (IC)</h5>
+                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
+                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 02 · SEPATU SOL KARET (IC)</p>
                         <p class="text-gray-500 leading-relaxed text-[10px]">Standar lantai mewajibkan sol indoor. Dilarang keras memakai stud/pull rumput outdoor.</p>
                     </div>
 
-                    <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 03</p>
-                        <h5 class="text-xs font-extrabold text-gray-900">Area Parkir Luas &amp; Gratis</h5>
+                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
+                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 03 · PARKIR LUAS &amp; GRATIS</p>
                         <p class="text-gray-500 leading-relaxed text-[10px]">Tersedia slot aman untuk mobil dan motor tim. Cukup tunjukkan E-Tiket kepada petugas keamanan.</p>
                     </div>
                 </div>
@@ -1079,31 +1079,33 @@
          style="display: none;">
 
         <div @click.away="if (!cancelSubmitting) cancelModalOpen = false"
-             class="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden p-4 sm:p-8 space-y-4 sm:space-y-5 text-left border border-gray-100">
-            
+             class="relative w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl p-5 sm:p-7 space-y-4 text-left border border-gray-100">
+
             {{-- Close Button --}}
             <button @click="cancelModalOpen = false"
                     :disabled="cancelSubmitting"
                     type="button"
-                    class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition active:scale-95 cursor-pointer">
+                <x-lucide-x class="w-4 h-4" />
             </button>
 
-            {{-- Modal Header --}}
-            <div class="flex items-center gap-3 pr-8">
-                <div class="h-10 w-10 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                </div>
+            {{-- Modal Header (Tanpa kotak badge di belakang ikon) --}}
+            <div class="flex items-start gap-3 pr-9">
+                <x-lucide-ban class="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
                 <div class="min-w-0">
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900 leading-snug">
                         Konfirmasi Pembatalan Sewa
                     </h3>
-                    <p class="text-[11px] sm:text-xs text-gray-500 truncate" x-text="cancelLapanganNama + ' • ' + cancelTanggal"></p>
+                    <p class="text-[11px] sm:text-xs text-gray-500 leading-snug mt-0.5">
+                        <span class="font-semibold text-gray-700" x-text="cancelLapanganNama"></span>
+                        <span> &bull; </span>
+                        <span x-text="cancelTanggal"></span>
+                    </p>
                 </div>
             </div>
 
             {{-- Loading Indicator --}}
-            <div x-show="cancelLoading" class="p-8 text-center rounded-2xl bg-gray-50 border border-gray-100">
+            <div x-show="cancelLoading" class="p-7 text-center rounded-2xl bg-gray-50 border border-gray-100">
                 <svg class="animate-spin h-6 w-6 text-red-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1112,71 +1114,67 @@
             </div>
 
             {{-- Content Once Loaded --}}
-            <div x-show="!cancelLoading && cancelPenalty" class="space-y-4">
-                
+            <div x-show="!cancelLoading && cancelPenalty" class="space-y-3.5 sm:space-y-4">
+
                 {{-- Banner Kebijakan Penalti --}}
-                <div :class="cancelPenalty?.is_h_minus_24 ? 'bg-red-50 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
-                     class="rounded-2xl border p-4 text-xs leading-relaxed">
-                    <div class="flex items-center gap-2 font-bold text-sm">
+                <div :class="cancelPenalty?.is_h_minus_24 ? 'bg-red-50/80 border-red-200/80 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
+                     class="rounded-2xl border p-3.5 text-xs leading-relaxed">
+                    <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
                         <template x-if="cancelPenalty?.is_h_minus_24">
-                            <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                            <x-lucide-triangle-alert class="w-4 h-4 text-red-600 shrink-0" />
                         </template>
                         <template x-if="!cancelPenalty?.is_h_minus_24">
-                            <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                            <x-lucide-info class="w-4 h-4 text-amber-700 shrink-0" />
                         </template>
                         <span x-text="cancelPenalty?.policy_badge"></span>
                     </div>
-                    <p class="mt-1" x-text="cancelPenalty?.policy_description"></p>
+                    <p class="mt-1 text-[11px] sm:text-xs opacity-90" x-text="cancelPenalty?.policy_description"></p>
                 </div>
 
                 {{-- Breakdown Angka --}}
-                <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 space-y-2 text-xs">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Total Harga Booking:</span>
-                        <span class="font-bold text-gray-900" x-text="formatRupiah(cancelPenalty?.total_price)"></span>
+                <div class="rounded-2xl bg-gray-50/90 border border-gray-100 p-3.5 sm:p-4 space-y-2 text-xs">
+                    <div class="flex items-center justify-between gap-3 text-gray-600">
+                        <span>Total Harga Booking</span>
+                        <span class="font-bold text-gray-900 whitespace-nowrap shrink-0" x-text="formatRupiah(cancelPenalty?.total_price)"></span>
                     </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>Dana Terbayar:</span>
-                        <span class="font-bold text-gray-900" x-text="formatRupiah(cancelPenalty?.total_paid)"></span>
+                    <div class="flex items-center justify-between gap-3 text-gray-600">
+                        <span>Dana Terbayar</span>
+                        <span class="font-bold text-gray-900 whitespace-nowrap shrink-0" x-text="formatRupiah(cancelPenalty?.total_paid)"></span>
                     </div>
-                    <div class="flex justify-between text-red-600 font-bold border-t border-gray-200/60 pt-2">
-                        <span>Denda Penalti Pembatalan (<span x-text="cancelPenalty?.penalty_percentage"></span>%):</span>
-                        <span x-text="'- ' + formatRupiah(cancelPenalty?.penalty_amount)"></span>
+                    <div class="flex items-center justify-between gap-3 text-red-600 font-bold border-t border-gray-200/70 pt-2">
+                        <span>Denda Penalti (<span x-text="cancelPenalty?.penalty_percentage"></span>%)</span>
+                        <span class="whitespace-nowrap shrink-0" x-text="'- ' + formatRupiah(cancelPenalty?.penalty_amount)"></span>
                     </div>
-                    <div class="flex justify-between text-emerald-700 font-extrabold text-sm border-t border-gray-200/60 pt-2">
-                        <span>Estimasi Pengembalian (Refund):</span>
-                        <span x-text="formatRupiah(cancelPenalty?.estimated_refund)"></span>
+                    <div class="flex items-center justify-between gap-3 text-emerald-700 font-extrabold text-xs sm:text-sm border-t border-gray-200/70 pt-2">
+                        <span>Estimasi Pengembalian (Refund)</span>
+                        <span class="text-sm sm:text-base whitespace-nowrap shrink-0" x-text="formatRupiah(cancelPenalty?.estimated_refund)"></span>
                     </div>
                 </div>
 
                 {{-- Form Pembatalan --}}
-                <form :action="cancelFormUrl" method="POST" @submit="cancelSubmitting = true" class="space-y-4">
+                <form :action="cancelFormUrl" method="POST" @submit="cancelSubmitting = true" class="space-y-3.5">
                     @csrf
                     <div>
-                        <label for="alasan_pembatalan" class="block text-xs font-bold uppercase tracking-wider text-gray-700">
-                            Alasan Pembatalan (Opsional)
+                        <label for="alasan_pembatalan" class="block text-[11px] font-bold uppercase tracking-wider text-gray-600">
+                            Alasan Pembatalan <span class="font-normal normal-case text-gray-400">(opsional)</span>
                         </label>
                         <textarea id="alasan_pembatalan"
                                   name="alasan_pembatalan"
                                   rows="2"
                                   maxlength="500"
-                                  placeholder="Berikan alasan pembatalan untuk arsip venue..."
-                                  class="mt-1.5 w-full rounded-xl border-gray-300 shadow-xs text-xs focus:border-red-500 focus:ring-red-500"></textarea>
+                                  placeholder="Tulis alasan singkat pembatalan..."
+                                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition"></textarea>
                     </div>
 
-                    <div class="p-3 rounded-xl bg-gray-100 text-[11px] text-gray-500">
-                        Slot jadwal Anda akan otomatis <strong>dilepaskan kembali ke publik</strong> dan status diubah menjadi <strong>Dibatalkan</strong>.
-                    </div>
-
-                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
                         <button type="button"
                                 @click="cancelModalOpen = false"
-                                class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition text-center">
+                                class="px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition text-center cursor-pointer">
                             Batal, Simpan Jadwal
                         </button>
                         <button type="submit"
                                 :disabled="cancelSubmitting"
-                                class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.98] text-xs font-bold text-white shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
                             <span x-show="!cancelSubmitting">Ya, Batalkan Booking</span>
                             <span x-show="cancelSubmitting" x-cloak>Memproses...</span>
                         </button>
