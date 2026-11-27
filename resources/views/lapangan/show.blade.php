@@ -433,7 +433,7 @@
                      @keydown.escape.window="calOpen = false">
                     <div class="relative flex items-center justify-between gap-2 pb-2.5 sm:pb-3 border-b border-gray-100">
                         <div class="flex items-center gap-2 min-w-0">
-                            <x-lucide-calendar-days class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
+                            <x-icons.calendar class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
                             <h2 class="text-sm sm:text-base font-headline font-bold text-[#0b1c30] truncate">Pilih Tanggal Main</h2>
                         </div>
 

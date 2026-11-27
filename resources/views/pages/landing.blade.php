@@ -309,7 +309,7 @@
                                 class="w-full flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-3 text-left text-xs sm:text-sm font-bold text-[#0b1c30] transition cursor-pointer"
                                 :class="dateOpen ? 'border-[#1a146b] bg-white ring-1 ring-[#1a146b]' : 'border-gray-200 bg-[#f8faff] hover:border-gray-300'">
                             <span class="flex items-center gap-2.5 min-w-0">
-                                <x-lucide-calendar-days class="w-4 h-4 text-[#1a146b] shrink-0" />
+                                <x-icons.calendar class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span class="truncate" x-text="dateLabel"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"

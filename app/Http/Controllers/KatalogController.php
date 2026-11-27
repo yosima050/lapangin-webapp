@@ -73,6 +73,10 @@ class KatalogController extends Controller
 
     public function show(Request $request, $id)
     {
+        if (! \Illuminate\Support\Str::isUuid((string) $id)) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date_format:Y-m-d'],
         ]);

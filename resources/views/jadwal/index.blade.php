@@ -259,7 +259,7 @@
                      @keydown.escape.window="calOpen = false">
                     <div class="relative flex items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-[#0b1c30]">
-                            <x-lucide-calendar-days class="w-4 h-4 text-[#1a146b] shrink-0" />
+                            <x-icons.calendar class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
                             <span>Pilih Tanggal</span>
                         </div>
 

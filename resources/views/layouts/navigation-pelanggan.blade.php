@@ -259,7 +259,7 @@
                         class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('jadwal.*') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
                     >
                         <span class="flex items-center gap-3">
-                            <x-lucide-calendar-days class="w-4 h-4 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <x-icons.calendar class="w-4 h-4 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
                             <span>Cek Jadwal</span>
                         </span>
                         @if (request()->routeIs('jadwal.*'))
