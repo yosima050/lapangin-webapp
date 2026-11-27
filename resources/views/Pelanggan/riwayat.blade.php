@@ -294,29 +294,29 @@
                 <button type="button"
                         @click="activeTab = 'all'"
                         :class="activeTab === 'all' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer">
                     Semua ({{ $countSemua }})
                 </button>
                 <button type="button"
                         @click="activeTab = 'aktif'"
                         :class="activeTab === 'aktif' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                        class="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer">
                     <span>Aktif<span class="hidden sm:inline"> &amp; Mendatang</span></span>
                     <span :class="activeTab === 'aktif' ? 'bg-[#acf847] text-[#1a146b]' : 'bg-gray-300 text-gray-700'"
-                          class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[10px] font-extrabold">
+                          class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[10px] font-extrabold transition-colors duration-150">
                         {{ $countAktif }}
                     </span>
                 </button>
                 <button type="button"
                         @click="activeTab = 'selesai'"
                         :class="activeTab === 'selesai' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer">
                     Selesai ({{ $countSelesai }})
                 </button>
                 <button type="button"
                         @click="activeTab = 'dibatalkan'"
                         :class="activeTab === 'dibatalkan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition cursor-pointer">
+                        class="inline-flex items-center justify-center rounded-lg sm:rounded-xl px-1.5 py-2 sm:px-4 sm:py-2 whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer">
                     <span class="sm:hidden">Batal</span><span class="hidden sm:inline">Dibatalkan</span>&nbsp;({{ $countDibatalkan }})
                 </button>
             </div>

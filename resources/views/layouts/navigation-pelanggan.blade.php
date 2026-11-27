@@ -1,9 +1,22 @@
 {{-- Unified Responsive Navigation Bar untuk Pelanggan LapangIn --}}
+<div x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false">
+    {{-- Backdrop Redup Halus saat Mobile Menu Terbuka --}}
+    <div
+        x-show="mobileMenuOpen"
+        x-cloak
+        @click="mobileMenuOpen = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="lg:hidden fixed inset-0 z-40 bg-slate-900/25 backdrop-blur-[2px]"
+        aria-hidden="true"
+    ></div>
+
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
-    <nav
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        x-data="{ mobileMenuOpen: false }"
-    >
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-20 flex items-center justify-between">
 
             {{-- Logo Brand --}}
@@ -85,7 +98,7 @@
                                 {{ Auth::user()->nama ?? Auth::user()->name ?? 'Pengguna' }}
                             </span>
 
-                            <x-lucide-chevron-down class="text-gray-400 w-4 h-4 shrink-0" />
+                            <x-lucide-chevron-down class="text-gray-400 w-4 h-4 shrink-0 transition-transform duration-200" x-bind:class="profileOpen ? 'rotate-180' : ''" />
                         </button>
 
                         <div
@@ -145,16 +158,30 @@
 
             </div>
 
-            {{-- Tombol Mobile Menu Hamburger --}}
+            {{-- Tombol Mobile Menu Hamburger (Animasi Morph 3 Garis -> Silang X) --}}
             <button
                 type="button"
                 @click="mobileMenuOpen = !mobileMenuOpen"
-                class="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                class="lg:hidden relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 active:scale-95 transition-all duration-200 cursor-pointer"
+                :class="mobileMenuOpen ? 'bg-gray-100 text-[#1a146b]' : ''"
                 :aria-expanded="mobileMenuOpen"
-                aria-label="Buka menu navigasi"
+                :aria-label="mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'"
             >
-                <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-                <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span class="sr-only">Toggle navigasi</span>
+                <span class="relative flex h-4 w-5 flex-col items-center justify-center">
+                    <span
+                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                        :class="mobileMenuOpen ? 'translate-y-0 rotate-45' : '-translate-y-[6px] rotate-0'"
+                    ></span>
+                    <span
+                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-200 ease-out"
+                        :class="mobileMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'"
+                    ></span>
+                    <span
+                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                        :class="mobileMenuOpen ? 'translate-y-0 -rotate-45' : 'translate-y-[6px] rotate-0'"
+                    ></span>
+                </span>
             </button>
 
         </div>
@@ -163,33 +190,33 @@
         <div
             x-show="mobileMenuOpen"
             x-cloak
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
+            x-transition:enter="transition ease-out duration-200 origin-top"
+            x-transition:enter-start="opacity-0 -translate-y-2 scale-[0.99]"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150 origin-top"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 -translate-y-2 scale-[0.99]"
             class="lg:hidden border-t border-gray-100 py-4 bg-white"
         >
             <div class="flex flex-col gap-1.5">
 
                 <a
                     href="{{ route('home') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('home') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('home') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                 >
                     Beranda
                 </a>
 
                 <a
                     href="{{ route('katalog.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                 >
                     Jelajahi Lapangan
                 </a>
 
                 <a
                     href="{{ route('jadwal.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('jadwal.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('jadwal.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                 >
                     Cek Jadwal
                 </a>
@@ -198,7 +225,7 @@
                     @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
                         <a
                             href="{{ route('pelanggan.booking.index') }}"
-                            class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                         >
                             Riwayat Booking
                         </a>
@@ -206,7 +233,7 @@
 
                     <a
                         href="{{ route('bantuan') }}"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                        class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
                     >
                         Pusat Bantuan
                     </a>
@@ -255,3 +282,4 @@
 
     </nav>
 </header>
+</div>

@@ -361,7 +361,7 @@
                         @foreach ($datesCarousel as $d)
                             <button type="button"
                                     @click="changeDate('{{ $d['date_str'] }}')"
-                                    class="min-w-[66px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition border cursor-pointer"
+                                    class="min-w-[66px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 border cursor-pointer"
                                     :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
                                 <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
                                       :class="selectedDate === '{{ $d['date_str'] }}' ? 'text-[#acf847]' : 'text-gray-400'">
@@ -412,7 +412,7 @@
                                         <button type="button"
                                                 @click="toggleSlot(slot)"
                                                 :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
+                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition-all duration-150 active:scale-95 flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
                                             <div class="flex items-center gap-1">
                                                 <span class="font-headline font-black text-xs sm:text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
                                                 <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
@@ -463,7 +463,7 @@
                                         <button type="button"
                                                 @click="toggleSlot(slot)"
                                                 :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
+                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition-all duration-150 active:scale-95 flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
                                             <div class="flex items-center gap-1">
                                                 <span class="font-headline font-black text-xs sm:text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
                                                 <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
