@@ -697,25 +697,25 @@
         
         <div @click.away="showModal = false"
              id="printable-ticket-{{ $jadwal->id }}"
-             class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-6 max-h-[92vh] overflow-y-auto text-left border border-gray-100">
+             class="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl p-4 sm:p-6 space-y-3.5 sm:space-y-4 max-h-[92vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-left border border-gray-100">
 
             {{-- Tombol Close X --}}
             <button @click="showModal = false"
                     type="button"
-                    class="no-print absolute top-3.5 right-3.5 sm:top-5 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition active:scale-95 z-10 cursor-pointer">
+                    class="no-print absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition active:scale-95 z-10 cursor-pointer">
                 <x-lucide-x class="w-4 h-4" />
             </button>
 
-            {{-- Header Status (Ringkas 1 baris di HP agar QR langsung terlihat di atas) --}}
-            <div class="flex sm:flex-col items-center gap-2.5 sm:gap-2 text-left sm:text-center pr-10 sm:pr-0 pt-0.5 sm:pt-2">
-                <div class="inline-flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#acf847] text-[#1a146b] shadow-xs">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            {{-- Header Status (Ringkas & tanpa celah kosong atas akibat space-y) --}}
+            <div class="!mt-0 flex sm:flex-col items-center gap-2.5 sm:gap-1.5 text-left sm:text-center pr-10 sm:pr-0">
+                <div class="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-[#acf847] text-[#1a146b] shadow-xs">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                 </div>
                 <div class="min-w-0">
-                    <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase tracking-wider">
                         ● Akses Lapangan Aktif
                     </span>
-                    <h2 class="text-sm sm:text-2xl font-extrabold text-[#1a146b] sm:mt-1 leading-snug">
+                    <h2 class="text-sm sm:text-xl font-extrabold text-[#1a146b] sm:mt-0.5 leading-snug">
                         Reservasi Berhasil Dikonfirmasi!
                     </h2>
                     <p class="sm:hidden text-[11px] font-semibold text-gray-500 truncate">
@@ -757,21 +757,20 @@
                         </p>
                     </div>
 
-                    {{-- Pemesan & Tim (2 kolom sejajar di HP & Desktop) --}}
-                    <div class="grid grid-cols-2 gap-2.5 sm:gap-3 bg-[#f8f9ff] p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-indigo-50">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-[#1a146b] text-white flex items-center justify-center font-bold text-[10px] sm:text-xs shrink-0 uppercase">
-                                {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'P', 0, 2)) }}
-                            </div>
+                    {{-- Pemesan --}}
+                    <div class="flex items-center justify-between gap-3 bg-[#f8f9ff] px-3.5 py-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-indigo-50">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <x-lucide-user class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
                             <div class="min-w-0">
                                 <p class="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-wider">PEMESAN</p>
-                                <p class="text-[11px] sm:text-xs font-bold text-gray-800 truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
+                                <p class="text-xs sm:text-sm font-bold text-gray-800 truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2 bg-white px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border border-gray-100 min-w-0">
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1a146b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                            <p class="text-[11px] sm:text-xs font-bold text-gray-800 truncate">{{ $jadwal->nama_tim ?? 'Pemain Umum' }}</p>
-                        </div>
+                        @if (Auth::user()->no_hp)
+                            <span class="text-[11px] sm:text-xs font-mono font-semibold text-gray-500 shrink-0">
+                                {{ Auth::user()->no_hp }}
+                            </span>
+                        @endif
                     </div>
 
                     {{-- Schedule Grid (2 kolom di HP, 3 kolom di Desktop) --}}
@@ -852,7 +851,7 @@
 
             </div>
 
-            {{-- Tombol Action (2 kolom sejajar di HP, 3 tombol lengkap di Desktop) --}}
+            {{-- Tombol Action --}}
             <div class="no-print grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
                 <a href="https://wa.me/?text={{ urlencode('E-Tiket LapangIn untuk ' . $jadwal->lapangan?->nama . ' - Kode Booking: ' . ($jadwal->kode_booking ?? $displayKode)) }}"
                    target="_blank"
@@ -866,37 +865,6 @@
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                     <span>Unduh PDF</span>
                 </a>
-                <button type="button"
-                        onclick="printTiketDocument('{{ $jadwal->id }}', 'Tiket-{{ addslashes($jadwal->kode_booking ?? $jadwal->id) }}')"
-                        class="hidden sm:inline-flex items-center justify-center gap-2 rounded-2xl bg-white border border-gray-200 px-5 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-xs cursor-pointer">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.64-2.115-1.173-3.085m12.906 0a17.394 17.394 0 00-1.173 3.085m-10.56 0A17.917 17.917 0 0012 15c2.316 0 4.475-.436 6.44-1.171m-12.88 0C4.385 10.978 4 8.784 4 6.5 4 4.567 5.567 3 7.5 3h9C18.433 3 20 4.567 20 6.5c0 2.284-.385 4.478-1.56 7.329M6.72 13.829a17.92 17.92 0 00-1.173 3.085M6.72 13.829A17.92 17.92 0 0112 15m0 0v6m-4-3h8"/></svg>
-                    <span>Cetak Tiket</span>
-                </button>
-            </div>
-
-            {{-- Panduan & Protokol (Ringkas di HP, 3 kartu di Desktop) --}}
-            <div class="no-print pt-3 sm:pt-4 border-t border-gray-100">
-                <h4 class="text-xs font-extrabold text-[#1a146b] flex items-center gap-2 mb-2.5 sm:mb-3">
-                    <svg class="w-4 h-4 text-[#416900] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-                    <span>Panduan &amp; Protokol Hari Pertandingan</span>
-                </h4>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-left">
-                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 01 · HADIR 15 MENIT AWAL</p>
-                        <p class="text-gray-500 leading-relaxed text-[10px]">Registrasi &amp; pengambilan rompi tim dapat dilakukan langsung di meja kasir sebelum kick-off.</p>
-                    </div>
-
-                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 02 · SEPATU SOL KARET (IC)</p>
-                        <p class="text-gray-500 leading-relaxed text-[10px]">Standar lantai mewajibkan sol indoor. Dilarang keras memakai stud/pull rumput outdoor.</p>
-                    </div>
-
-                    <div class="bg-gray-50 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gray-100 space-y-0.5 sm:space-y-1">
-                        <p class="text-[9px] font-extrabold uppercase text-[#416900]">ATURAN 03 · PARKIR LUAS &amp; GRATIS</p>
-                        <p class="text-gray-500 leading-relaxed text-[10px]">Tersedia slot aman untuk mobil dan motor tim. Cukup tunjukkan E-Tiket kepada petugas keamanan.</p>
-                    </div>
-                </div>
             </div>
 
             {{-- Petunjuk Arah Arena --}}
@@ -1118,7 +1086,7 @@
          style="display: none;">
 
         <div @click.away="if (!cancelSubmitting) cancelModalOpen = false"
-             class="relative w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl p-5 sm:p-7 space-y-4 text-left border border-gray-100">
+             class="relative w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-3xl bg-white shadow-2xl p-5 sm:p-7 space-y-4 text-left border border-gray-100">
 
             {{-- Close Button --}}
             <button @click="cancelModalOpen = false"
@@ -1129,7 +1097,7 @@
             </button>
 
             {{-- Modal Header (Tanpa kotak badge di belakang ikon) --}}
-            <div class="flex items-start gap-3 pr-9">
+            <div class="!mt-0 flex items-start gap-3 pr-9">
                 <x-lucide-ban class="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
                 <div class="min-w-0">
                     <h3 class="text-base sm:text-lg font-extrabold text-gray-900 leading-snug">
