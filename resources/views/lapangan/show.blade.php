@@ -116,8 +116,10 @@
                  return;
              }
 
-             // Ambil dari server
-             this.isLoadingSlots = true;
+             // Ambil dari server (hanya tampilkan skeleton jika > 220ms)
+             const skeletonTimer = setTimeout(() => {
+                 this.isLoadingSlots = true;
+             }, 220);
              try {
                  const res = await fetch(`{{ route('katalog.show', ['id' => $lapangan->id]) }}?tanggal=${newDate}`, {
                      headers: {
@@ -141,6 +143,7 @@
              } catch (err) {
                  console.error('Gagal mengambil jadwal:', err);
              } finally {
+                 clearTimeout(skeletonTimer);
                  this.isLoadingSlots = false;
              }
          },

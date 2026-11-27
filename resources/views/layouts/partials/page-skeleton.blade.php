@@ -394,6 +394,7 @@
         const pageSkeleton = document.getElementById('global-page-skeleton');
         const mainContent = document.getElementById('app-main-content');
         let isNavigating = false;
+        let progressTimer = null;
         let skeletonTimer = null;
 
         function resolveSkeletonType(urlStr) {
@@ -432,6 +433,10 @@
 
         function resetTransitionState() {
             isNavigating = false;
+            if (progressTimer) {
+                clearTimeout(progressTimer);
+                progressTimer = null;
+            }
             if (skeletonTimer) {
                 clearTimeout(skeletonTimer);
                 skeletonTimer = null;
@@ -475,27 +480,29 @@
             const skeletonType = resolveSkeletonType(targetUrl);
             activateSkeletonVariant(skeletonType);
 
-            // 3. Gerakkan progress bar atas seketika (GPU-composited)
-            if (progressContainer && progressBar) {
-                progressContainer.style.opacity = '1';
-                progressBar.style.transition = 'transform 150ms ease-out';
-                progressBar.style.transform = 'scaleX(0.75)';
+            // 3. Tampilkan progress bar hanya jika navigasi > 250ms (kalau cepat langsung pindah tanpa animasi)
+            progressTimer = setTimeout(() => {
+                if (isNavigating && progressContainer && progressBar) {
+                    progressContainer.style.opacity = '1';
+                    progressBar.style.transition = 'transform 180ms ease-out';
+                    progressBar.style.transform = 'scaleX(0.75)';
 
-                setTimeout(() => {
-                    if (isNavigating) {
-                        progressBar.style.transition = 'transform 320ms ease-out';
-                        progressBar.style.transform = 'scaleX(0.92)';
-                    }
-                }, 160);
-            }
+                    setTimeout(() => {
+                        if (isNavigating) {
+                            progressBar.style.transition = 'transform 350ms ease-out';
+                            progressBar.style.transform = 'scaleX(0.92)';
+                        }
+                    }, 190);
+                }
+            }, 250);
 
-            // 4. Tampilkan route-aware skeleton hanya jika navigasi butuh > 150ms
+            // 4. Tampilkan route-aware skeleton hanya jika jaringan/server benar-benar lambat (> 450ms)
             skeletonTimer = setTimeout(() => {
                 if (isNavigating && pageSkeleton) {
                     pageSkeleton.style.opacity = '1';
                     pageSkeleton.style.pointerEvents = 'auto';
                 }
-            }, 150);
+            }, 450);
         }
 
         // Preload di hover agar navigasi secepat mungkin

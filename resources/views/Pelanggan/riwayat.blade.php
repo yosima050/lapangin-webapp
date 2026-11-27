@@ -91,11 +91,18 @@
         this.cancelLapanganNama = nama;
         this.cancelTanggal = tgl;
         this.cancelJam = jam;
-        this.cancelLoading = true;
+        this.cancelLoading = false;
         this.cancelSubmitting = false;
         this.cancelPenalty = null;
         this.cancelFormUrl = '/pelanggan/booking/' + id + '/cancel';
-        this.cancelModalOpen = true;
+
+        // Jika respon cepat (<180ms), langsung buka modal dengan data siap tanpa kedip skeleton
+        const skeletonTimer = setTimeout(() => {
+            if (!this.cancelPenalty) {
+                this.cancelLoading = true;
+                this.cancelModalOpen = true;
+            }
+        }, 180);
 
         fetch('/pelanggan/booking/' + id + '/cancel-preview', {
             headers: {
@@ -105,12 +112,16 @@
         })
         .then(res => res.json())
         .then(data => {
+            clearTimeout(skeletonTimer);
             this.cancelPenalty = data.penalty;
             this.cancelLoading = false;
+            this.cancelModalOpen = true;
         })
         .catch(err => {
+            clearTimeout(skeletonTimer);
             console.error(err);
             this.cancelLoading = false;
+            this.cancelModalOpen = true;
         });
     },
 

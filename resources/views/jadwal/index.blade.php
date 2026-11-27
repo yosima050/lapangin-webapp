@@ -43,19 +43,22 @@
              this.activeDate = dateStr;
              this.clickedSlotKey = null;
              this.hasSwitchedDate = true;
-             this.isLoadingDate = true;
+
+             // Hanya tampilkan skeleton jika request > 220ms (kalau cepat langsung ganti tanpa flicker)
+             const skeletonTimer = setTimeout(() => {
+                 if (!controller.signal.aborted) {
+                     this.isLoadingDate = true;
+                 }
+             }, 220);
 
              try {
-                 const [response] = await Promise.all([
-                     fetch(targetUrl, {
-                         headers: {
-                             'Accept': 'application/json',
-                             'X-Requested-With': 'XMLHttpRequest',
-                         },
-                         signal: controller.signal,
-                     }),
-                     new Promise(resolve => setTimeout(resolve, 220)),
-                 ]);
+                 const response = await fetch(targetUrl, {
+                     headers: {
+                         'Accept': 'application/json',
+                         'X-Requested-With': 'XMLHttpRequest',
+                     },
+                     signal: controller.signal,
+                 });
 
                  if (!response.ok) {
                      window.location.href = targetUrl;
@@ -77,6 +80,7 @@
                  window.location.href = targetUrl;
                  return;
              } finally {
+                 clearTimeout(skeletonTimer);
                  if (!controller.signal.aborted) {
                      this.isLoadingDate = false;
                  }
