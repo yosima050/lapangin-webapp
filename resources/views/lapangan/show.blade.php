@@ -418,53 +418,27 @@
                     </div>
                 </div>
 
-                {{-- Pilih Tanggal Main (7-Day Carousel: 1 baris swipe di HP, 7 kolom di Desktop) --}}
-                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-3 sm:gap-4">
-                    <div class="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-gray-100">
-                        <div class="flex items-center gap-2">
+                {{-- Pilih Tanggal Main (7-Day Carousel Full Width + Tombol Kalender Pill di Header) --}}
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-3 sm:gap-4"
+                     @click.outside="calOpen = false"
+                     @keydown.escape.window="calOpen = false">
+                    <div class="relative flex items-center justify-between gap-2 pb-2.5 sm:pb-3 border-b border-gray-100">
+                        <div class="flex items-center gap-2 min-w-0">
                             <x-lucide-calendar-days class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
-                            <h2 class="text-sm sm:text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
-                        </div>
-                        <span class="text-[11px] sm:text-xs font-semibold text-gray-400" x-text="monthYear">
-                            {{ $selectedDateCarbon->translatedFormat('F Y') }}
-                        </span>
-                    </div>
-
-                    {{-- Horizontal 7-Day Date Buttons + Tombol Kalender Custom (SPA Reactive tanpa reload) --}}
-                    <div class="relative flex items-stretch gap-2 sm:gap-2.5"
-                         @click.outside="calOpen = false"
-                         @keydown.escape.window="calOpen = false">
-                        <div class="flex-1 min-w-0 flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                            <template x-for="d in datesCarousel" :key="d.date_str">
-                                <button type="button"
-                                        @click="changeDate(d.date_str)"
-                                        class="min-w-[64px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 border cursor-pointer"
-                                        :class="selectedDate === d.date_str ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
-                                    <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
-                                          :class="selectedDate === d.date_str ? 'text-[#acf847]' : 'text-gray-400'"
-                                          x-text="d.label_top"></span>
-                                    <span class="text-lg sm:text-xl font-headline font-black my-0.5 sm:my-1 leading-tight"
-                                          x-text="d.day_num"></span>
-                                    <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
-                                        <span class="w-1.5 h-1.5 rounded-full"
-                                              :class="selectedDate === d.date_str ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
-                                        <span x-text="d.month_name"></span>
-                                    </div>
-                                </button>
-                            </template>
+                            <h2 class="text-sm sm:text-base font-headline font-bold text-[#0b1c30] truncate">Pilih Tanggal Main</h2>
                         </div>
 
-                        {{-- Tombol Kalender Custom --}}
+                        {{-- Tombol Kalender Custom Berbentuk Pill Bulan (Rapi, Tanpa Potong Strip 7 Hari) --}}
                         <button type="button"
                                 @click="calOpen = !calOpen"
                                 :aria-expanded="calOpen"
                                 aria-label="Pilih tanggal dari kalender"
-                                class="shrink-0 w-[66px] sm:w-[78px] mb-1 sm:mb-0 flex flex-col items-center justify-center gap-1 py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all active:scale-95 cursor-pointer"
-                                :class="calOpen ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-[#f4f7ff] text-[#1a146b] border-[#dce9ff] hover:bg-[#e8f0ff] hover:border-[#1a146b]/30'">
-                            <span class="shrink-0" :class="calOpen ? 'text-[#acf847]' : 'text-[#1a146b]'">
-                                <x-lucide-calendar-days class="w-5 h-5" />
+                                class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] sm:text-xs font-extrabold transition cursor-pointer active:scale-95"
+                                :class="calOpen ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-xs' : 'bg-[#f4f7ff] text-[#1a146b] border-[#dce9ff] hover:bg-[#e8f0ff]'">
+                            <span x-text="monthYear">{{ $selectedDateCarbon->translatedFormat('F Y') }}</span>
+                            <span class="shrink-0 transition-transform duration-200" :class="calOpen ? 'rotate-180 text-[#acf847]' : 'text-[#1a146b]/70'">
+                                <x-lucide-chevron-down class="w-3.5 h-3.5" />
                             </span>
-                            <span class="text-[10px] font-extrabold leading-tight">Kalender</span>
                         </button>
 
                         {{-- Popover Kalender Custom --}}
@@ -539,6 +513,27 @@
                                 </template>
                             </div>
                         </div>
+                    </div>
+
+                    {{-- Horizontal 7-Day Date Buttons Full Width (SPA Reactive tanpa reload) --}}
+                    <div class="flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <template x-for="d in datesCarousel" :key="d.date_str">
+                            <button type="button"
+                                    @click="changeDate(d.date_str)"
+                                    class="min-w-[66px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 border cursor-pointer"
+                                    :class="selectedDate === d.date_str ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
+                                <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
+                                      :class="selectedDate === d.date_str ? 'text-[#acf847]' : 'text-gray-400'"
+                                      x-text="d.label_top"></span>
+                                <span class="text-lg sm:text-xl font-headline font-black my-0.5 sm:my-1 leading-tight"
+                                      x-text="d.day_num"></span>
+                                <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="selectedDate === d.date_str ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                    <span x-text="d.month_name"></span>
+                                </div>
+                            </button>
+                        </template>
                     </div>
                 </div>
 
