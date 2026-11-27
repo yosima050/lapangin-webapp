@@ -234,60 +234,60 @@
     </section>
 
     {{-- 2. USP / Fitur Unggulan (4 Card) --}}
-    <section class="py-16 sm:py-20 bg-white border-y border-gray-100">
+    <section class="py-10 sm:py-20 bg-white border-y border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-14">
-                <span class="inline-block text-xs sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-2">Kenapa LapangIn?</span>
-                <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
+            <div class="text-center max-w-3xl mx-auto mb-7 sm:mb-14">
+                <span class="inline-block text-[11px] sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-1.5 sm:mb-2">Kenapa LapangIn?</span>
+                <h2 class="text-xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
                     Pengalaman Reservasi Olahraga Modern
                 </h2>
-                <p class="mt-3 text-sm sm:text-base text-gray-600">
+                <p class="mt-2 sm:mt-3 text-xs sm:text-base text-gray-600">
                     Semua kenyamanan mulai dari pemilihan jadwal hingga bermain di lapangan kami rancang tanpa ribet.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {{-- USP Card 1 --}}
-                <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-12 h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <x-lucide-dribbble class="w-6 h-6 shrink-0" />
+                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
+                        <x-lucide-dribbble class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Standar Lantai AFC</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Material vinyl & interlock standar federasi internasional, ramah lutut, antiselip, dan nyaman untuk laga intens.
+                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Standar Lantai AFC</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
+                        Material vinyl &amp; interlock standar federasi internasional, ramah lutut, antiselip, dan nyaman untuk laga intens.
                     </p>
                 </div>
 
                 {{-- USP Card 2 --}}
-                <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-12 h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <x-lucide-banknote class="w-6 h-6 shrink-0" />
+                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
+                        <x-lucide-banknote class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Sistem Pembayaran DP 50%</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Cukup bayar uang muka 50% secara instan lewat payment gateway resmi untuk mengamankan slot pertandingan tim Anda.
+                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Pembayaran DP 50%</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
+                        Cukup bayar uang muka 50% secara instan lewat payment gateway resmi untuk mengamankan slot tim Anda.
                     </p>
                 </div>
 
                 {{-- USP Card 3 --}}
-                <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-12 h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <x-lucide-scan-line class="w-6 h-6 shrink-0" />
+                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
+                        <x-lucide-scan-line class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Check-in Cepat QR Code</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Tiba di lokasi tinggal tunjukkan tiket digital. Kasir scan QR dalam hitungan detik tanpa perlu bukti transfer manual.
+                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Check-in Cepat QR</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
+                        Tiba di lokasi tinggal tunjukkan tiket digital. Kasir scan QR dalam hitungan detik tanpa bukti transfer manual.
                     </p>
                 </div>
 
                 {{-- USP Card 4 --}}
-                <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-12 h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <x-lucide-clock class="w-6 h-6 shrink-0" />
+                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
+                        <x-lucide-clock class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Ketersediaan Real-Time</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Jadwal terhubung langsung dengan sistem kasir lapangan. Tidak ada lagi risiko bentrok jadwal atau double-booking.
+                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Jadwal Real-Time</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
+                        Jadwal terhubung langsung dengan sistem kasir lapangan. Bebas risiko bentrok jadwal atau double-booking.
                     </p>
                 </div>
             </div>
@@ -295,19 +295,19 @@
     </section>
 
     {{-- 3. Kategori Olahraga --}}
-    <section class="py-16 sm:py-20 bg-[#f8f9ff]">
+    <section class="py-10 sm:py-20 bg-[#f8f9ff]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-12">
                 <div>
-                    <span class="inline-block text-xs sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-2">Kategori Lapangan</span>
-                    <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
+                    <span class="inline-block text-[11px] sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-1.5 sm:mb-2">Kategori Lapangan</span>
+                    <h2 class="text-xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
                         Pilih Olahraga Favoritmu
                     </h2>
                 </div>
-                <div class="mt-4 md:mt-0">
+                <div class="mt-2.5 md:mt-0">
                     <a
                         href="{{ route('katalog.index') }}"
-                        class="inline-flex items-center gap-1.5 text-sm font-headline font-bold text-[#1a146b] hover:text-[#416900] transition-colors"
+                        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-headline font-bold text-[#1a146b] hover:text-[#416900] transition-colors"
                     >
                         <span>Lihat Semua Lapangan</span>
                         <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
@@ -315,10 +315,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {{-- Kategori: Futsal --}}
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                    <div class="relative h-48 overflow-hidden bg-gray-900">
+                    <div class="relative h-28 sm:h-48 overflow-hidden bg-gray-900">
                         <img
                             src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=500&q=75"
                             alt="Futsal"
@@ -329,17 +329,17 @@
                             decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#1a146b] text-white text-xs font-semibold">
-                            Indoor & Vinyl
+                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#1a146b] text-white text-[10px] sm:text-xs font-semibold">
+                            Indoor &amp; Vinyl
                         </span>
                     </div>
-                    <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div class="p-3 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-lg font-headline font-bold text-[#1a146b]">Futsal</h3>
-                            <p class="mt-1 text-xs text-gray-500">Lantai interlock dan vinyl berstandar kompetisi.</p>
+                            <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b]">Futsal</h3>
+                            <p class="mt-1 text-[11px] sm:text-xs text-gray-500 line-clamp-2">Lantai interlock dan vinyl berstandar kompetisi.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">Mulai sesi</span>
+                        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-[11px] sm:text-xs text-gray-500 hidden sm:inline">Mulai sesi</span>
                             <a
                                 href="{{ route('katalog.index', ['kategori' => 'Futsal']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
@@ -352,7 +352,7 @@
 
                 {{-- Kategori: Badminton --}}
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                    <div class="relative h-48 overflow-hidden bg-gray-900">
+                    <div class="relative h-28 sm:h-48 overflow-hidden bg-gray-900">
                         <img
                             src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=500&q=75"
                             alt="Badminton"
@@ -363,17 +363,17 @@
                             decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#416900] text-white text-xs font-semibold">
+                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#416900] text-white text-[10px] sm:text-xs font-semibold">
                             Karpet BWF
                         </span>
                     </div>
-                    <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div class="p-3 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-lg font-headline font-bold text-[#1a146b]">Badminton</h3>
-                            <p class="mt-1 text-xs text-gray-500">Pencahayaan anti-silau dengan karpet standar PBSI/BWF.</p>
+                            <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b]">Badminton</h3>
+                            <p class="mt-1 text-[11px] sm:text-xs text-gray-500 line-clamp-2">Pencahayaan anti-silau dengan karpet standar PBSI/BWF.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">Mulai sesi</span>
+                        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-[11px] sm:text-xs text-gray-500 hidden sm:inline">Mulai sesi</span>
                             <a
                                 href="{{ route('katalog.index', ['kategori' => 'Badminton']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
@@ -386,7 +386,7 @@
 
                 {{-- Kategori: Basket --}}
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                    <div class="relative h-48 overflow-hidden bg-gray-900">
+                    <div class="relative h-28 sm:h-48 overflow-hidden bg-gray-900">
                         <img
                             src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=500&q=75"
                             alt="Basket"
@@ -397,17 +397,17 @@
                             decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#1a146b] text-white text-xs font-semibold">
-                            FIBA Ring & Board
+                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#1a146b] text-white text-[10px] sm:text-xs font-semibold">
+                            FIBA Ring
                         </span>
                     </div>
-                    <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div class="p-3 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-lg font-headline font-bold text-[#1a146b]">Basket</h3>
-                            <p class="mt-1 text-xs text-gray-500">Full court & 3x3 dengan ring hidrolik kaca tempered.</p>
+                            <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b]">Basket</h3>
+                            <p class="mt-1 text-[11px] sm:text-xs text-gray-500 line-clamp-2">Full court &amp; 3x3 dengan ring hidrolik kaca tempered.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">Mulai sesi</span>
+                        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-[11px] sm:text-xs text-gray-500 hidden sm:inline">Mulai sesi</span>
                             <a
                                 href="{{ route('katalog.index', ['kategori' => 'Basket']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
@@ -420,7 +420,7 @@
 
                 {{-- Kategori: Mini Soccer --}}
                 <div class="group relative rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                    <div class="relative h-48 overflow-hidden bg-gray-900">
+                    <div class="relative h-28 sm:h-48 overflow-hidden bg-gray-900">
                         <img
                             src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=500&q=75"
                             alt="Mini Soccer"
@@ -431,17 +431,17 @@
                             decoding="async"
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#416900] text-white text-xs font-semibold">
-                            Rumput Sintetis Pro
+                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#416900] text-white text-[10px] sm:text-xs font-semibold">
+                            Sintetis Pro
                         </span>
                     </div>
-                    <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div class="p-3 sm:p-5 flex-1 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-lg font-headline font-bold text-[#1a146b]">Mini Soccer</h3>
-                            <p class="mt-1 text-xs text-gray-500">Rumput sintetis monofilament dan drainase prima.</p>
+                            <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b]">Mini Soccer</h3>
+                            <p class="mt-1 text-[11px] sm:text-xs text-gray-500 line-clamp-2">Rumput sintetis monofilament dan drainase prima.</p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                            <span class="text-xs text-gray-500">Mulai sesi</span>
+                        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span class="text-[11px] sm:text-xs text-gray-500 hidden sm:inline">Mulai sesi</span>
                             <a
                                 href="{{ route('katalog.index', ['kategori' => 'Mini Soccer']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
@@ -456,59 +456,65 @@
     </section>
 
     {{-- 4. Cara Kerja (3 Langkah) --}}
-    <section id="cara-kerja" class="py-16 sm:py-20 bg-white border-t border-gray-100">
+    <section id="cara-kerja" class="py-10 sm:py-20 bg-white border-t border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-14">
-                <span class="inline-block text-xs sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-2">Alur Reservasi</span>
-                <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
+            <div class="text-center max-w-3xl mx-auto mb-7 sm:mb-14">
+                <span class="inline-block text-[11px] sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-1.5 sm:mb-2">Alur Reservasi</span>
+                <h2 class="text-xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
                     3 Langkah Mudah Booking di LapangIn
                 </h2>
-                <p class="mt-3 text-sm sm:text-base text-gray-600">
+                <p class="mt-2 sm:mt-3 text-xs sm:text-base text-gray-600">
                     Proses reservasi praktis tanpa konfirmasi via chat manual yang memakan waktu.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 relative">
                 {{-- Langkah 1 --}}
-                <div class="relative bg-[#f8f9ff] p-8 rounded-2xl border border-gray-100 text-center">
-                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-xl shadow-md mb-6">
+                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
+                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
                         1
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Pilih Jadwal & Lapangan</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Pilih jenis olahraga, cek ketersediaan jam secara live, dan tentukan durasi bermain yang Anda inginkan.
-                    </p>
+                    <div>
+                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Pilih Jadwal &amp; Lapangan</h3>
+                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
+                            Pilih jenis olahraga, cek ketersediaan jam secara live, dan tentukan durasi bermain yang Anda inginkan.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- Langkah 2 --}}
-                <div class="relative bg-[#f8f9ff] p-8 rounded-2xl border border-gray-100 text-center">
-                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#416900] text-white flex items-center justify-center font-headline font-black text-xl shadow-md mb-6">
+                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
+                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#416900] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
                         2
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Bayar DP Online Aman</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Cukup selesaikan down payment (DP 50%) melalui QRIS, Virtual Account, atau E-Wallet favorit Anda.
-                    </p>
+                    <div>
+                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Bayar DP Online Aman</h3>
+                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
+                            Cukup selesaikan down payment (DP 50%) melalui QRIS, Virtual Account, atau E-Wallet favorit Anda.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- Langkah 3 --}}
-                <div class="relative bg-[#f8f9ff] p-8 rounded-2xl border border-gray-100 text-center">
-                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-xl shadow-md mb-6">
+                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
+                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
                         3
                     </div>
-                    <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Scan QR di Lokasi</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Tiba di venue, tunjukkan tiket digital QR Code ke meja kasir untuk check-in instan dan langsung bermain!
-                    </p>
+                    <div>
+                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Scan QR di Lokasi</h3>
+                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
+                            Tiba di venue, tunjukkan tiket digital QR Code ke meja kasir untuk check-in instan dan langsung bermain!
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     {{-- 5. Bottom CTA Banner --}}
-    <section class="py-16 sm:py-20 bg-[#f8f9ff]">
+    <section class="py-10 sm:py-20 bg-[#f8f9ff]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-3xl bg-[#1a146b] px-6 py-12 sm:px-12 sm:py-16 shadow-2xl text-white">
+            <div class="relative overflow-hidden rounded-3xl bg-[#1a146b] px-5 py-8 sm:px-12 sm:py-16 shadow-2xl text-white">
                 {{-- Decorative Glow elements --}}
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#acf847]/20 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
