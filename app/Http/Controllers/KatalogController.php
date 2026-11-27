@@ -87,18 +87,22 @@ class KatalogController extends Controller
         // Ambil status ketersediaan jam dari JadwalService
         $jadwalData = $this->jadwalService->getSlotStatus((string) $id, $tanggal);
 
-        $selectedDateCarbon = \Carbon\Carbon::parse($tanggal)->startOfDay();
-        $today = now()->startOfDay();
+        $selectedDateCarbon = \Carbon\Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        $windowStart = $selectedDateCarbon->gt($today->copy()->addDays(6))
+            ? $selectedDateCarbon->copy()
+            : $today->copy();
 
         $datesCarousel = [];
         for ($i = 0; $i < 7; $i++) {
-            $cDate = $today->copy()->addDays($i);
+            $cDate = $windowStart->copy()->addDays($i);
+            $diffDays = (int) $today->diffInDays($cDate, false);
             $datesCarousel[] = [
                 'date_str' => $cDate->toDateString(),
                 'day_num' => $cDate->format('d'),
-                'day_name' => $cDate->translatedFormat('D'),
-                'month_name' => $cDate->translatedFormat('M'),
-                'label_top' => $i === 0 ? 'HARI INI' : ($i === 1 ? 'BESOK' : strtoupper($cDate->translatedFormat('D'))),
+                'day_name' => $cDate->locale('id')->translatedFormat('D'),
+                'month_name' => $cDate->locale('id')->translatedFormat('M'),
+                'label_top' => $diffDays === 0 ? 'HARI INI' : ($diffDays === 1 ? 'BESOK' : strtoupper($cDate->locale('id')->translatedFormat('D'))),
                 'is_selected' => $cDate->toDateString() === $tanggal,
             ];
         }

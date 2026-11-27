@@ -8,7 +8,16 @@
          selectedKategori: '{{ $kategori }}',
          selectedLapangan: '{{ $selectedLapanganId ?? '' }}',
          searchLapangan: '',
+         todayStr: '{{ $today }}',
          activeDate: '{{ $tanggal }}',
+         dateOptions: {{ Js::from($dateOptions) }},
+         calOpen: false,
+         calYear: {{ \Carbon\Carbon::parse($tanggal)->year }},
+         calMonth: {{ \Carbon\Carbon::parse($tanggal)->month - 1 }},
+         monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+         shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+         dayHeaders: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+         jadwalBaseUrl: '{{ route('jadwal.index') }}',
          matrix: {{ Js::from($matrix) }},
          totalTersedia: {{ $totalSlotTersedia }},
          totalBooked: {{ $totalSlotDibooking }},
@@ -19,6 +28,67 @@
          currentPage: 1,
          perPage: 10,
          lapanganBaseUrl: '{{ url('/lapangan') }}',
+
+         formatISO(y, m, d) {
+             return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+         },
+
+         addDays(iso, days) {
+             const [y, m, d] = iso.split('-').map(Number);
+             const dt = new Date(y, m - 1, d + days);
+             return this.formatISO(dt.getFullYear(), dt.getMonth(), dt.getDate());
+         },
+
+         jadwalDateUrl(dateStr) {
+             const url = new URL(this.jadwalBaseUrl, window.location.origin);
+             const current = new URLSearchParams(window.location.search);
+             current.forEach((v, k) => url.searchParams.set(k, v));
+             url.searchParams.set('tanggal', dateStr);
+             return url.toString();
+         },
+
+         get canPrevMonth() {
+             const [ty, tm] = this.todayStr.split('-').map(Number);
+             return this.calYear > ty || (this.calYear === ty && this.calMonth > (tm - 1));
+         },
+
+         prevMonth() {
+             if (!this.canPrevMonth) return;
+             if (this.calMonth === 0) { this.calMonth = 11; this.calYear--; }
+             else { this.calMonth--; }
+         },
+
+         nextMonth() {
+             if (this.calMonth === 11) { this.calMonth = 0; this.calYear++; }
+             else { this.calMonth++; }
+         },
+
+         get calendarCells() {
+             const firstDay = new Date(this.calYear, this.calMonth, 1).getDay();
+             const daysInMonth = new Date(this.calYear, this.calMonth + 1, 0).getDate();
+             const cells = [];
+             for (let i = 0; i < firstDay; i++) cells.push(null);
+             for (let d = 1; d <= daysInMonth; d++) {
+                 const iso = this.formatISO(this.calYear, this.calMonth, d);
+                 cells.push({
+                     day: d,
+                     iso,
+                     disabled: iso < this.todayStr,
+                     isToday: iso === this.todayStr,
+                     isSelected: iso === this.activeDate,
+                 });
+             }
+             return cells;
+         },
+
+         pickCalendarDate(iso) {
+             if (iso < this.todayStr) return;
+             const [y, m] = iso.split('-').map(Number);
+             this.calYear = y;
+             this.calMonth = m - 1;
+             this.calOpen = false;
+             this.switchDate(iso, this.jadwalDateUrl(iso));
+         },
 
          init() {
              // Reset state ketika pengguna kembali via tombol Back browser (bfcache)
@@ -41,6 +111,9 @@
              this.dateAbortController = controller;
 
              this.activeDate = dateStr;
+             const [sy, sm] = dateStr.split('-').map(Number);
+             this.calYear = sy;
+             this.calMonth = sm - 1;
              this.clickedSlotKey = null;
              this.hasSwitchedDate = true;
 
@@ -70,6 +143,9 @@
 
                  if (data && data.success && Array.isArray(data.matrix)) {
                      this.matrix = data.matrix;
+                     if (Array.isArray(data.dateOptions)) {
+                         this.dateOptions = data.dateOptions;
+                     }
                      window.history.replaceState({}, '', targetUrl);
                  } else {
                      window.location.href = targetUrl;
@@ -176,30 +252,119 @@
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-3.5 sm:p-5">
             <div class="flex flex-col gap-3.5 sm:gap-5">
 
-                {{-- Baris 1: Date Quick Selector (Swipeable horizontal di HP, Grid 7 Kolom di Tablet/Desktop) --}}
-                <div class="flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-3 pb-3.5 sm:pb-4 border-b border-gray-100 w-full snap-x scrollbar-none">
-                    @foreach ($dateOptions as $dOpt)
-                        <a
-                            href="{{ route('jadwal.index', array_merge(request()->query(), ['tanggal' => $dOpt['date']])) }}"
-                            data-no-progress
-                            @click.prevent="switchDate('{{ $dOpt['date'] }}', $el.href)"
-                            :class="activeDate === '{{ $dOpt['date'] }}' ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md sm:transform sm:-translate-y-0.5' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs'"
-                            class="flex flex-col items-center justify-center min-w-[68px] shrink-0 sm:min-w-0 sm:w-full snap-start py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all text-center cursor-pointer"
-                        >
-                            <span
-                                :class="activeDate === '{{ $dOpt['date'] }}' ? 'text-[#acf847]' : 'text-gray-500'"
-                                class="text-[10px] sm:text-xs font-extrabold tracking-wider whitespace-nowrap"
+                {{-- Baris 1: Date Quick Selector (7 Hari + Tombol Kalender Custom di Ujung Kanan) --}}
+                <div class="relative flex items-stretch gap-2 sm:gap-2.5 pb-3.5 sm:pb-4 border-b border-gray-100 w-full"
+                     @click.outside="calOpen = false"
+                     @keydown.escape.window="calOpen = false">
+                    <div class="flex-1 min-w-0 flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-2.5 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <template x-for="dOpt in dateOptions" :key="dOpt.date">
+                            <a
+                                :href="jadwalDateUrl(dOpt.date)"
+                                data-no-progress
+                                @click.prevent="switchDate(dOpt.date, jadwalDateUrl(dOpt.date))"
+                                :class="activeDate === dOpt.date ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs'"
+                                class="flex flex-col items-center justify-center min-w-[66px] shrink-0 sm:min-w-0 sm:w-full snap-start py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all text-center cursor-pointer"
                             >
-                                {{ $dOpt['label_top'] }}
-                            </span>
-                            <span class="text-lg sm:text-2xl font-black leading-tight mt-0.5 sm:mt-1">
-                                {{ $dOpt['day_num'] }}
-                            </span>
-                            <span class="text-[10px] sm:text-xs font-semibold opacity-80 mt-0.5">
-                                {{ $dOpt['month_name'] }}
-                            </span>
-                        </a>
-                    @endforeach
+                                <span
+                                    :class="activeDate === dOpt.date ? 'text-[#acf847]' : 'text-gray-500'"
+                                    class="text-[10px] sm:text-xs font-extrabold tracking-wider whitespace-nowrap"
+                                    x-text="dOpt.label_top"
+                                ></span>
+                                <span class="text-lg sm:text-2xl font-black leading-tight mt-0.5 sm:mt-1" x-text="dOpt.day_num"></span>
+                                <span class="text-[10px] sm:text-xs font-semibold opacity-80 mt-0.5" x-text="dOpt.month_name"></span>
+                            </a>
+                        </template>
+                    </div>
+
+                    {{-- Tombol Kalender Custom (Selalu Terlihat di Kanan, Sejajar 7 Kotak) --}}
+                    <button
+                        type="button"
+                        @click="calOpen = !calOpen"
+                        :aria-expanded="calOpen"
+                        aria-label="Pilih tanggal dari kalender"
+                        class="shrink-0 w-[68px] sm:w-[92px] flex flex-col items-center justify-center gap-1 py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all cursor-pointer active:scale-95"
+                        :class="calOpen ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-[#f4f7ff] text-[#1a146b] border-[#dce9ff] hover:bg-[#e8f0ff] hover:border-[#1a146b]/30'"
+                    >
+                        <span class="shrink-0" :class="calOpen ? 'text-[#acf847]' : 'text-[#1a146b]'">
+                            <x-lucide-calendar-days class="w-5 h-5 sm:w-6 sm:h-6" />
+                        </span>
+                        <span class="text-[10px] sm:text-[11px] font-extrabold leading-tight">Kalender</span>
+                    </button>
+
+                    {{-- Popover Kalender Custom --}}
+                    <div
+                        x-show="calOpen"
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-1 scale-[0.98]"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 -translate-y-1 scale-[0.98]"
+                        class="absolute right-0 top-full mt-2 z-40 w-[292px] rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/15 p-3"
+                    >
+                        <div class="grid grid-cols-2 gap-1.5 mb-3">
+                            <button type="button"
+                                    @click="pickCalendarDate(todayStr)"
+                                    class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                    :class="activeDate === todayStr ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                Hari Ini
+                            </button>
+                            <button type="button"
+                                    @click="pickCalendarDate(addDays(todayStr, 1))"
+                                    class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                    :class="activeDate === addDays(todayStr, 1) ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                Besok
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-2 px-0.5">
+                            <button type="button"
+                                    @click="prevMonth()"
+                                    :disabled="!canPrevMonth"
+                                    aria-label="Bulan sebelumnya"
+                                    class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] transition"
+                                    :class="canPrevMonth ? 'hover:bg-[#f4f7ff] cursor-pointer' : 'opacity-30 cursor-not-allowed'">
+                                <x-lucide-chevron-left class="w-4 h-4" />
+                            </button>
+                            <span class="text-xs font-extrabold text-[#0b1c30]" x-text="monthNames[calMonth] + ' ' + calYear"></span>
+                            <button type="button"
+                                    @click="nextMonth()"
+                                    aria-label="Bulan berikutnya"
+                                    class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] hover:bg-[#f4f7ff] transition cursor-pointer">
+                                <x-lucide-chevron-right class="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-0.5 text-center mb-1">
+                            <template x-for="dh in dayHeaders" :key="dh">
+                                <span class="text-[10px] font-bold text-gray-400 py-1" x-text="dh"></span>
+                            </template>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-0.5">
+                            <template x-for="(cell, idx) in calendarCells" :key="idx">
+                                <div class="flex items-center justify-center">
+                                    <template x-if="cell">
+                                        <button type="button"
+                                                @click="pickCalendarDate(cell.iso)"
+                                                :disabled="cell.disabled"
+                                                class="h-8 w-8 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition relative"
+                                                :class="cell.disabled
+                                                    ? 'text-gray-300 cursor-not-allowed'
+                                                    : (cell.isSelected
+                                                        ? 'bg-[#1a146b] text-white shadow-xs ring-2 ring-[#acf847]/70 cursor-pointer'
+                                                        : (cell.isToday
+                                                            ? 'bg-[#eff4ff] text-[#1a146b] hover:bg-[#dfe9ff] cursor-pointer'
+                                                            : 'text-[#0b1c30] hover:bg-[#f4f7ff] hover:text-[#1a146b] cursor-pointer'))">
+                                            <span x-text="cell.day"></span>
+                                            <span x-show="cell.isToday && !cell.isSelected" class="absolute bottom-1 h-1 w-1 rounded-full bg-[#416900]"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Baris 2: Filter Kategori & Filter Spesifik Lapangan (Instan Client-side) --}}

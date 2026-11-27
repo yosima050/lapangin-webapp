@@ -240,7 +240,7 @@
                  }"
                  @keydown.escape.window="katOpen = false; dateOpen = false">
                 <form method="GET"
-                      action="{{ route('katalog.index') }}"
+                      action="{{ route('jadwal.index') }}"
                       class="rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/10 p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-end">
 
                     {{-- Pilih Cabang Olahraga (Custom Dropdown) --}}

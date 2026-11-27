@@ -57,16 +57,22 @@ class CekJadwalController extends Controller
             $lapangans = $lapangans->where('id', $selectedLapanganId)->values();
         }
 
-        // Generate 7 hari cepat navigasi kalender
+        // Generate 7 hari cepat navigasi kalender (geser jendela jika tanggal dipilih > 6 hari dari hari ini)
         $currentDateCarbon = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
         $todayCarbon = Carbon::parse($todayWib, 'Asia/Jakarta')->startOfDay();
+        $windowStart = $currentDateCarbon->gt($todayCarbon->copy()->addDays(6))
+            ? $currentDateCarbon->copy()
+            : $todayCarbon->copy();
 
         $dateOptions = [];
         for ($i = 0; $i < 7; $i++) {
-            $d = $todayCarbon->copy()->addDays($i);
+            $d = $windowStart->copy()->addDays($i);
             $dateStr = $d->toDateString();
-            $labelTop = ($i === 0) ? 'HARI INI' : (($i === 1) ? 'BESOK' : strtoupper($d->locale('id')->translatedFormat('D')));
-            
+            $diffDays = (int) $todayCarbon->diffInDays($d, false);
+            $labelTop = ($diffDays === 0)
+                ? 'HARI INI'
+                : (($diffDays === 1) ? 'BESOK' : strtoupper($d->locale('id')->translatedFormat('D')));
+
             $dateOptions[] = [
                 'date' => $dateStr,
                 'label_top' => $labelTop,
@@ -119,6 +125,7 @@ class CekJadwalController extends Controller
                 'success' => true,
                 'tanggal' => $tanggal,
                 'matrix' => $matrix,
+                'dateOptions' => $dateOptions,
             ]);
         }
 

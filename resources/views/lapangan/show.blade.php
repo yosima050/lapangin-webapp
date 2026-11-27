@@ -4,22 +4,9 @@
 
 @section('content')
 @php
-    $selectedDateCarbon = \Carbon\Carbon::parse($tanggalDipilih)->startOfDay();
-    $today = now()->startOfDay();
-
-    // Generate 7 hari kalender
-    $datesCarousel = [];
-    for ($i = 0; $i < 7; $i++) {
-        $cDate = $today->copy()->addDays($i);
-        $datesCarousel[] = [
-            'date_str' => $cDate->toDateString(),
-            'day_num' => $cDate->format('d'),
-            'day_name' => $cDate->translatedFormat('D'),
-            'month_name' => $cDate->translatedFormat('M'),
-            'label_top' => $i === 0 ? 'HARI INI' : ($i === 1 ? 'BESOK' : strtoupper($cDate->translatedFormat('D'))),
-            'is_selected' => $cDate->toDateString() === $tanggalDipilih,
-        ];
-    }
+    $selectedDateCarbon = \Carbon\Carbon::parse($tanggalDipilih, 'Asia/Jakarta')->startOfDay();
+    $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+    $todayStr = $today->toDateString();
 
     // Kelompokkan slot siang (sebelum 18:00) dan malam prime time (>= 18:00)
     $slotsSiang = [];
@@ -55,9 +42,16 @@
 <div class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] pb-16"
      x-data="{
          selectedSlots: {{ Js::from($initialSelectedSlots) }},
+         todayStr: '{{ $todayStr }}',
          selectedDate: '{{ $tanggalDipilih }}',
          formattedDate: '{{ $selectedDateCarbon->translatedFormat('l, d F Y') }}',
          monthYear: '{{ $selectedDateCarbon->translatedFormat('F Y') }}',
+         calOpen: false,
+         calYear: {{ $selectedDateCarbon->year }},
+         calMonth: {{ $selectedDateCarbon->month - 1 }},
+         monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+         shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+         dayHeaders: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
          paymentScheme: 'full',
          showSchemeAccordion: false,
          equipments: {{ Js::from($perlengkapans->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama, 'harga' => (float)$p->harga, 'qty' => 0])) }},
@@ -77,6 +71,81 @@
              this.showAlertModal = true;
          },
 
+         formatISO(y, m, d) {
+             return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+         },
+
+         addDays(iso, days) {
+             const [y, m, d] = iso.split('-').map(Number);
+             const dt = new Date(y, m - 1, d + days);
+             return this.formatISO(dt.getFullYear(), dt.getMonth(), dt.getDate());
+         },
+
+         build7Days(targetIso) {
+             const maxInitial = this.addDays(this.todayStr, 6);
+             const startIso = targetIso > maxInitial ? targetIso : this.todayStr;
+             const tomorrowStr = this.addDays(this.todayStr, 1);
+             const list = [];
+             for (let i = 0; i < 7; i++) {
+                 const iso = this.addDays(startIso, i);
+                 const [y, m, d] = iso.split('-').map(Number);
+                 const dt = new Date(y, m - 1, d);
+                 const dayShort = this.dayHeaders[dt.getDay()];
+                 list.push({
+                     date_str: iso,
+                     day_num: String(d).padStart(2, '0'),
+                     day_name: dayShort,
+                     month_name: this.shortMonths[m - 1],
+                     label_top: iso === this.todayStr ? 'HARI INI' : (iso === tomorrowStr ? 'BESOK' : dayShort.toUpperCase()),
+                     is_selected: iso === targetIso,
+                 });
+             }
+             return list;
+         },
+
+         get canPrevMonth() {
+             const [ty, tm] = this.todayStr.split('-').map(Number);
+             return this.calYear > ty || (this.calYear === ty && this.calMonth > (tm - 1));
+         },
+
+         prevMonth() {
+             if (!this.canPrevMonth) return;
+             if (this.calMonth === 0) { this.calMonth = 11; this.calYear--; }
+             else { this.calMonth--; }
+         },
+
+         nextMonth() {
+             if (this.calMonth === 11) { this.calMonth = 0; this.calYear++; }
+             else { this.calMonth++; }
+         },
+
+         get calendarCells() {
+             const firstDay = new Date(this.calYear, this.calMonth, 1).getDay();
+             const daysInMonth = new Date(this.calYear, this.calMonth + 1, 0).getDate();
+             const cells = [];
+             for (let i = 0; i < firstDay; i++) cells.push(null);
+             for (let d = 1; d <= daysInMonth; d++) {
+                 const iso = this.formatISO(this.calYear, this.calMonth, d);
+                 cells.push({
+                     day: d,
+                     iso,
+                     disabled: iso < this.todayStr,
+                     isToday: iso === this.todayStr,
+                     isSelected: iso === this.selectedDate,
+                 });
+             }
+             return cells;
+         },
+
+         pickCalendarDate(iso) {
+             if (iso < this.todayStr) return;
+             const [y, m] = iso.split('-').map(Number);
+             this.calYear = y;
+             this.calMonth = m - 1;
+             this.calOpen = false;
+             this.changeDate(iso);
+         },
+
          async changeDate(newDate) {
              if (this.selectedDate === newDate) return;
              this.selectedDate = newDate;
@@ -84,20 +153,22 @@
 
              // Update status tombol carousel langsung secara instan (optimistic UI)
              const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
              const parts = newDate.split('-');
              if (parts.length === 3) {
-                 const dObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                 const yNum = parseInt(parts[0], 10);
+                 const mNum = parseInt(parts[1], 10) - 1;
+                 const dNum = parseInt(parts[2], 10);
+                 this.calYear = yNum;
+                 this.calMonth = mNum;
+                 const dObj = new Date(yNum, mNum, dNum);
                  const dayOfWeek = dayNames[dObj.getDay()];
                  const dayNum = String(dObj.getDate()).padStart(2, '0');
-                 const monthName = monthNames[dObj.getMonth()];
+                 const monthName = this.monthNames[dObj.getMonth()];
                  this.formattedDate = `${dayOfWeek}, ${dayNum} ${monthName} ${dObj.getFullYear()}`;
                  this.monthYear = `${monthName} ${dObj.getFullYear()}`;
              }
 
-             this.datesCarousel.forEach(d => {
-                 d.is_selected = (d.date_str === newDate);
-             });
+             this.datesCarousel = this.build7Days(newDate);
 
              // Update URL query param tanpa reload halaman
              const newUrl = new URL(window.location.href);
@@ -359,27 +430,115 @@
                         </span>
                     </div>
 
-                    {{-- Horizontal 7-Day Date Buttons (SPA Reactive tanpa reload) --}}
-                    <div class="flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        @foreach ($datesCarousel as $d)
-                            <button type="button"
-                                    @click="changeDate('{{ $d['date_str'] }}')"
-                                    class="min-w-[66px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 border cursor-pointer"
-                                    :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
-                                <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
-                                      :class="selectedDate === '{{ $d['date_str'] }}' ? 'text-[#acf847]' : 'text-gray-400'">
-                                    {{ $d['label_top'] }}
-                                </span>
-                                <span class="text-lg sm:text-xl font-headline font-black my-0.5 sm:my-1 leading-tight">
-                                    {{ $d['day_num'] }}
-                                </span>
-                                <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full"
-                                          :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
-                                    <span>{{ $d['day_name'] }}</span>
-                                </div>
-                            </button>
-                        @endforeach
+                    {{-- Horizontal 7-Day Date Buttons + Tombol Kalender Custom (SPA Reactive tanpa reload) --}}
+                    <div class="relative flex items-stretch gap-2 sm:gap-2.5"
+                         @click.outside="calOpen = false"
+                         @keydown.escape.window="calOpen = false">
+                        <div class="flex-1 min-w-0 flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                            <template x-for="d in datesCarousel" :key="d.date_str">
+                                <button type="button"
+                                        @click="changeDate(d.date_str)"
+                                        class="min-w-[64px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition-all duration-150 active:scale-95 border cursor-pointer"
+                                        :class="selectedDate === d.date_str ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
+                                    <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
+                                          :class="selectedDate === d.date_str ? 'text-[#acf847]' : 'text-gray-400'"
+                                          x-text="d.label_top"></span>
+                                    <span class="text-lg sm:text-xl font-headline font-black my-0.5 sm:my-1 leading-tight"
+                                          x-text="d.day_num"></span>
+                                    <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
+                                        <span class="w-1.5 h-1.5 rounded-full"
+                                              :class="selectedDate === d.date_str ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                        <span x-text="d.month_name"></span>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+
+                        {{-- Tombol Kalender Custom --}}
+                        <button type="button"
+                                @click="calOpen = !calOpen"
+                                :aria-expanded="calOpen"
+                                aria-label="Pilih tanggal dari kalender"
+                                class="shrink-0 w-[66px] sm:w-[78px] mb-1 sm:mb-0 flex flex-col items-center justify-center gap-1 py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all active:scale-95 cursor-pointer"
+                                :class="calOpen ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-[#f4f7ff] text-[#1a146b] border-[#dce9ff] hover:bg-[#e8f0ff] hover:border-[#1a146b]/30'">
+                            <span class="shrink-0" :class="calOpen ? 'text-[#acf847]' : 'text-[#1a146b]'">
+                                <x-lucide-calendar-days class="w-5 h-5" />
+                            </span>
+                            <span class="text-[10px] font-extrabold leading-tight">Kalender</span>
+                        </button>
+
+                        {{-- Popover Kalender Custom --}}
+                        <div x-show="calOpen"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 -translate-y-1 scale-[0.98]"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 -translate-y-1 scale-[0.98]"
+                             class="absolute right-0 top-full mt-2 z-40 w-[292px] rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/15 p-3">
+                            <div class="grid grid-cols-2 gap-1.5 mb-3">
+                                <button type="button"
+                                        @click="pickCalendarDate(todayStr)"
+                                        class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                        :class="selectedDate === todayStr ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                    Hari Ini
+                                </button>
+                                <button type="button"
+                                        @click="pickCalendarDate(addDays(todayStr, 1))"
+                                        class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                        :class="selectedDate === addDays(todayStr, 1) ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                    Besok
+                                </button>
+                            </div>
+
+                            <div class="flex items-center justify-between mb-2 px-0.5">
+                                <button type="button"
+                                        @click="prevMonth()"
+                                        :disabled="!canPrevMonth"
+                                        aria-label="Bulan sebelumnya"
+                                        class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] transition"
+                                        :class="canPrevMonth ? 'hover:bg-[#f4f7ff] cursor-pointer' : 'opacity-30 cursor-not-allowed'">
+                                    <x-lucide-chevron-left class="w-4 h-4" />
+                                </button>
+                                <span class="text-xs font-extrabold text-[#0b1c30]" x-text="monthNames[calMonth] + ' ' + calYear"></span>
+                                <button type="button"
+                                        @click="nextMonth()"
+                                        aria-label="Bulan berikutnya"
+                                        class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] hover:bg-[#f4f7ff] transition cursor-pointer">
+                                    <x-lucide-chevron-right class="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-0.5 text-center mb-1">
+                                <template x-for="dh in dayHeaders" :key="dh">
+                                    <span class="text-[10px] font-bold text-gray-400 py-1" x-text="dh"></span>
+                                </template>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-0.5">
+                                <template x-for="(cell, idx) in calendarCells" :key="idx">
+                                    <div class="flex items-center justify-center">
+                                        <template x-if="cell">
+                                            <button type="button"
+                                                    @click="pickCalendarDate(cell.iso)"
+                                                    :disabled="cell.disabled"
+                                                    class="h-8 w-8 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition relative"
+                                                    :class="cell.disabled
+                                                        ? 'text-gray-300 cursor-not-allowed'
+                                                        : (cell.isSelected
+                                                            ? 'bg-[#1a146b] text-white shadow-xs ring-2 ring-[#acf847]/70 cursor-pointer'
+                                                            : (cell.isToday
+                                                                ? 'bg-[#eff4ff] text-[#1a146b] hover:bg-[#dfe9ff] cursor-pointer'
+                                                                : 'text-[#0b1c30] hover:bg-[#f4f7ff] hover:text-[#1a146b] cursor-pointer'))">
+                                                <span x-text="cell.day"></span>
+                                                <span x-show="cell.isToday && !cell.isSelected" class="absolute bottom-1 h-1 w-1 rounded-full bg-[#416900]"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
