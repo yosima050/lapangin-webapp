@@ -13,7 +13,7 @@
         $prefilledName = old('name', request('name', ''));
     @endphp
 
-    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between"
+    <div class="min-h-screen py-4 sm:py-8 px-3.5 sm:px-6 lg:px-8 flex flex-col justify-between"
          x-data="{
              tab: '{{ $activeTab }}',
              showPassword: false,
@@ -37,14 +37,15 @@
          }">
 
         {{-- Top Minimalist Navigation Bar --}}
-        <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-6 sm:mb-10">
+        <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-4 sm:mb-10">
             <a href="{{ route('home') }}"
-               class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
+               class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
                 <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
-                <span>Kembali ke Beranda</span>
+                <span class="sm:hidden">Beranda</span>
+                <span class="hidden sm:inline">Kembali ke Beranda</span>
             </a>
 
-            <div class="lg:hidden">
+            <div class="lg:hidden scale-90 sm:scale-100 origin-right">
                 <x-application-logo />
             </div>
         </div>
@@ -112,30 +113,32 @@
 
             {{-- Right Column: Interactive Auth Card (Single Unified Container) --}}
             <div class="lg:col-span-6 flex justify-center w-full">
-                <div class="w-full max-w-lg bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
+                <div class="w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
 
-                    {{-- Top Tabs Segmented Control (Smooth Client-Side Switch with Native Link Fallback) --}}
-                    <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-6 border border-[#dce9ff]">
+                    {{-- Top Tabs Segmented Control (1 baris rapi di HP & Desktop) --}}
+                    <div class="bg-[#eff4ff] p-1 sm:p-1.5 rounded-2xl flex items-center gap-1 mb-5 sm:mb-6 border border-[#dce9ff]">
                         <a
                             id="btn-tab-login"
                             href="{{ route('login') }}"
                             onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            class="flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
+                            <span class="hidden sm:inline-flex items-center"><span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span></span>
                             <x-lucide-log-in class="w-4 h-4 shrink-0" />
-                            <span>Masuk ke Akun</span>
+                            <span class="sm:hidden">Masuk</span>
+                            <span class="hidden sm:inline">Masuk ke Akun</span>
                         </a>
 
                         <a
                             id="btn-tab-register"
                             href="{{ route('register') }}"
                             onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            class="flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
+                            <span class="hidden sm:inline-flex items-center"><span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span></span>
                             <x-lucide-user-plus class="w-4 h-4 shrink-0" />
-                            <span>Daftar Akun Baru</span>
+                            <span class="sm:hidden">Daftar</span>
+                            <span class="hidden sm:inline">Daftar Akun Baru</span>
                         </a>
                     </div>
 
@@ -146,8 +149,8 @@
                          class="{{ $activeTab === 'login' ? '' : 'hidden' }}"
                          @if($activeTab !== 'login') style="display: none;" @endif>
 
-                        <div class="mb-5">
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
+                        <div class="mb-4 sm:mb-5">
+                            <h2 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
                                 Selamat Datang Kembali
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">
@@ -261,8 +264,8 @@
                                 @endif
                             </div>
 
-                            {{-- Remember Me & Security Badge --}}
-                            <div class="flex items-center justify-between pt-1">
+                            {{-- Remember Me --}}
+                            <div class="flex items-center pt-1">
                                 <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer">
                                     <input
                                         id="remember_me"
@@ -274,21 +277,16 @@
                                         Ingat Saya di Perangkat Ini
                                     </span>
                                 </label>
-
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#416900]">
-                                    <x-lucide-lock class="w-3.5 h-3.5 shrink-0" />
-                                    <span>Sesi Aman</span>
-                                </span>
                             </div>
 
                             {{-- Submit Button --}}
                             <button
                                 type="submit"
-                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
+                                class="w-full mt-5 sm:mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
                             >
                                 <span>Masuk Sekarang</span>
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold transition group-hover:translate-x-0.5">
-                                    →
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] transition group-hover:translate-x-0.5">
+                                    <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                                 </span>
                             </button>
                         </form>
@@ -315,8 +313,8 @@
                          class="{{ $activeTab === 'register' ? '' : 'hidden' }}"
                          @if($activeTab !== 'register') style="display: none;" @endif>
 
-                        <div class="mb-5">
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
+                        <div class="mb-4 sm:mb-5">
+                            <h2 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
                                 Daftar Akun Baru
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">
@@ -707,14 +705,16 @@
                 }
 
                 if (btnLogin && btnRegister) {
+                    const activeClasses = 'flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
+                    const inactiveClasses = 'flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
                     if (isLogin) {
-                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
-                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        btnLogin.className = activeClasses;
+                        btnRegister.className = inactiveClasses;
                         if (dotLogin) dotLogin.classList.remove('hidden');
                         if (dotRegister) dotRegister.classList.add('hidden');
                     } else {
-                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
-                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        btnRegister.className = activeClasses;
+                        btnLogin.className = inactiveClasses;
                         if (dotRegister) dotRegister.classList.remove('hidden');
                         if (dotLogin) dotLogin.classList.add('hidden');
                     }
