@@ -123,7 +123,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-6">
 
                 @forelse ($katalog as $item)
                     @php
@@ -133,15 +133,15 @@
                         x-show="(sport === 'Semua' || '{{ $item['kategori'] }}' === sport) && (!searchQuery.trim() || {{ json_encode($searchKeyword) }}.includes(searchQuery.toLowerCase().trim()))"
                         x-transition
                         @if($loop->index >= 2)
-                            style="content-visibility: auto; contain-intrinsic-size: 1px 280px;"
+                            style="content-visibility: auto; contain-intrinsic-size: 1px 160px;"
                         @endif
                         onclick="window.location.href = '{{ route('katalog.show', $item['lapangan_id']) }}'"
                         class="cursor-pointer bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col"
                     >
-                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] flex-1">
+                        <div class="grid grid-cols-[116px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[240px_1fr] flex-1">
 
                             {{-- Image Lapangan Asli dari PostgreSQL / Upload --}}
-                            <div class="relative h-60 md:h-full min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
+                            <div class="relative h-full min-h-[144px] sm:min-h-[200px] md:min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
                                 <img
                                     src="{{ $item['foto_card_url'] ?? $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
                                     alt="{{ $item['lapangan_nama'] }}"
@@ -157,71 +157,72 @@
                                    class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent md:hidden"></div>
 
-                                <span class="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-xs font-bold shadow-sm">
+                                <span class="absolute top-2 left-2 sm:top-3.5 sm:left-3.5 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-[10px] sm:text-xs font-bold shadow-sm max-w-[96px] sm:max-w-none truncate">
                                     {{ $item['kategori'] }}
                                 </span>
                             </div>
 
                             {{-- Content Lapangan & Tarif --}}
-                            <div class="p-6 flex flex-col justify-between">
+                            <div class="p-3 sm:p-5 md:p-6 flex flex-col justify-between min-w-0">
                                 <div>
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p class="text-xs font-bold uppercase tracking-wider text-[#416900]">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <p class="hidden sm:block text-xs font-bold uppercase tracking-wider text-[#416900]">
                                                 {{ $item['kategori'] }}
                                             </p>
-                                            <h3 class="mt-1 text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition">
+                                            <h3 class="sm:mt-1 text-sm sm:text-base md:text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition leading-snug line-clamp-2">
                                                 {{ $item['lapangan_nama'] }}
                                             </h3>
                                         </div>
                                     </div>
 
                                     @if (!empty($item['deskripsi']))
-                                        <p class="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                                        <p class="hidden sm:line-clamp-2 mt-2 text-xs text-gray-500 leading-relaxed">
                                             {{ $item['deskripsi'] }}
                                         </p>
                                     @endif
 
-                                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                                        <x-lucide-clock class="w-4 h-4 text-[#1a146b] shrink-0" />
-                                        <span>Jam Buka: {{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
+                                    <div class="mt-1.5 sm:mt-3 flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-500">
+                                        <x-lucide-clock class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1a146b] shrink-0" />
+                                        <span class="truncate">{{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
                                     </div>
                                 </div>
 
-                                <div class="mt-5 pt-4 border-t border-gray-100">
-                                    <div class="flex items-end justify-between gap-3">
+                                <div class="mt-2.5 sm:mt-5 pt-2.5 sm:pt-4 border-t border-gray-100">
+                                    <div class="flex flex-wrap items-end justify-between gap-2">
                                         <div>
                                             <div class="flex items-center gap-1.5">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
+                                                <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
                                                 @if(!empty($item['has_harga_khusus']))
-                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800">
-                                                        PROMO / KHUSUS
+                                                    <span class="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-extrabold bg-amber-100 text-amber-800">
+                                                        PROMO
                                                     </span>
                                                 @endif
                                             </div>
-                                            <div class="flex items-baseline gap-1">
-                                                <span class="text-lg font-extrabold text-[#0b1c30]">
+                                            <div class="flex items-baseline gap-0.5 sm:gap-1">
+                                                <span class="text-sm sm:text-lg font-extrabold text-[#0b1c30]">
                                                     Rp {{ number_format($item['harga_termurah'] ?? ($item['harga_weekday'] ?? 100000), 0, ',', '.') }}
                                                 </span>
-                                                <span class="text-xs text-gray-500 font-medium">/jam</span>
+                                                <span class="text-[10px] sm:text-xs text-gray-500 font-medium">/jam</span>
                                             </div>
                                         </div>
 
                                         <div class="text-right">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#eaf7d8] text-[#416900]">
-                                                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
-                                                {{ collect($item['slots'])->where('is_tersedia', true)->count() }} slot kosong
+                                            <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[#eaf7d8] text-[#416900]">
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#416900]"></span>
+                                                {{ collect($item['slots'])->where('is_tersedia', true)->count() }} slot
                                             </span>
                                         </div>
                                     </div>
 
                                     <a
                                         href="{{ route('katalog.show', ['id' => $item['lapangan_id'], 'tanggal' => $tanggal]) }}"
-                                        class="mt-4 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold shadow-sm transition"
+                                        class="mt-2.5 sm:mt-4 flex items-center justify-center w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-[11px] sm:text-xs font-bold shadow-sm transition"
                                     >
-                                        Lihat Detail &amp; Jadwal Lengkap →
+                                        <span class="sm:hidden">Detail &amp; Jadwal →</span>
+                                        <span class="hidden sm:inline">Lihat Detail &amp; Jadwal Lengkap →</span>
                                     </a>
                                 </div>
                             </div>
