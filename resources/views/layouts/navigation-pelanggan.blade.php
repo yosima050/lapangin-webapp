@@ -1,6 +1,6 @@
 {{-- Unified Responsive Navigation Bar untuk Pelanggan LapangIn --}}
 <div x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false">
-    {{-- Backdrop Redup Halus saat Mobile Menu Terbuka --}}
+    {{-- Backdrop Redup Halus saat Mobile Menu Terbuka (mulai di bawah header agar warna putih header & drawer menyatu 100%) --}}
     <div
         x-show="mobileMenuOpen"
         x-cloak
@@ -11,11 +11,14 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="lg:hidden fixed inset-0 z-40 bg-slate-900/25 backdrop-blur-[2px]"
+        class="lg:hidden fixed inset-x-0 top-20 bottom-0 z-40 bg-slate-900/25 backdrop-blur-[2px]"
         aria-hidden="true"
     ></div>
 
-<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
+<header
+    class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-colors duration-200"
+    :class="mobileMenuOpen ? 'bg-white border-transparent shadow-none lg:bg-white/95 lg:border-gray-100 lg:shadow-xs' : 'bg-white/95 border-gray-100 shadow-xs'"
+>
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-20 flex items-center justify-between">
 
@@ -76,12 +79,14 @@
             <div class="hidden lg:flex items-center gap-4 ml-auto">
 
                 @guest
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-bold text-[#1a146b] hover:bg-gray-50 rounded-xl transition">
-                            Masuk
+                    <div class="flex items-center gap-2.5">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#1a146b] hover:bg-gray-50 rounded-xl transition">
+                            <x-lucide-log-in class="w-4 h-4 shrink-0" />
+                            <span>Masuk</span>
                         </a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-bold shadow-xs hover:shadow-md transition">
-                            Daftar
+                        <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-bold shadow-xs hover:shadow-md transition">
+                            <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                            <span>Daftar</span>
                         </a>
                     </div>
                 @endguest
@@ -308,15 +313,17 @@
                 <div class="grid grid-cols-2 gap-2">
                     <a
                         href="{{ route('login') }}"
-                        class="text-center py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#1a146b] hover:bg-gray-50 transition active:scale-[0.98]"
+                        class="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#1a146b] hover:bg-gray-50 transition active:scale-[0.98]"
                     >
-                        Masuk
+                        <x-lucide-log-in class="w-4 h-4 shrink-0" />
+                        <span>Masuk</span>
                     </a>
                     <a
                         href="{{ route('register') }}"
-                        class="text-center py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-extrabold shadow-sm transition active:scale-[0.98]"
+                        class="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-extrabold shadow-sm transition active:scale-[0.98]"
                     >
-                        Daftar Akun
+                        <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                        <span>Daftar</span>
                     </a>
                 </div>
             @endauth
