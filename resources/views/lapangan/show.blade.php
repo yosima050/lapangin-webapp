@@ -264,62 +264,77 @@
          }
      }">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3.5 sm:pt-6">
 
-        {{-- 1. Breadcrumbs --}}
-        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
-            <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
+        {{-- 1. Breadcrumbs (Ringkas 1 baris di HP, lengkap di Desktop) --}}
+        <div class="flex sm:hidden items-center justify-between gap-2 mb-3">
+            <a href="{{ route('katalog.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#1a146b] hover:underline shrink-0">
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
+                <span>Kembali ke Katalog</span>
+            </a>
+            <span class="rounded-full bg-[#eff4ff] px-2.5 py-0.5 text-[10px] font-bold text-[#1a146b] truncate">
+                {{ $lapangan->kategori }}
+            </span>
+        </div>
+
+        <nav class="hidden sm:flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
+            <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1 shrink-0 whitespace-nowrap">
                 <x-lucide-house class="w-4 h-4 shrink-0" />
                 <span>Beranda</span>
             </a>
-            <span>/</span>
-            <a href="{{ route('katalog.index', ['kategori' => $lapangan->kategori]) }}" class="hover:text-[#1a146b]">
+            <span class="shrink-0">/</span>
+            <a href="{{ route('katalog.index', ['kategori' => $lapangan->kategori]) }}" class="hover:text-[#1a146b] shrink-0 whitespace-nowrap">
                 {{ $lapangan->kategori }}
             </a>
-            <span>/</span>
+            <span class="shrink-0">/</span>
             <span class="text-gray-900 font-bold truncate">{{ $lapangan->nama }}</span>
         </nav>
 
         {{-- Flash Error Message (jika diarahkan karena jam lewat) --}}
         @if (session('error'))
-            <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-sm flex items-center gap-3 shadow-xs">
+            <div class="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm flex items-center gap-2.5 sm:gap-3 shadow-xs">
                 <x-lucide-clock class="w-5 h-5 text-amber-600 shrink-0" />
                 <span class="font-semibold">{{ session('error') }}</span>
             </div>
         @endif
 
         {{-- 2. Main Two-Column Split Grid (70% Kiri, 30% Kanan) --}}
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
 
             {{-- ======================================================== --}}
             {{-- KOLOM KIRI (Main Content): Jadwal, Carousel Tanggal, Slots & Addons --}}
             {{-- ======================================================== --}}
-            <div class="lg:col-span-8 xl:col-span-8 flex flex-col gap-8">
+            <div class="lg:col-span-8 xl:col-span-8 flex flex-col gap-4 sm:gap-8">
 
                 {{-- Venue Header Card --}}
-                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
-                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div>
-                            <h1 class="text-2xl sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight">
-                                {{ $lapangan->nama }}
-                            </h1>
-
-                            <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
-                                <x-lucide-map-pin class="w-4 h-4 text-gray-400 shrink-0" />
-                                <span>{{ $lapangan->deskripsi ?: 'Arena futsal, badminton, dan multisport resmi dengan standar pencahayaan turnamen.' }}</span>
-                            </p>
-
-                            {{-- Hidden pricing metadata for automated test assertions (KatalogSyncAndApiTest) --}}
-                            <div class="sr-only" aria-hidden="true">
-                                <span>Tarif Weekday: Rp {{ number_format($hargaWeekday ?? 125000, 0, ',', '.') }}</span>
-                                <span>Tarif Weekend: Rp {{ number_format($hargaWeekend ?? 175000, 0, ',', '.') }}</span>
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-3 sm:gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                        <div class="flex items-start gap-3 sm:block min-w-0">
+                            {{-- Thumbnail Lapangan Khusus HP/Tablet (Desktop sudah tampil di Sidebar) --}}
+                            <div class="lg:hidden w-16 h-16 rounded-2xl bg-gray-900 overflow-hidden shrink-0 border border-gray-100 shadow-2xs mt-0.5">
+                                <img src="{{ $lapangan->foto_card_url ?? $lapangan->foto_url }}" alt="{{ $lapangan->nama }}" width="64" height="64" class="w-full h-full object-cover">
                             </div>
 
+                            <div class="min-w-0 flex-1">
+                                <h1 class="text-lg sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
+                                    {{ $lapangan->nama }}
+                                </h1>
 
+                                <p class="text-[11px] sm:text-xs text-gray-500 mt-1 sm:mt-1.5 flex items-start sm:items-center gap-1.5 leading-relaxed">
+                                    <x-lucide-map-pin class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 shrink-0 mt-0.5 sm:mt-0" />
+                                    <span class="line-clamp-2 sm:line-clamp-none">{{ $lapangan->deskripsi ?: 'Arena futsal, badminton, dan multisport resmi dengan standar pencahayaan turnamen.' }}</span>
+                                </p>
+
+                                {{-- Hidden pricing metadata for automated test assertions (KatalogSyncAndApiTest) --}}
+                                <div class="sr-only" aria-hidden="true">
+                                    <span>Tarif Weekday: Rp {{ number_format($hargaWeekday ?? 125000, 0, ',', '.') }}</span>
+                                    <span>Tarif Weekend: Rp {{ number_format($hargaWeekend ?? 175000, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- Tombol Kembali ke Katalog (Area Atas Bersih) --}}
-                        <div class="shrink-0 self-start sm:self-center">
+                        {{-- Tombol Kembali ke Katalog (Desktop; di HP sudah tersedia di bar atas) --}}
+                        <div class="hidden sm:block shrink-0 self-start sm:self-center">
                             <a href="{{ route('katalog.index') }}"
                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 transition shadow-2xs">
                                 <x-lucide-arrow-left class="w-4 h-4 text-gray-500 shrink-0" />
@@ -329,33 +344,33 @@
                     </div>
                 </div>
 
-                {{-- Pilih Tanggal Main (7-Day Carousel) --}}
-                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                {{-- Pilih Tanggal Main (7-Day Carousel: 1 baris swipe di HP, 7 kolom di Desktop) --}}
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-3 sm:gap-4">
+                    <div class="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-gray-100">
                         <div class="flex items-center gap-2">
-                            <x-lucide-calendar-days class="w-5 h-5 text-[#1a146b] shrink-0" />
-                            <h2 class="text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
+                            <x-lucide-calendar-days class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a146b] shrink-0" />
+                            <h2 class="text-sm sm:text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
                         </div>
-                        <span class="text-xs font-semibold text-gray-400" x-text="monthYear">
+                        <span class="text-[11px] sm:text-xs font-semibold text-gray-400" x-text="monthYear">
                             {{ $selectedDateCarbon->translatedFormat('F Y') }}
                         </span>
                     </div>
 
                     {{-- Horizontal 7-Day Date Buttons (SPA Reactive tanpa reload) --}}
-                    <div class="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
+                    <div class="flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         @foreach ($datesCarousel as $d)
                             <button type="button"
                                     @click="changeDate('{{ $d['date_str'] }}')"
-                                    class="flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl transition border cursor-pointer"
+                                    class="min-w-[66px] sm:min-w-0 shrink-0 snap-start flex flex-col items-center justify-center py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl transition border cursor-pointer"
                                     :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#1a146b] border-[#1a146b] text-white shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'">
-                                <span class="text-[10px] font-black tracking-wider uppercase"
+                                <span class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase"
                                       :class="selectedDate === '{{ $d['date_str'] }}' ? 'text-[#acf847]' : 'text-gray-400'">
                                     {{ $d['label_top'] }}
                                 </span>
-                                <span class="text-xl font-headline font-black my-1">
+                                <span class="text-lg sm:text-xl font-headline font-black my-0.5 sm:my-1 leading-tight">
                                     {{ $d['day_num'] }}
                                 </span>
-                                <div class="flex items-center gap-1 text-[11px] font-bold">
+                                <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
                                     <span class="w-1.5 h-1.5 rounded-full"
                                           :class="selectedDate === '{{ $d['date_str'] }}' ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                     <span>{{ $d['day_name'] }}</span>
@@ -366,7 +381,7 @@
                 </div>
 
                 {{-- Grouping Sesi Jam Booking --}}
-                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-6 relative">
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-5 sm:gap-6 relative">
                     {{-- Loading Bar Tipis Halus saat ganti tanggal --}}
                     <div x-show="isLoadingSlots"
                          x-transition:enter="transition ease-out duration-150"
@@ -375,55 +390,55 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100"
                          x-transition:leave-end="opacity-0"
-                         class="absolute inset-x-0 top-0 h-1 bg-[#acf847] overflow-hidden rounded-t-3xl z-20">
+                         class="absolute inset-x-0 top-0 h-1 bg-[#acf847] overflow-hidden rounded-t-2xl sm:rounded-t-3xl z-20">
                         <div class="w-full h-full bg-[#1a146b] animate-pulse"></div>
                     </div>
 
                     {{-- Sesi Siang & Sore --}}
                     <div x-show="slotsSiang.length > 0">
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-[#416900]"></span>
-                                <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Siang &amp; Sore</h3>
-                                <span class="text-xs text-gray-400 font-mono">13:00 – 17:00</span>
+                        <div class="flex items-center justify-between gap-2 mb-3 sm:mb-3.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#416900] shrink-0"></span>
+                                <h3 class="text-xs sm:text-sm font-bold text-[#0b1c30] truncate">Sesi Siang &amp; Sore</h3>
+                                <span class="hidden sm:inline text-xs text-gray-400 font-mono">13:00 – 17:00</span>
                             </div>
-                            <span class="text-xs font-bold text-gray-600" x-text="formatRp(baseRate) + ' / jam'"></span>
+                            <span class="text-[11px] sm:text-xs font-bold text-gray-600 shrink-0 whitespace-nowrap" x-text="formatRp(baseRate) + ' / jam'"></span>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                             <template x-for="slot in slotsSiang" :key="slot.jam_mulai">
                                 <div>
                                     <template x-if="slot.is_tersedia">
                                         <button type="button"
                                                 @click="toggleSlot(slot)"
                                                 :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                                class="w-full py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
                                             <div class="flex items-center gap-1">
-                                                <span class="font-headline font-black text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                                <span class="font-headline font-black text-xs sm:text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                             </div>
-                                            <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[9px] sm:text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
                                             <template x-if="slot.is_harga_khusus">
-                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                                                <span class="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-md"
                                                       :class="isSlotSelected(slot) ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-800'"
                                                       x-text="formatRp(slot.harga)">
                                                 </span>
                                             </template>
-                                            <span class="text-[10px] font-bold mt-0.5"
+                                            <span class="text-[9px] sm:text-[10px] font-bold mt-0.5"
                                                   :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
                                                   x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">
                                             </span>
                                         </button>
                                     </template>
                                     <template x-if="!slot.is_tersedia">
-                                        <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                        <div class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-not-allowed">
                                             <div class="flex items-center gap-1">
-                                                <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
-                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
+                                                <span class="font-bold text-xs sm:text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                                             </div>
-                                            <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
-                                            <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
+                                            <span class="text-[9px] sm:text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[9px] sm:text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -433,49 +448,48 @@
 
                     {{-- Sesi Malam Prime Time --}}
                     <div x-show="slotsMalam.length > 0" class="pt-4 border-t border-gray-100">
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-[#1a146b]"></span>
-                                <h3 class="text-sm font-bold text-[#0b1c30]">Sesi Malam Prime Time</h3>
-
+                        <div class="flex items-center justify-between gap-2 mb-3 sm:mb-3.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#1a146b] shrink-0"></span>
+                                <h3 class="text-xs sm:text-sm font-bold text-[#0b1c30] truncate">Sesi Malam Prime Time</h3>
                             </div>
-                            <span class="text-xs font-bold text-[#1a146b]" x-text="formatRp(primeRate) + ' / jam'"></span>
+                            <span class="text-[11px] sm:text-xs font-bold text-[#1a146b] shrink-0 whitespace-nowrap" x-text="formatRp(primeRate) + ' / jam'"></span>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
                             <template x-for="slot in slotsMalam" :key="slot.jam_mulai">
                                 <div>
                                     <template x-if="slot.is_tersedia">
                                         <button type="button"
                                                 @click="toggleSlot(slot)"
                                                 :class="isSlotSelected(slot) ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-indigo-50/50'"
-                                                class="w-full py-3.5 px-3 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer">
+                                                class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border text-center transition flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-pointer">
                                             <div class="flex items-center gap-1">
-                                                <span class="font-headline font-black text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <span class="w-2 h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                                <span class="font-headline font-black text-xs sm:text-sm tracking-tight" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" :class="isSlotSelected(slot) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                             </div>
-                                            <span class="text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[9px] sm:text-[10px]" :class="isSlotSelected(slot) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
                                             <template x-if="slot.is_harga_khusus">
-                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                                                <span class="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-md"
                                                       :class="isSlotSelected(slot) ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-800'"
                                                       x-text="formatRp(slot.harga)">
                                                 </span>
                                             </template>
-                                            <span class="text-[10px] font-bold mt-0.5"
+                                            <span class="text-[9px] sm:text-[10px] font-bold mt-0.5"
                                                   :class="isSlotSelected(slot) ? 'text-[#acf847]' : 'text-emerald-600'"
                                                   x-text="isSlotSelected(slot) ? 'DIPILIH' : 'Tersedia'">
                                             </span>
                                         </button>
                                     </template>
                                     <template x-if="!slot.is_tersedia">
-                                        <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
+                                        <div class="w-full py-2.5 px-1.5 sm:py-3.5 sm:px-3 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-0.5 sm:gap-1 cursor-not-allowed">
                                             <div class="flex items-center gap-1">
-                                                <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
-                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
+                                                <span class="font-bold text-xs sm:text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
+                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                                             </div>
-                                            <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
-                                            <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
+                                            <span class="text-[9px] sm:text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
+                                            <span class="text-[9px] sm:text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -484,18 +498,18 @@
                     </div>
 
                     {{-- Slot Legend Status --}}
-                    <div class="flex flex-wrap items-center gap-6 pt-3 border-t border-gray-100 text-xs text-gray-500">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-gray-200"></span>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 pt-3 border-t border-gray-100 text-[11px] sm:text-xs text-gray-500">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-200"></span>
                             <span>Terisi / Lewat Jam</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></span>
                             <span>Tersedia</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-[#1a146b]"></span>
-                            <span class="font-bold text-[#1a146b]">Dipilih Anda (<span x-text="selectedSlots.length"></span> Jam)</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#1a146b]"></span>
+                            <span class="font-bold text-[#1a146b]">Dipilih (<span x-text="selectedSlots.length"></span> Jam)</span>
                         </div>
                     </div>
                 </div>
@@ -503,27 +517,27 @@
                 {{-- ======================================================== --}}
                 {{-- 4. MODUL SEWA PERLENGKAPAN TAMBAHAN (Sesuai Permintaan) --}}
                 {{-- ======================================================== --}}
-                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-5">
-                    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4 sm:gap-5">
+                    <div class="flex items-start sm:items-center justify-between gap-2 pb-3 border-b border-gray-100">
                         <div>
                             <div class="flex items-center gap-2">
-                                <x-lucide-flag class="w-5 h-5 text-[#416900] shrink-0" />
-                                <h2 class="text-base font-headline font-bold text-[#0b1c30]">Modul Sewa Perlengkapan Tambahan</h2>
+                                <x-lucide-flag class="w-4 h-4 sm:w-5 sm:h-5 text-[#416900] shrink-0" />
+                                <h2 class="text-sm sm:text-base font-headline font-bold text-[#0b1c30]">Modul Sewa Perlengkapan Tambahan</h2>
                             </div>
-                            <p class="text-xs text-gray-500 mt-0.5">
+                            <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5">
                                 Tambahkan rompi tanding, bola resmi FIFA, atau perlengkapan lainnya ke dalam pesanan Anda.
                             </p>
                         </div>
-                        <span class="text-xs font-bold text-[#416900] bg-[#eaf7d8] px-3 py-1 rounded-full">
+                        <span class="text-[10px] sm:text-xs font-bold text-[#416900] bg-[#eaf7d8] px-2.5 sm:px-3 py-1 rounded-full shrink-0">
                             Opsional
                         </span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         @forelse ($perlengkapans as $p)
-                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#1a146b]/40 transition flex items-center justify-between gap-3 shadow-xs">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
+                            <div class="p-3 sm:p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#1a146b]/40 transition flex items-center justify-between gap-3 shadow-xs">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
                                         @if($p->gambar)
                                             <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                         @else
@@ -532,8 +546,8 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div>
-                                        <h4 class="text-xs font-bold text-[#0b1c30]">{{ $p->nama }}</h4>
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-bold text-[#0b1c30] truncate">{{ $p->nama }}</h4>
                                         <p class="text-[11px] text-[#416900] font-extrabold mt-0.5">
                                             Rp{{ number_format((float)$p->harga, 0, ',', '.') }} <span class="text-gray-400 font-normal">/sesi</span>
                                         </p>
@@ -541,7 +555,7 @@
                                 </div>
 
                                 {{-- Quantity Stepper Control --}}
-                                <div class="flex items-center gap-2 bg-[#eff4ff] p-1 rounded-xl border border-[#dce9ff]"
+                                <div class="flex items-center gap-2 bg-[#eff4ff] p-1 rounded-xl border border-[#dce9ff] shrink-0"
                                      x-data="{ item: equipments.find(e => e.id === '{{ $p->id }}') }">
                                     <button type="button"
                                             @click="changeQty('{{ $p->id }}', -1)"
@@ -566,10 +580,10 @@
                 </div>
 
                 {{-- Fasilitas Venue --}}
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#1a146b] shrink-0">
-                            <x-lucide-droplets class="w-5 h-5 shrink-0" />
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+                    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#1a146b] shrink-0">
+                            <x-lucide-droplets class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Fasilitas Lengkap</h4>
@@ -577,9 +591,9 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#416900] shrink-0">
-                            <x-lucide-zap class="w-5 h-5 shrink-0" />
+                    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#416900] shrink-0">
+                            <x-lucide-zap class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Instan Konfirmasi</h4>
@@ -587,9 +601,9 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                            <x-lucide-circle-parking class="w-5 h-5 shrink-0" />
+                    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-xs flex items-center gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <x-lucide-circle-parking class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Parkir Luas</h4>
@@ -799,136 +813,121 @@
     {{-- ========================================================================= --}}
     {{-- MOBILE / SMALL SCREEN FIXED BOTTOM BAR DENGAN AKORDEON EXPAND/COLLAPSE --}}
     {{-- ========================================================================= --}}
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] border-t border-gray-100 transition-all duration-300">
-        
-        {{-- Area Wrapper Akordeon Ringkasan Pesanan --}}
-        <div class="max-w-xl mx-auto px-5 pt-3.5 pb-2">
-            
-            {{-- Handle Bar Kecil di Atas --}}
-            <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-2.5"></div>
+    {{-- STICKY MOBILE BOTTOM BAR (Kompak 1 baris, Expandable saat slot dipilih) --}}
+    {{-- ========================================================================= --}}
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(11,28,48,0.08)] border-t border-gray-200 transition-all duration-300 after:content-[''] after:absolute after:inset-x-0 after:top-full after:h-16 after:bg-white after:pointer-events-none">
+        <div class="max-w-xl mx-auto">
 
-            {{-- KONDISI 1: Belum Ada Jadwal Lapangan yang Dipilih --}}
-            <template x-if="selectedSlots.length === 0">
-                <div class="py-2.5 px-3 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center">
-                    <p class="text-xs font-medium text-gray-400">Belum ada jadwal lapangan yang dipilih.</p>
+            {{-- PANEL EXPANDED: Rincian Biaya & Pilihan Skema Pembayaran (hanya muncul saat diklik) --}}
+            <div x-show="selectedSlots.length > 0 && showSchemeAccordion"
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-2"
+                 class="max-h-[60vh] overflow-y-auto px-4 pt-3.5 pb-3 border-b border-gray-100 space-y-2.5 text-xs text-gray-600 bg-white rounded-t-2xl">
+
+                <div class="flex items-center justify-between">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-[#416900]">Ringkasan Jadwal Main</p>
+                    <button type="button" @click="showSchemeAccordion = false" class="text-[11px] font-bold text-gray-400 hover:text-gray-600">Tutup</button>
                 </div>
-            </template>
 
-            {{-- KONDISI 2 & 3: Jadwal Lapangan Dipilih (Header Akordeon Collapsed / Expanded) --}}
-            <template x-if="selectedSlots.length > 0">
-                <div class="rounded-2xl border border-gray-200 bg-gray-50/80 overflow-hidden transition-all shadow-xs">
-                    
-                    {{-- Baris Header yang Bisa Diklik untuk Toggle Expand/Collapse --}}
-                    <button type="button"
-                            @click="showSchemeAccordion = !showSchemeAccordion"
-                            class="w-full p-3.5 flex items-center justify-between text-left transition cursor-pointer hover:bg-gray-100/70">
-                        <div class="min-w-0 flex-1 pr-2">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-[#1a146b]"></span>
-                                <span class="text-xs font-bold text-[#0b1c30] truncate"
-                                      x-text="selectedSlots.length + ' Sesi Jam Dipilih'">
-                                </span>
+                {{-- Daftar Sesi Terpilih Mobile --}}
+                <div class="space-y-1">
+                    <template x-for="(interval, idx) in groupedSlotIntervals" :key="idx">
+                        <div class="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-[#f8faff] border border-indigo-100/70 text-[11px]">
+                            <span class="text-gray-500" x-text="formattedDate"></span>
+                            <span class="font-bold text-[#0b1c30] font-mono" x-text="interval.start + ' - ' + interval.end + ' WIB'"></span>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Rincian Biaya --}}
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between">
+                        <span>Sewa Lapangan (<span x-text="durationHours"></span> Jam)</span>
+                        <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
+                    </div>
+                    <template x-if="equipmentTotalFee > 0">
+                        <div class="flex items-center justify-between text-emerald-700">
+                            <span>Sewa Perlengkapan</span>
+                            <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Pilihan Skema Pembayaran --}}
+                <div class="pt-2 border-t border-gray-100">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Skema Pembayaran</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
+                               :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white'">
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-extrabold text-[#0b1c30]">Lunas 100%</p>
+                                <p class="text-[10px] font-bold text-[#1a146b]" x-text="formatRp(grandTotal)"></p>
                             </div>
-                            <p class="text-[11px] font-semibold text-gray-500 mt-0.5 truncate" 
-                               x-text="groupedSlotIntervals.map(i => i.start + '-' + i.end).join(', ') + ' WIB'"></p>
-                        </div>
+                            <input type="radio" name="mobile_scheme" value="full" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#1a146b] focus:ring-[#1a146b]">
+                        </label>
 
-                        <div class="flex items-center gap-2 shrink-0">
-                            <div class="text-right">
-                                <span class="text-xs font-extrabold text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
-                                <span class="block text-[9px] text-gray-400 font-semibold" x-text="paymentScheme === 'dp' ? 'Bayar DP' : 'Bayar Lunas'"></span>
+                        <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
+                               :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/60 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white'">
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-extrabold text-[#0b1c30]">DP 50%</p>
+                                <p class="text-[10px] font-bold text-[#416900]" x-text="formatRp(dpAmount)"></p>
                             </div>
-                            <x-lucide-chevron-down class="text-gray-400 w-5 h-5 transition-transform duration-200 shrink-0"
-                                  x-bind:class="w-5 h-5 showSchemeAccordion ? 'rotate-180' : '' shrink-0" />
-                        </div>
-                    </button>
-
-                    {{-- KONDISI 3 (EXPANDED): Detail Rincian Biaya & Pilihan Skema Pembayaran --}}
-                    <div x-show="showSchemeAccordion"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="px-3.5 pb-3.5 pt-1 border-t border-gray-200/80 space-y-2.5 text-xs text-gray-600 bg-white">
-                        
-                        {{-- Daftar Sesi Terpilih Mobile --}}
-                        <div class="pt-1 space-y-1">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Rincian Jam Main:</p>
-                            <template x-for="(interval, idx) in groupedSlotIntervals" :key="idx">
-                                <div class="flex items-center justify-between py-1 px-2 rounded-lg bg-gray-50 border border-gray-100 text-[11px]">
-                                    <span class="text-gray-500" x-text="formattedDate"></span>
-                                    <span class="font-bold text-[#0b1c30] font-mono" x-text="interval.start + ' - ' + interval.end + ' WIB'"></span>
-                                </div>
-                            </template>
-                        </div>
-                        
-                        {{-- Baris 1: Sewa Lapangan --}}
-                        <div class="flex items-center justify-between pt-1">
-                            <span>Sewa Lapangan (<span x-text="durationHours"></span> Jam):</span>
-                            <span class="font-bold text-gray-900" x-text="formatRp(courtTotalFee)"></span>
-                        </div>
-
-                        {{-- Baris 2: Perlengkapan Opsional --}}
-                        <template x-if="equipmentTotalFee > 0">
-                            <div class="flex items-center justify-between text-emerald-700">
-                                <span>Sewa Perlengkapan:</span>
-                                <span class="font-bold" x-text="formatRp(equipmentTotalFee)"></span>
-                            </div>
-                        </template>
-
-                        {{-- Garis Pemisah (Divider) --}}
-                        <div class="border-t border-gray-100 my-1"></div>
-
-                        {{-- Baris Total Biaya --}}
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="font-bold text-gray-900" x-text="paymentScheme === 'dp' ? 'DP yang Harus Dibayar:' : 'Total Biaya:'">Total Biaya:</span>
-                            <span class="font-black text-lg text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
-                        </div>
-
-                        {{-- Pilihan Skema Pembayaran Simpel di Dalam Area Expanded --}}
-                        <div class="pt-2 border-t border-gray-100">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Pilihan Skema Pembayaran</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
-                                       :class="paymentScheme === 'full' ? 'border-[#1a146b] bg-[#eff4ff] ring-1 ring-[#1a146b]' : 'border-gray-200 bg-white'">
-                                    <div class="min-w-0">
-                                        <p class="text-[11px] font-extrabold text-[#0b1c30]">Bayar Lunas 100%</p>
-                                        <p class="text-[10px] font-bold text-[#1a146b]" x-text="formatRp(grandTotal)"></p>
-                                    </div>
-                                    <input type="radio" name="mobile_scheme" value="full" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#1a146b] focus:ring-[#1a146b]">
-                                </label>
-
-                                <label class="p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-1.5"
-                                       :class="paymentScheme === 'dp' ? 'border-[#416900] bg-[#eaf7d8]/60 ring-1 ring-[#acf847]' : 'border-gray-200 bg-white'">
-                                    <div class="min-w-0">
-                                        <p class="text-[11px] font-extrabold text-[#0b1c30]">DP 50%</p>
-                                        <p class="text-[10px] font-bold text-[#416900]" x-text="formatRp(dpAmount)"></p>
-                                    </div>
-                                    <input type="radio" name="mobile_scheme" value="dp" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#416900] focus:ring-[#acf847]">
-                                </label>
-                            </div>
-                        </div>
-
+                            <input type="radio" name="mobile_scheme" value="dp" x-model="paymentScheme" class="w-3.5 h-3.5 text-[#416900] focus:ring-[#acf847]">
+                        </label>
                     </div>
                 </div>
-            </template>
+            </div>
 
-            {{-- Tombol Aksi Utama: Full-Width Pil Navy Blue --}}
-            <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="mt-2.5 mb-1 pb-safe">
-                <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
-                <input type="hidden" name="tanggal" :value="selectedDate">
-                <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
-                <input type="hidden" name="durasi" :value="durationHours">
-                <input type="hidden" name="tipe_bayar" :value="paymentScheme">
+            {{-- BARIS AKSI UTAMA 1 BARIS KOMPAK --}}
+            <div class="px-4 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3">
+                {{-- Kiri: Info singkat (Belum pilih vs Sudah pilih) --}}
+                <div class="min-w-0 flex-1">
+                    <template x-if="selectedSlots.length === 0">
+                        <p class="text-xs font-semibold text-gray-500">Pilih slot jam main</p>
+                    </template>
 
-                <button type="submit"
-                        :disabled="selectedSlots.length === 0"
-                        class="w-full py-3.5 px-6 rounded-full font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
-                        :class="selectedSlots.length > 0
-                            ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-                    <span>Lanjut ➔</span>
-                </button>
-            </form>
+                    <template x-if="selectedSlots.length > 0">
+                        <button type="button"
+                                @click="showSchemeAccordion = !showSchemeAccordion"
+                                class="w-full text-left flex items-center gap-1.5 group cursor-pointer">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-base font-black text-[#1a146b] leading-none" x-text="formatRp(payableAmount)"></span>
+                                    <span class="rounded-md bg-[#eff4ff] px-1.5 py-0.5 text-[9px] font-bold text-[#1a146b]"
+                                          x-text="paymentScheme === 'dp' ? 'DP 50%' : 'Lunas'"></span>
+                                </div>
+                                <p class="text-[10px] font-semibold text-gray-500 mt-1 truncate"
+                                   x-text="selectedSlots.length + ' Jam · ' + groupedSlotIntervals.map(i => i.start + '-' + i.end).join(', ') + ' WIB'"></p>
+                            </div>
+                            <x-lucide-chevron-up class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0"
+                                  x-bind:class="showSchemeAccordion ? 'rotate-180' : ''" />
+                        </button>
+                    </template>
+                </div>
+
+                {{-- Kanan: Tombol Lanjut --}}
+                <form method="GET" action="{{ route('checkout.index', ['lapangan_id' => $lapangan->id]) }}" class="shrink-0">
+                    <input type="hidden" name="lapangan_id" value="{{ $lapangan->id }}">
+                    <input type="hidden" name="tanggal" :value="selectedDate">
+                    <input type="hidden" name="jam_mulai" :value="earliestSlot ? earliestSlot.substring(0, 5) : ''">
+                    <input type="hidden" name="durasi" :value="durationHours">
+                    <input type="hidden" name="tipe_bayar" :value="paymentScheme">
+
+                    <button type="submit"
+                            :disabled="selectedSlots.length === 0"
+                            class="py-2.5 px-5 rounded-xl font-headline font-black text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                            :class="selectedSlots.length > 0
+                                ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-md shadow-indigo-950/20 cursor-pointer'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'">
+                        <span>Lanjut ➔</span>
+                    </button>
+                </form>
+            </div>
 
         </div>
     </div>
@@ -981,7 +980,7 @@
     </div>
 
     {{-- Spacer Tambahan di Mobile agar Konten Bawah Tidak Tertutup Sticky Bar --}}
-    <div class="h-28 lg:hidden"></div>
+    <div class="h-16 lg:hidden"></div>
 
 </div>
 @endsection
