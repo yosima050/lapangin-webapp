@@ -90,9 +90,22 @@ svg.w-12, svg.h-12, svg.size-12 {
     animation: lapangin-select-pop 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* GitHub-style Shimmer Skeleton */
+@keyframes lapangin-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #e8edf6 25%, #f5f8fd 50%, #e8edf6 75%);
+    background-size: 200% 100%;
+    animation: lapangin-shimmer 1.35s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .accordion-panel,
-    .animate-select-pop {
+    .animate-select-pop,
+    .skeleton-shimmer {
         transition: none !important;
         animation: none !important;
     }

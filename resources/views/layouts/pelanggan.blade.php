@@ -23,12 +23,15 @@
         @include('layouts.navigation-pelanggan')
 
         {{-- Main Content --}}
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-10 sm:pb-12 flex-1 w-full">
+        <main id="app-main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-10 sm:pb-12 flex-1 w-full">
             @yield('content')
         </main>
 
         {{-- Unified Pelanggan Footer --}}
         @include('layouts.footer-pelanggan')
     </div>
+
+    {{-- Global GitHub-style Page Progress Bar & Smart Skeleton --}}
+    @include('layouts.partials.page-skeleton')
 </body>
 </html>

@@ -152,12 +152,12 @@
                 <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
                     <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Slot Kosong</span>
                     <span x-show="!isLoadingDate" class="text-xl sm:text-2xl font-black text-[#416900]" x-text="countFilteredTersedia()">{{ $totalSlotTersedia }}</span>
-                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 sm:h-7 w-10 sm:w-12 mt-0.5 rounded-lg bg-gray-200/90 animate-pulse"></span>
+                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 sm:h-7 w-10 sm:w-12 mt-0.5 rounded-lg skeleton-shimmer"></span>
                 </div>
                 <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
                     <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Terisi</span>
                     <span x-show="!isLoadingDate" class="text-xl sm:text-2xl font-black text-rose-600" x-text="countFilteredBooked()">{{ $totalSlotDibooking }}</span>
-                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 sm:h-7 w-8 sm:w-10 mt-0.5 rounded-lg bg-gray-200/90 animate-pulse"></span>
+                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 sm:h-7 w-8 sm:w-10 mt-0.5 rounded-lg skeleton-shimmer"></span>
                 </div>
                 <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
                     <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Venue Tampil</span>
@@ -361,7 +361,7 @@
                             <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t border-gray-100 sm:border-t-0">
                                 <div>
                                     {{-- Skeleton Badge ala GitHub saat ganti tanggal --}}
-                                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 w-24 sm:w-28 rounded-full bg-gray-200/90 animate-pulse align-middle"></span>
+                                    <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 w-24 sm:w-28 rounded-full skeleton-shimmer align-middle"></span>
                                     <span
                                         x-show="!isLoadingDate"
                                         :class="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0 ? 'bg-[#eaf7d8] text-[#416900]' : 'bg-red-50 text-red-600'"
@@ -391,10 +391,10 @@
                             <template x-if="isLoadingDate">
                                 <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1.5 sm:gap-2.5">
                                     <template x-for="n in {{ max(8, count($slots)) }}" :key="n">
-                                        <div class="flex flex-col items-center justify-center py-2.5 px-1 sm:py-3.5 sm:px-2 rounded-xl border border-gray-100 bg-gray-50/90 animate-pulse gap-1.5">
-                                            <div class="w-9 sm:w-10 h-3 bg-gray-200 rounded-md"></div>
-                                            <div class="w-11 sm:w-12 h-2 bg-gray-200/80 rounded-md"></div>
-                                            <div class="w-8 sm:w-9 h-2.5 bg-gray-200/70 rounded-md mt-0.5"></div>
+                                        <div class="flex flex-col items-center justify-center py-2.5 px-1 sm:py-3.5 sm:px-2 rounded-xl border border-gray-100 bg-white gap-1.5">
+                                            <div class="w-9 sm:w-10 h-3 rounded-md skeleton-shimmer"></div>
+                                            <div class="w-11 sm:w-12 h-2 rounded-md skeleton-shimmer"></div>
+                                            <div class="w-8 sm:w-9 h-2.5 rounded-md mt-0.5 skeleton-shimmer"></div>
                                         </div>
                                     </template>
                                 </div>

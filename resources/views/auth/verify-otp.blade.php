@@ -161,7 +161,7 @@
                             :disabled="sending"
                             class="inline-flex items-center gap-1.5 text-xs font-bold text-[#1a146b] hover:text-[#0b1c30] hover:underline transition cursor-pointer disabled:opacity-50"
                         >
-                            <x-lucide-refresh-cw class="w-4 h-4 shrink-0" x-bind:class="w-5 h-5 sending ? 'animate-spin' : '' shrink-0" />
+                            <x-lucide-refresh-cw class="w-4 h-4 shrink-0" x-bind:class="sending ? 'animate-spin' : ''" />
                             <span x-text="sending ? 'Mengirim ulang...' : 'Kirim Ulang Kode OTP'"></span>
                         </button>
                     </form>

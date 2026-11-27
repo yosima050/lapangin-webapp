@@ -382,20 +382,44 @@
 
                 {{-- Grouping Sesi Jam Booking --}}
                 <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-5 sm:gap-6 relative">
-                    {{-- Loading Bar Tipis Halus saat ganti tanggal --}}
-                    <div x-show="isLoadingSlots"
-                         x-transition:enter="transition ease-out duration-150"
-                         x-transition:enter-start="opacity-0"
-                         x-transition:enter-end="opacity-100"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
-                         class="absolute inset-x-0 top-0 h-1 bg-[#acf847] overflow-hidden rounded-t-2xl sm:rounded-t-3xl z-20">
-                        <div class="w-full h-full bg-[#1a146b] animate-pulse"></div>
-                    </div>
+                    {{-- GitHub-style Shimmer Skeleton Grid saat memuat slot tanggal baru --}}
+                    <template x-if="isLoadingSlots">
+                        <div class="space-y-5">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="h-4 w-36 rounded-lg skeleton-shimmer"></div>
+                                    <div class="h-4 w-24 rounded-lg skeleton-shimmer"></div>
+                                </div>
+                                <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                                    <template x-for="n in 8" :key="'sk-siang-' + n">
+                                        <div class="py-3 px-2 sm:py-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-white flex flex-col items-center gap-1.5">
+                                            <div class="h-3.5 w-11 rounded-md skeleton-shimmer"></div>
+                                            <div class="h-2.5 w-14 rounded-md skeleton-shimmer"></div>
+                                            <div class="h-2.5 w-10 rounded-md skeleton-shimmer mt-0.5"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="h-4 w-40 rounded-lg skeleton-shimmer"></div>
+                                    <div class="h-4 w-24 rounded-lg skeleton-shimmer"></div>
+                                </div>
+                                <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+                                    <template x-for="n in 5" :key="'sk-malam-' + n">
+                                        <div class="py-3 px-2 sm:py-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-white flex flex-col items-center gap-1.5">
+                                            <div class="h-3.5 w-11 rounded-md skeleton-shimmer"></div>
+                                            <div class="h-2.5 w-14 rounded-md skeleton-shimmer"></div>
+                                            <div class="h-2.5 w-10 rounded-md skeleton-shimmer mt-0.5"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
 
                     {{-- Sesi Siang & Sore --}}
-                    <div x-show="slotsSiang.length > 0">
+                    <div x-show="!isLoadingSlots && slotsSiang.length > 0">
                         <div class="flex items-center justify-between gap-2 mb-3 sm:mb-3.5">
                             <div class="flex items-center gap-2 min-w-0">
                                 <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#416900] shrink-0"></span>
@@ -447,7 +471,7 @@
                     </div>
 
                     {{-- Sesi Malam Prime Time --}}
-                    <div x-show="slotsMalam.length > 0" class="pt-4 border-t border-gray-100">
+                    <div x-show="!isLoadingSlots && slotsMalam.length > 0" class="pt-4 border-t border-gray-100">
                         <div class="flex items-center justify-between gap-2 mb-3 sm:mb-3.5">
                             <div class="flex items-center gap-2 min-w-0">
                                 <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#1a146b] shrink-0"></span>
