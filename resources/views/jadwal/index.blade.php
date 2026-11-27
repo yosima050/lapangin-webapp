@@ -110,6 +110,7 @@
              const controller = new AbortController();
              this.dateAbortController = controller;
 
+             const alreadyInStrip = this.dateOptions.some(d => d.date === dateStr);
              this.activeDate = dateStr;
              const [sy, sm] = dateStr.split('-').map(Number);
              this.calYear = sy;
@@ -143,7 +144,7 @@
 
                  if (data && data.success && Array.isArray(data.matrix)) {
                      this.matrix = data.matrix;
-                     if (Array.isArray(data.dateOptions)) {
+                     if (!alreadyInStrip && Array.isArray(data.dateOptions)) {
                          this.dateOptions = data.dateOptions;
                      }
                      window.history.replaceState({}, '', targetUrl);

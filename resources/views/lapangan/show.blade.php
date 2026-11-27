@@ -168,7 +168,14 @@
                  this.monthYear = `${monthName} ${dObj.getFullYear()}`;
              }
 
-             this.datesCarousel = this.build7Days(newDate);
+             const alreadyInStrip = this.datesCarousel.some(d => d.date_str === newDate);
+             if (alreadyInStrip) {
+                 this.datesCarousel.forEach(d => {
+                     d.is_selected = (d.date_str === newDate);
+                 });
+             } else {
+                 this.datesCarousel = this.build7Days(newDate);
+             }
 
              // Update URL query param tanpa reload halaman
              const newUrl = new URL(window.location.href);
@@ -202,7 +209,9 @@
                      const data = await res.json();
                      this.slotsSiang = data.slotsSiang;
                      this.slotsMalam = data.slotsMalam;
-                     this.datesCarousel = data.datesCarousel;
+                     if (!alreadyInStrip && Array.isArray(data.datesCarousel)) {
+                         this.datesCarousel = data.datesCarousel;
+                     }
                      this.formattedDate = data.formattedDate;
                      this.monthYear = data.monthYear;
                      this.baseRate = data.baseRate;
