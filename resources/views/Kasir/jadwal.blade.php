@@ -52,11 +52,11 @@
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-[#acf847]/30 border border-[#acf847] flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#416900]">check_circle</span>
+                <x-lucide-circle-check class="w-6 h-6 text-[#416900] shrink-0" />
                 <span class="text-xs font-bold text-[#102000]">{{ session('success') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#416900] hover:text-[#102000]">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -82,7 +82,7 @@
             <form method="GET" action="{{ route('kasir.jadwal') }}" class="flex items-center bg-[#eff4ff] px-2 py-1.5 rounded-2xl border border-[#dce9ff] gap-1 shadow-sm">
                 <input type="hidden" name="lapangan_id" value="{{ $selectedCourtId }}">
                 <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-xl shadow-xs">
-                    <span class="material-symbols-outlined text-[#1a146b] text-base">calendar_today</span>
+                    <x-lucide-calendar class="text-[#1a146b] w-4 h-4 shrink-0" />
                     <input type="date" name="tanggal" value="{{ $selectedDate }}" onchange="this.form.submit()"
                            class="text-xs font-bold text-[#0b1c30] border-none bg-transparent p-0 focus:ring-0">
                     @if ($selectedDate === now()->toDateString())
@@ -93,7 +93,7 @@
 
             <button type="button" @click="document.getElementById('input-pemesan').focus(); document.getElementById('walkin-form-card').scrollIntoView({ behavior: 'smooth' });"
                     class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#acf847] text-[#102000] hover:bg-[#91db2a] font-headline font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer">
-                <span class="material-symbols-outlined text-lg font-bold">add_circle</span>
+                <x-lucide-circle-plus class="w-5 h-5 font-bold shrink-0" />
                 <span>+ Buat Booking Walk-in Baru</span>
             </button>
         </div>
@@ -212,26 +212,26 @@
                     @if ($isCancelled)
                         <a href="{{ route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id]) }}"
                            class="px-4 py-2.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-800 text-xs font-bold transition-colors shrink-0 flex items-center justify-center gap-1.5 border border-red-300">
-                            <span class="material-symbols-outlined text-base">cancel</span>
+                            <x-lucide-circle-x class="w-4 h-4 shrink-0" />
                             <span>Dibatalkan (Slot Bebas)</span>
                         </a>
                     @elseif ($sisaTagihan > 0)
                         <a href="{{ route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id]) }}"
                            class="px-4 py-2.5 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] text-white text-xs font-extrabold transition-all shadow-sm shrink-0 flex items-center justify-center gap-1.5">
-                            <span class="material-symbols-outlined text-base">payments</span>
+                            <x-lucide-banknote class="w-4 h-4 shrink-0" />
                             <span>Proses Pelunasan Kasir</span>
                         </a>
                     @else
                         <a href="{{ route('kasir.index', ['code' => $jadwal->kode_qr ?? $jadwal->id]) }}"
                            class="px-4 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] text-xs font-bold transition-colors shrink-0 flex items-center justify-center gap-1.5 border border-[#dce9ff]">
-                            <span class="material-symbols-outlined text-base">receipt</span>
+                            <x-lucide-receipt class="w-4 h-4 shrink-0" />
                             <span>Lihat Detail Tiket</span>
                         </a>
                     @endif
                 </div>
             @empty
                 <div class="bg-white p-8 rounded-2xl border border-[#e5eeff] text-center text-[#777682]">
-                    <span class="material-symbols-outlined text-4xl text-[#acf847] mb-2">event_available</span>
+                    <x-lucide-calendar-check class="w-9 h-9 text-[#acf847] mb-2 shrink-0" />
                     <p class="font-bold text-[#0b1c30]">Belum ada jadwal booking pada tanggal ini.</p>
                     <p class="text-xs text-[#474651] mt-1">Gunakan formulir di samping untuk membuat booking walk-in baru langsung di meja kasir.</p>
                 </div>
@@ -265,7 +265,7 @@
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-5 sticky top-20">
                 <div class="flex items-start gap-3 pb-3 border-b border-[#eff4ff]">
                     <div class="w-10 h-10 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b] shrink-0">
-                        <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                        <x-lucide-receipt-text class="w-6 h-6 shrink-0" />
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-[#0b1c30] leading-tight">Form Booking Tamu Walk-in</h2>
@@ -286,7 +286,7 @@
                             <span class="text-[10px] text-[#777682]">Wajib diisi</span>
                         </div>
                         <div class="relative">
-                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-lg">groups</span>
+                            <x-lucide-users class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] w-5 h-5 shrink-0" />
                             <input type="text" name="nama_tamu" id="input-pemesan" x-model="customerName" required
                                    placeholder="Contoh: Spartan Futsal Club"
                                    class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold border border-[#e5eeff] focus:bg-white focus:ring-2 focus:ring-[#acf847] outline-none transition-all">
@@ -300,7 +300,7 @@
                             <span class="text-[10px] text-[#777682]">Konfirmasi struk digital</span>
                         </div>
                         <div class="relative">
-                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-lg">chat</span>
+                            <x-lucide-message-circle class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] w-5 h-5 shrink-0" />
                             <input type="tel" name="no_wa_tamu" x-model="whatsapp" required
                                    placeholder="0812xxxxxxx"
                                    class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold border border-[#e5eeff] focus:bg-white focus:ring-2 focus:ring-[#acf847] outline-none transition-all">
@@ -472,7 +472,7 @@
                     <!-- CTA Submit Button -->
                     <button type="submit"
                             class="w-full py-3.5 px-5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer">
-                        <span class="material-symbols-outlined text-lg">check_circle</span>
+                        <x-lucide-circle-check class="w-5 h-5 shrink-0" />
                         <span>Simpan Booking Walk-in ke Database</span>
                     </button>
                 </form>

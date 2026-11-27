@@ -269,7 +269,7 @@
         {{-- 1. Breadcrumbs --}}
         <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
             <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">home</span>
+                <x-lucide-house class="w-4 h-4 shrink-0" />
                 <span>Beranda</span>
             </a>
             <span>/</span>
@@ -283,7 +283,7 @@
         {{-- Flash Error Message (jika diarahkan karena jam lewat) --}}
         @if (session('error'))
             <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-sm flex items-center gap-3 shadow-xs">
-                <span class="material-symbols-outlined text-xl text-amber-600 shrink-0">schedule</span>
+                <x-lucide-clock class="w-5 h-5 text-amber-600 shrink-0" />
                 <span class="font-semibold">{{ session('error') }}</span>
             </div>
         @endif
@@ -305,7 +305,7 @@
                             </h1>
 
                             <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                                <x-lucide-map-pin class="w-4 h-4 text-gray-400 shrink-0" />
                                 <span>{{ $lapangan->deskripsi ?: 'Arena futsal, badminton, dan multisport resmi dengan standar pencahayaan turnamen.' }}</span>
                             </p>
 
@@ -322,7 +322,7 @@
                         <div class="shrink-0 self-start sm:self-center">
                             <a href="{{ route('katalog.index') }}"
                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 transition shadow-2xs">
-                                <span class="material-symbols-outlined text-base text-gray-500">arrow_back</span>
+                                <x-lucide-arrow-left class="w-4 h-4 text-gray-500 shrink-0" />
                                 <span>Kembali ke Katalog</span>
                             </a>
                         </div>
@@ -333,7 +333,7 @@
                 <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-4">
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                         <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-xl text-[#1a146b]">calendar_month</span>
+                            <x-lucide-calendar-days class="w-5 h-5 text-[#1a146b] shrink-0" />
                             <h2 class="text-base font-headline font-bold text-[#0b1c30]">Pilih Tanggal Main</h2>
                         </div>
                         <span class="text-xs font-semibold text-gray-400" x-text="monthYear">
@@ -419,7 +419,8 @@
                                         <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
                                             <div class="flex items-center gap-1">
                                                 <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <span class="material-symbols-outlined text-xs" x-text="slot.status === 'lewat_jam' ? 'schedule' : 'lock'"></span>
+                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
+                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
                                             </div>
                                             <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
                                             <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
@@ -470,7 +471,8 @@
                                         <div class="w-full py-3.5 px-3 rounded-2xl border border-gray-100 bg-gray-50/80 text-gray-400 text-center flex flex-col items-center justify-center gap-1 cursor-not-allowed">
                                             <div class="flex items-center gap-1">
                                                 <span class="font-bold text-sm line-through" x-text="slot.jam_mulai.substring(0, 5)"></span>
-                                                <span class="material-symbols-outlined text-xs" x-text="slot.status === 'lewat_jam' ? 'schedule' : 'lock'"></span>
+                                                <x-lucide-clock x-show="slot.status === 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
+                                                <x-lucide-lock x-show="slot.status !== 'lewat_jam'" class="w-3.5 h-3.5 shrink-0" />
                                             </div>
                                             <span class="text-[10px] text-gray-400" x-text="slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5)"></span>
                                             <span class="text-[10px] font-semibold text-gray-400" x-text="slot.status === 'lewat_jam' ? 'Lewat Jam' : 'Terisi'"></span>
@@ -505,7 +507,7 @@
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-xl text-[#416900]">sports_score</span>
+                                <x-lucide-flag class="w-5 h-5 text-[#416900] shrink-0" />
                                 <h2 class="text-base font-headline font-bold text-[#0b1c30]">Modul Sewa Perlengkapan Tambahan</h2>
                             </div>
                             <p class="text-xs text-gray-500 mt-0.5">
@@ -526,7 +528,7 @@
                                             <img src="{{ asset('storage/' . $p->gambar) }}" alt="{{ $p->nama }}" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-[#1a146b]">
-                                                <span class="material-symbols-outlined text-2xl">sports_soccer</span>
+                                                <x-lucide-dribbble class="w-6 h-6 shrink-0" />
                                             </div>
                                         @endif
                                     </div>
@@ -567,7 +569,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#1a146b] shrink-0">
-                            <span class="material-symbols-outlined text-xl">shower</span>
+                            <x-lucide-droplets class="w-5 h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Fasilitas Lengkap</h4>
@@ -577,7 +579,7 @@
 
                     <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#416900] shrink-0">
-                            <span class="material-symbols-outlined text-xl">bolt</span>
+                            <x-lucide-zap class="w-5 h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Instan Konfirmasi</h4>
@@ -587,7 +589,7 @@
 
                     <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                            <span class="material-symbols-outlined text-xl">local_parking</span>
+                            <x-lucide-circle-parking class="w-5 h-5 shrink-0" />
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-[#0b1c30]">Parkir Luas</h4>
@@ -642,7 +644,7 @@
                     <template x-if="selectedSlots.length === 0">
                         <div class="p-5 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center flex flex-col items-center justify-center gap-2">
                             <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                <span class="material-symbols-outlined text-xl">event_busy</span>
+                                <x-lucide-calendar-x class="w-5 h-5 shrink-0" />
                             </div>
                             <p class="text-xs font-bold text-gray-600">Belum ada jadwal yang dipilih</p>
                             <p class="text-[11px] text-gray-400 leading-snug">Silakan klik salah satu atau beberapa slot jam pada kolom di sebelah kiri.</p>
@@ -655,7 +657,7 @@
                             <div class="p-4 rounded-2xl bg-[#eff4ff] border border-[#dce9ff] flex flex-col gap-2.5 text-xs">
                                 <div class="flex items-center justify-between text-gray-600">
                                     <span class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">calendar_today</span>
+                                        <x-lucide-calendar class="w-4 h-4 text-[#1a146b] shrink-0" />
                                         <span>Tanggal:</span>
                                     </span>
                                     <strong class="text-gray-900" x-text="formattedDate"></strong>
@@ -665,7 +667,7 @@
                                 <div class="pt-2 border-t border-indigo-100/70">
                                     <div class="flex items-center justify-between text-gray-600 mb-1.5">
                                         <span class="flex items-center gap-1.5 font-medium">
-                                            <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                            <x-lucide-clock class="w-4 h-4 text-[#1a146b] shrink-0" />
                                             <span>Jadwal Main Terpilih:</span>
                                         </span>
                                         <span class="text-[11px] font-bold text-[#1a146b]" x-text="selectedSlots.length + ' Sesi Jam'"></span>
@@ -753,7 +755,7 @@
 
                         @guest
                             <div class="mb-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-snug flex items-start gap-2">
-                                <span class="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
+                                <x-lucide-info class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                                 <span>Pemesanan online memerlukan akun terdaftar. Anda akan diarahkan ke login/daftar jika belum masuk.</span>
                             </div>
                         @endguest
@@ -766,20 +768,20 @@
                                     ? 'bg-[#1a146b] hover:bg-[#130d52] text-white shadow-indigo-950/20'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
                             <span x-text="selectedSlots.length === 0 ? 'Pesan Sekarang!' : ('Bayar ' + (paymentScheme === 'dp' ? 'DP ' : 'Lunas ') + formatRp(payableAmount))">Pesan Sekarang!</span>
-                            <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                            <x-lucide-arrow-right class="w-5 h-5 shrink-0" />
                         </button>
                     </form>
 
                     {{-- Lock Reassurance Box --}}
                     <div class="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-2.5 text-gray-500 text-[11px] leading-snug">
-                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">lock_clock</span>
+                        <x-lucide-clock-alert class="w-4 h-4 text-[#1a146b] shrink-0 mt-0.5" />
                         <span>Slot otomatis terkunci aman selama 10 menit saat Anda menekan tombol Pesan Sekarang.</span>
                     </div>
 
                     {{-- Helpline Note --}}
                     <div class="text-center pt-1 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                         <span class="flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">support_agent</span>
+                            <x-lucide-headset class="w-4 h-4 shrink-0" />
                             <span>Butuh bantuan?</span>
                         </span>
                         <a href="https://wa.me/{{ config('app.support_whatsapp', '6281234567890') }}" target="_blank" class="font-bold text-[#1a146b] hover:underline">
@@ -836,8 +838,8 @@
                                 <span class="text-xs font-extrabold text-[#1a146b]" x-text="formatRp(payableAmount)"></span>
                                 <span class="block text-[9px] text-gray-400 font-semibold" x-text="paymentScheme === 'dp' ? 'Bayar DP' : 'Bayar Lunas'"></span>
                             </div>
-                            <span class="material-symbols-outlined text-gray-400 text-xl transition-transform duration-200"
-                                  :class="showSchemeAccordion ? 'rotate-180' : ''">expand_more</span>
+                            <x-lucide-chevron-down class="text-gray-400 w-5 h-5 transition-transform duration-200 shrink-0"
+                                  x-bind:class="w-5 h-5 showSchemeAccordion ? 'rotate-180' : '' shrink-0" />
                         </div>
                     </button>
 
@@ -954,7 +956,7 @@
 
             {{-- Icon Peringatan --}}
             <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 shadow-xs">
-                <span class="material-symbols-outlined text-3xl">schedule</span>
+                <x-lucide-clock class="w-7 h-7 shrink-0" />
             </div>
 
             {{-- Judul --}}

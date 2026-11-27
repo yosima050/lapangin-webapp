@@ -36,3 +36,6 @@ __pycache__/
 
 # Unlighthouse reports
 .unlighthouse/
+
+# Temporary QA evidence screenshots
+evidence_m2/

@@ -8,11 +8,10 @@
     <link rel="icon" type="image/png" href="{{ asset('images/02_Icon_App.png') }}">
     <link rel="shortcut icon" href="{{ asset('images/02_Icon_App.png') }}">
 
-    <!-- Google Fonts & Material Symbols -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <style>
         @layer base {
@@ -71,7 +70,7 @@
             <!-- Brand Logo -->
             <div class="px-3 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-[#1a146b] flex items-center justify-center text-[#acf847] shadow-sm">
-                    <span class="material-symbols-outlined text-xl">sports_soccer</span>
+                    <x-lucide-dribbble class="w-5 h-5 shrink-0" />
                 </div>
                 <div class="flex flex-col">
                     <span class="text-xl font-headline font-extrabold text-[#1a146b] tracking-tight leading-tight">
@@ -94,35 +93,35 @@
                 <!-- Pemindai Hardware & Struk Thermal POS -->
                 <a href="{{ route('kasir.checkin.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.checkin.*') || request()->routeIs('kasir.struk') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">barcode_scanner</span>
+                    <x-lucide-scan-barcode class="w-5 h-5 shrink-0" />
                     <span>Scanner &amp; Struk POS</span>
                 </a>
 
                 <!-- Pemindai Kamera QR Tiket (Sprint 4) -->
                 <a href="{{ route('kasir.scan') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.scan') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+                    <x-lucide-scan-line class="w-5 h-5 shrink-0" />
                     <span>Scan Kamera QR</span>
                 </a>
 
                 <!-- 1. Check-in & Validasi -->
                 <a href="{{ route('kasir.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.index') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">verified_user</span>
+                    <x-lucide-shield-check class="w-5 h-5 shrink-0" />
                     <span>Check-in &amp; Validasi</span>
                 </a>
 
                 <!-- 2. Jadwal & Walk-in -->
                 <a href="{{ route('kasir.jadwal') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.jadwal') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                    <x-lucide-calendar-days class="w-5 h-5 shrink-0" />
                     <span>Jadwal &amp; Walk-in</span>
                 </a>
 
                 <!-- 3. Transaksi & Tutup Shift -->
                 <a href="{{ route('kasir.transaksi') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.transaksi') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+                    <x-lucide-calculator class="w-5 h-5 shrink-0" />
                     <span>Transaksi &amp; Tutup Shift</span>
                 </a>
 
@@ -142,7 +141,7 @@
                 <a href="{{ route('kasir.reschedule') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all text-sm font-semibold {{ request()->routeIs('kasir.reschedule') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
                     <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+                        <x-lucide-clock class="w-5 h-5 shrink-0" />
                         <span>Approval Reschedule</span>
                     </div>
                     @if($pendingRescheduleCount > 0)
@@ -162,7 +161,7 @@
                     <span class="px-2 py-0.5 rounded-full bg-[#acf847] text-[#102000] text-[10px] font-extrabold">Online</span>
                 </div>
                 <div class="flex items-center gap-2 text-[#0b1c30]">
-                    <span class="material-symbols-outlined text-base text-[#416900]">database</span>
+                    <x-lucide-database class="w-4 h-4 text-[#416900] shrink-0" />
                     <span class="text-xs font-semibold">POS Kasir LapangIn v1.0</span>
                 </div>
                 <span class="text-[10px] text-[#777682]">Sinkronisasi Basis Data Lokal</span>
@@ -172,7 +171,7 @@
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors">
-                    <span class="material-symbols-outlined text-base">logout</span>
+                    <x-lucide-log-out class="w-4 h-4 shrink-0" />
                     <span>Keluar Sesi Kasir</span>
                 </button>
             </form>
@@ -187,11 +186,11 @@
             <!-- Terminal & Shift Status Chips -->
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#eff4ff] border border-[#e5eeff]">
-                    <span class="material-symbols-outlined text-[#1a146b] text-base">desktop_windows</span>
+                    <x-lucide-monitor class="text-[#1a146b] w-4 h-4 shrink-0" />
                     <span class="text-xs font-semibold text-[#0b1c30]">Terminal Meja Resepsionis #01</span>
                 </div>
                 <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#eff4ff] border border-[#e5eeff]">
-                    <span class="material-symbols-outlined text-[#474651] text-base">schedule</span>
+                    <x-lucide-clock class="text-[#474651] w-4 h-4 shrink-0" />
                     <span class="text-xs font-medium text-[#474651]">{{ $shiftLabel }}</span>
                 </div>
             </div>
@@ -199,7 +198,7 @@
             <!-- Cashier Identity & Badge -->
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#acf847] text-[#102000] shadow-sm font-bold text-xs">
-                    <span class="material-symbols-outlined text-base">badge</span>
+                    <x-lucide-badge-check class="w-4 h-4 shrink-0" />
                     <span>{{ Auth::user()?->nama ?? 'Kasir LapangIn' }}</span>
                 </div>
 

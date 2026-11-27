@@ -40,7 +40,7 @@
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-6 sm:mb-10">
             <a href="{{ route('home') }}"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Kembali ke Beranda</span>
             </a>
 
@@ -123,7 +123,7 @@
                             class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
                             <span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
-                            <span class="material-symbols-outlined text-base">login</span>
+                            <x-lucide-log-in class="w-4 h-4 shrink-0" />
                             <span>Masuk ke Akun</span>
                         </a>
 
@@ -134,7 +134,7 @@
                             class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
                             <span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
-                            <span class="material-symbols-outlined text-base">person_add</span>
+                            <x-lucide-user-plus class="w-4 h-4 shrink-0" />
                             <span>Daftar Akun Baru</span>
                         </a>
                     </div>
@@ -158,7 +158,7 @@
                         {{-- Session Status --}}
                         @if (session('status'))
                             <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                <x-lucide-circle-check class="w-4 h-4 shrink-0" />
                                 <span>{{ session('status') }}</span>
                             </div>
                         @endif
@@ -193,9 +193,7 @@
                                 </label>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
+                                    <x-lucide-badge-check class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="login_email"
                                         type="text"
@@ -211,7 +209,7 @@
 
                                 @if ($activeTab === 'login' && $errors->has('email'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('email') }}</span>
                                     </p>
                                 @endif
@@ -233,9 +231,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
+                                    <x-lucide-lock class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="login_password"
                                         type="password"
@@ -252,15 +248,14 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPassword" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPassword" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 @if ($activeTab === 'login' && $errors->has('password'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password') }}</span>
                                     </p>
                                 @endif
@@ -281,7 +276,7 @@
                                 </label>
 
                                 <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#416900]">
-                                    <span class="material-symbols-outlined text-xs">lock</span>
+                                    <x-lucide-lock class="w-3.5 h-3.5 shrink-0" />
                                     <span>Sesi Aman</span>
                                 </span>
                             </div>
@@ -307,7 +302,7 @@
                                     onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
                                     class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     <span>Daftar Sekarang</span>
-                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
+                                    <x-lucide-arrow-up-right class="w-3.5 h-3.5 shrink-0" />
                                 </a>
                             </p>
                         </div>
@@ -332,7 +327,7 @@
                         {{-- Session Status --}}
                         @if (session('status'))
                             <div class="mb-5 p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-semibold text-[#1a146b] flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">info</span>
+                                <x-lucide-info class="w-4 h-4 shrink-0" />
                                 <span>{{ session('status') }}</span>
                             </div>
                         @endif
@@ -412,9 +407,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
+                                    <x-lucide-badge-check class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_name"
                                         type="text"
@@ -429,7 +422,7 @@
 
                                 @if ($activeTab === 'register' && $errors->has('name'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('name') }}</span>
                                     </p>
                                 @endif
@@ -446,9 +439,7 @@
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition"
                                      :class="emailError ? '!border-red-500 !bg-red-50/30' : ''">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        mail
-                                    </span>
+                                    <x-lucide-mail class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_email"
                                         type="email"
@@ -473,14 +464,14 @@
                                 {{-- Real-time Email Availability Warning --}}
                                 <template x-if="emailError">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span x-text="emailError"></span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('email'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!emailError">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('email') }}</span>
                                     </p>
                                 @endif
@@ -494,7 +485,7 @@
 
                                 <div class="flex items-center rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition overflow-hidden">
                                     <span class="inline-flex items-center gap-1 px-3.5 py-3 bg-[#e2edff] text-xs font-bold text-[#1a146b] shrink-0 border-r border-[#dce9ff]">
-                                        <span class="material-symbols-outlined text-sm">chat</span>
+                                        <x-lucide-message-circle class="w-4 h-4 shrink-0" />
                                         <span>+62</span>
                                     </span>
                                     <input
@@ -511,7 +502,7 @@
 
                                 @if ($activeTab === 'register' && $errors->has('no_hp'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('no_hp') }}</span>
                                     </p>
                                 @endif
@@ -527,9 +518,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
+                                    <x-lucide-lock class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_password"
                                         type="password"
@@ -548,22 +537,21 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPassword" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPassword" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 <template x-if="passwordTooShort">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>Kata sandi minimal harus 8 karakter.</span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('password'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordTooShort">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password') }}</span>
                                     </p>
                                 @endif
@@ -576,9 +564,7 @@
                                 </label>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock_reset
-                                    </span>
+                                    <x-lucide-key-round class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_password_confirmation"
                                         type="password"
@@ -597,22 +583,21 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPasswordConfirm ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPasswordConfirm" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPasswordConfirm" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 <template x-if="passwordMismatch">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>Konfirmasi kata sandi tidak cocok.</span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('password_confirmation'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordMismatch">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password_confirmation') }}</span>
                                     </p>
                                 @endif
@@ -644,7 +629,7 @@
                             >
                                 <template x-if="!submitting">
                                     <span class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-base text-[#acf847]">bolt</span>
+                                        <x-lucide-zap class="w-4 h-4 text-[#acf847] shrink-0" />
                                         <span>Daftar Akun Sekarang</span>
                                     </span>
                                 </template>
@@ -669,7 +654,7 @@
                                     onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
                                     class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     <span>Masuk Sekarang</span>
-                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
+                                    <x-lucide-arrow-up-right class="w-3.5 h-3.5 shrink-0" />
                                 </a>
                             </p>
                         </div>
@@ -683,7 +668,7 @@
         {{-- Footer Help Note --}}
         <footer class="max-w-7xl mx-auto w-full text-center py-6 mt-6">
             <p class="text-xs text-gray-500 inline-flex items-center justify-center gap-1.5 flex-wrap">
-                <span class="material-symbols-outlined text-sm text-gray-400">help</span>
+                <x-lucide-circle-help class="w-4 h-4 text-gray-400 shrink-0" />
                 <span>Butuh bantuan kendala akun?</span>
                 <a href="https://wa.me/{{ config('app.support_whatsapp', '6281234567890') }}" target="_blank" rel="noopener noreferrer" class="font-bold text-[#1a146b] hover:underline">
                     Hubungi Layanan Pengguna 24/7

@@ -54,7 +54,7 @@
             <div class="bg-[#1a146b] text-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-900/50">
                 <div class="flex items-center gap-3.5">
                     <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#acf847] shrink-0 border border-white/10">
-                        <span class="material-symbols-outlined text-2xl">confirmation_number</span>
+                        <x-lucide-ticket class="w-6 h-6 shrink-0" />
                     </div>
                     <div>
                         <span class="text-[10px] font-black uppercase tracking-widest text-[#acf847]">BOARDING PASS LAPANGIN</span>

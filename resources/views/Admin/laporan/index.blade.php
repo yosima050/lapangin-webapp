@@ -25,11 +25,11 @@
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.laporan.exportPdf', request()->query()) }}" 
                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#120c52] text-xs font-bold text-white shadow-sm transition hover:shadow-md">
-                <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                <x-lucide-file-text class="w-4 h-4 shrink-0" />
                 <span>Unduh Laporan PDF</span>
             </a>
             <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-xs transition">
-                <span class="material-symbols-outlined text-base">print</span>
+                <x-lucide-printer class="w-4 h-4 shrink-0" />
                 <span>Cetak Web</span>
             </button>
         </div>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm text-[#416900]">calendar_today</span>
+                    <x-lucide-calendar class="w-4 h-4 text-[#416900] shrink-0" />
                     <span>Aktif: <strong class="text-gray-800">{{ $periodeLabel }}</strong></span>
                 </div>
             </div>
@@ -93,12 +93,12 @@
 
                 <div class="flex items-center gap-2">
                     <button type="submit" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#0b1c30] hover:bg-[#1a146b] text-xs font-bold text-white transition">
-                        <span class="material-symbols-outlined text-sm">filter_list</span>
+                        <x-lucide-list-filter class="w-4 h-4 shrink-0" />
                         <span>Filter Data</span>
                     </button>
                     @if(request()->hasAny(['start_date', 'end_date', 'periode', 'metode']))
                         <a href="{{ route('admin.laporan.index') }}" class="px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold text-gray-600 transition" title="Reset Filter">
-                            <span class="material-symbols-outlined text-sm">restart_alt</span>
+                            <x-lucide-rotate-ccw class="w-4 h-4 shrink-0" />
                         </a>
                     @endif
                 </div>
@@ -118,7 +118,7 @@
                 <p class="text-[11px] text-gray-500 font-semibold mt-1">{{ $totalTransaksiSukses }} Transaksi Sukses</p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#1a146b] flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                <x-lucide-wallet class="w-6 h-6 shrink-0" />
             </div>
         </div>
 
@@ -132,7 +132,7 @@
                 <p class="text-[11px] text-[#0284c7] font-semibold mt-1">{{ $transaksiOnlineCount }} Transaksi Digital (Snap/QRIS)</p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#f0f9ff] text-[#0284c7] flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl">credit_card</span>
+                <x-lucide-credit-card class="w-6 h-6 shrink-0" />
             </div>
         </div>
 
@@ -146,7 +146,7 @@
                 <p class="text-[11px] text-[#d97706] font-semibold mt-1">{{ $transaksiTunaiCount }} Transaksi Tunai di Kasir</p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#fffbeb] text-[#d97706] flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl">point_of_sale</span>
+                <x-lucide-calculator class="w-6 h-6 shrink-0" />
             </div>
         </div>
 
@@ -160,7 +160,7 @@
                 <p class="text-[11px] text-[#416900] font-semibold mt-1">Online + Kasir = Total Omset</p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eaf7d8] text-[#416900] flex items-center justify-center">
-                <span class="material-symbols-outlined text-2xl">verified</span>
+                <x-lucide-badge-check class="w-6 h-6 shrink-0" />
             </div>
         </div>
     </div>
@@ -214,12 +214,12 @@
                             <td class="px-6 py-4">
                                 @if(in_array(strtolower((string)$tx->metode), ['tunai', 'cash']))
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-[#fef3c7] text-[#b45309]">
-                                        <span class="material-symbols-outlined text-[13px]">payments</span>
+                                        <x-lucide-banknote class="w-3.5 h-3.5 shrink-0" />
                                         TUNAI (KASIR)
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-[#e0f2fe] text-[#0369a1]">
-                                        <span class="material-symbols-outlined text-[13px]">credit_card</span>
+                                        <x-lucide-credit-card class="w-3.5 h-3.5 shrink-0" />
                                         MIDTRANS ONLINE
                                     </span>
                                 @endif
@@ -239,7 +239,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                                <span class="material-symbols-outlined text-4xl text-gray-300 block mb-2">receipt_long</span>
+                                <x-lucide-receipt-text class="w-9 h-9 text-gray-300 block mb-2 shrink-0" />
                                 Tidak ada transaksi yang sesuai dengan filter periode ini.
                             </td>
                         </tr>

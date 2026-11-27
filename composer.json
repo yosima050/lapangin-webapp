@@ -11,6 +11,7 @@
         "laravel/framework": "^13.17",
         "laravel/socialite": "^5.31",
         "laravel/tinker": "^3.0",
+        "mallardduck/blade-lucide-icons": "^2.0",
         "midtrans/midtrans-php": "^2.6",
         "simplesoftwareio/simple-qrcode": "^4.2"
     },

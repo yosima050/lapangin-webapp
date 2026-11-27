@@ -41,7 +41,7 @@
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.lapangan.create') }}"
                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs shadow-md transition-all">
-                <span class="material-symbols-outlined text-base text-[#acf847]">add_circle</span>
+                <x-lucide-circle-plus class="w-4 h-4 text-[#acf847] shrink-0" />
                 <span>+ Tambah Lapangan Baru</span>
             </a>
         </div>
@@ -50,7 +50,7 @@
     {{-- Notifikasi --}}
     @if (session('success'))
         <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center gap-2 text-sm font-semibold">
-            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <x-lucide-circle-check class="w-5 h-5 text-green-600 shrink-0" />
             <span>{{ session('success') }}</span>
         </div>
     @endif
@@ -77,12 +77,12 @@
                     <span class="text-xs font-semibold text-[#416900]">Siap Sewa</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
-                    <span class="material-symbols-outlined text-sm text-[#416900]">check_circle</span>
+                    <x-lucide-circle-check class="w-4 h-4 text-[#416900] shrink-0" />
                     <span>{{ $lapangans->filter(fn($l) => !($l->is_active ?? true))->count() }} nonaktif dari {{ $lapangans->count() }} total lapangan</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                <span class="material-symbols-outlined text-2xl text-[#416900]">sports_soccer</span>
+                <x-lucide-dribbble class="w-6 h-6 text-[#416900] shrink-0" />
             </div>
         </div>
 
@@ -95,12 +95,12 @@
                     <span class="text-xs text-[#777682]">/jam</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
-                    <span class="material-symbols-outlined text-sm text-[#1a146b]">trending_up</span>
+                    <x-lucide-trending-up class="w-4 h-4 text-[#1a146b] shrink-0" />
                     <span>Rentang aktif Rp {{ number_format(($minRate ?? 60000) / 1000, 0) }}rb – Rp {{ number_format(($maxRate ?? 200000) / 1000, 0) }}rb/jam</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                <span class="material-symbols-outlined text-2xl">payments</span>
+                <x-lucide-banknote class="w-6 h-6 shrink-0" />
             </div>
         </div>
 
@@ -115,12 +115,12 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#474651]">
-                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    <x-lucide-clock class="w-4 h-4 shrink-0" />
                     <span>Jam operasional {{ substr($lapangans->min('jam_buka') ?? '07:00', 0, 5) }} – {{ substr($lapangans->max('jam_tutup') ?? '24:00', 0, 5) }} WIB</span>
                 </div>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                <span class="material-symbols-outlined text-2xl">storefront</span>
+                <x-lucide-store class="w-6 h-6 shrink-0" />
             </div>
         </div>
     </div>
@@ -129,7 +129,7 @@
     <div class="p-4 rounded-2xl bg-[#eff4ff] border border-[#dce9ff] flex items-center justify-between gap-4 shadow-xs">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-[#1a146b] flex items-center justify-center text-[#acf847] shrink-0">
-                <span class="material-symbols-outlined text-xl">verified_user</span>
+                <x-lucide-shield-check class="w-5 h-5 shrink-0" />
             </div>
             <div>
                 <h4 class="text-xs font-bold text-[#0b1c30]">Validasi Master Price Proteksi Aktif</h4>
@@ -193,11 +193,11 @@
                             </div>
                             @if ($lapangan->is_active ?? true)
                                 <span class="flex items-center gap-1.5 text-xs text-[#416900] font-semibold">
-                                    <span class="material-symbols-outlined text-sm">wifi</span> Online Terbuka
+                                    <x-lucide-wifi class="w-4 h-4 shrink-0" /> Online Terbuka
                                 </span>
                             @else
                                 <span class="flex items-center gap-1.5 text-xs text-[#ba1a1a] font-semibold">
-                                    <span class="material-symbols-outlined text-sm">wifi_off</span> Ditutup Sementara
+                                    <x-lucide-wifi-off class="w-4 h-4 shrink-0" /> Ditutup Sementara
                                 </span>
                             @endif
                         </div>
@@ -205,12 +205,12 @@
                         <!-- Facility Chips: Real Operational Hours & Description -->
                         <div class="flex flex-wrap gap-2 mt-2.5">
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-semibold text-[#1a146b]">
-                                <span class="material-symbols-outlined text-xs text-[#1a146b]">schedule</span>
+                                <x-lucide-clock class="w-3.5 h-3.5 text-[#1a146b] shrink-0" />
                                 Operasional: {{ substr($lapangan->jam_buka, 0, 5) }} – {{ substr($lapangan->jam_tutup, 0, 5) }} WIB
                             </span>
                             @if (!empty($lapangan->deskripsi))
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] text-[11px] font-medium text-[#474651]" title="{{ $lapangan->deskripsi }}">
-                                    <span class="material-symbols-outlined text-xs text-[#1a146b]">notes</span>
+                                    <x-lucide-file-text class="w-3.5 h-3.5 text-[#1a146b] shrink-0" />
                                     {{ Str::limit($lapangan->deskripsi, 80) }}
                                 </span>
                             @endif
@@ -259,20 +259,20 @@
                     <!-- Footer Details & Action Buttons -->
                     <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         <span class="text-[#777682] flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">schedule</span>
+                            <x-lucide-clock class="w-4 h-4 shrink-0" />
                             Terakhir diperbarui: {{ ($lapangan->updated_at ?? $lapangan->created_at ?? now())->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') }}
                         </span>
 
                         <div class="flex items-center gap-2">
                             <a href="{{ route('admin.lapangan.edit', $lapangan->id) }}"
                                class="px-3.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-bold text-xs border border-[#dce9ff] transition-colors flex items-center gap-1 cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">edit</span>
+                                <x-lucide-pencil class="w-4 h-4 shrink-0" />
                                 <span>Edit Detail</span>
                             </a>
                             <button type="button"
                                     @click="openDrawer('{{ $lapangan->id }}', '{{ addslashes($lapangan->nama) }}', {{ (float) $weekdayOffPeak }}, {{ (float) $weekdayPrime }}, {{ (float) $weekendRate }}, {{ (float) $weekendPrime }})"
                                     class="px-3.5 py-1.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1 cursor-pointer">
-                                <span class="material-symbols-outlined text-sm text-[#acf847]">tune</span>
+                                <x-lucide-sliders-horizontal class="w-4 h-4 text-[#acf847] shrink-0" />
                                 <span>Atur Tarif</span>
                             </button>
                             <form method="POST" action="{{ route('admin.lapangan.toggle-status', $lapangan->id) }}"
@@ -281,7 +281,11 @@
                                 @method('PATCH')
                                 <button type="submit"
                                         class="px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer {{ ($lapangan->is_active ?? true) ? 'bg-[#eff4ff] hover:bg-[#ffdad6] text-[#ba1a1a]' : 'bg-[#eaf7d8] hover:bg-[#acf847] text-[#102000]' }}">
-                                    <span class="material-symbols-outlined text-sm">{{ ($lapangan->is_active ?? true) ? 'block' : 'check_circle' }}</span>
+                                    @if ($lapangan->is_active ?? true)
+                                        <x-lucide-ban class="w-4 h-4 shrink-0" />
+                                    @else
+                                        <x-lucide-circle-check class="w-4 h-4 shrink-0" />
+                                    @endif
                                     <span>{{ ($lapangan->is_active ?? true) ? 'Nonaktifkan' : 'Aktifkan Lapangan' }}</span>
                                 </button>
                             </form>
@@ -330,7 +334,7 @@
                     <div class="flex items-center justify-between pb-4 border-b border-[#eff4ff]">
                         <div class="flex items-center gap-2.5">
                             <div class="w-9 h-9 rounded-xl bg-[#1a146b] text-[#acf847] flex items-center justify-center">
-                                <span class="material-symbols-outlined text-lg">tune</span>
+                                <x-lucide-sliders-horizontal class="w-5 h-5 shrink-0" />
                             </div>
                             <div>
                                 <h3 class="text-base font-bold text-[#0b1c30]">Atur Tarif Sewa Master</h3>
@@ -338,7 +342,7 @@
                             </div>
                         </div>
                         <button type="button" @click="drawerOpen = false" class="text-[#777682] hover:text-[#0b1c30] p-1 rounded-lg">
-                            <span class="material-symbols-outlined text-xl">close</span>
+                            <x-lucide-x class="w-5 h-5 shrink-0" />
                         </button>
                     </div>
 
@@ -353,7 +357,7 @@
 
                     <!-- Price Info Note -->
                     <div class="p-3.5 rounded-xl bg-[#eff4ff] border border-[#dce9ff] flex items-start gap-2.5 text-xs text-[#474651] mb-5">
-                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">info</span>
+                        <x-lucide-info class="w-4 h-4 text-[#1a146b] shrink-0 mt-0.5" />
                         <div class="text-[11px] leading-relaxed">
                             Bila tarif malam belum ada atau sama dengan tarif pagi, Anda dapat mengisi nilai yang sama.
                         </div>

@@ -8,11 +8,10 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/02_Icon_App.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/02_Icon_App.png') }}">
 
-    <!-- Google Fonts & Material Symbols -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <style>
         @layer base {
@@ -44,7 +43,7 @@
             <div class="px-3 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-[#1a146b] flex items-center justify-center text-[#acf847] shadow-sm">
-                        <span class="material-symbols-outlined text-xl">stadium</span>
+                        <x-lucide-building-2 class="w-5 h-5 shrink-0" />
                     </div>
                     <div class="flex flex-col">
                         <span class="text-lg font-headline font-extrabold tracking-tight text-[#1a146b] leading-tight">
@@ -69,42 +68,42 @@
                 <!-- 1. Dashboard Overview -->
                 <a href="{{ route('admin.dashboard') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+                    <x-lucide-layout-dashboard class="w-5 h-5 shrink-0" />
                     <span>Dashboard Overview</span>
                 </a>
 
                 <!-- 2. Kelola Lapangan & Tarif -->
                 <a href="{{ route('admin.lapangan.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.lapangan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">sports_soccer</span>
+                    <x-lucide-dribbble class="w-5 h-5 shrink-0" />
                     <span>Kelola Lapangan &amp; Tarif</span>
                 </a>
 
                 <!-- 3. Pengaturan Harga Khusus -->
                 <a href="{{ route('admin.harga-khusus.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ (request()->routeIs('admin.custom-price') || request()->routeIs('admin.harga-khusus.*')) ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">event_available</span>
+                    <x-lucide-calendar-check class="w-5 h-5 shrink-0" />
                     <span>Pengaturan Harga Khusus</span>
                 </a>
 
                 <!-- 4. Kelola Perlengkapan -->
                 <a href="{{ route('admin.perlengkapan.index') }}"
                 class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.perlengkapan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">sports_tennis</span>
+                    <x-lucide-trophy class="w-5 h-5 shrink-0" />
                     <span>Kelola Perlengkapan</span>
                 </a>
 
                 <!-- 5. Kelola Pegawai / Kasir -->
                 <a href="{{ route('admin.pegawai.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.pegawai.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">badge</span>
+                    <x-lucide-badge-check class="w-5 h-5 shrink-0" />
                     <span>Kelola Pegawai / Kasir</span>
                 </a>
 
                 <!-- 6. Laporan & Analitik -->
                 <a href="{{ route('admin.laporan.index') }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.laporan.*') ? 'bg-[#1a146b] text-white shadow-md' : 'text-[#474651] hover:bg-[#dce9ff] hover:text-[#0b1c30]' }}">
-                    <span class="material-symbols-outlined text-[20px]">monitoring</span>
+                    <x-lucide-bar-chart-3 class="w-5 h-5 shrink-0" />
                     <span>Laporan &amp; Analitik</span>
                 </a>
             </nav>
@@ -124,7 +123,7 @@
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="text-[#474651] hover:text-[#ba1a1a] transition-colors p-1" title="Logout">
-                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                    <x-lucide-log-out class="w-5 h-5 shrink-0" />
                 </button>
             </form>
         </div>
@@ -155,7 +154,7 @@
                          }
                      }"
                      x-init="startClock()">
-                    <span class="material-symbols-outlined text-[16px]">schedule</span>
+                    <x-lucide-clock class="w-4 h-4 shrink-0" />
                     <span x-text="clockText">{{ now()->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i') }} WIB</span>
                 </div>
             </div>
@@ -167,10 +166,10 @@
                 </div>
                 <div class="flex items-center gap-1 text-[#474651]">
                     <a href="{{ route('admin.laporan.index') }}" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors" title="Laporan & Notifikasi">
-                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                        <x-lucide-bell class="w-5 h-5 shrink-0" />
                     </a>
                     <a href="{{ route('katalog.index') }}" target="_blank" class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#dce9ff] transition-colors" title="Buka Katalog Publik">
-                        <span class="material-symbols-outlined text-[20px]">open_in_new</span>
+                        <x-lucide-external-link class="w-5 h-5 shrink-0" />
                     </a>
                 </div>
                 <div class="w-8 h-8 rounded-full bg-[#1a146b] flex items-center justify-center text-white text-xs font-bold shadow-sm" title="{{ Auth::user()?->nama }}">

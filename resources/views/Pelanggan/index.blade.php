@@ -311,14 +311,14 @@
 
                     @if (session('status') === 'password-updated')
                         <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-base text-emerald-600 shrink-0">check_circle</span>
+                            <x-lucide-circle-check class="w-4 h-4 text-emerald-600 shrink-0" />
                             <span>Kata sandi Anda berhasil diperbarui dan telah aktif.</span>
                         </div>
                     @endif
 
                     @if (session('login_provider') === 'google')
                         <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-[#1a146b] text-xs font-semibold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-base text-blue-600 shrink-0">info</span>
+                            <x-lucide-info class="w-4 h-4 text-blue-600 shrink-0" />
                             <span>Anda masuk menggunakan Akun Google. Anda dapat langsung menentukan kata sandi baru untuk mengaktifkan login via Email &amp; Password tanpa memerlukan kata sandi lama.</span>
                         </div>
                     @else
@@ -403,7 +403,7 @@
                     <div class="rounded-2xl border border-[#dce9ff] bg-[#f4f7ff] p-4 text-[#474651]">
                         <div class="flex items-center justify-between text-xs font-bold mb-2">
                             <span class="flex items-center gap-1.5 text-[#1a146b]">
-                                <span class="material-symbols-outlined text-base text-[#1a146b]">shield</span>
+                                <x-lucide-shield class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span>Kekuatan Sandi</span>
                             </span>
                             <span :class="strength.textClass" class="font-black tracking-wide" x-text="strength.label"></span>
@@ -417,19 +417,22 @@
                         {{-- Checklist Kriteria Dinamis --}}
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                             <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasMinLength ? 'text-[#166534] font-bold' : 'text-gray-400'">
-                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasMinLength ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasMinLength ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <x-lucide-circle-check x-show="hasMinLength" style="display: none;" class="w-4 h-4 text-[#22c55e] shrink-0" />
+                                <x-lucide-circle x-show="!hasMinLength" class="w-4 h-4 text-gray-400 shrink-0" />
                                 <span>Minimal 8 karakter</span>
                             </div>
                             <div class="flex items-center gap-1.5 transition-colors duration-200" :class="hasLetterAndNumber ? 'text-[#166534] font-bold' : 'text-gray-400'">
-                                <span class="material-symbols-outlined text-sm shrink-0" :class="hasLetterAndNumber ? 'text-[#22c55e]' : 'text-gray-400'" x-text="hasLetterAndNumber ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <x-lucide-circle-check x-show="hasLetterAndNumber" style="display: none;" class="w-4 h-4 text-[#22c55e] shrink-0" />
+                                <x-lucide-circle x-show="!hasLetterAndNumber" class="w-4 h-4 text-gray-400 shrink-0" />
                                 <span>Kombinasi huruf &amp; angka</span>
                             </div>
                             <div class="flex items-center gap-1.5 transition-colors duration-200" :class="isMatched ? 'text-[#166534] font-bold' : 'text-gray-400'">
-                                <span class="material-symbols-outlined text-sm shrink-0" :class="isMatched ? 'text-[#22c55e]' : 'text-gray-400'" x-text="isMatched ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <x-lucide-circle-check x-show="isMatched" style="display: none;" class="w-4 h-4 text-[#22c55e] shrink-0" />
+                                <x-lucide-circle x-show="!isMatched" class="w-4 h-4 text-gray-400 shrink-0" />
                                 <span>Konfirmasi sandi cocok</span>
                             </div>
                             <div class="flex items-center gap-1.5 text-gray-500">
-                                <span class="material-symbols-outlined text-sm text-[#1a146b] shrink-0">lock</span>
+                                <x-lucide-lock class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span>Disimpan dengan Hashing Bcrypt</span>
                             </div>
                         </div>

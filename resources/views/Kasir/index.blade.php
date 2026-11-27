@@ -1,4 +1,4 @@
-﻿@extends('layouts.kasir')
+@extends('layouts.kasir')
 
 @section('title', 'Validasi Check-in & Pelunasan Kasir - LapangIn')
 
@@ -51,11 +51,11 @@
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-[#acf847]/30 border border-[#acf847] flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#416900]">check_circle</span>
+                <x-lucide-circle-check class="w-6 h-6 text-[#416900] shrink-0" />
                 <span class="text-xs font-bold text-[#102000]">{{ session('success') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#416900] hover:text-[#102000]">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -63,11 +63,11 @@
     @if (session('error'))
         <div class="p-4 rounded-2xl bg-[#ffdad6] border border-[#ba1a1a]/30 flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#ba1a1a]">error</span>
+                <x-lucide-circle-alert class="w-6 h-6 text-[#ba1a1a] shrink-0" />
                 <span class="text-xs font-bold text-[#ba1a1a]">{{ session('error') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#ba1a1a] hover:text-[#410002]">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -80,7 +80,7 @@
                     POS OPERASIONAL
                 </span>
                 <span class="text-xs text-[#474651] flex items-center gap-1 font-medium">
-                    <span class="material-symbols-outlined text-sm text-[#416900]">sync</span>
+                    <x-lucide-refresh-cw class="w-4 h-4 text-[#416900] shrink-0" />
                     Database Real-Time LapangIn
                 </span>
             </div>
@@ -94,11 +94,11 @@
 
         <div class="flex items-center gap-3">
             <a href="{{ route('kasir.scan') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#eff4ff] text-[#1a146b] text-xs font-bold transition-all border border-[#dce9ff] shadow-xs">
-                <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                <x-lucide-scan-line class="w-4 h-4 shrink-0" />
                 <span>Buka Pemindai Kamera</span>
             </a>
             <a href="{{ route('kasir.transaksi') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-sm">
-                <span class="material-symbols-outlined text-base">history</span>
+                <x-lucide-history class="w-4 h-4 shrink-0" />
                 <span>Riwayat Sesi Ini</span>
             </a>
         </div>
@@ -262,7 +262,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                            <span class="material-symbols-outlined text-xl">search</span>
+                            <x-lucide-search class="w-5 h-5 shrink-0" />
                         </div>
                         <div>
                             <h2 class="text-sm font-bold text-[#0b1c30]">Cari Tiket / Pesanan</h2>
@@ -271,7 +271,7 @@
                     </div>
                     <template x-if="searchQuery.trim().length > 0">
                         <button type="button" @click="clearSearch()" class="inline-flex items-center gap-1 text-[11px] font-bold text-[#ba1a1a] hover:underline cursor-pointer">
-                            <span class="material-symbols-outlined text-sm">close</span>
+                            <x-lucide-x class="w-4 h-4 shrink-0" />
                             <span>Reset</span>
                         </button>
                     </template>
@@ -282,7 +282,7 @@
 
                 <!-- Live Search Input (Realtime Filter, 0ms latency, Tanpa Reload Halaman) -->
                 <div class="relative">
-                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-xl pointer-events-none">search</span>
+                    <x-lucide-search class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] w-5 h-5 pointer-events-none shrink-0" />
                     <input
                     x-ref="searchInput"
                     type="text"
@@ -298,7 +298,7 @@
                             @click="clearSearch()"
                             class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition p-1 cursor-pointer"
                             title="Hapus pencarian">
-                        <span class="material-symbols-outlined text-lg">cancel</span>
+                        <x-lucide-circle-x class="w-5 h-5 shrink-0" />
                     </button>
                 </div>
 
@@ -309,13 +309,13 @@
                         </template>
                         <template x-if="searchQuery.trim()">
                             <span class="text-[#1a146b] font-semibold flex items-center gap-1">
-                                <span class="material-symbols-outlined text-xs text-[#416900]">bolt</span>
+                                <x-lucide-zap class="w-3.5 h-3.5 text-[#416900] shrink-0" />
                                 <span>Menyaring otomatis: "<strong x-text="searchQuery"></strong>"</span>
                             </span>
                         </template>
                     </div>
                     <div x-show="isSearchingServer" style="display: none;" class="text-blue-600 font-semibold flex items-center gap-1 text-[10px] animate-pulse">
-                        <span class="material-symbols-outlined text-xs animate-spin">refresh</span>
+                        <x-lucide-refresh-cw class="w-3.5 h-3.5 animate-spin shrink-0" />
                         <span>Cek database...</span>
                     </div>
                 </div>
@@ -325,10 +325,8 @@
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-xl"
-                              :class="searchQuery.trim() ? 'text-[#1a146b]' : 'text-[#416900]'">
-                            <span x-text="searchQuery.trim() ? 'manage_search' : 'queue'"></span>
-                        </span>
+                        <x-lucide-search x-show="searchQuery.trim()" style="display: none;" class="w-5 h-5 text-[#1a146b] shrink-0" />
+                        <x-lucide-list x-show="!searchQuery.trim()" class="w-5 h-5 text-[#416900] shrink-0" />
                         <div>
                             <h2 class="text-sm font-bold text-[#0b1c30]"
                                 x-text="searchQuery.trim() ? 'Hasil Penyaringan: ' + visibleItems.length + ' Pesanan' : 'Antrean Tamu Hari Ini'">
@@ -434,12 +432,12 @@
 
                     <!-- Empty State -->
                     <div x-show="visibleItems.length === 0" x-cloak style="display: none;" class="py-8 text-center text-xs text-[#777682] space-y-2.5">
-                        <span class="material-symbols-outlined text-3xl text-gray-300">search_off</span>
+                        <x-lucide-search-x class="w-7 h-7 text-gray-300 shrink-0" />
                         <p>Tidak ada tiket atau pesanan yang cocok dengan "<strong class="text-[#0b1c30]" x-text="searchQuery"></strong>".</p>
                         <div>
                             <button type="button" @click="clearSearch()"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#eff4ff] hover:bg-[#e5eeff] text-[#1a146b] font-bold text-xs transition cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">restart_alt</span>
+                                <x-lucide-rotate-ccw class="w-4 h-4 shrink-0" />
                                 <span>Reset & Tampilkan Semua Antrean</span>
                             </button>
                         </div>
@@ -450,7 +448,7 @@
                 <div class="rounded-xl bg-[#eff4ff] p-4 flex items-center justify-between border border-[#dce9ff]">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#1a146b] shadow-xs">
-                            <span class="material-symbols-outlined">sports_soccer</span>
+                            <x-lucide-dribbble class="w-5 h-5 shrink-0" />
                         </div>
                         <div>
                             <div class="text-xs font-bold text-[#0b1c30]">Ringkasan Slot Aktif</div>
@@ -471,15 +469,15 @@
                 </div>
                 <div class="flex flex-col gap-2.5 text-xs text-[#474651]">
                     <div class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-base text-[#416900] shrink-0 mt-0.5">check_circle</span>
+                        <x-lucide-circle-check class="w-4 h-4 text-[#416900] shrink-0 mt-0.5" />
                         <span>Pemain menunjukkan QR tiket dari aplikasi LapangIn atau screenshot e-tiket.</span>
                     </div>
                     <div class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-base text-[#416900] shrink-0 mt-0.5">check_circle</span>
+                        <x-lucide-circle-check class="w-4 h-4 text-[#416900] shrink-0 mt-0.5" />
                         <span>Sistem langsung mencocokkan hash token terenkripsi dan rincian DP reservasi secara realtime.</span>
                     </div>
                     <div class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-base text-[#416900] shrink-0 mt-0.5">check_circle</span>
+                        <x-lucide-circle-check class="w-4 h-4 text-[#416900] shrink-0 mt-0.5" />
                         <span>Lanjutkan pelunasan sisa tagihan onsite pada panel kasir di samping.</span>
                     </div>
                 </div>
@@ -530,7 +528,7 @@
                     <div class="p-6 bg-[#eff4ff] border-b border-[#e5eeff] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-3.5">
                             <div class="w-10 h-10 rounded-full {{ $activeBooking?->checked_in_at ? 'bg-emerald-100 text-emerald-800' : 'bg-[#acf847] text-[#102000]' }} flex items-center justify-center shadow-sm">
-                                <span class="material-symbols-outlined text-2xl font-bold">verified</span>
+                                <x-lucide-badge-check class="w-6 h-6 font-bold shrink-0" />
                             </div>
                             <div>
                                 @if ($activeBooking?->checked_in_at)
@@ -585,11 +583,11 @@
                             <span class="text-[10px] font-bold uppercase tracking-wider {{ $isCancelled ? 'text-red-700' : 'text-[#777682]' }}">PEMESAN</span>
                             <div class="text-base font-bold text-[#0b1c30]">{{ $customerName }}</div>
                             <div class="flex items-center gap-2 text-xs {{ $isCancelled ? 'text-red-700' : 'text-[#416900]' }} font-semibold mt-0.5">
-                                <span class="material-symbols-outlined text-base">chat</span>
+                                <x-lucide-message-circle class="w-4 h-4 shrink-0" />
                                 <span>{{ $customerPhone }}</span>
                             </div>
                             <div class="text-xs text-[#474651] mt-1 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm text-[#1a146b]">groups</span>
+                                <x-lucide-users class="w-4 h-4 text-[#1a146b] shrink-0" />
                                 <span>{{ $activeBooking?->nama_tamu ?: 'Penyewa Terdaftar LapangIn' }}</span>
                             </div>
                         </div>
@@ -605,13 +603,15 @@
                             </div>
                             <div class="text-base font-bold {{ $isCancelled ? 'text-red-900 line-through' : 'text-[#0b1c30]' }}">{{ $courtName }}</div>
                             <div class="flex items-center gap-2 text-xs {{ $isCancelled ? 'text-red-700 font-semibold' : 'text-[#1a146b] font-medium' }} mt-0.5">
-                                <span class="material-symbols-outlined text-base">schedule</span>
+                                <x-lucide-clock class="w-4 h-4 shrink-0" />
                                 <span class="{{ $isCancelled ? 'line-through' : '' }}">{{ $jamMulai }} - {{ $jamSelesai }} WIB</span>
                             </div>
                             <div class="text-xs {{ $isCancelled ? 'text-red-800 bg-red-100/80 p-2 rounded-lg font-semibold' : 'text-[#474651]' }} mt-1 flex items-start gap-1.5">
-                                <span class="material-symbols-outlined text-sm {{ $isCancelled ? 'text-red-600' : 'text-[#416900]' }} shrink-0 mt-0.5">
-                                    {{ $isCancelled ? 'cancel' : 'sports' }}
-                                </span>
+                                @if ($isCancelled)
+                                    <x-lucide-circle-x class="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                                @else
+                                    <x-lucide-trophy class="w-4 h-4 text-[#416900] shrink-0 mt-0.5" />
+                                @endif
                                 <span>{{ $activeBooking?->catatan_kasir ?: 'Termasuk Rompi Latihan & Bola Match' }}</span>
                             </div>
                         </div>
@@ -669,7 +669,7 @@
                         </div>
                         <div class="flex items-center justify-between text-sm text-[#416900]">
                             <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                <x-lucide-circle-check class="w-4 h-4 shrink-0" />
                                 <span>DP / Pembayaran Masuk (Online / Kasir)</span>
                             </div>
                             <span class="font-extrabold">- Rp {{ number_format($dpPaid, 0, ',', '.') }}</span>
@@ -723,12 +723,12 @@
                             <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
                                 <a href="{{ route('kasir.index') }}"
                                    class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-red-200 text-red-700 hover:bg-red-50 font-bold text-xs transition shadow-xs">
-                                    <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                                    <x-lucide-scan-line class="w-4 h-4 shrink-0" />
                                     <span>Scan / Cari Tiket Lain</span>
                                 </a>
                                 <a href="{{ route('kasir.jadwal') }}"
                                    class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#1a146b] text-white hover:bg-indigo-900 font-bold text-xs transition shadow-xs">
-                                    <span class="material-symbols-outlined text-base">calendar_month</span>
+                                    <x-lucide-calendar-days class="w-4 h-4 shrink-0" />
                                     <span>Buka Jadwal Lapangan</span>
                                 </a>
                             </div>
@@ -737,7 +737,7 @@
                         <!-- Cashier Payment Form -->
                         <div class="flex flex-col gap-5 pt-2">
                         <div class="flex items-center gap-2 text-base font-bold text-[#0b1c30]">
-                            <span class="material-symbols-outlined text-[#1a146b]">payments</span>
+                            <x-lucide-banknote class="w-5 h-5 text-[#1a146b] shrink-0" />
                             <span>Form Pembayaran Kasir</span>
                         </div>
 
@@ -748,19 +748,19 @@
                                 <button type="button" @click="paymentMethod = 'cash'"
                                         :class="paymentMethod === 'cash' ? 'bg-[#1a146b] text-white shadow-md' : 'bg-[#e5eeff] text-[#0b1c30] hover:bg-[#dce9ff]'"
                                         class="flex flex-col items-center justify-center p-3.5 rounded-xl font-bold text-xs gap-1 transition-all">
-                                    <span class="material-symbols-outlined text-xl">payments</span>
+                                    <x-lucide-banknote class="w-5 h-5 shrink-0" />
                                     <span>Tunai / Cash</span>
                                 </button>
                                 <button type="button" @click="paymentMethod = 'qris'"
                                         :class="paymentMethod === 'qris' ? 'bg-[#1a146b] text-white shadow-md' : 'bg-[#e5eeff] text-[#0b1c30] hover:bg-[#dce9ff]'"
                                         class="flex flex-col items-center justify-center p-3.5 rounded-xl font-bold text-xs gap-1 transition-all">
-                                    <span class="material-symbols-outlined text-xl">qr_code_2</span>
+                                    <x-lucide-qr-code class="w-5 h-5 shrink-0" />
                                     <span>QRIS Kasir</span>
                                 </button>
                                 <button type="button" @click="paymentMethod = 'debit'"
                                         :class="paymentMethod === 'debit' ? 'bg-[#1a146b] text-white shadow-md' : 'bg-[#e5eeff] text-[#0b1c30] hover:bg-[#dce9ff]'"
                                         class="flex flex-col items-center justify-center p-3.5 rounded-xl font-bold text-xs gap-1 transition-all">
-                                    <span class="material-symbols-outlined text-xl">credit_card</span>
+                                    <x-lucide-credit-card class="w-5 h-5 shrink-0" />
                                     <span>Debit / EDC</span>
                                 </button>
                             </div>
@@ -805,7 +805,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-1.5 text-xs text-[#416900] font-medium mt-2">
-                                    <span class="material-symbols-outlined text-sm">check</span>
+                                    <x-lucide-check class="w-4 h-4 shrink-0" />
                                     <span>Pastikan fisik uang kembalian diserahkan</span>
                                 </div>
                             </div>
@@ -823,7 +823,7 @@
                             <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                                        <span class="material-symbols-outlined text-2xl">verified</span>
+                                        <x-lucide-badge-check class="w-6 h-6 shrink-0" />
                                     </div>
                                     <div>
                                         <h4 class="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">Pemesanan Sudah Check-in</h4>
@@ -832,7 +832,7 @@
                                 </div>
                                 <a href="{{ route('kasir.struk', $activeBooking->id) }}" target="_blank"
                                    class="px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#25207c] text-white text-xs font-bold flex items-center gap-2 shadow-xs transition">
-                                    <span class="material-symbols-outlined text-base">receipt_long</span>
+                                    <x-lucide-receipt-text class="w-4 h-4 shrink-0" />
                                     <span>Cetak Ulang Struk Thermal</span>
                                 </a>
                             </div>
@@ -888,7 +888,7 @@
 
                                     <button type="submit"
                                             class="w-full py-4 px-6 rounded-2xl bg-[#acf847] hover:bg-[#91db2a] text-[#102000] font-headline font-black text-base flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99] cursor-pointer">
-                                        <span class="material-symbols-outlined text-2xl font-bold">check_circle</span>
+                                        <x-lucide-circle-check class="w-6 h-6 font-bold shrink-0" />
                                         <span>Konfirmasi Pelunasan &amp; Check-in Berhasil</span>
                                     </button>
                                 </form>
@@ -903,19 +903,19 @@
                                 @if($activeBooking)
                                     <a href="{{ route('kasir.struk', $activeBooking->id) }}" target="_blank"
                                        class="print:hidden py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#25207c] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-xs">
-                                        <span class="material-symbols-outlined text-lg">receipt_long</span>
+                                        <x-lucide-receipt-text class="w-5 h-5 shrink-0" />
                                         <span>Cetak Struk Thermal (58/80mm)</span>
                                     </a>
                                 @else
                                     <button type="button" disabled
                                             class="print:hidden py-3 px-4 rounded-xl bg-[#eff4ff] text-gray-400 text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] cursor-not-allowed">
-                                        <span class="material-symbols-outlined text-lg">print</span>
+                                        <x-lucide-printer class="w-5 h-5 shrink-0" />
                                         <span>Cetak Struk Pembayaran</span>
                                     </button>
                                 @endif
                                 <button type="button" onclick="alert('Bukti pembayaran telah dikirim ke nomor WhatsApp {{ $customerPhone }}')"
                                         class="py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-[#416900]">chat</span>
+                                    <x-lucide-message-circle class="w-5 h-5 text-[#416900] shrink-0" />
                                     <span>Kirim Bukti ke WhatsApp Tamu</span>
                                 </button>
                             </div>

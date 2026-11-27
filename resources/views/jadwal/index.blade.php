@@ -154,7 +154,7 @@
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <div class="relative w-full sm:w-64 md:w-72">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                <span class="material-symbols-outlined text-[18px]">search</span>
+                                <x-lucide-search class="w-5 h-5 shrink-0" />
                             </span>
                             <input
                                 type="text"
@@ -169,7 +169,7 @@
                                 class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 transition cursor-pointer"
                                 title="Hapus pencarian"
                             >
-                                <span class="material-symbols-outlined text-sm">close</span>
+                                <x-lucide-x class="w-4 h-4 shrink-0" />
                             </button>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         @if (empty($matrix))
             <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-                <span class="material-symbols-outlined text-5xl text-gray-300">event_busy</span>
+                <x-lucide-calendar-x class="w-12 h-12 text-gray-300 shrink-0" />
                 <h3 class="mt-3 text-lg font-extrabold text-gray-700">Tidak ada lapangan ditemukan</h3>
                 <p class="mt-1 text-sm text-gray-500">Coba sesuaikan filter kategori atau tanggal Anda.</p>
                 <a href="{{ route('jadwal.index') }}" class="mt-4 inline-block px-5 py-2 rounded-xl bg-[#1a146b] text-white text-xs font-bold hover:bg-opacity-90">
@@ -293,7 +293,7 @@
                                     class="px-3.5 py-1.5 rounded-xl border border-gray-200 hover:border-[#1a146b] text-[#1a146b] text-xs font-bold transition flex items-center gap-1"
                                 >
                                     Detail
-                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
                                 </a>
                             </div>
                         </div>
@@ -411,7 +411,7 @@
                     style="display: none;"
                 >
                     <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-2xl">search_off</span>
+                        <x-lucide-search-x class="w-6 h-6 shrink-0" />
                     </div>
                     <h3 class="text-base font-bold text-gray-800">Tidak ada lapangan yang cocok</h3>
                     <p class="mt-1 text-xs sm:text-sm text-gray-500">
@@ -446,7 +446,7 @@
                             :class="currentPage <= 1 ? 'opacity-40 cursor-not-allowed bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 cursor-pointer shadow-2xs'"
                             class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
                         >
-                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            <x-lucide-chevron-left class="w-4 h-4 shrink-0" />
                             <span>Sebelumnya</span>
                         </button>
 
@@ -472,7 +472,7 @@
                             class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
                         >
                             <span>Selanjutnya</span>
-                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            <x-lucide-chevron-right class="w-4 h-4 shrink-0" />
                         </button>
                     </div>
                 </div>

@@ -91,7 +91,7 @@
                 {{-- Search Bar Lapangan --}}
                 <div class="relative w-full sm:w-72 lg:w-80">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                        <span class="material-symbols-outlined text-lg">search</span>
+                        <x-lucide-search class="w-5 h-5 shrink-0" />
                     </span>
                     <input
                         type="text"
@@ -107,7 +107,7 @@
                         class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition cursor-pointer"
                         title="Hapus pencarian"
                     >
-                        <span class="material-symbols-outlined text-base">close</span>
+                        <x-lucide-x class="w-4 h-4 shrink-0" />
                     </button>
                 </div>
             </div>
@@ -166,7 +166,7 @@
                                     @endif
 
                                     <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
+                                        <x-lucide-clock class="w-4 h-4 text-[#1a146b] shrink-0" />
                                         <span>Jam Buka: {{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
                                     </div>
                                 </div>
@@ -226,7 +226,7 @@
                         style="display: none;"
                     >
                         <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-2xl">search_off</span>
+                            <x-lucide-search-x class="w-6 h-6 shrink-0" />
                         </div>
                         <h3 class="text-base font-bold text-gray-800">Tidak ada lapangan yang cocok</h3>
                         <p class="mt-1 text-xs sm:text-sm text-gray-500">

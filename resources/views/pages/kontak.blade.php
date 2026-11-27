@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
         <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">home</span>
+            <x-lucide-house class="w-4 h-4 shrink-0" />
             <span>Beranda</span>
         </a>
         <span>/</span>
@@ -37,7 +37,7 @@
 
             <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-6">
                 <h2 class="text-lg font-headline font-bold text-[#0b1c30] flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[#1a146b]">location_on</span>
+                    <x-lucide-map-pin class="w-5 h-5 text-[#1a146b] shrink-0" />
                     <span>Lokasi &amp; Jam Operasional</span>
                 </h2>
 
@@ -74,7 +74,7 @@
                    target="_blank"
                    rel="noopener noreferrer"
                    class="w-full py-3.5 px-4 rounded-2xl bg-[#416900] hover:bg-[#315000] text-white font-headline font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition active:scale-[0.99]">
-                    <span class="material-symbols-outlined text-lg">chat</span>
+                    <x-lucide-message-circle class="w-5 h-5 shrink-0" />
                     <span>Chat WhatsApp CS LapangIn</span>
                 </a>
             </div>
@@ -146,7 +146,7 @@
                         :class="open ? 'ring-2 ring-[#1a146b] border-[#1a146b]' : ''"
                     >
                         <span x-text="selectedText"></span>
-                        <span class="material-symbols-outlined text-sm text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-[#1a146b]' : ''">expand_more</span>
+                        <x-lucide-chevron-down class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" x-bind:class="w-5 h-5 open ? 'rotate-180 text-[#1a146b]' : '' shrink-0" />
                     </button>
 
                     {{-- Custom Dropdown Menu --}}
@@ -169,7 +169,7 @@
                                 :class="selectedVal === item.val ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : 'text-gray-700 hover:bg-[#f8f9ff] hover:text-[#1a146b]'"
                             >
                                 <span x-text="item.label"></span>
-                                <span x-show="selectedVal === item.val" class="material-symbols-outlined text-sm text-[#416900] font-bold">check</span>
+                                <x-lucide-check x-show="selectedVal === item.val" class="w-4 h-4 text-[#416900] font-bold shrink-0" />
                             </button>
                         </template>
                     </div>
@@ -181,7 +181,7 @@
                 </div>
 
                 <button type="submit" class="w-full py-3.5 px-6 rounded-2xl bg-[#1a146b] hover:bg-[#282094] text-white font-headline font-bold text-sm shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
-                    <span class="material-symbols-outlined text-base">send</span>
+                    <x-lucide-send class="w-4 h-4 shrink-0" />
                     <span>Kirim Pesan Sekarang</span>
                 </button>
             </form>

@@ -85,7 +85,7 @@
                                 {{ Auth::user()->nama ?? Auth::user()->name ?? 'Pengguna' }}
                             </span>
 
-                            <span class="material-symbols-outlined text-gray-400 text-sm">expand_more</span>
+                            <x-lucide-chevron-down class="text-gray-400 w-4 h-4 shrink-0" />
                         </button>
 
                         <div
@@ -107,25 +107,25 @@
 
                             @if (Auth::user()->role === 'admin')
                                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">space_dashboard</span>
+                                    <x-lucide-layout-dashboard class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Dashboard Admin</span>
                                 </a>
                             @elseif (Auth::user()->role === 'kasir')
                                 <a href="{{ route('kasir.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">point_of_sale</span>
+                                    <x-lucide-calculator class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Portal Kasir POS</span>
                                 </a>
                             @else
                                 <a href="{{ route('pelanggan.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b] {{ request()->routeIs('pelanggan.dashboard') ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : '' }}">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">account_circle</span>
+                                    <x-lucide-circle-user class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Profil &amp; Pengaturan Akun</span>
                                 </a>
                                 <a href="{{ route('pelanggan.booking.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : '' }}">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">receipt_long</span>
+                                    <x-lucide-receipt-text class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Riwayat Booking &amp; Jadwal</span>
                                 </a>
                                 <a href="{{ route('katalog.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">sports_soccer</span>
+                                    <x-lucide-dribbble class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Cari &amp; Pesan Lapangan</span>
                                 </a>
                             @endif
@@ -135,7 +135,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full text-left flex items-center gap-2.5 px-4 py-2 font-bold text-red-600 hover:bg-red-50 transition cursor-pointer">
-                                    <span class="material-symbols-outlined text-base">logout</span>
+                                    <x-lucide-log-out class="w-4 h-4 shrink-0" />
                                     <span>Keluar (Log Out)</span>
                                 </button>
                             </form>

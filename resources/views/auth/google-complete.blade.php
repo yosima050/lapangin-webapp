@@ -5,7 +5,7 @@
         <div class="max-w-xl mx-auto w-full flex items-center justify-between mb-6">
             <a href="{{ route('login') }}"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Batal &amp; Kembali</span>
             </a>
 
@@ -42,7 +42,7 @@
                     </div>
 
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold mb-3 border border-emerald-200">
-                        <span class="material-symbols-outlined text-xs">verified</span>
+                        <x-lucide-badge-check class="w-3.5 h-3.5 shrink-0" />
                         <span>Akun Google Terverifikasi</span>
                     </div>
 
@@ -65,9 +65,7 @@
                             NAMA LENGKAP
                         </label>
                         <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                            <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                badge
-                            </span>
+                            <x-lucide-badge-check class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                             <input
                                 id="nama"
                                 type="text"
@@ -79,7 +77,7 @@
                         </div>
                         @if ($errors->has('nama'))
                             <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
+                                <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                 <span>{{ $errors->first('nama') }}</span>
                             </p>
                         @endif
@@ -92,14 +90,12 @@
                                 EMAIL GOOGLE
                             </label>
                             <span class="text-[11px] font-bold text-emerald-600 inline-flex items-center gap-0.5">
-                                <span class="material-symbols-outlined text-xs">check_circle</span>
+                                <x-lucide-circle-check class="w-3.5 h-3.5 shrink-0" />
                                 Terhubung
                             </span>
                         </div>
                         <div class="relative rounded-xl bg-gray-50 border border-gray-200">
-                            <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                mail
-                            </span>
+                            <x-lucide-mail class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                             <input
                                 type="email"
                                 value="{{ $googleUser['email'] }}"
@@ -121,7 +117,7 @@
 
                         <div class="flex items-center rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition overflow-hidden">
                             <span class="inline-flex items-center gap-1 px-3.5 py-3 bg-[#e2edff] text-xs font-bold text-[#1a146b] shrink-0 border-r border-[#dce9ff]">
-                                <span class="material-symbols-outlined text-sm">chat</span>
+                                <x-lucide-message-circle class="w-4 h-4 shrink-0" />
                                 <span>+62</span>
                             </span>
                             <input
@@ -139,13 +135,13 @@
 
                         @if ($errors->has('no_hp'))
                             <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
+                                <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                 <span>{{ $errors->first('no_hp') }}</span>
                             </p>
                         @endif
 
                         <p class="text-[11px] text-gray-500 mt-1.5 flex items-start gap-1 leading-normal">
-                            <span class="material-symbols-outlined text-xs text-[#416900] mt-0.5">info</span>
+                            <x-lucide-info class="w-3.5 h-3.5 text-[#416900] mt-0.5 shrink-0" />
                             <span>Nomor ini penting untuk verifikasi tiket masuk dan notifikasi jadwal bertanding di arena.</span>
                         </p>
                     </div>

@@ -71,7 +71,7 @@
                             href="{{ route('katalog.index') }}"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-sm shadow-lg shadow-[#1a146b]/20 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
                         >
-                            <span class="material-symbols-outlined text-base">search</span>
+                            <x-lucide-search class="w-4 h-4 shrink-0" />
                             <span>Cari Lapangan Sekarang</span>
                         </a>
 
@@ -80,7 +80,7 @@
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-gray-300 hover:border-[#1a146b] text-gray-700 hover:text-[#1a146b] font-headline font-semibold text-sm bg-white/80 hover:bg-white transition-all duration-200"
                         >
                             <span>Pelajari Alur Booking</span>
-                            <span class="material-symbols-outlined text-base">arrow_downward</span>
+                            <x-lucide-arrow-down class="w-4 h-4 shrink-0" />
                         </a>
                     </div>
 
@@ -176,7 +176,7 @@
                                             <a href="{{ $slide['url'] }}"
                                                class="mt-6 inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#acf847] hover:bg-[#9de837] text-[#102000] font-headline font-black text-xs shadow-lg shadow-[#acf847]/30 hover:shadow-[#acf847]/50 border border-[#bbf968] transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
                                                 <span>Cek jadwal dan booking disini!</span>
-                                                <span class="material-symbols-outlined text-sm font-black">arrow_forward</span>
+                                                <x-lucide-arrow-right class="w-4 h-4 font-black shrink-0" />
                                             </a>
                                         </div>
 
@@ -198,7 +198,7 @@
                                         aria-label="Slide Sebelumnya"
                                         class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
                                         title="Slide Sebelumnya">
-                                    <span class="material-symbols-outlined text-base">chevron_left</span>
+                                    <x-lucide-chevron-left class="w-4 h-4 shrink-0" />
                                 </button>
 
                                 <button type="button"
@@ -206,7 +206,7 @@
                                         aria-label="Slide Selanjutnya"
                                         class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
                                         title="Slide Selanjutnya">
-                                    <span class="material-symbols-outlined text-base">chevron_right</span>
+                                    <x-lucide-chevron-right class="w-4 h-4 shrink-0" />
                                 </button>
                             </div>
 
@@ -250,7 +250,7 @@
                 {{-- USP Card 1 --}}
                 <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
                     <div class="w-12 h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <span class="material-symbols-outlined text-[24px]">sports_soccer</span>
+                        <x-lucide-dribbble class="w-6 h-6 shrink-0" />
                     </div>
                     <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Standar Lantai AFC</h3>
                     <p class="text-sm text-gray-600 leading-relaxed">
@@ -261,7 +261,7 @@
                 {{-- USP Card 2 --}}
                 <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
                     <div class="w-12 h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <span class="material-symbols-outlined text-[24px]">payments</span>
+                        <x-lucide-banknote class="w-6 h-6 shrink-0" />
                     </div>
                     <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Sistem Pembayaran DP 50%</h3>
                     <p class="text-sm text-gray-600 leading-relaxed">
@@ -272,7 +272,7 @@
                 {{-- USP Card 3 --}}
                 <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
                     <div class="w-12 h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+                        <x-lucide-scan-line class="w-6 h-6 shrink-0" />
                     </div>
                     <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Check-in Cepat QR Code</h3>
                     <p class="text-sm text-gray-600 leading-relaxed">
@@ -283,7 +283,7 @@
                 {{-- USP Card 4 --}}
                 <div class="p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
                     <div class="w-12 h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-5 shadow-sm">
-                        <span class="material-symbols-outlined text-[24px]">schedule</span>
+                        <x-lucide-clock class="w-6 h-6 shrink-0" />
                     </div>
                     <h3 class="text-lg font-headline font-bold text-[#1a146b] mb-2">Ketersediaan Real-Time</h3>
                     <p class="text-sm text-gray-600 leading-relaxed">
@@ -310,7 +310,7 @@
                         class="inline-flex items-center gap-1.5 text-sm font-headline font-bold text-[#1a146b] hover:text-[#416900] transition-colors"
                     >
                         <span>Lihat Semua Lapangan</span>
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
                     </a>
                 </div>
             </div>
@@ -344,7 +344,7 @@
                                 href="{{ route('katalog.index', ['kategori' => 'Futsal']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
                             >
-                                Explore <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                                Explore <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                             </a>
                         </div>
                     </div>
@@ -378,7 +378,7 @@
                                 href="{{ route('katalog.index', ['kategori' => 'Badminton']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
                             >
-                                Explore <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                                Explore <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                             </a>
                         </div>
                     </div>
@@ -412,7 +412,7 @@
                                 href="{{ route('katalog.index', ['kategori' => 'Basket']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
                             >
-                                Explore <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                                Explore <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                             </a>
                         </div>
                     </div>
@@ -446,7 +446,7 @@
                                 href="{{ route('katalog.index', ['kategori' => 'Mini Soccer']) }}"
                                 class="inline-flex items-center gap-1 text-xs font-headline font-bold text-[#1a146b] hover:text-[#416900]"
                             >
-                                Explore <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                                Explore <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                             </a>
                         </div>
                     </div>
@@ -515,7 +515,7 @@
 
                 <div class="relative z-10 max-w-3xl mx-auto text-center space-y-6">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-[#acf847] text-xs font-semibold">
-                        <span class="material-symbols-outlined text-sm">app_registration</span>
+                        <x-lucide-user-plus class="w-4 h-4 shrink-0" />
                         Gabung Komunitas LapangIn
                     </div>
 
@@ -533,7 +533,7 @@
                                 href="{{ route('katalog.index') }}"
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#acf847] hover:bg-[#9de437] text-[#1a146b] font-headline font-bold text-sm shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
                             >
-                                <span class="material-symbols-outlined text-base">sports</span>
+                                <x-lucide-trophy class="w-4 h-4 shrink-0" />
                                 <span>Cari Lapangan Sekarang</span>
                             </a>
                         @else
@@ -541,7 +541,7 @@
                                 href="{{ route('register') }}"
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#acf847] hover:bg-[#9de437] text-[#1a146b] font-headline font-bold text-sm shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
                             >
-                                <span class="material-symbols-outlined text-base">person_add</span>
+                                <x-lucide-user-plus class="w-4 h-4 shrink-0" />
                                 <span>Daftar Akun Gratis</span>
                             </a>
 
@@ -550,7 +550,7 @@
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/30 hover:border-white text-white font-headline font-semibold text-sm bg-white/10 hover:bg-white/20 transition-all duration-200 cursor-pointer"
                             >
                                 <span>Jelajahi Dulu</span>
-                                <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
                             </a>
                         @endauth
                     </div>

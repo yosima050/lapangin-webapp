@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
         <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">home</span>
+            <x-lucide-house class="w-4 h-4 shrink-0" />
             <span>Beranda</span>
         </a>
         <span>/</span>
@@ -20,7 +20,7 @@
 
         <header class="border-b border-gray-100 pb-5">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eff4ff] text-[#1a146b] text-xs font-black uppercase tracking-wider mb-2">
-                <span class="material-symbols-outlined text-sm">gavel</span>
+                <x-lucide-gavel class="w-4 h-4 shrink-0" />
                 SYARAT &amp; KETENTUAN PENGGUNA
             </div>
             <h1 class="text-2xl sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight">
@@ -60,7 +60,7 @@
 
         <footer class="pt-6 border-t border-gray-100 flex items-center justify-between">
             <a href="{{ route('home') }}" class="text-xs font-bold text-[#1a146b] hover:underline flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">home</span>
+                <x-lucide-house class="w-4 h-4 shrink-0" />
                 <span>Kembali ke Beranda</span>
             </a>
             <a href="{{ route('kebijakan.privasi') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900">
