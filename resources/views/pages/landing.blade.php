@@ -40,6 +40,11 @@
     }
 
     $heroLcpImage = $carouselSlides[0]['foto'] ?? null;
+    $heroCategories = isset($lapangans) && $lapangans->isNotEmpty()
+        ? $lapangans->pluck('kategori')->filter()->unique()->sort()->values()
+        : collect(['Futsal', 'Badminton', 'Futsal & Basket']);
+    $todayDate = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+    $totalLapanganAktif = isset($lapangans) ? $lapangans->count() : count($carouselSlides);
 @endphp
 
 @push('head')
@@ -51,185 +56,363 @@
 @section('content')
 <div class="bg-[#f8f9ff] text-[#0b1c30]">
 
-    {{-- 1. Hero Section --}}
-    <section class="relative overflow-hidden bg-gradient-to-b from-[#1a146b]/5 via-transparent to-transparent pt-8 pb-16 lg:pt-12 lg:pb-24">
+    {{-- 1. Photo-First Editorial Sports Arena Hero + Quick-Book Dock --}}
+    <section class="relative pt-4 pb-10 sm:pt-6 sm:pb-16 lg:pt-8 lg:pb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-                
-                {{-- Hero Copy --}}
-                <div class="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-headline font-black text-[#1a146b] tracking-tight leading-[1.15]">
-                        Booking Lapangan Olahraga <span class="text-[#416900]">Cepat, Mudah,</span> dan Terjadwal
-                    </h1>
 
-                    <p class="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed">
-                        Cek jadwal real-time, pilih lapangan standar kompetisi, dan amankan slot bermain Anda cukup dengan DP 50%. Bebas antre, langsung main!
-                    </p>
-
-                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2 w-full sm:w-auto">
-                        <a
-                            href="{{ route('katalog.index') }}"
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-sm shadow-lg shadow-[#1a146b]/20 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                        >
-                            <x-lucide-search class="w-4 h-4 shrink-0" />
-                            <span>Cari Lapangan Sekarang</span>
-                        </a>
-
-                        <a
-                            href="#cara-kerja"
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-gray-300 hover:border-[#1a146b] text-gray-700 hover:text-[#1a146b] font-headline font-semibold text-sm bg-white/80 hover:bg-white transition-all duration-200"
-                        >
-                            <span>Pelajari Alur Booking</span>
-                            <x-lucide-arrow-down class="w-4 h-4 shrink-0" />
-                        </a>
-                    </div>
-
-                    {{-- Quick Social Proof Metrics --}}
-                    <div class="grid grid-cols-3 gap-6 sm:gap-10 pt-6 border-t border-gray-200/80 w-full max-w-lg">
-                        <div>
-                            <p class="text-2xl sm:text-3xl font-headline font-black text-[#1a146b]">100%</p>
-                            <p class="text-xs text-gray-500 font-medium mt-0.5">Jadwal Real-Time</p>
-                        </div>
-                        <div>
-                            <p class="text-2xl sm:text-3xl font-headline font-black text-[#1a146b]">50%</p>
-                            <p class="text-xs text-gray-500 font-medium mt-0.5">Bisa DP Dahulu</p>
-                        </div>
-                        <div>
-                            <p class="text-2xl sm:text-3xl font-headline font-black text-[#1a146b]">QR Code</p>
-                            <p class="text-xs text-gray-500 font-medium mt-0.5">Check-in Kilat</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-5 relative w-full"
-                     x-data="{
-                        currentSlide: 0,
-                        totalSlides: {{ count($carouselSlides) }},
-                        timer: null,
-                        init() {
-                            this.timer = setInterval(() => {
-                                this.next();
-                            }, 5000);
-                        },
-                        next() {
-                            this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
-                        },
-                        prev() {
-                            this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+            {{-- Full-Bleed Arena Photo Showcase --}}
+            <div class="relative rounded-3xl overflow-hidden bg-[#0e0a3c] shadow-xl border border-[#1a146b]/15 select-none"
+                 x-data="{
+                    currentSlide: 0,
+                    totalSlides: {{ count($carouselSlides) }},
+                    timer: null,
+                    init() {
+                        if (this.totalSlides > 1) {
+                            this.timer = setInterval(() => this.next(), 5500);
                         }
-                     }"
-                     @mouseenter="clearInterval(timer)"
-                     @mouseleave="timer = setInterval(() => next(), 5000)">
+                    },
+                    next() {
+                        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+                    },
+                    prev() {
+                        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+                    }
+                 }"
+                 @mouseenter="if (timer) clearInterval(timer)"
+                 @mouseleave="if (totalSlides > 1) timer = setInterval(() => next(), 5500)">
 
-                    <div class="relative mx-auto max-w-md lg:max-w-none">
-                        {{-- Background Accent Glow --}}
-                        <div class="absolute -top-6 -right-6 w-60 h-60 bg-[#acf847]/30 rounded-full blur-3xl pointer-events-none"></div>
-                        <div class="absolute -bottom-6 -left-6 w-60 h-60 bg-[#1a146b]/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative w-full h-[330px] sm:h-[420px] lg:h-[460px] overflow-hidden">
+                    @foreach ($carouselSlides as $idx => $slide)
+                        <div x-show="currentSlide === {{ $idx }}"
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 scale-[1.02]"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0"
+                             class="absolute inset-0 w-full h-full"
+                             style="{{ $idx > 0 ? 'display: none;' : '' }}">
 
-                        {{-- Main Billboard Container --}}
-                        <div class="relative rounded-3xl overflow-hidden border border-white/80 shadow-2xl bg-gray-950 group select-none">
-                            <div class="relative w-full overflow-hidden" style="height: 380px; min-height: 380px;">
+                            <img src="{{ $slide['foto'] }}"
+                                 alt="{{ $slide['nama'] }}"
+                                 width="1200"
+                                 height="600"
+                                 fetchpriority="{{ $idx === 0 ? 'high' : 'low' }}"
+                                 @if($idx === 0)
+                                    decoding="sync"
+                                 @else
+                                    loading="lazy"
+                                    decoding="async"
+                                 @endif
+                                 class="w-full h-full object-cover object-center"
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&h=600&fm=webp&q=75';">
 
-                                @foreach ($carouselSlides as $idx => $slide)
-                                    <div x-show="currentSlide === {{ $idx }}"
-                                         x-transition:enter="transition ease-out duration-500"
-                                         x-transition:enter-start="opacity-0 scale-95"
-                                         x-transition:enter-end="opacity-100 scale-100"
-                                         x-transition:leave="transition ease-in duration-300"
-                                         x-transition:leave-start="opacity-100 scale-100"
-                                         x-transition:leave-end="opacity-0 scale-95"
-                                         class="absolute inset-0 w-full h-full"
-                                         style="{{ $idx > 0 ? 'display: none;' : '' }}">
+                            {{-- Directional Editorial Scrim (Jaga keterbacaan teks tanpa menutupi atmosfer lapangan) --}}
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0b082e]/95 via-[#0b082e]/45 to-black/20"></div>
+                            <div class="hidden sm:block absolute inset-0 bg-gradient-to-r from-[#0b082e]/85 via-[#0b082e]/30 to-transparent"></div>
 
-                                        {{-- Image Background (Hero Slide: Prioritas tertinggi untuk LCP, lazy untuk slide selanjutnya) --}}
-                                        <img src="{{ $slide['foto'] }}"
-                                             alt="{{ $slide['nama'] }}"
-                                             width="800"
-                                             height="480"
-                                             fetchpriority="{{ $idx === 0 ? 'high' : 'low' }}"
-                                             @if($idx === 0)
-                                                decoding="sync"
-                                             @else
-                                                loading="lazy"
-                                                decoding="async"
-                                             @endif
-                                             class="w-full h-full object-cover object-center filter brightness-[0.78] contrast-[1.05]"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&h=480&fm=webp&q=75';">
+                            {{-- Top Bar Overlay: Kategori Lapangan Aktif & Link Langsung --}}
+                            <div class="absolute top-4 left-4 right-4 sm:top-6 sm:left-8 sm:right-8 z-10 flex items-center justify-between gap-2">
+                                <a href="{{ $slide['url'] }}"
+                                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-md border border-white/15 text-white text-[11px] font-bold transition max-w-[75%]">
+                                    <span class="w-2 h-2 rounded-full bg-[#acf847] shrink-0"></span>
+                                    <span class="truncate">{{ $slide['nama'] }}</span>
+                                    <x-lucide-arrow-up-right class="w-3.5 h-3.5 text-[#acf847] shrink-0" />
+                                </a>
 
-                                        {{-- Dark Vignette Gradient --}}
-                                        <div class="absolute inset-0 bg-gradient-to-t from-[#0e0a40]/95 via-[#1a146b]/40 to-black/30"></div>
-
-                                        {{-- Header Brand Badge Overlay (Kiri Atas) --}}
-                                        <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
-                                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1a146b]/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-black tracking-wider uppercase shadow-sm">
-                                                <span class="w-2 h-2 rounded-full bg-[#acf847]"></span>
-                                                <span class="text-white">{{ $slide['kategori'] }}</span>
-                                            </div>
-                                        </div>
-
-                                        {{-- Center Billboard Content (Posisi Tengah Elegan) --}}
-                                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
-                                            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-headline font-black text-white tracking-tight drop-shadow-[0_4px_14px_rgba(10,5,50,0.95)] leading-tight max-w-sm">
-                                                {{ $slide['nama'] }}
-                                            </h3>
-
-                                            <a href="{{ $slide['url'] }}"
-                                               class="mt-6 inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#acf847] hover:bg-[#9de837] text-[#102000] font-headline font-black text-xs shadow-lg shadow-[#acf847]/30 hover:shadow-[#acf847]/50 border border-[#bbf968] transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer">
-                                                <span>Cek jadwal dan booking disini!</span>
-                                                <x-lucide-arrow-right class="w-4 h-4 font-black shrink-0" />
-                                            </a>
-                                        </div>
-
-                                        {{-- Watermark Pojok Kanan Bawah --}}
-                                        <div class="absolute bottom-4 right-4 z-10 pointer-events-none opacity-80 hidden sm:block text-right">
-                                            <span class="text-[10px] font-black tracking-widest text-white/90 uppercase block drop-shadow-md">
-                                                MAIN MAKIN
-                                            </span>
-                                            <span class="text-xs font-black tracking-wider text-[#acf847] uppercase block drop-shadow-md -mt-1">
-                                                MUDAH!
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endforeach
-
-                                {{-- Slider Navigation Arrow Buttons --}}
-                                <button type="button"
-                                        @click="prev()"
-                                        aria-label="Slide Sebelumnya"
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
-                                        title="Slide Sebelumnya">
-                                    <x-lucide-chevron-left class="w-4 h-4 shrink-0" />
-                                </button>
-
-                                <button type="button"
-                                        @click="next()"
-                                        aria-label="Slide Selanjutnya"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition shadow-md cursor-pointer"
-                                        title="Slide Selanjutnya">
-                                    <x-lucide-chevron-right class="w-4 h-4 shrink-0" />
-                                </button>
-                            </div>
-
-                            {{-- Slider Pagination Dots (Bawah) dengan area klik yang memenuhi standar aksesibilitas --}}
-                            <div class="py-2.5 bg-black/80 backdrop-blur-md border-t border-white/10 flex items-center justify-center gap-1">
-                                @foreach ($carouselSlides as $idx => $slide)
+                                <div class="hidden sm:flex items-center gap-1.5">
                                     <button type="button"
-                                            @click="currentSlide = {{ $idx }}"
-                                            aria-label="Pindah ke Slide {{ $idx + 1 }}"
-                                            class="p-2 flex items-center justify-center cursor-pointer group">
-                                        <span class="h-2 rounded-full transition-all duration-300 block"
-                                              :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-2 bg-white/40 group-hover:bg-white/70'"></span>
+                                            @click="prev()"
+                                            aria-label="Slide Sebelumnya"
+                                            class="w-8 h-8 rounded-full bg-black/40 hover:bg-black/65 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                                        <x-lucide-chevron-left class="w-4 h-4" />
                                     </button>
-                                @endforeach
+                                    <button type="button"
+                                            @click="next()"
+                                            aria-label="Slide Selanjutnya"
+                                            class="w-8 h-8 rounded-full bg-black/40 hover:bg-black/65 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                                        <x-lucide-chevron-right class="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Editorial Left-Aligned Copy Overlay (di atas foto arena) --}}
+                    <div class="absolute inset-x-0 bottom-0 z-10 p-5 pb-12 sm:p-8 sm:pb-16 lg:p-10 lg:pb-16 flex flex-col justify-end pointer-events-none">
+                        <div class="max-w-xl space-y-2 sm:space-y-3">
+                            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-headline font-black text-white tracking-tight leading-[1.12]">
+                                Pesan Lapangan.<br>
+                                <span class="text-[#acf847]">Langsung Main.</span>
+                            </h1>
+                            <p class="text-xs sm:text-base text-indigo-100/90 leading-relaxed max-w-md">
+                                Cek slot kosong real-time, kunci jadwal mulai DP 50%, dan check-in di gerbang cukup pakai QR Code.
+                            </p>
+                        </div>
+
+                        {{-- Slide Dots (Pojok Kanan Bawah di Desktop, Bawah Kiri di HP) --}}
+                        <div class="mt-3.5 sm:mt-0 sm:absolute sm:bottom-14 sm:right-8 lg:right-10 flex items-center gap-1.5 pointer-events-auto">
+                            @foreach ($carouselSlides as $idx => $slide)
+                                <button type="button"
+                                        @click="currentSlide = {{ $idx }}"
+                                        aria-label="Pindah ke Slide {{ $idx + 1 }}"
+                                        class="py-1 cursor-pointer">
+                                    <span class="block h-1.5 rounded-full transition-all duration-300"
+                                          :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-1.5 bg-white/45 hover:bg-white/75'"></span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Floating Interactive Quick-Book Search Dock (Custom Dropdown & Calendar, Tanpa Popup Bawaan Browser) --}}
+            <div class="relative z-20 -mt-7 sm:-mt-9 mx-2 sm:mx-6 lg:mx-10"
+                 x-data="{
+                    katOpen: false,
+                    dateOpen: false,
+                    selectedKat: '',
+                    todayStr: '{{ $todayDate }}',
+                    selectedDate: '{{ $todayDate }}',
+                    viewYear: {{ \Carbon\Carbon::parse($todayDate)->year }},
+                    viewMonth: {{ \Carbon\Carbon::parse($todayDate)->month - 1 }},
+                    monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                    shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                    dayHeaders: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                    formatISO(y, m, d) {
+                        return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                    },
+                    addDays(iso, days) {
+                        const [y, m, d] = iso.split('-').map(Number);
+                        const dt = new Date(y, m - 1, d + days);
+                        return this.formatISO(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                    },
+                    get dateLabel() {
+                        const [y, m, d] = this.selectedDate.split('-').map(Number);
+                        const dt = new Date(y, m - 1, d);
+                        const tomorrowStr = this.addDays(this.todayStr, 1);
+                        if (this.selectedDate === this.todayStr) {
+                            return 'Hari Ini • ' + d + ' ' + this.shortMonths[m - 1];
+                        }
+                        if (this.selectedDate === tomorrowStr) {
+                            return 'Besok • ' + d + ' ' + this.shortMonths[m - 1];
+                        }
+                        return this.dayHeaders[dt.getDay()] + ', ' + d + ' ' + this.shortMonths[m - 1] + ' ' + y;
+                    },
+                    get canPrevMonth() {
+                        const [ty, tm] = this.todayStr.split('-').map(Number);
+                        return this.viewYear > ty || (this.viewYear === ty && this.viewMonth > (tm - 1));
+                    },
+                    prevMonth() {
+                        if (!this.canPrevMonth) return;
+                        if (this.viewMonth === 0) { this.viewMonth = 11; this.viewYear--; }
+                        else { this.viewMonth--; }
+                    },
+                    nextMonth() {
+                        if (this.viewMonth === 11) { this.viewMonth = 0; this.viewYear++; }
+                        else { this.viewMonth++; }
+                    },
+                    get calendarCells() {
+                        const firstDay = new Date(this.viewYear, this.viewMonth, 1).getDay();
+                        const daysInMonth = new Date(this.viewYear, this.viewMonth + 1, 0).getDate();
+                        const cells = [];
+                        for (let i = 0; i < firstDay; i++) cells.push(null);
+                        for (let d = 1; d <= daysInMonth; d++) {
+                            const iso = this.formatISO(this.viewYear, this.viewMonth, d);
+                            cells.push({
+                                day: d,
+                                iso,
+                                disabled: iso < this.todayStr,
+                                isToday: iso === this.todayStr,
+                                isSelected: iso === this.selectedDate,
+                            });
+                        }
+                        return cells;
+                    },
+                    pickDate(iso) {
+                        if (iso < this.todayStr) return;
+                        this.selectedDate = iso;
+                        const [y, m] = iso.split('-').map(Number);
+                        this.viewYear = y;
+                        this.viewMonth = m - 1;
+                        this.dateOpen = false;
+                    }
+                 }"
+                 @keydown.escape.window="katOpen = false; dateOpen = false">
+                <form method="GET"
+                      action="{{ route('katalog.index') }}"
+                      class="rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/10 p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-end">
+
+                    {{-- Pilih Cabang Olahraga (Custom Dropdown) --}}
+                    <div class="sm:col-span-5 relative" @click.outside="katOpen = false">
+                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1 px-1">
+                            Cabang Olahraga
+                        </label>
+                        <input type="hidden" name="kategori" :value="selectedKat">
+                        <button type="button"
+                                @click="katOpen = !katOpen; dateOpen = false"
+                                :aria-expanded="katOpen"
+                                class="w-full flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-3 text-left text-xs sm:text-sm font-bold text-[#0b1c30] transition cursor-pointer"
+                                :class="katOpen ? 'border-[#1a146b] bg-white ring-1 ring-[#1a146b]' : 'border-gray-200 bg-[#f8faff] hover:border-gray-300'">
+                            <span class="flex items-center gap-2.5 min-w-0">
+                                <x-lucide-dribbble class="w-4 h-4 text-[#1a146b] shrink-0" />
+                                <span class="truncate" x-text="selectedKat || 'Semua Olahraga'"></span>
+                            </span>
+                            <x-lucide-chevron-down class="w-4 h-4 shrink-0 transition-transform duration-200"
+                                                   ::class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'" />
+                        </button>
+
+                        {{-- Panel Pilihan Cabang Olahraga --}}
+                        <div x-show="katOpen"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 -translate-y-1 scale-[0.98]"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 -translate-y-1 scale-[0.98]"
+                             class="absolute left-0 right-0 mt-1.5 z-40 rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/12 p-1.5 space-y-0.5 max-h-60 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                            <button type="button"
+                                    @click="selectedKat = ''; katOpen = false"
+                                    class="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-xs sm:text-sm transition cursor-pointer"
+                                    :class="selectedKat === '' ? 'bg-[#1a146b] text-white font-bold shadow-xs' : 'text-[#0b1c30] font-semibold hover:bg-[#f4f7ff] hover:text-[#1a146b]'">
+                                <span>Semua Olahraga</span>
+                                <x-lucide-check x-show="selectedKat === ''" class="w-4 h-4 text-[#acf847] shrink-0" />
+                            </button>
+                            @foreach ($heroCategories as $kat)
+                                <button type="button"
+                                        @click="selectedKat = @js($kat); katOpen = false"
+                                        class="w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-xs sm:text-sm transition cursor-pointer"
+                                        :class="selectedKat === @js($kat) ? 'bg-[#1a146b] text-white font-bold shadow-xs' : 'text-[#0b1c30] font-semibold hover:bg-[#f4f7ff] hover:text-[#1a146b]'">
+                                    <span class="truncate">{{ $kat }}</span>
+                                    <x-lucide-check x-show="selectedKat === @js($kat)" class="w-4 h-4 text-[#acf847] shrink-0" />
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Pilih Tanggal Main (Custom Calendar Popover) --}}
+                    <div class="sm:col-span-4 relative" @click.outside="dateOpen = false">
+                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1 px-1">
+                            Tanggal Main
+                        </label>
+                        <input type="hidden" name="tanggal" :value="selectedDate">
+                        <button type="button"
+                                @click="dateOpen = !dateOpen; katOpen = false"
+                                :aria-expanded="dateOpen"
+                                class="w-full flex items-center justify-between gap-2 rounded-xl border py-2.5 pl-3 pr-3 text-left text-xs sm:text-sm font-bold text-[#0b1c30] transition cursor-pointer"
+                                :class="dateOpen ? 'border-[#1a146b] bg-white ring-1 ring-[#1a146b]' : 'border-gray-200 bg-[#f8faff] hover:border-gray-300'">
+                            <span class="flex items-center gap-2.5 min-w-0">
+                                <x-lucide-calendar-days class="w-4 h-4 text-[#1a146b] shrink-0" />
+                                <span class="truncate" x-text="dateLabel"></span>
+                            </span>
+                            <x-lucide-chevron-down class="w-4 h-4 shrink-0 transition-transform duration-200"
+                                                   ::class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'" />
+                        </button>
+
+                        {{-- Panel Kalender Custom --}}
+                        <div x-show="dateOpen"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 -translate-y-1 scale-[0.98]"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 -translate-y-1 scale-[0.98]"
+                             class="absolute left-0 right-0 sm:right-auto sm:w-[292px] mt-1.5 z-40 rounded-2xl bg-white border border-gray-200/90 shadow-xl shadow-[#0b1c30]/12 p-3">
+                            {{-- Pintasan Cepat --}}
+                            <div class="grid grid-cols-2 gap-1.5 mb-3">
+                                <button type="button"
+                                        @click="pickDate(todayStr)"
+                                        class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                        :class="selectedDate === todayStr ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                    Hari Ini
+                                </button>
+                                <button type="button"
+                                        @click="pickDate(addDays(todayStr, 1))"
+                                        class="rounded-lg py-1.5 text-[11px] font-bold transition cursor-pointer"
+                                        :class="selectedDate === addDays(todayStr, 1) ? 'bg-[#1a146b] text-white' : 'bg-[#f4f7ff] text-[#1a146b] hover:bg-[#e6eeff]'">
+                                    Besok
+                                </button>
+                            </div>
+
+                            {{-- Header Bulan --}}
+                            <div class="flex items-center justify-between mb-2 px-0.5">
+                                <button type="button"
+                                        @click="prevMonth()"
+                                        :disabled="!canPrevMonth"
+                                        aria-label="Bulan sebelumnya"
+                                        class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] transition"
+                                        :class="canPrevMonth ? 'hover:bg-[#f4f7ff] cursor-pointer' : 'opacity-30 cursor-not-allowed'">
+                                    <x-lucide-chevron-left class="w-4 h-4" />
+                                </button>
+                                <span class="text-xs font-extrabold text-[#0b1c30]" x-text="monthNames[viewMonth] + ' ' + viewYear"></span>
+                                <button type="button"
+                                        @click="nextMonth()"
+                                        aria-label="Bulan berikutnya"
+                                        class="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-gray-200 text-[#1a146b] hover:bg-[#f4f7ff] transition cursor-pointer">
+                                    <x-lucide-chevron-right class="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {{-- Nama Hari --}}
+                            <div class="grid grid-cols-7 gap-0.5 text-center mb-1">
+                                <template x-for="dh in dayHeaders" :key="dh">
+                                    <span class="text-[10px] font-bold text-gray-400 py-1" x-text="dh"></span>
+                                </template>
+                            </div>
+
+                            {{-- Grid Tanggal --}}
+                            <div class="grid grid-cols-7 gap-0.5">
+                                <template x-for="(cell, idx) in calendarCells" :key="idx">
+                                    <div class="flex items-center justify-center">
+                                        <template x-if="cell">
+                                            <button type="button"
+                                                    @click="pickDate(cell.iso)"
+                                                    :disabled="cell.disabled"
+                                                    class="h-8 w-8 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition relative"
+                                                    :class="cell.disabled
+                                                        ? 'text-gray-300 cursor-not-allowed'
+                                                        : (cell.isSelected
+                                                            ? 'bg-[#1a146b] text-white shadow-xs ring-2 ring-[#acf847]/70 cursor-pointer'
+                                                            : (cell.isToday
+                                                                ? 'bg-[#eff4ff] text-[#1a146b] hover:bg-[#dfe9ff] cursor-pointer'
+                                                                : 'text-[#0b1c30] hover:bg-[#f4f7ff] hover:text-[#1a146b] cursor-pointer'))">
+                                                <span x-text="cell.day"></span>
+                                                <span x-show="cell.isToday && !cell.isSelected" class="absolute bottom-1 h-1 w-1 rounded-full bg-[#416900]"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
-                </div>
-                        </div>
-                    </div>
-                </div>
 
+                    {{-- Submit CTA --}}
+                    <div class="sm:col-span-3">
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] active:scale-[0.98] px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold text-white shadow-md shadow-[#1a146b]/20 transition cursor-pointer">
+                            <x-lucide-search class="w-4 h-4 text-[#acf847] shrink-0" />
+                            <span>Cari Jadwal</span>
+                        </button>
+                    </div>
+                </form>
+
+                {{-- Quick Action Strip di Bawah Dock --}}
+                <div class="mt-3.5 flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+                    <a href="{{ route('jadwal.index') }}"
+                       class="inline-flex items-center gap-1.5 font-bold text-[#1a146b] hover:underline">
+                        <x-lucide-clock class="w-3.5 h-3.5 text-[#416900] shrink-0" />
+                        <span>Lihat Matriks Jadwal Hari Ini</span>
+                        <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
+                    </a>
+                    <a href="{{ route('katalog.index') }}"
+                       class="text-[11px] sm:text-xs font-semibold text-gray-500 hover:text-[#1a146b] transition">
+                        {{ $totalLapanganAktif }} Lapangan Aktif &bull; Lihat Semua
+                    </a>
+                </div>
             </div>
+
         </div>
     </section>
 

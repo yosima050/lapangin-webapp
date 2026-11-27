@@ -1,5 +1,7 @@
 {{-- Unified Responsive Navigation Bar untuk Pelanggan LapangIn --}}
-<div x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false">
+<div x-data="{ mobileMenuOpen: false }"
+     @keydown.escape.window="mobileMenuOpen = false"
+     @pagehide.window="mobileMenuOpen = false">
     {{-- Backdrop Redup Halus saat Mobile Menu Terbuka (mulai di bawah header agar warna putih header & drawer menyatu 100%) --}}
     <div
         x-show="mobileMenuOpen"
@@ -25,6 +27,7 @@
             {{-- Logo Brand --}}
             <a
                 href="{{ route('home') }}"
+                @click="mobileMenuOpen = false"
                 class="flex items-center shrink-0 hover:opacity-90 transition"
                 aria-label="LapangIn"
             >
@@ -186,10 +189,11 @@
     <aside
         x-show="mobileMenuOpen"
         x-cloak
-        x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-300"
+        @click="if ($event.target.closest('a, button[type=submit]')) mobileMenuOpen = false"
+        x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-250"
         x-transition:enter-start="translate-x-full"
         x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full"
         class="lg:hidden fixed top-20 right-0 bottom-0 z-50 w-[82%] max-w-[320px] bg-white text-[#0b1c30] shadow-[-12px_0_32px_rgba(11,28,48,0.10)] border-l border-gray-200/80 flex flex-col justify-between overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
