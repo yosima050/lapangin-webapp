@@ -66,28 +66,18 @@
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                        <span class="text-[11px] sm:text-xs font-black uppercase tracking-wider text-amber-900">
-                            Batas Waktu Pembayaran
-                        </span>
-                        <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-                            <span class="h-1.5 w-1.5 rounded-full bg-amber-600 animate-ping"></span>
-                            Slot Terkunci Sementara
-                        </span>
-                    </div>
+                    <span class="text-[11px] sm:text-xs font-black uppercase tracking-wider text-amber-900">
+                        Batas Waktu Pembayaran
+                    </span>
                     <p class="mt-0.5 text-[11px] sm:text-xs text-amber-800 leading-snug sm:leading-relaxed">
                         Slot waktu ini dikunci eksklusif selama 10 menit. Jika waktu habis, pesanan otomatis dibatalkan &amp; slot dibuka kembali.
                     </p>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between sm:justify-end gap-2 pt-2 border-t border-amber-200/70 sm:border-t-0 sm:pt-0 shrink-0">
-                <span class="sm:hidden inline-flex items-center gap-1.5 rounded-full bg-amber-200/80 px-2.5 py-1 text-[10px] font-bold text-amber-900">
-                    <span class="h-1.5 w-1.5 rounded-full bg-amber-600 animate-ping"></span>
-                    Slot Terkunci
-                </span>
-                <div class="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white px-3 py-1.5 sm:px-4 sm:py-2.5 border border-amber-200 shadow-xs">
-                    <span class="text-[11px] sm:text-xs font-semibold text-gray-500">Sisa:</span>
+            <div class="flex items-center justify-end shrink-0">
+                <div class="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 rounded-xl bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 border border-amber-200 shadow-xs">
+                    <span class="text-[11px] sm:text-xs font-semibold text-gray-500">Sisa<span class="sm:hidden"> Waktu</span>:</span>
                     <span id="countdown-display" class="font-mono text-base sm:text-xl font-black text-amber-900">
                         {{ sprintf('%02d:%02d', floor(($sisaDetik ?? 600) / 60), ($sisaDetik ?? 600) % 60) }}
                     </span>
@@ -523,26 +513,28 @@
             <aside class="space-y-4 lg:sticky lg:top-28 lg:col-span-5" style="position: sticky; top: 110px; height: fit-content;">
 
                 {{-- Card Ringkasan Pemesanan Utama (Sesuai Referensi Gambar 2) --}}
-                <section class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
+                <section id="checkout-summary-card" class="overflow-hidden rounded-2xl border border-[#e8edfa] bg-white shadow-md">
                     <div class="p-5 sm:p-6">
 
                         {{-- Item Header: Thumbnail + Nama Lapangan + Venue --}}
                         <div class="flex items-center gap-3.5 pb-4 border-b border-gray-100">
                             @php
-                                $thumbUrl = $lapangan->foto_utama_url 
-                                    ?? ($lapangan->images && count($lapangan->images) > 0 ? asset('storage/' . $lapangan->images[0]) : null)
-                                    ?? asset('images/default-lapangan.jpg');
+                                $thumbUrl = $lapangan->foto_thumbnail_url ?? $lapangan->foto_url;
+                                $fallbackThumb = 'https://ui-avatars.com/api/?name=' . urlencode($lapangan->nama) . '&background=1a146b&color=acf847&size=256';
+                                $kategoriLabel = is_object($lapangan->kategori) ? ($lapangan->kategori->nama ?? 'Olahraga') : ($lapangan->kategori ?: 'Olahraga');
                             @endphp
-                            <img src="{{ $thumbUrl }}" 
-                                 alt="{{ $lapangan->nama }}" 
-                                 class="h-14 w-14 rounded-xl object-cover border border-gray-100 shadow-2xs"
-                                 onerror="this.src='{{ asset('images/Logo_revisi.png') }}'">
+                            <img src="{{ $thumbUrl }}"
+                                 alt="{{ $lapangan->nama }}"
+                                 width="56"
+                                 height="56"
+                                 class="h-14 w-14 rounded-xl object-cover border border-gray-100 shadow-2xs shrink-0"
+                                 onerror="this.onerror=null; this.src='{{ $fallbackThumb }}'">
                             <div class="min-w-0 flex-1">
                                 <h3 class="truncate text-sm font-extrabold text-[#0b1c30]">
                                     {{ $lapangan->nama }}
                                 </h3>
-                                <p class="text-xs font-semibold text-[#416900] mt-0.5">
-                                    {{ $lapangan->kategori->nama ?? 'Olahraga' }} &bull; {{ $lapangan->lokasi ?? 'Venue Mitra' }}
+                                <p class="text-xs font-semibold text-[#416900] mt-0.5 truncate">
+                                    {{ $kategoriLabel }} &bull; {{ $lapangan->lokasi ?? 'Venue Mitra' }}
                                 </p>
                             </div>
                         </div>
@@ -668,10 +660,6 @@
                             <span id="pay-button-text">Pesan Sekarang!</span>
                             <span class="sr-only">Bayar Sekarang</span>
                         </button>
-
-                        <p class="mt-2.5 text-center text-[11px] text-[#777682]">
-                            Diverifikasi otomatis &amp; aman via Midtrans
-                        </p>
                     </div>
                 </section>
             </aside>
@@ -775,6 +763,19 @@
         if (activeCard) {
             activeCard.classList.remove('border-[#e8edfa]', 'bg-white');
             activeCard.classList.add('border-2', 'border-[#1a146b]', 'bg-[#eff4ff]', 'shadow-xs', 'ring-1', 'ring-[#1a146b]');
+        }
+
+        // Otomatis scroll halus ke bagian atas kartu Ringkasan Pemesanan
+        const summaryCard = document.getElementById('checkout-summary-card');
+        if (summaryCard) {
+            const rect = summaryCard.getBoundingClientRect();
+            const isCardVisible = rect.top >= 76 && rect.bottom <= window.innerHeight;
+            if (!isCardVisible) {
+                setTimeout(() => {
+                    const targetTop = summaryCard.getBoundingClientRect().top + window.scrollY - 92;
+                    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                }, 120);
+            }
         }
     };
 
