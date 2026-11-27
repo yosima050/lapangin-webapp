@@ -64,57 +64,57 @@
      }">
 
     {{-- Hero Section (Selaras dengan Katalog Lapangan) --}}
-    <section class="px-4 sm:px-6 lg:px-8 pt-8 pb-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <section class="px-4 sm:px-6 lg:px-8 pt-5 pb-4 sm:pt-8 sm:pb-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
             <div>
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1a146b] max-w-3xl">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1a146b] max-w-3xl">
                     Cek Ketersediaan
                     <span class="text-[#416900]">
                         Lapangan
                     </span>
                 </h1>
-                <p class="mt-4 max-w-2xl text-sm sm:text-base leading-7 text-gray-600">
+                <p class="mt-2 sm:mt-4 max-w-2xl text-xs sm:text-base leading-relaxed sm:leading-7 text-gray-600">
                     Pantau ketersediaan slot jam setiap venue secara transparan. Klik slot jam hijau untuk langsung memesan tiket.
                 </p>
             </div>
 
-            {{-- Summary Stats Pills --}}
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Slot Kosong</span>
-                    <span class="text-2xl font-black text-[#416900]" x-text="countFilteredTersedia()">{{ $totalSlotTersedia }}</span>
+            {{-- Summary Stats Pills (3 kolom sejajar rapi di HP) --}}
+            <div class="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-3 w-full md:w-auto">
+                <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
+                    <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Slot Kosong</span>
+                    <span class="text-xl sm:text-2xl font-black text-[#416900]" x-text="countFilteredTersedia()">{{ $totalSlotTersedia }}</span>
                 </div>
-                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Terisi</span>
-                    <span class="text-2xl font-black text-rose-600" x-text="countFilteredBooked()">{{ $totalSlotDibooking }}</span>
+                <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
+                    <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Terisi</span>
+                    <span class="text-xl sm:text-2xl font-black text-rose-600" x-text="countFilteredBooked()">{{ $totalSlotDibooking }}</span>
                 </div>
-                <div class="bg-white rounded-2xl px-5 py-3 border border-gray-200/80 shadow-xs min-w-[110px]">
-                    <span class="text-[11px] uppercase tracking-wider font-bold text-gray-500 block">Venue Tampil</span>
-                    <span class="text-2xl font-black text-[#1a146b]" x-text="filterMatrix().length">{{ count($matrix) }}</span>
+                <div class="bg-white rounded-xl sm:rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3 border border-gray-200/80 shadow-xs text-center sm:text-left sm:min-w-[110px]">
+                    <span class="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-gray-500 block whitespace-nowrap">Venue Tampil</span>
+                    <span class="text-xl sm:text-2xl font-black text-[#1a146b]" x-text="filterMatrix().length">{{ count($matrix) }}</span>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Main Filter & Date Carousel (Lega, Bersih & Elegan) --}}
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
-        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4 sm:p-5">
-            <div class="flex flex-col gap-5">
+    {{-- Main Filter & Date Carousel (Swipe halus di HP, Full 7 kolom di Desktop) --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-1 sm:mt-2">
+        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-3.5 sm:p-5">
+            <div class="flex flex-col gap-3.5 sm:gap-5">
 
-                {{-- Baris 1: Date Quick Selector (7 Hari Full Width Grid) --}}
-                <div class="grid grid-cols-7 gap-2 sm:gap-3 pb-4 border-b border-gray-100 w-full">
+                {{-- Baris 1: Date Quick Selector (Swipeable horizontal di HP, Grid 7 Kolom di Tablet/Desktop) --}}
+                <div class="flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-3 pb-3.5 sm:pb-4 border-b border-gray-100 w-full snap-x scrollbar-none">
                     @foreach ($dateOptions as $dOpt)
                         <a
                             href="{{ route('jadwal.index', array_merge(request()->query(), ['tanggal' => $dOpt['date']])) }}"
-                            class="flex flex-col items-center justify-center w-full py-3 sm:py-3.5 px-1 sm:px-2 rounded-2xl border transition-all text-center {{ $dOpt['is_active'] ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md transform -translate-y-0.5' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs' }}"
+                            class="flex flex-col items-center justify-center min-w-[68px] shrink-0 sm:min-w-0 sm:w-full snap-start py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all text-center {{ $dOpt['is_active'] ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md sm:transform sm:-translate-y-0.5' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs' }}"
                         >
-                            <span class="text-[10px] sm:text-xs font-extrabold tracking-wider {{ $dOpt['is_active'] ? 'text-[#acf847]' : 'text-gray-500' }}">
+                            <span class="text-[10px] sm:text-xs font-extrabold tracking-wider whitespace-nowrap {{ $dOpt['is_active'] ? 'text-[#acf847]' : 'text-gray-500' }}">
                                 {{ $dOpt['label_top'] }}
                             </span>
-                            <span class="text-xl sm:text-2xl font-black leading-tight mt-1">
+                            <span class="text-lg sm:text-2xl font-black leading-tight mt-0.5 sm:mt-1">
                                 {{ $dOpt['day_num'] }}
                             </span>
-                            <span class="text-[11px] sm:text-xs font-semibold opacity-80 mt-0.5">
+                            <span class="text-[10px] sm:text-xs font-semibold opacity-80 mt-0.5">
                                 {{ $dOpt['month_name'] }}
                             </span>
                         </a>
@@ -122,16 +122,16 @@
                 </div>
 
                 {{-- Baris 2: Filter Kategori & Filter Spesifik Lapangan (Instan Client-side) --}}
-                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                    {{-- Kategori Badges (Instan 0 ms) --}}
-                    <div class="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
-                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Kategori:</span>
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
+                    {{-- Kategori Badges (Instan 0 ms, horizontal scroll rapi) --}}
+                    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-0.5 scrollbar-none">
+                        <span class="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mr-1 shrink-0 whitespace-nowrap">Kategori:</span>
 
                         <button
                             type="button"
                             @click="selectedKategori = 'Semua'"
                             :class="selectedKategori === 'Semua' ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                            class="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
                         >
                             Semua
                         </button>
@@ -142,7 +142,7 @@
                                     type="button"
                                     @click="selectedKategori = '{{ $kat }}'"
                                     :class="selectedKategori === '{{ $kat }}' ? 'bg-[#1a146b] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer"
+                                    class="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer shrink-0 whitespace-nowrap"
                                 >
                                     {{ $kat }}
                                 </button>
@@ -153,8 +153,8 @@
                     {{-- Search Bar Lapangan (Modern & Elegan) --}}
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <div class="relative w-full sm:w-64 md:w-72">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                <x-lucide-search class="w-5 h-5 shrink-0" />
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                                <x-lucide-search class="w-4 h-4 shrink-0" />
                             </span>
                             <input
                                 type="text"
@@ -179,47 +179,47 @@
         </div>
     </section>
 
-    {{-- Legend Info Bar --}}
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
-        <div class="bg-white rounded-xl border border-gray-100 px-4 py-3 flex flex-wrap items-center justify-between gap-4 text-xs">
-            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
-                <span class="font-bold text-gray-500 uppercase tracking-wider">Keterangan Slot:</span>
+    {{-- Legend Info Bar (Grid 2x2 ringkas di HP, 1 baris di Desktop) --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3.5 sm:mt-5">
+        <div class="bg-white rounded-xl border border-gray-100 px-3.5 py-2.5 sm:px-4 sm:py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 text-[11px] sm:text-xs">
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-2 sm:gap-5">
+                <span class="hidden sm:inline font-bold text-gray-500 uppercase tracking-wider">Keterangan Slot:</span>
                 
                 {{-- Slot Tersedia --}}
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-[#eaf7d8] border border-[#acf847] text-[#416900] flex items-center justify-center font-bold text-[10px]">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-4 h-4 rounded-md bg-[#eaf7d8] border border-[#acf847] text-[#416900] flex items-center justify-center font-bold text-[10px] shrink-0">
                         ✓
                     </span>
-                    <span class="font-medium text-gray-700">Tersedia (Bisa Dipesan)</span>
+                    <span class="font-medium text-gray-700"><span class="sm:hidden">Tersedia</span><span class="hidden sm:inline">Tersedia (Bisa Dipesan)</span></span>
                 </div>
 
                 {{-- Slot Terisi --}}
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-red-100 border border-red-200 text-red-600 flex items-center justify-center font-bold text-[10px]">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-4 h-4 rounded-md bg-red-100 border border-red-200 text-red-600 flex items-center justify-center font-bold text-[10px] shrink-0">
                         ✕
                     </span>
-                    <span class="font-medium text-gray-700">Terisi / Dibooking</span>
+                    <span class="font-medium text-gray-700"><span class="sm:hidden">Terisi</span><span class="hidden sm:inline">Terisi / Dibooking</span></span>
                 </div>
 
                 {{-- Slot Pending --}}
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center font-bold text-[10px]">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-4 h-4 rounded-md bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center font-bold text-[10px] shrink-0">
                         ⏳
                     </span>
-                    <span class="font-medium text-gray-700">Menunggu Pembayaran</span>
+                    <span class="font-medium text-gray-700"><span class="sm:hidden">Menunggu Bayar</span><span class="hidden sm:inline">Menunggu Pembayaran</span></span>
                 </div>
 
                 {{-- Slot Lewat --}}
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-gray-100 border border-gray-200 text-gray-400 flex items-center justify-center font-bold text-[10px]">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-4 h-4 rounded-md bg-gray-100 border border-gray-200 text-gray-400 flex items-center justify-center font-bold text-[10px] shrink-0">
                         -
                     </span>
                     <span class="font-medium text-gray-400">Lewat Jam</span>
                 </div>
             </div>
 
-            <div class="text-gray-500 text-[11px] italic">
-                *Klik pada kotak jam yang <strong>tersedia</strong> untuk langsung masuk ke pemesanan lapangan.
+            <div class="text-gray-500 text-[10px] sm:text-[11px] italic border-t border-gray-100 pt-2 lg:border-t-0 lg:pt-0">
+                *Klik kotak jam <strong>tersedia</strong> untuk langsung memesan lapangan.
             </div>
         </div>
     </section>
@@ -254,8 +254,8 @@
                         class="bg-white rounded-2xl border border-gray-150 shadow-xs hover:shadow-md transition-shadow overflow-hidden"
                     >
                         {{-- Header Bar Lapangan --}}
-                        <div class="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-center gap-3">
+                        <div class="px-3.5 py-3 sm:px-5 sm:py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
                                 <img
                                     src="{{ $lap->foto_thumbnail_url }}"
                                     alt="{{ $lap->nama }}"
@@ -263,44 +263,44 @@
                                     height="48"
                                     loading="lazy"
                                     decoding="async"
-                                    class="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-xs"
+                                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover border border-gray-200 shadow-xs shrink-0"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($lap->nama) }}&background=1a146b&color=acf847&size=200';"
                                 >
-                                <div>
-                                    <div class="flex items-center gap-2">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                                         <span class="px-2 py-0.5 rounded-md bg-[#1a146b]/10 text-[#1a146b] text-[10px] font-extrabold uppercase tracking-wider">
                                             {{ $lap->kategori }}
                                         </span>
-                                        <span class="text-xs text-gray-500">
-                                            Operasional: {{ $row['jam_operasional']['jam_buka'] }} – {{ $row['jam_operasional']['jam_tutup'] }} WIB
+                                        <span class="text-[11px] sm:text-xs text-gray-500">
+                                            {{ $row['jam_operasional']['jam_buka'] }} – {{ $row['jam_operasional']['jam_tutup'] }} WIB
                                         </span>
                                     </div>
-                                    <h3 class="text-base sm:text-lg font-extrabold text-[#0b1c30] mt-0.5">
+                                    <h3 class="text-sm sm:text-lg font-extrabold text-[#0b1c30] mt-0.5 truncate">
                                         {{ $lap->nama }}
                                     </h3>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 self-end sm:self-center">
-                                <div class="text-right">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold {{ $row['tersedia_count'] > 0 ? 'bg-[#eaf7d8] text-[#416900]' : 'bg-red-50 text-red-600' }}">
-                                        <span class="w-2 h-2 rounded-full {{ $row['tersedia_count'] > 0 ? 'bg-[#416900]' : 'bg-red-500' }}"></span>
+                            <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t border-gray-100 sm:border-t-0">
+                                <div>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold {{ $row['tersedia_count'] > 0 ? 'bg-[#eaf7d8] text-[#416900]' : 'bg-red-50 text-red-600' }}">
+                                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full {{ $row['tersedia_count'] > 0 ? 'bg-[#416900]' : 'bg-red-500' }}"></span>
                                         {{ $row['tersedia_count'] }} Slot Tersedia
                                     </span>
                                 </div>
                                 <a
                                     href="{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal]) }}"
-                                    class="px-3.5 py-1.5 rounded-xl border border-gray-200 hover:border-[#1a146b] text-[#1a146b] text-xs font-bold transition flex items-center gap-1"
+                                    class="px-3 sm:px-3.5 py-1.5 rounded-xl border border-gray-200 hover:border-[#1a146b] text-[#1a146b] text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shrink-0"
                                 >
                                     Detail
-                                    <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
+                                    <x-lucide-arrow-right class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                                 </a>
                             </div>
                         </div>
 
-                        {{-- Cinema Seat Matrix of Hours --}}
-                        <div class="p-5">
-                            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5">
+                        {{-- Cinema Seat Matrix of Hours (4 kolom rapat di HP, 6-8 kolom di Desktop) --}}
+                        <div class="p-3 sm:p-5">
+                            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1.5 sm:gap-2.5">
                                 @forelse ($slots as $slot)
                                     @php
                                         $status = $slot['status'];
@@ -323,7 +323,7 @@
                                                 'opacity-40': clickedSlotKey !== null && clickedSlotKey !== '{{ $slotKey }}',
                                                 'bg-[#f7fee7] border-[#acf847] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] hover:-translate-y-0.5 hover:shadow-md': clickedSlotKey !== '{{ $slotKey }}'
                                             }"
-                                            class="group relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition transform cursor-pointer text-center"
+                                            class="group relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border-2 transition transform cursor-pointer text-center"
                                             title="Slot Kosong: {{ $slot['jam_label'] }}"
                                         >
                                             <template x-if="clickedSlotKey === '{{ $slotKey }}'">
@@ -338,10 +338,10 @@
                                                     <span class="text-xs font-black tracking-tight group-hover:scale-105 transition-transform">
                                                         {{ $slot['jam_mulai'] }}
                                                     </span>
-                                                    <span class="text-[10px] font-bold text-[#416900] group-hover:text-[#102000]">
+                                                    <span class="text-[9px] sm:text-[10px] font-bold text-[#416900] group-hover:text-[#102000]">
                                                         s/d {{ $slot['jam_selesai'] }}
                                                     </span>
-                                                    <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
+                                                    <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
                                                         KOSONG
                                                     </span>
                                                 </div>
@@ -349,47 +349,47 @@
                                         </a>
                                     @elseif ($isPending)
                                         <div
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 cursor-not-allowed opacity-90 text-center"
+                                            class="relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 cursor-not-allowed opacity-90 text-center"
                                             title="Menunggu Pembayaran: {{ $slot['jam_label'] }}"
                                         >
                                             <span class="text-xs font-bold tracking-tight text-amber-800">
                                                 {{ $slot['jam_mulai'] }}
                                             </span>
-                                            <span class="text-[10px] font-medium text-amber-600">
+                                            <span class="text-[9px] sm:text-[10px] font-medium text-amber-600">
                                                 s/d {{ $slot['jam_selesai'] }}
                                             </span>
-                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-200/70 text-amber-800">
+                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-bold uppercase bg-amber-200/70 text-amber-800">
                                                 PROSES
                                             </span>
                                         </div>
                                     @elseif ($isBooked)
                                         <div
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-red-200 bg-red-50 text-red-900 cursor-not-allowed opacity-85 text-center"
+                                            class="relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border border-red-200 bg-red-50 text-red-900 cursor-not-allowed opacity-85 text-center"
                                             title="Sudah Dibooking: {{ $slot['jam_label'] }}"
                                         >
                                             <span class="text-xs font-bold tracking-tight text-red-800 line-through">
                                                 {{ $slot['jam_mulai'] }}
                                             </span>
-                                            <span class="text-[10px] font-medium text-red-600">
+                                            <span class="text-[9px] sm:text-[10px] font-medium text-red-600">
                                                 s/d {{ $slot['jam_selesai'] }}
                                             </span>
-                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-red-200/70 text-red-800">
+                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-bold uppercase bg-red-200/70 text-red-800">
                                                 TERISI
                                             </span>
                                         </div>
                                     @else
                                         {{-- Lewat Jam --}}
                                         <div
-                                            class="relative flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed text-center"
+                                            class="relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed text-center"
                                             title="Jam telah berlalu: {{ $slot['jam_label'] }}"
                                         >
                                             <span class="text-xs font-semibold tracking-tight text-gray-400">
                                                 {{ $slot['jam_mulai'] }}
                                             </span>
-                                            <span class="text-[10px] font-medium text-gray-400">
+                                            <span class="text-[9px] sm:text-[10px] font-medium text-gray-400">
                                                 s/d {{ $slot['jam_selesai'] }}
                                             </span>
-                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase bg-gray-200 text-gray-500">
+                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-semibold uppercase bg-gray-200 text-gray-500">
                                                 LEWAT
                                             </span>
                                         </div>
