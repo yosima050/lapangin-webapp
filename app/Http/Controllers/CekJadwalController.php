@@ -31,25 +31,31 @@ class CekJadwalController extends Controller
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
         $selectedLapanganId = $validated['lapangan_id'] ?? null;
 
-        // Query Lapangan Aktif
-        $query = Lapangan::with('hargaMasters')->where('is_active', true);
+        // Query seluruh lapangan aktif sekali saja (bebas query berulang)
+        $allActiveLapangans = Lapangan::with('hargaMasters')
+            ->where('is_active', true)
+            ->orderBy('nama')
+            ->get();
 
+        $kategoriList = $allActiveLapangans->pluck('kategori')
+            ->filter(fn ($k) => $k !== null && $k !== '')
+            ->unique()
+            ->sort()
+            ->values();
+
+        $allLapangans = $allActiveLapangans->map(fn ($l) => (object) [
+            'id' => $l->id,
+            'nama' => $l->nama,
+            'kategori' => $l->kategori,
+        ]);
+
+        $lapangans = $allActiveLapangans;
         if ($kategori && $kategori !== 'Semua') {
-            $query->where('kategori', $kategori);
+            $lapangans = $lapangans->where('kategori', $kategori)->values();
         }
-
         if (!empty($selectedLapanganId)) {
-            $query->where('id', $selectedLapanganId);
+            $lapangans = $lapangans->where('id', $selectedLapanganId)->values();
         }
-
-        $lapangans = $query->orderBy('nama')->get();
-        $kategoriList = Lapangan::where('is_active', true)
-            ->distinct()
-            ->whereNotNull('kategori')
-            ->where('kategori', '!=', '')
-            ->orderBy('kategori')
-            ->pluck('kategori');
-        $allLapangans = Lapangan::where('is_active', true)->orderBy('nama')->get(['id', 'nama', 'kategori']);
 
         // Generate 7 hari cepat navigasi kalender
         $currentDateCarbon = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
@@ -70,14 +76,15 @@ class CekJadwalController extends Controller
             ];
         }
 
-        // Ambil data matriks slot per lapangan
+        // Ambil data matriks slot per lapangan secara batch (bebas N+1)
+        $bulkSlotData = $this->jadwalService->getBulkSlotStatus($lapangans, $tanggal);
         $matrix = [];
         $totalSlotTersedia = 0;
         $totalSlotDibooking = 0;
         $totalSlotLewat = 0;
 
         foreach ($lapangans as $lap) {
-            $slotData = $this->jadwalService->getSlotStatus((string) $lap->id, $tanggal);
+            $slotData = $bulkSlotData[(string) $lap->id] ?? [];
 
             $lapanganSlots = $slotData['slots'] ?? [];
             $tersediaCount = 0;

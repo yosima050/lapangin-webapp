@@ -2,6 +2,17 @@
 
 @section('title', 'Katalog Lapangan')
 
+@php
+    $firstKatalogItem = $katalog->first();
+    $katalogLcpImage = $firstKatalogItem['foto_card_url'] ?? $firstKatalogItem['foto_url'] ?? null;
+@endphp
+
+@push('head')
+    @if($katalogLcpImage)
+        <link rel="preload" as="image" href="{{ $katalogLcpImage }}" fetchpriority="high" />
+    @endif
+@endpush
+
 @section('content')
 <div
     x-data="{
@@ -121,6 +132,9 @@
                     <article
                         x-show="(sport === 'Semua' || '{{ $item['kategori'] }}' === sport) && (!searchQuery.trim() || {{ json_encode($searchKeyword) }}.includes(searchQuery.toLowerCase().trim()))"
                         x-transition
+                        @if($loop->index >= 2)
+                            style="content-visibility: auto; contain-intrinsic-size: 1px 280px;"
+                        @endif
                         onclick="window.location.href = '{{ route('katalog.show', $item['lapangan_id']) }}'"
                         class="cursor-pointer bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col"
                     >
@@ -129,12 +143,17 @@
                             {{-- Image Lapangan Asli dari PostgreSQL / Upload --}}
                             <div class="relative h-60 md:h-full min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
                                 <img
-                                    src="{{ $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
+                                    src="{{ $item['foto_card_url'] ?? $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
                                     alt="{{ $item['lapangan_nama'] }}"
                                     width="240"
                                     height="220"
-                                    loading="lazy"
-                                    decoding="async"
+                                    @if($loop->first)
+                                        fetchpriority="high"
+                                        decoding="sync"
+                                    @else
+                                        loading="lazy"
+                                        decoding="async"
+                                    @endif
                                    class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >

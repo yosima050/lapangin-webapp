@@ -6,6 +6,7 @@ use App\Models\HargaKhusus;
 use App\Models\Jadwal;
 use App\Models\Lapangan;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use JsonException;
 
 class JadwalService
@@ -35,6 +36,66 @@ class JadwalService
             ->where('is_active', true)
             ->get();
 
+        return $this->computeSlotStatusForLapangan($lapangan, $normalizedTanggal, $baseDate, $daftarJadwal, $hargaKhususAktif);
+    }
+
+    /**
+     * Batch-compute hourly availability and exact pricing for multiple fields in constant queries (eliminates N+1).
+     *
+     * @param  Collection<int, Lapangan>  $lapangans
+     * @return array<string, array<string, mixed>>
+     */
+    public function getBulkSlotStatus(Collection $lapangans, string $tanggal): array
+    {
+        if ($lapangans->isEmpty()) {
+            return [];
+        }
+
+        Jadwal::autoCancelExpiredPendingBookings();
+
+        $baseDate = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+        $normalizedTanggal = $baseDate->toDateString();
+        $lapanganIds = $lapangans->pluck('id')->all();
+
+        $jadwalsByLapangan = Jadwal::query()
+            ->whereIn('lapangan_id', $lapanganIds)
+            ->whereDate('tanggal', $normalizedTanggal)
+            ->whereNotIn('status', ['dibatalkan', 'cancelled', 'rejected'])
+            ->get()
+            ->groupBy('lapangan_id');
+
+        $hargaKhususByLapangan = HargaKhusus::query()
+            ->whereIn('lapangan_id', $lapanganIds)
+            ->whereDate('tanggal', $normalizedTanggal)
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('lapangan_id');
+
+        $results = [];
+        foreach ($lapangans as $lapangan) {
+            $id = (string) $lapangan->id;
+            $results[$id] = $this->computeSlotStatusForLapangan(
+                $lapangan,
+                $normalizedTanggal,
+                $baseDate,
+                $jadwalsByLapangan->get($id, collect()),
+                $hargaKhususByLapangan->get($id, collect())
+            );
+        }
+
+        return $results;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function computeSlotStatusForLapangan(
+        Lapangan $lapangan,
+        string $normalizedTanggal,
+        Carbon $baseDate,
+        Collection $daftarJadwal,
+        Collection $hargaKhususAktif
+    ): array {
         $isWeekend = in_array($baseDate->dayOfWeek, [0, 6], true);
 
         // Cek master harga tanggal khusus (jika ada)

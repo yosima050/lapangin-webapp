@@ -57,6 +57,16 @@ class Lapangan extends Model
         return $url;
     }
 
+    public function getFotoCardUrlAttribute(): string
+    {
+        $url = $this->foto_url;
+        if (str_contains($url, 'images.unsplash.com')) {
+            $baseUrl = explode('?', $url)[0];
+            return $baseUrl . '?auto=format&fit=crop&w=480&h=440&fm=webp&q=75';
+        }
+        return $url;
+    }
+
     protected function casts(): array
     {
         return [
