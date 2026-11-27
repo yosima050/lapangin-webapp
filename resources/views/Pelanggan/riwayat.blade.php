@@ -564,10 +564,8 @@
                         {{-- Kolom 3: Tombol Aksi Kanan --}}
                         <div class="lg:col-span-3 flex flex-col gap-2">
                             @if ($isPaidOrVerified)
-                                <button type="button" @click="showModal = true" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-900 transition cursor-pointer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2a1 1 0 001-1v-5a1 1 0 00-1-1h-2M6 8H4a1 1 0 00-1 1v5a1 1 0 001 1h2m13-8V4a1 1 0 00-1-1H6a1 1 0 00-1 1v4m16 0e" />
-                                    </svg>
+                                <button type="button" @click="showModal = true" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a146b] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-900 active:scale-[0.98] transition cursor-pointer">
+                                    <x-lucide-qr-code class="w-4 h-4 shrink-0" />
                                     Lihat E-Tiket Masuk &amp; QR
                                 </button>
                             @elseif ($isUnpaid)

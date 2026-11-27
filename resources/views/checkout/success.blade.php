@@ -78,9 +78,9 @@
         {{-- Main Boarding Pass / E-Ticket Card --}}
         <div class="bg-white rounded-2xl sm:rounded-3xl border border-[#e5eeff] shadow-xl overflow-hidden print:border-none print:shadow-none">
             {{-- Ticket Header --}}
-            <div class="bg-[#1a146b] text-white p-4 sm:p-7 flex items-center gap-3 sm:gap-3.5 border-b border-indigo-900/50">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 flex items-center justify-center text-[#acf847] shrink-0 border border-white/10">
-                    <x-lucide-ticket class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+            <div class="bg-[#1a146b] text-white p-4 sm:p-7 flex items-center gap-3.5 sm:gap-4 border-b border-indigo-900/50">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-[#acf847] shrink-0">
+                    <x-lucide-ticket class="w-full h-full" stroke-width="1.8" />
                 </div>
                 <div class="min-w-0">
                     <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#acf847]">BOARDING PASS LAPANGIN</span>
