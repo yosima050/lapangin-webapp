@@ -158,128 +158,168 @@
 
             </div>
 
-            {{-- Tombol Mobile Menu Hamburger (Animasi Morph 3 Garis -> Silang X) --}}
+            {{-- Tombol Mobile Menu (@animated-burgers/burger-squeeze) --}}
             <button
                 type="button"
                 @click="mobileMenuOpen = !mobileMenuOpen"
-                class="lg:hidden relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 active:scale-95 transition-all duration-200 cursor-pointer"
-                :class="mobileMenuOpen ? 'bg-gray-100 text-[#1a146b]' : ''"
+                class="lg:hidden relative inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors duration-200 cursor-pointer"
+                :class="mobileMenuOpen ? 'bg-[#eff4ff]' : 'hover:bg-gray-100'"
                 :aria-expanded="mobileMenuOpen"
                 :aria-label="mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'"
             >
                 <span class="sr-only">Toggle navigasi</span>
-                <span class="relative flex h-4 w-5 flex-col items-center justify-center">
-                    <span
-                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                        :class="mobileMenuOpen ? 'translate-y-0 rotate-45' : '-translate-y-[6px] rotate-0'"
-                    ></span>
-                    <span
-                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-200 ease-out"
-                        :class="mobileMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'"
-                    ></span>
-                    <span
-                        class="absolute h-[2px] w-5 rounded-full bg-current transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                        :class="mobileMenuOpen ? 'translate-y-0 -rotate-45' : 'translate-y-[6px] rotate-0'"
-                    ></span>
-                </span>
+                <div class="burger burger-squeeze lapangin-burger" :class="{ 'open': mobileMenuOpen }">
+                    <div class="burger-lines"></div>
+                </div>
             </button>
 
         </div>
+    </nav>
+</header>
 
-        {{-- Mobile Menu Drawer --}}
-        <div
-            x-show="mobileMenuOpen"
-            x-cloak
-            x-transition:enter="transition ease-out duration-200 origin-top"
-            x-transition:enter-start="opacity-0 -translate-y-2 scale-[0.99]"
-            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-            x-transition:leave="transition ease-in duration-150 origin-top"
-            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-            x-transition:leave-end="opacity-0 -translate-y-2 scale-[0.99]"
-            class="lg:hidden border-t border-gray-100 py-4 bg-white"
-        >
-            <div class="flex flex-col gap-1.5">
-
+    {{-- Clean Sporty Right Slide-Over Mobile Drawer (Selaras Tema Terang LapangIn) --}}
+    <aside
+        x-show="mobileMenuOpen"
+        x-cloak
+        x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-300"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        class="lg:hidden fixed top-20 right-0 bottom-0 z-50 w-[82%] max-w-[320px] bg-white text-[#0b1c30] shadow-[-12px_0_32px_rgba(11,28,48,0.10)] border-l border-gray-200/80 flex flex-col justify-between overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Menu navigasi mobile"
+    >
+        <div class="p-4 space-y-5">
+            {{-- Kartu Akun di Atas (Bisa diklik langsung ke Profil) --}}
+            @auth
+                @php
+                    $profileRoute = Auth::user()->role === 'admin'
+                        ? route('admin.dashboard')
+                        : (Auth::user()->role === 'kasir' ? route('kasir.index') : route('pelanggan.dashboard'));
+                @endphp
                 <a
-                    href="{{ route('home') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('home') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    href="{{ $profileRoute }}"
+                    class="flex items-center justify-between gap-3 rounded-2xl bg-[#f4f7ff] hover:bg-[#eaf0ff] border border-[#dce9ff] p-3.5 transition active:scale-[0.98]"
                 >
-                    Beranda
-                </a>
-
-                <a
-                    href="{{ route('katalog.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                >
-                    Jelajahi Lapangan
-                </a>
-
-                <a
-                    href="{{ route('jadwal.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('jadwal.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                >
-                    Cek Jadwal
-                </a>
-
-                @auth
-                    @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
-                        <a
-                            href="{{ route('pelanggan.booking.index') }}"
-                            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                        >
-                            Riwayat Booking
-                        </a>
-                    @endif
-
-                    <a
-                        href="{{ route('bantuan') }}"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                    >
-                        Pusat Bantuan
-                    </a>
-
-                    <div class="pt-2 border-t border-gray-100 mt-2">
-                        <div class="px-3 py-2 bg-gray-50 rounded-xl mb-2">
-                            <p class="text-xs font-bold text-gray-800">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
-                            <p class="text-[11px] text-gray-500">{{ Auth::user()->email }}</p>
+                    <div class="flex items-center gap-3 min-w-0">
+                        <x-lucide-user class="w-5 h-5 text-[#1a146b] shrink-0" />
+                        <div class="min-w-0">
+                            <p class="text-xs font-extrabold text-[#0b1c30] truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
+                            <p class="text-[11px] text-gray-500 truncate">{{ Auth::user()->email }}</p>
                         </div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer">
-                                Keluar (Log Out)
-                            </button>
-                        </form>
                     </div>
-                @endauth
+                    <x-lucide-chevron-right class="w-4 h-4 text-gray-400 shrink-0" />
+                </a>
+            @endauth
 
-                @guest
+            {{-- Daftar Navigasi Utama --}}
+            <div>
+                <p class="px-3 mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-gray-400">
+                    Menu Utama
+                </p>
+                <div class="flex flex-col gap-1.5">
                     <a
-                        href="{{ route('bantuan') }}"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                        href="{{ route('home') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('home') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
                     >
-                        Pusat Bantuan
+                        <span class="flex items-center gap-3">
+                            <x-lucide-house class="w-4 h-4 shrink-0 {{ request()->routeIs('home') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span>Beranda</span>
+                        </span>
+                        @if (request()->routeIs('home'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                        @endif
                     </a>
 
-                    <div class="pt-3 border-t border-gray-100 flex flex-col gap-2">
-                        <a
-                            href="{{ route('login') }}"
-                            class="w-full text-center py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-[#1a146b] hover:bg-gray-50"
-                        >
-                            Masuk
-                        </a>
-                        <a
-                            href="{{ route('register') }}"
-                            class="w-full text-center py-2.5 rounded-xl bg-[#1a146b] text-white text-sm font-bold shadow-xs"
-                        >
-                            Daftar Akun
-                        </a>
-                    </div>
-                @endguest
+                    <a
+                        href="{{ route('katalog.index') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                    >
+                        <span class="flex items-center gap-3">
+                            <x-lucide-dribbble class="w-4 h-4 shrink-0 {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span>Jelajahi Lapangan</span>
+                        </span>
+                        @if (request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                        @endif
+                    </a>
 
+                    <a
+                        href="{{ route('jadwal.index') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('jadwal.*') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                    >
+                        <span class="flex items-center gap-3">
+                            <x-lucide-calendar-days class="w-4 h-4 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span>Cek Jadwal</span>
+                        </span>
+                        @if (request()->routeIs('jadwal.*'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                        @endif
+                    </a>
+
+                    @auth
+                        @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
+                            <a
+                                href="{{ route('pelanggan.booking.index') }}"
+                                class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                            >
+                                <span class="flex items-center gap-3">
+                                    <x-lucide-receipt-text class="w-4 h-4 shrink-0 {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                                    <span>Riwayat Booking</span>
+                                </span>
+                                @if (request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat'))
+                                    <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                                @endif
+                            </a>
+                        @endif
+                    @endauth
+
+                    <a
+                        href="{{ route('bantuan') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98] {{ request()->routeIs('bantuan') ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold' }}"
+                    >
+                        <span class="flex items-center gap-3">
+                            <x-lucide-circle-help class="w-4 h-4 shrink-0 {{ request()->routeIs('bantuan') ? 'text-[#acf847]' : 'text-gray-400' }}" />
+                            <span>Pusat Bantuan</span>
+                        </span>
+                        @if (request()->routeIs('bantuan'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                        @endif
+                    </a>
+                </div>
             </div>
         </div>
 
-    </nav>
-</header>
+        {{-- Footer Dock Bawah --}}
+        <div class="p-4 border-t border-gray-100 bg-[#f8faff]">
+            @auth
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-white hover:bg-red-50 text-xs font-bold text-red-600 transition active:scale-[0.98] cursor-pointer shadow-2xs"
+                    >
+                        <x-lucide-log-out class="w-4 h-4 shrink-0" />
+                        <span>Keluar (Log Out)</span>
+                    </button>
+                </form>
+            @else
+                <div class="grid grid-cols-2 gap-2">
+                    <a
+                        href="{{ route('login') }}"
+                        class="text-center py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#1a146b] hover:bg-gray-50 transition active:scale-[0.98]"
+                    >
+                        Masuk
+                    </a>
+                    <a
+                        href="{{ route('register') }}"
+                        class="text-center py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-extrabold shadow-sm transition active:scale-[0.98]"
+                    >
+                        Daftar Akun
+                    </a>
+                </div>
+            @endauth
+        </div>
+    </aside>
 </div>

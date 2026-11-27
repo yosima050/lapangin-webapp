@@ -1,9 +1,31 @@
+@import '@animated-burgers/burger-squeeze/dist/styles.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 [x-cloak] {
     display: none !important;
+}
+
+/* Custom LapangIn Burger Squeeze Sizing & Brand Colors */
+.lapangin-burger {
+    font-size: 7.5px;
+}
+
+.lapangin-burger .burger-lines,
+.lapangin-burger .burger-lines:before,
+.lapangin-burger .burger-lines:after {
+    background-color: #1a146b;
+}
+
+.lapangin-burger.open .burger-lines {
+    background-color: transparent;
+}
+
+.lapangin-burger.open .burger-lines:before,
+.lapangin-burger.open .burger-lines:after {
+    background-color: #1a146b;
 }
 
 /* Defensive Icon Size Safeguards */
