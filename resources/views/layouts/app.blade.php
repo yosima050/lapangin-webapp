@@ -106,7 +106,7 @@
             document.addEventListener('click', function(e) {
                 const anchor = e.target.closest('a');
                 if (!anchor || !anchor.href) return;
-                if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+                if (anchor.target === '_blank' || anchor.hasAttribute('download') || anchor.hasAttribute('data-no-progress')) return;
                 if (anchor.origin !== window.location.origin) return;
                 if (anchor.href === window.location.href || anchor.href.includes('#')) return;
 
@@ -117,7 +117,7 @@
             window.addEventListener('pageshow', function() {
                 if (progressContainer) {
                     progressContainer.style.opacity = '0';
-                    progressBar.style.width = '0%';
+                    progressBar.style.transform = 'scaleX(0)';
                 }
                 if (mainContent) {
                     mainContent.style.opacity = '1';
