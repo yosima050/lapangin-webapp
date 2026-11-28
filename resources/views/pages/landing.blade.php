@@ -466,15 +466,11 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
+            <div class="flex md:grid md:grid-cols-12 gap-3.5 sm:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0 scrollbar-none">
 
                 {{-- Bento 1 (7 Cols, Featured Dark Navy): Jadwal Real-Time + Mini Live Slot Preview --}}
-                <div class="md:col-span-7 rounded-3xl bg-[#1a146b] text-white p-6 sm:p-8 flex flex-col justify-between gap-6 border border-[#1a146b] shadow-sm">
+                <div class="w-[84vw] max-w-[330px] md:w-auto md:max-w-none shrink-0 snap-center md:col-span-7 rounded-3xl bg-[#1a146b] text-white p-5 sm:p-8 flex flex-col justify-between gap-5 sm:gap-6 border border-[#1a146b] shadow-sm">
                     <div class="space-y-2 max-w-lg">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#acf847]">
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
-                            Sinkron Langsung dengan Kasir
-                        </span>
                         <h3 class="text-xl sm:text-2xl font-headline font-black tracking-tight leading-snug">
                             Jadwal Real-Time, Bebas Double-Booking
                         </h3>
@@ -504,11 +500,8 @@
                 </div>
 
                 {{-- Bento 2 (5 Cols, Crisp Light): Pembayaran Fleksibel Lunas / DP 50% --}}
-                <div class="md:col-span-5 rounded-3xl bg-[#f8f9ff] p-6 sm:p-8 flex flex-col justify-between gap-6 border border-[#e5eeff]">
+                <div class="w-[84vw] max-w-[330px] md:w-auto md:max-w-none shrink-0 snap-center md:col-span-5 rounded-3xl bg-[#f8f9ff] p-5 sm:p-8 flex flex-col justify-between gap-5 sm:gap-6 border border-[#e5eeff]">
                     <div class="space-y-2">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#416900]">
-                            Pembayaran Fleksibel
-                        </span>
                         <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
                             Bayar Lunas 100% atau DP 50%
                         </h3>
@@ -530,11 +523,8 @@
                 </div>
 
                 {{-- Bento 3 (5 Cols, Crisp Light): Standar Lapangan Kompetisi --}}
-                <div class="md:col-span-5 rounded-3xl bg-[#f8f9ff] p-6 sm:p-8 flex flex-col justify-center border border-[#e5eeff]">
+                <div class="w-[84vw] max-w-[330px] md:w-auto md:max-w-none shrink-0 snap-center md:col-span-5 rounded-3xl bg-[#f8f9ff] p-5 sm:p-8 flex flex-col justify-center border border-[#e5eeff]">
                     <div class="space-y-2">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#1a146b]">
-                            Kualitas Arena
-                        </span>
                         <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
                             Permukaan Standar Kompetisi
                         </h3>
@@ -545,11 +535,8 @@
                 </div>
 
                 {{-- Bento 4 (7 Cols, Soft Court-Lime Surface): Check-in QR & Token --}}
-                <div class="md:col-span-7 rounded-3xl bg-[#f4fbe6] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 border border-[#d7f0a6]">
+                <div class="w-[84vw] max-w-[330px] md:w-auto md:max-w-none shrink-0 snap-center md:col-span-7 rounded-3xl bg-[#f4fbe6] p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 border border-[#d7f0a6]">
                     <div class="space-y-2 max-w-md">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#416900]">
-                            Check-in Tanpa Antre
-                        </span>
                         <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
                             E-Tiket QR &amp; Token Instan
                         </h3>
@@ -913,7 +900,8 @@
         </div>
     </section>
 
-    {{-- 5. Bottom CTA Banner --}}
+    {{-- 5. Bottom CTA Banner (Hanya tampil untuk pengunjung yang belum login) --}}
+    @guest
     <section class="py-10 sm:py-20 bg-[#f8f9ff]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="relative overflow-hidden rounded-3xl bg-[#1a146b] px-5 py-8 sm:px-12 sm:py-16 shadow-2xl text-white">
@@ -931,36 +919,27 @@
                     </p>
 
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                        @auth
-                            <a
-                                href="{{ route('katalog.index') }}"
-                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#acf847] hover:bg-[#9de437] text-[#1a146b] font-headline font-bold text-sm shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                            >
-                                <x-lucide-trophy class="w-4 h-4 shrink-0" />
-                                <span>Cari Lapangan Sekarang</span>
-                            </a>
-                        @else
-                            <a
-                                href="{{ route('register') }}"
-                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#acf847] hover:bg-[#9de437] text-[#1a146b] font-headline font-bold text-sm shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                            >
-                                <x-lucide-user-plus class="w-4 h-4 shrink-0" />
-                                <span>Daftar Akun Gratis</span>
-                            </a>
+                        <a
+                            href="{{ route('register') }}"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#acf847] hover:bg-[#9de437] text-[#1a146b] font-headline font-bold text-sm shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                        >
+                            <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                            <span>Daftar Akun Gratis</span>
+                        </a>
 
-                            <a
-                                href="{{ route('katalog.index') }}"
-                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/30 hover:border-white text-white font-headline font-semibold text-sm bg-white/10 hover:bg-white/20 transition-all duration-200 cursor-pointer"
-                            >
-                                <span>Jelajahi Dulu</span>
-                                <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
-                            </a>
-                        @endauth
+                        <a
+                            href="{{ route('katalog.index') }}"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/30 hover:border-white text-white font-headline font-semibold text-sm bg-white/10 hover:bg-white/20 transition-all duration-200 cursor-pointer"
+                        >
+                            <span>Jelajahi Dulu</span>
+                            <x-lucide-arrow-right class="w-4 h-4 shrink-0" />
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    @endguest
 
 </div>
 @endsection

@@ -18,7 +18,7 @@
         </h1>
 
         <p class="text-xs sm:text-sm text-[#474651] max-w-2xl leading-relaxed">
-            Kelola identitas tanding, sinkronisasi WhatsApp OTP, dan amankan akun reservasi gelanggang olahraga Anda secara terpusat.
+            Kelola identitas tanding, sinkronisasi WhatsApp OTP, dan amankan akun reservasi lapangan olahraga Anda secara terpusat.
         </p>
     </div>
 
@@ -235,7 +235,7 @@
                                    class="w-full border-0 bg-transparent py-2.5 px-3.5 text-xs sm:text-sm font-semibold text-[#0b1c30] focus:outline-none">
                         </div>
                         <p class="mt-1.5 text-[11px] text-[#777682] flex items-center gap-1">
-                            <span>ⓘ</span> Nomor ini digunakan untuk verifikasi e-tiket di meja turnstile gelanggang.
+                            <span>ⓘ</span> Nomor ini digunakan untuk verifikasi e-tiket di meja resepsionis lapangan.
                         </p>
                         @error('no_hp')
                             <p class="mt-1 text-[11px] text-red-600 font-semibold">{{ $message }}</p>

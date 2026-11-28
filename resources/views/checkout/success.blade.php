@@ -208,7 +208,7 @@
                     </div>
 
                     <p class="text-[11px] text-gray-500 mt-3.5 sm:mt-4 max-w-[240px] leading-relaxed">
-                        Tunjukkan QR Code ini ke petugas kasir saat Anda tiba di gelanggang olahraga.
+                        Tunjukkan QR Code ini ke petugas kasir saat Anda tiba di lapangan olahraga.
                     </p>
                 </div>
 

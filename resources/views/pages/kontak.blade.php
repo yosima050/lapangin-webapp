@@ -43,7 +43,7 @@
 
                 <div class="space-y-4 text-xs text-gray-600">
                     <div>
-                        <strong class="text-gray-900 block font-bold text-sm mb-1">Gelanggang Utama LapangIn</strong>
+                        <strong class="text-gray-900 block font-bold text-sm mb-1">Lapangan Utama LapangIn</strong>
                         <p class="leading-relaxed">
                             Jl. Ijen No. 25, Klojen, Kota Malang, Jawa Timur 65119 (Kompleks Olahraga Utama LapangIn Arena)
                         </p>

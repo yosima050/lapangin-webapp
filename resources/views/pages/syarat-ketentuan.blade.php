@@ -45,10 +45,10 @@
                 <li><strong>Mini Soccer Turf:</strong> Menggunakan sepatu sol TF (turf) atau karet lembut.</li>
             </ul>
 
-            <h2 class="text-base font-headline font-bold text-[#0b1c30] pt-4 border-t border-gray-100">3. Ketertiban &amp; Keamanan Gelanggang</h2>
+            <h2 class="text-base font-headline font-bold text-[#0b1c30] pt-4 border-t border-gray-100">3. Ketertiban &amp; Keamanan Lapangan</h2>
             <ul class="list-disc list-inside space-y-1 ml-2 text-gray-600">
                 <li>Pemain wajib tiba minimal 15 menit sebelum waktu kickoff untuk melakukan verifikasi check-in di kasir atau pemindai turnstile.</li>
-                <li>Dilarang merokok, membawa senjata, atau minuman keras beralkohol di dalam seluruh area gelanggang olahraga.</li>
+                <li>Dilarang merokok, membawa senjata, atau minuman keras beralkohol di dalam seluruh area lapangan olahraga.</li>
                 <li>Penyewa bertanggung jawab penuh atas keselamatan barang bawaan masing-masing di area loker dan tribun. Pihak venue tidak bertanggung jawab atas kehilangan barang berharga.</li>
             </ul>
 

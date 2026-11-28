@@ -43,7 +43,7 @@
             <div class="col-span-2 lg:col-span-3 rounded-2xl bg-[#f8f9ff] p-4 border border-gray-100 lg:rounded-none lg:bg-transparent lg:p-0 lg:border-0">
                 <h4 class="font-extrabold uppercase tracking-wider text-gray-900">Kerjasama Venue</h4>
                 <p class="mt-2 sm:mt-3 leading-relaxed text-gray-600">
-                    Punya gelanggang atau lapangan olahraga? Kelola jadwal dan tiket reservasi otomatis dengan ekosistem LapangIn Partner.
+                    Punya venue atau lapangan olahraga? Kelola jadwal dan tiket reservasi otomatis dengan ekosistem LapangIn Partner.
                 </p>
                 <a href="{{ route('kontak') }}" class="mt-3.5 sm:mt-4 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#acf847] px-4 py-2.5 font-bold text-[#1a146b] shadow-xs hover:bg-[#9be338] transition">
                     Masuk Portal Venue Owner &rarr;
