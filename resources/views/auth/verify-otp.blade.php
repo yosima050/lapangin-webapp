@@ -39,22 +39,66 @@
                              this.updateTimer();
                          }, 1000);
                          this.$nextTick(() => {
-                             if (this.$refs.digit0) this.$refs.digit0.focus();
+                             const first = this.getInput(0);
+                             if (first) first.focus();
                          });
                      },
+                     getInput(index) {
+                         if (!this.$refs.otpGroup) return null;
+                         return this.$refs.otpGroup.querySelectorAll('input')[index] || null;
+                     },
                      handleInput(index, event) {
-                         const val = event.target.value.replace(/[^0-9]/g, '');
-                         this.otpDigits[index] = val ? val.slice(-1) : '';
-                         event.target.value = this.otpDigits[index];
+                         const digits = (event.target.value || '').replace(/[^0-9]/g, '');
 
-                         if (this.otpDigits[index] && index < 5) {
-                             this.$refs['digit' + (index + 1)].focus();
+                         if (!digits) {
+                             this.otpDigits[index] = '';
+                             event.target.value = '';
+                             return;
                          }
-                         this.syncOtp();
+
+                         // Jika user mengetik cepat / autofill > 1 digit, sebar otomatis ke kotak berikutnya
+                         if (digits.length > 1) {
+                             for (let i = 0; i < digits.length && (index + i) < 6; i++) {
+                                 this.otpDigits[index + i] = digits[i];
+                                 const box = this.getInput(index + i);
+                                 if (box) box.value = digits[i];
+                             }
+                             const nextIdx = Math.min(index + digits.length, 5);
+                             const target = this.getInput(nextIdx);
+                             if (target) target.focus();
+                             return;
+                         }
+
+                         this.otpDigits[index] = digits;
+                         event.target.value = digits;
+
+                         if (index < 5) {
+                             const next = this.getInput(index + 1);
+                             if (next) next.focus();
+                         }
                      },
                      handleKeyDown(index, event) {
-                         if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-                             this.$refs['digit' + (index - 1)].focus();
+                         if (event.key === 'Backspace') {
+                             if (this.otpDigits[index]) {
+                                 this.otpDigits[index] = '';
+                                 event.target.value = '';
+                             } else if (index > 0) {
+                                 event.preventDefault();
+                                 const prev = this.getInput(index - 1);
+                                 this.otpDigits[index - 1] = '';
+                                 if (prev) {
+                                     prev.value = '';
+                                     prev.focus();
+                                 }
+                             }
+                         } else if (event.key === 'ArrowLeft' && index > 0) {
+                             event.preventDefault();
+                             const prev = this.getInput(index - 1);
+                             if (prev) prev.focus();
+                         } else if (event.key === 'ArrowRight' && index < 5) {
+                             event.preventDefault();
+                             const next = this.getInput(index + 1);
+                             if (next) next.focus();
                          }
                      },
                      handlePaste(event) {
@@ -63,14 +107,13 @@
                          if (paste.length > 0) {
                              for (let i = 0; i < 6; i++) {
                                  this.otpDigits[i] = paste[i] || '';
+                                 const box = this.getInput(i);
+                                 if (box) box.value = this.otpDigits[i];
                              }
-                             this.syncOtp();
                              const focusIndex = Math.min(paste.length, 5);
-                             this.$refs['digit' + focusIndex].focus();
+                             const target = this.getInput(focusIndex);
+                             if (target) target.focus();
                          }
-                     },
-                     syncOtp() {
-                         this.$refs.hiddenOtp.value = this.otpDigits.join('');
                      }
                  }">
                 {{-- Header Icon --}}
@@ -106,22 +149,24 @@
                 {{-- Form OTP --}}
                 <form method="POST" action="{{ route('register.otp.verify') }}" class="space-y-6">
                     @csrf
-                    <input type="hidden" name="otp" x-ref="hiddenOtp" required>
+                    <input type="hidden" name="otp" :value="otpDigits.join('')" required>
 
                     <div>
                         <label class="block text-center text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
                             Masukkan 6 Digit Kode OTP
                         </label>
-                        <div class="flex justify-center gap-2 sm:gap-3" @paste="handlePaste($event)">
+                        <div x-ref="otpGroup" class="flex justify-center gap-2 sm:gap-3" @paste="handlePaste($event)">
                             <template x-for="(digit, idx) in 6" :key="idx">
                                 <input
                                     type="text"
                                     inputmode="numeric"
-                                    maxlength="1"
-                                    :x-ref="'digit' + idx"
+                                    autocomplete="one-time-code"
+                                    maxlength="6"
+                                    :aria-label="'Digit OTP ke-' + (idx + 1)"
                                     class="w-11 h-14 sm:w-12 sm:h-14 text-center text-xl font-black text-[#1a146b] bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#1a146b] focus:ring-2 focus:ring-[#1a146b]/20 outline-none transition shadow-xs"
                                     @input="handleInput(idx, $event)"
                                     @keydown="handleKeyDown(idx, $event)"
+                                    @focus="$event.target.select()"
                                 >
                             </template>
                         </div>
