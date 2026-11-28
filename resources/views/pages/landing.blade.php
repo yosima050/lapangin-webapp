@@ -27,10 +27,17 @@
     if (isset($lapangans) && $lapangans->isNotEmpty()) {
         $dbSlides = [];
         foreach ($lapangans as $l) {
+            $fotoUrl = $l->foto_url;
+            if (is_string($fotoUrl) && str_contains($fotoUrl, 'images.unsplash.com')) {
+                $fotoUrl = preg_replace('/([?&])w=\d+/', '$1w=1000', $fotoUrl);
+                if (!str_contains($fotoUrl, 'fm=')) {
+                    $fotoUrl .= (str_contains($fotoUrl, '?') ? '&' : '?') . 'fm=webp&q=75';
+                }
+            }
             $dbSlides[] = [
                 'nama' => $l->nama,
                 'kategori' => $l->kategori ?? 'Sports Arena',
-                'foto' => $l->foto_url,
+                'foto' => $fotoUrl,
                 'url' => route('katalog.show', $l->id),
             ];
         }
@@ -48,6 +55,9 @@
 @endphp
 
 @push('head')
+    @if($heroLcpImage && str_contains($heroLcpImage, 'images.unsplash.com'))
+        <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+    @endif
     @if($heroLcpImage)
         <link rel="preload" as="image" href="{{ $heroLcpImage }}" fetchpriority="high" />
     @endif
@@ -256,12 +266,11 @@
 
                     {{-- Pilih Cabang Olahraga (Custom Dropdown) --}}
                     <div class="sm:col-span-5 relative" @click.outside="katOpen = false">
-                        <span id="hero_kat_label" class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
+                        <span class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
                             Cabang Olahraga
                         </span>
                         <input type="hidden" name="kategori" :value="selectedKat">
                         <button type="button"
-                                aria-labelledby="hero_kat_label"
                                 @click="katOpen = !katOpen; dateOpen = false"
                                 :aria-expanded="katOpen"
                                 class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
@@ -270,6 +279,7 @@
                                 <span class="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#1a146b] inline-flex items-center justify-center">
                                     <x-icons.sport class="w-full h-full" />
                                 </span>
+                                <span class="sr-only">Cabang Olahraga: </span>
                                 <span class="truncate" x-text="selectedKat || 'Semua Olahraga'"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
@@ -313,12 +323,11 @@
 
                     {{-- Pilih Tanggal Main (Custom Calendar Popover) --}}
                     <div class="sm:col-span-4 relative" @click.outside="dateOpen = false">
-                        <span id="hero_date_label" class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
+                        <span class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
                             Tanggal Main
                         </span>
                         <input type="hidden" name="tanggal" :value="selectedDate">
                         <button type="button"
-                                aria-labelledby="hero_date_label"
                                 @click="dateOpen = !dateOpen; katOpen = false"
                                 :aria-expanded="dateOpen"
                                 class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
@@ -327,6 +336,7 @@
                                 <span class="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#1a146b] inline-flex items-center justify-center">
                                     <x-icons.calendar class="w-full h-full" />
                                 </span>
+                                <span class="sr-only">Tanggal Main: </span>
                                 <span class="flex items-center gap-2 min-w-0">
                                     <span class="truncate" x-text="dateLabel"></span>
                                     <span x-show="dateBadge"
@@ -723,7 +733,7 @@
     </section>
 
     {{-- 4. Alur Reservasi (Odoo-Style Illustrated Winding Roadmap) --}}
-    <section id="cara-kerja" class="relative py-14 sm:py-24 bg-white border-t border-gray-100 overflow-hidden">
+    <section id="cara-kerja" style="content-visibility: auto; contain-intrinsic-size: 1px 560px;" class="relative py-14 sm:py-24 bg-white border-t border-gray-100 overflow-hidden">
         {{-- Pola Latar Halus --}}
         <div class="absolute inset-0 opacity-[0.35] pointer-events-none"
              style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 26px 26px;"></div>
