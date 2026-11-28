@@ -27,7 +27,7 @@ class RegisterOtpMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.register-otp',
+            view: 'emails.register-otp',
         );
     }
 
