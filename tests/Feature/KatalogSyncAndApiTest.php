@@ -45,8 +45,10 @@ class KatalogSyncAndApiTest extends TestCase
 
     public function test_katalog_page_displays_synchronized_data_from_database(): void
     {
+        $nextWeekday = \Carbon\Carbon::now('Asia/Jakarta')->next(\Carbon\Carbon::WEDNESDAY)->toDateString();
+
         $response = $this->get(route('katalog.index', [
-            'tanggal' => '2026-10-23',
+            'tanggal' => $nextWeekday,
         ]));
 
         $response->assertStatus(200);
