@@ -21,11 +21,11 @@
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-[#acf847]/30 border border-[#acf847] flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#416900]">check_circle</span>
+                <x-lucide-circle-check class="w-6 h-6 text-[#416900] shrink-0" />
                 <span class="text-xs font-bold text-[#102000]">{{ session('success') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#416900] hover:text-[#102000]">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -34,7 +34,7 @@
         <div class="p-4 rounded-2xl bg-[#ffdad6] border border-[#ffb4ab] flex flex-col gap-1 shadow-xs">
             @foreach ($errors->all() as $err)
                 <div class="flex items-center gap-2 text-xs font-bold text-[#ba1a1a]">
-                    <span class="material-symbols-outlined text-base">error</span>
+                    <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                     <span>{{ $err }}</span>
                 </div>
             @endforeach
@@ -59,7 +59,7 @@
 
         <button type="button" @click="document.getElementById('form-tambah-kasir').scrollIntoView({ behavior: 'smooth' })"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs shadow-md transition-all shrink-0">
-            <span class="material-symbols-outlined text-base text-[#acf847]">add_circle</span>
+            <x-lucide-circle-plus class="w-4 h-4 text-[#acf847] shrink-0" />
             <span>+ Tambah Kasir Baru</span>
         </button>
     </div>
@@ -69,7 +69,7 @@
         <div class="p-5 rounded-2xl bg-white shadow-sm border border-[#e5eeff] flex items-center justify-between">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                    <span class="material-symbols-outlined text-2xl">badge</span>
+                    <x-lucide-badge-check class="w-6 h-6 shrink-0" />
                 </div>
                 <div>
                     <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">TOTAL AKUN PEGAWAI</span>
@@ -84,7 +84,7 @@
         <div class="p-5 rounded-2xl bg-white shadow-sm border border-[#e5eeff] flex items-center justify-between">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#416900]">
-                    <span class="material-symbols-outlined text-2xl">point_of_sale</span>
+                    <x-lucide-calculator class="w-6 h-6 shrink-0" />
                 </div>
                 <div>
                     <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">KASIR STANDBY POS</span>
@@ -99,7 +99,7 @@
         <div class="p-5 rounded-2xl bg-white shadow-sm border border-[#e5eeff] flex items-center justify-between">
             <div class="flex items-center gap-3.5">
                 <div class="w-12 h-12 rounded-xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                    <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+                    <x-lucide-shield-check class="w-6 h-6 shrink-0" />
                 </div>
                 <div>
                     <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">ADMINISTRATOR SISTEM</span>
@@ -117,7 +117,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#1a146b] flex items-center justify-center text-white">
-                    <span class="material-symbols-outlined text-xl">badge</span>
+                    <x-lucide-badge-check class="w-5 h-5 shrink-0" />
                 </div>
                 <div>
                     <h2 class="text-base font-bold text-[#0b1c30]">Daftar Akun Pegawai &amp; Kasir POS</h2>
@@ -141,7 +141,7 @@
 
         <!-- Search Bar -->
         <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-base">search</span>
+            <x-lucide-search class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777682] w-4 h-4 shrink-0" />
             <input type="text" x-model="searchKasir"
                    placeholder="Cari nama kasir, meja terminal, atau email..."
                    class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#eff4ff] text-xs font-semibold text-[#0b1c30] border border-[#e5eeff] focus:bg-white focus:ring-2 focus:ring-[#acf847] outline-none transition-all">
@@ -235,7 +235,11 @@
                             </td>
                             <td class="px-5 py-4 text-[#474651] font-medium">
                                 <span class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-sm text-[#777682]">{{ $isAdmin ? 'shield' : 'desktop_windows' }}</span>
+                                    @if ($isAdmin)
+                                        <x-lucide-shield class="w-4 h-4 text-[#777682] shrink-0" />
+                                    @else
+                                        <x-lucide-monitor class="w-4 h-4 text-[#777682] shrink-0" />
+                                    @endif
                                     {{ $terminal }}
                                 </span>
                             </td>
@@ -294,7 +298,7 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-[#e5eeff] flex flex-col gap-5" id="form-tambah-kasir">
         <div class="flex items-center justify-between pb-3 border-b border-[#eff4ff]">
             <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-xl text-[#1a146b]">person_add</span>
+                <x-lucide-user-plus class="w-5 h-5 text-[#1a146b] shrink-0" />
                 <h2 class="text-base font-bold text-[#0b1c30]">Form Tambah Kasir Baru</h2>
             </div>
         </div>
@@ -328,7 +332,7 @@
                         placeholder="Masukkan password sementara"
                         class="w-full px-3.5 py-2.5 rounded-xl bg-[#eff4ff] text-[#0b1c30] font-mono font-bold border border-[#e5eeff] focus:bg-white focus:ring-2 focus:ring-[#acf847] outline-none transition-all"
                     >
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-[#777682]">lock</span>
+                    <x-lucide-lock class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#777682] shrink-0" />
                 </div>
             </div>
 
@@ -348,7 +352,7 @@
 
             <button type="submit"
                     class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
-                <span class="material-symbols-outlined text-base">save</span>
+                <x-lucide-save class="w-4 h-4 shrink-0" />
                 <span>Simpan Akun Kasir ke Database</span>
             </button>
         </form>

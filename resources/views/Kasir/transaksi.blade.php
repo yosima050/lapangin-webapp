@@ -33,7 +33,7 @@
 
         <button type="button" data-testid="transaction-print" onclick="window.print()"
                 class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold transition-all shadow-md cursor-pointer">
-            <span class="material-symbols-outlined text-base">print</span>
+            <x-lucide-printer class="w-4 h-4 shrink-0" />
             <span>Cetak Rekap Transaksi</span>
         </button>
     </div>
@@ -142,7 +142,7 @@
                                     @if ($trx->jadwal_id)
                                         <a href="{{ route('kasir.struk', $trx->jadwal_id) }}" target="_blank"
                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#eff4ff] hover:bg-[#1a146b] text-[#1a146b] hover:text-white text-[11px] font-bold border border-[#dce9ff] transition-colors shadow-2xs">
-                                            <span class="material-symbols-outlined text-sm">receipt_long</span>
+                                            <x-lucide-receipt-text class="w-4 h-4 shrink-0" />
                                             <span>Struk</span>
                                         </a>
                                     @else
@@ -199,9 +199,9 @@
             <button
                 type="button"
                 data-testid="shift-close-button"
-                @click="alert('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
+                @click="window.lapanginNotify('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
                     class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer">
-                <span class="material-symbols-outlined text-base text-[#acf847]">lock_clock</span>
+                <x-lucide-clock-alert class="w-4 h-4 text-[#acf847] shrink-0" />
                 <span>Tutup Shift &amp; Cetak Berita Acara</span>
             </button>
         </div>

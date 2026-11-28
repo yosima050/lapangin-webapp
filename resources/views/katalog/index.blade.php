@@ -2,6 +2,17 @@
 
 @section('title', 'Katalog Lapangan')
 
+@php
+    $firstKatalogItem = $katalog->first();
+    $katalogLcpImage = $firstKatalogItem['foto_card_url'] ?? $firstKatalogItem['foto_url'] ?? null;
+@endphp
+
+@push('head')
+    @if($katalogLcpImage)
+        <link rel="preload" as="image" href="{{ $katalogLcpImage }}" fetchpriority="high" />
+    @endif
+@endpush
+
 @section('content')
 <div
     x-data="{
@@ -30,76 +41,6 @@
                 dengan konfirmasi langsung tanpa antre.
             </p>
 
-        </div>
-    </section>
-
-    {{-- Filter Tanggal & Fasilitas: Non-sticky (Tidak ikut turun saat scroll down) --}}
-    <section class="border-y border-gray-100 bg-[#f8f9ff]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-
-                {{-- Date Picker --}}
-                <form method="GET" action="{{ route('katalog.index') }}" class="flex items-center gap-2">
-                    @if(request('kategori'))
-                        <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                    @endif
-                    <label
-                        for="tanggal"
-                        class="text-xs sm:text-sm font-bold text-gray-700 shrink-0"
-                    >
-                        Tanggal:
-                    </label>
-
-                    <input
-                        id="tanggal"
-                        name="tanggal"
-                        type="date"
-                        min="{{ now('Asia/Jakarta')->toDateString() }}"
-                        value="{{ $tanggal }}"
-                        onchange="this.form.submit()"
-                        class="px-3.5 py-1.5 rounded-xl border border-gray-200 bg-white text-xs sm:text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#acf847]"
-                    >
-                </form>
-
-                {{-- Quick Filters --}}
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-
-                    <button
-                        type="button"
-                        @click="dp = !dp"
-                        :class="dp
-                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
-                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
-                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
-                    >
-                        Bisa DP 50%
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="parking = !parking"
-                        :class="parking
-                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
-                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
-                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
-                    >
-                        Parkir Mobil
-                    </button>
-
-                    <button
-                        type="button"
-                        @click="indoor = !indoor"
-                        :class="indoor
-                            ? 'bg-[#eaf7d8] text-[#284200] border-[#416900] ring-1 ring-[#acf847]'
-                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
-                        class="shrink-0 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition cursor-pointer"
-                    >
-                        AC / Indoor
-                    </button>
-
-                </div>
-
-            </div>
         </div>
     </section>
 
@@ -161,7 +102,7 @@
                 {{-- Search Bar Lapangan --}}
                 <div class="relative w-full sm:w-72 lg:w-80">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                        <span class="material-symbols-outlined text-lg">search</span>
+                        <x-lucide-search class="w-5 h-5 shrink-0" />
                     </span>
                     <input
                         type="text"
@@ -177,12 +118,12 @@
                         class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition cursor-pointer"
                         title="Hapus pencarian"
                     >
-                        <span class="material-symbols-outlined text-base">close</span>
+                        <x-lucide-x class="w-4 h-4 shrink-0" />
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-6">
 
                 @forelse ($katalog as $item)
                     @php
@@ -191,84 +132,96 @@
                     <article
                         x-show="(sport === 'Semua' || '{{ $item['kategori'] }}' === sport) && (!searchQuery.trim() || {{ json_encode($searchKeyword) }}.includes(searchQuery.toLowerCase().trim()))"
                         x-transition
+                        @if($loop->index >= 2)
+                            style="content-visibility: auto; contain-intrinsic-size: 1px 160px;"
+                        @endif
                         onclick="window.location.href = '{{ route('katalog.show', $item['lapangan_id']) }}'"
                         class="cursor-pointer bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col"
                     >
-                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] flex-1">
+                        <div class="grid grid-cols-[116px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[240px_1fr] flex-1">
 
                             {{-- Image Lapangan Asli dari PostgreSQL / Upload --}}
-                            <div class="relative h-60 md:h-full min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
+                            <div class="relative h-full min-h-[144px] sm:min-h-[200px] md:min-h-[220px] bg-gray-900 overflow-hidden shrink-0">
                                 <img
-                                    src="{{ $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
+                                    src="{{ $item['foto_card_url'] ?? $item['foto_url'] ?? ('https://ui-avatars.com/api/?name='.urlencode($item['lapangan_nama']).'&background=1a146b&color=acf847&size=512') }}"
                                     alt="{{ $item['lapangan_nama'] }}"
+                                    width="240"
+                                    height="220"
+                                    @if($loop->first)
+                                        fetchpriority="high"
+                                        decoding="sync"
+                                    @else
+                                        loading="lazy"
+                                        decoding="async"
+                                    @endif
                                    class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden"></div>
-
-                                <span class="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-xs font-bold shadow-sm">
-                                    {{ $item['kategori'] }}
-                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent md:hidden"></div>
                             </div>
 
                             {{-- Content Lapangan & Tarif --}}
-                            <div class="p-6 flex flex-col justify-between">
+                            <div class="p-3 sm:p-5 md:p-6 flex flex-col justify-between min-w-0">
                                 <div>
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p class="text-xs font-bold uppercase tracking-wider text-[#416900]">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-[#416900]">
                                                 {{ $item['kategori'] }}
                                             </p>
-                                            <h3 class="mt-1 text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition">
+                                            <h3 class="mt-0.5 sm:mt-1 text-sm sm:text-base md:text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition leading-snug line-clamp-2">
                                                 {{ $item['lapangan_nama'] }}
                                             </h3>
                                         </div>
                                     </div>
 
                                     @if (!empty($item['deskripsi']))
-                                        <p class="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                                        <p class="hidden sm:line-clamp-2 mt-2 text-xs text-gray-500 leading-relaxed">
                                             {{ $item['deskripsi'] }}
                                         </p>
                                     @endif
 
-                                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                                        <span class="material-symbols-outlined text-sm text-[#1a146b]">schedule</span>
-                                        <span>Jam Buka: {{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
+                                    <div class="mt-1.5 sm:mt-3 flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-500">
+                                        <x-lucide-clock class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1a146b] shrink-0" />
+                                        <span class="truncate">{{ $item['jam_operasional']['jam_buka'] }} – {{ $item['jam_operasional']['jam_tutup'] }} WIB</span>
                                     </div>
                                 </div>
 
-                                <div class="mt-5 pt-4 border-t border-gray-100">
-                                    <div class="flex items-end justify-between gap-3">
+                                <div class="mt-2.5 sm:mt-5 pt-2.5 sm:pt-4 border-t border-gray-100">
+                                    <div class="flex flex-wrap items-end justify-between gap-2">
                                         <div>
                                             <div class="flex items-center gap-1.5">
-                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
+                                                <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarif Mulai</p>
                                                 @if(!empty($item['has_harga_khusus']))
-                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800">
-                                                        PROMO / KHUSUS
+                                                    <span class="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-extrabold bg-amber-100 text-amber-800">
+                                                        PROMO
                                                     </span>
                                                 @endif
                                             </div>
-                                            <div class="flex items-baseline gap-1">
-                                                <span class="text-lg font-extrabold text-[#0b1c30]">
+                                            <div class="flex items-baseline gap-0.5 sm:gap-1">
+                                                <span class="text-sm sm:text-lg font-extrabold text-[#0b1c30]">
                                                     Rp {{ number_format($item['harga_termurah'] ?? ($item['harga_weekday'] ?? 100000), 0, ',', '.') }}
                                                 </span>
-                                                <span class="text-xs text-gray-500 font-medium">/jam</span>
+                                                <span class="text-[10px] sm:text-xs text-gray-500 font-medium">/jam</span>
                                             </div>
                                         </div>
 
+                                        @php
+                                            $availableSlotCount = collect($item['slots'])->where('is_tersedia', true)->count();
+                                        @endphp
                                         <div class="text-right">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#eaf7d8] text-[#416900]">
-                                                <span class="w-2 h-2 rounded-full bg-[#416900]"></span>
-                                                {{ collect($item['slots'])->where('is_tersedia', true)->count() }} slot kosong
+                                            <span class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold {{ $availableSlotCount > 0 ? 'text-[#416900]' : 'text-rose-600' }}">
+                                                <span class="w-1.5 h-1.5 rounded-full {{ $availableSlotCount > 0 ? 'bg-[#416900]' : 'bg-rose-500' }}"></span>
+                                                {{ $availableSlotCount > 0 ? $availableSlotCount . ' slot tersedia' : 'Slot penuh' }}
                                             </span>
                                         </div>
                                     </div>
 
                                     <a
                                         href="{{ route('katalog.show', ['id' => $item['lapangan_id'], 'tanggal' => $tanggal]) }}"
-                                        class="mt-4 flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-xs font-bold shadow-sm transition"
+                                        class="mt-2.5 sm:mt-4 flex items-center justify-center w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white text-[11px] sm:text-xs font-bold shadow-sm transition"
                                     >
-                                        Lihat Detail &amp; Jadwal Lengkap →
+                                        <span class="sm:hidden">Detail &amp; Jadwal →</span>
+                                        <span class="hidden sm:inline">Lihat Detail &amp; Jadwal Lengkap →</span>
                                     </a>
                                 </div>
                             </div>
@@ -292,7 +245,7 @@
                         style="display: none;"
                     >
                         <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-2xl">search_off</span>
+                            <x-lucide-search-x class="w-6 h-6 shrink-0" />
                         </div>
                         <h3 class="text-base font-bold text-gray-800">Tidak ada lapangan yang cocok</h3>
                         <p class="mt-1 text-xs sm:text-sm text-gray-500">

@@ -33,7 +33,7 @@ class RiwayatController extends Controller
         }
 
         $jadwals = $pelanggan ? $pelanggan->jadwals()
-            ->with(['lapangan', 'transaksis', 'reschedules'])
+            ->with(['lapangan', 'transaksis', 'reschedules', 'detailSewaPerlengkapans.perlengkapan'])
             ->orderByDesc('tanggal')
             ->orderByDesc('jam_mulai')
             ->get() : collect();

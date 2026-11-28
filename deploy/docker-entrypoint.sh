@@ -7,10 +7,8 @@ if [ ! -L /var/www/lapangin/public/storage ] || [ ! -e /var/www/lapangin/public/
     php artisan storage:link --force || true
 fi
 
-# Pastikan package discovery dijalankan di runtime saat environment aktif
-if [ ! -f /var/www/lapangin/bootstrap/cache/packages.php ]; then
-    php artisan package:discover --ansi || true
-fi
+# Pastikan package discovery selalu sinkron dengan vendor terbaru saat container start
+php artisan package:discover --ansi || true
 
 # Jalankan command (php-fpm / queue / scheduler)
 exec "$@"

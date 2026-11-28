@@ -6,7 +6,7 @@
         <div class="max-w-md mx-auto w-full flex items-center justify-between mb-6">
             <a href="{{ route('login') }}"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Kembali ke Login</span>
             </a>
 
@@ -17,7 +17,7 @@
         <main class="max-w-md mx-auto w-full my-auto">
             <div class="bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff]">
                 <div class="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#1a146b] flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-2xl">key</span>
+                    <x-lucide-key-round class="w-6 h-6 shrink-0" />
                 </div>
 
                 <h1 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
@@ -40,9 +40,7 @@
                         </label>
 
                         <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                            <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                mail
-                            </span>
+                            <x-lucide-mail class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                             <input
                                 id="email"
                                 type="email"
@@ -57,7 +55,7 @@
 
                         @if ($errors->has('email'))
                             <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
+                                <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                 <span>{{ $errors->first('email') }}</span>
                             </p>
                         @endif
@@ -69,9 +67,7 @@
                         </label>
 
                         <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                            <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                lock
-                            </span>
+                            <x-lucide-lock class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                             <input
                                 id="password"
                                 :type="showPassword ? 'text' : 'password'"
@@ -87,15 +83,14 @@
                                 class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                 tabindex="-1"
                             >
-                                <span class="material-symbols-outlined text-lg"
-                                      x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                </span>
+                                <x-lucide-eye x-show="!showPassword" class="w-5 h-5 shrink-0" />
+                                <x-lucide-eye-off x-show="showPassword" style="display: none;" class="w-5 h-5 shrink-0" />
                             </button>
                         </div>
 
                         @if ($errors->has('password'))
                             <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
+                                <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                 <span>{{ $errors->first('password') }}</span>
                             </p>
                         @endif
@@ -107,9 +102,7 @@
                         </label>
 
                         <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                            <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                lock_reset
-                            </span>
+                            <x-lucide-key-round class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                             <input
                                 id="password_confirmation"
                                 :type="showPasswordConfirm ? 'text' : 'password'"
@@ -125,15 +118,14 @@
                                 class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                 tabindex="-1"
                             >
-                                <span class="material-symbols-outlined text-lg"
-                                      x-text="showPasswordConfirm ? 'visibility_off' : 'visibility'">
-                                </span>
+                                <x-lucide-eye x-show="!showPasswordConfirm" class="w-5 h-5 shrink-0" />
+                                <x-lucide-eye-off x-show="showPasswordConfirm" style="display: none;" class="w-5 h-5 shrink-0" />
                             </button>
                         </div>
 
                         @if ($errors->has('password_confirmation'))
                             <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
+                                <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                 <span>{{ $errors->first('password_confirmation') }}</span>
                             </p>
                         @endif
@@ -144,7 +136,7 @@
                         class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <span>Simpan Kata Sandi Baru</span>
-                        <span class="material-symbols-outlined text-sm">save</span>
+                        <x-lucide-save class="w-4 h-4 shrink-0" />
                     </button>
                 </form>
             </div>

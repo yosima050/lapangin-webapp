@@ -5,7 +5,7 @@
         <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-6 sm:mb-10">
             <a href="{{ route('register') }}"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Ubah Data Registrasi</span>
             </a>
 
@@ -76,7 +76,7 @@
                 {{-- Header Icon --}}
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-[#eff4ff] flex items-center justify-center text-[#1a146b]">
-                        <span class="material-symbols-outlined text-3xl">mark_email_read</span>
+                        <x-lucide-mail-check class="w-7 h-7 shrink-0" />
                     </div>
                     <h2 class="text-2xl font-black text-[#0b1c30]">Verifikasi Email Anda</h2>
                     <p class="mt-2 text-sm text-gray-500 leading-relaxed">
@@ -90,7 +90,7 @@
                 {{-- Alert Status --}}
                 @if (session('status'))
                     <div class="mb-5 p-3 rounded-xl bg-green-50 border border-green-200 text-xs text-green-700 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base text-green-600">check_circle</span>
+                        <x-lucide-circle-check class="w-4 h-4 text-green-600 shrink-0" />
                         <span>{{ session('status') }}</span>
                     </div>
                 @endif
@@ -98,7 +98,7 @@
                 {{-- Alert Error --}}
                 @if ($errors->has('otp'))
                     <div class="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-base text-red-600">error</span>
+                        <x-lucide-circle-alert class="w-4 h-4 text-red-600 shrink-0" />
                         <span>{{ $errors->first('otp') }}</span>
                     </div>
                 @endif
@@ -147,7 +147,7 @@
                         class="w-full py-3.5 px-4 rounded-xl bg-[#1a146b] hover:bg-[#120d52] active:scale-[0.99] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <span>Verifikasi &amp; Lanjutkan</span>
-                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                        <x-lucide-arrow-right class="w-5 h-5 shrink-0" />
                     </button>
                 </form>
 
@@ -161,7 +161,7 @@
                             :disabled="sending"
                             class="inline-flex items-center gap-1.5 text-xs font-bold text-[#1a146b] hover:text-[#0b1c30] hover:underline transition cursor-pointer disabled:opacity-50"
                         >
-                            <span class="material-symbols-outlined text-base" :class="sending ? 'animate-spin' : ''">refresh</span>
+                            <x-lucide-refresh-cw class="w-4 h-4 shrink-0" x-bind:class="sending ? 'animate-spin' : ''" />
                             <span x-text="sending ? 'Mengirim ulang...' : 'Kirim Ulang Kode OTP'"></span>
                         </button>
                     </form>

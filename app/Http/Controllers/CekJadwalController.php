@@ -31,36 +31,48 @@ class CekJadwalController extends Controller
         $tanggal = ($rawTanggal < $todayWib) ? $todayWib : $rawTanggal;
         $selectedLapanganId = $validated['lapangan_id'] ?? null;
 
-        // Query Lapangan Aktif
-        $query = Lapangan::with('hargaMasters')->where('is_active', true);
+        // Query seluruh lapangan aktif sekali saja (bebas query berulang)
+        $allActiveLapangans = Lapangan::with('hargaMasters')
+            ->where('is_active', true)
+            ->orderBy('nama')
+            ->get();
 
+        $kategoriList = $allActiveLapangans->pluck('kategori')
+            ->filter(fn ($k) => $k !== null && $k !== '')
+            ->unique()
+            ->sort()
+            ->values();
+
+        $allLapangans = $allActiveLapangans->map(fn ($l) => (object) [
+            'id' => $l->id,
+            'nama' => $l->nama,
+            'kategori' => $l->kategori,
+        ]);
+
+        $lapangans = $allActiveLapangans;
         if ($kategori && $kategori !== 'Semua') {
-            $query->where('kategori', $kategori);
+            $lapangans = $lapangans->where('kategori', $kategori)->values();
         }
-
         if (!empty($selectedLapanganId)) {
-            $query->where('id', $selectedLapanganId);
+            $lapangans = $lapangans->where('id', $selectedLapanganId)->values();
         }
 
-        $lapangans = $query->orderBy('nama')->get();
-        $kategoriList = Lapangan::where('is_active', true)
-            ->distinct()
-            ->whereNotNull('kategori')
-            ->where('kategori', '!=', '')
-            ->orderBy('kategori')
-            ->pluck('kategori');
-        $allLapangans = Lapangan::where('is_active', true)->orderBy('nama')->get(['id', 'nama', 'kategori']);
-
-        // Generate 7 hari cepat navigasi kalender
+        // Generate 7 hari cepat navigasi kalender (geser jendela jika tanggal dipilih > 6 hari dari hari ini)
         $currentDateCarbon = Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
         $todayCarbon = Carbon::parse($todayWib, 'Asia/Jakarta')->startOfDay();
+        $windowStart = $currentDateCarbon->gt($todayCarbon->copy()->addDays(6))
+            ? $currentDateCarbon->copy()
+            : $todayCarbon->copy();
 
         $dateOptions = [];
         for ($i = 0; $i < 7; $i++) {
-            $d = $todayCarbon->copy()->addDays($i);
+            $d = $windowStart->copy()->addDays($i);
             $dateStr = $d->toDateString();
-            $labelTop = ($i === 0) ? 'HARI INI' : (($i === 1) ? 'BESOK' : strtoupper($d->locale('id')->translatedFormat('D')));
-            
+            $diffDays = (int) $todayCarbon->diffInDays($d, false);
+            $labelTop = ($diffDays === 0)
+                ? 'HARI INI'
+                : (($diffDays === 1) ? 'BESOK' : strtoupper($d->locale('id')->translatedFormat('D')));
+
             $dateOptions[] = [
                 'date' => $dateStr,
                 'label_top' => $labelTop,
@@ -70,14 +82,15 @@ class CekJadwalController extends Controller
             ];
         }
 
-        // Ambil data matriks slot per lapangan
+        // Ambil data matriks slot per lapangan secara batch (bebas N+1)
+        $bulkSlotData = $this->jadwalService->getBulkSlotStatus($lapangans, $tanggal);
         $matrix = [];
         $totalSlotTersedia = 0;
         $totalSlotDibooking = 0;
         $totalSlotLewat = 0;
 
         foreach ($lapangans as $lap) {
-            $slotData = $this->jadwalService->getSlotStatus((string) $lap->id, $tanggal);
+            $slotData = $bulkSlotData[(string) $lap->id] ?? [];
 
             $lapanganSlots = $slotData['slots'] ?? [];
             $tersediaCount = 0;
@@ -112,6 +125,7 @@ class CekJadwalController extends Controller
                 'success' => true,
                 'tanggal' => $tanggal,
                 'matrix' => $matrix,
+                'dateOptions' => $dateOptions,
             ]);
         }
 

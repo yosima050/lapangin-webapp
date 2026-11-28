@@ -13,7 +13,7 @@
         $prefilledName = old('name', request('name', ''));
     @endphp
 
-    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between"
+    <div class="min-h-screen py-4 sm:py-8 px-3.5 sm:px-6 lg:px-8 flex flex-col justify-between"
          x-data="{
              tab: '{{ $activeTab }}',
              showPassword: false,
@@ -37,14 +37,15 @@
          }">
 
         {{-- Top Minimalist Navigation Bar --}}
-        <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-6 sm:mb-10">
+        <div class="max-w-7xl mx-auto w-full flex items-center justify-between mb-4 sm:mb-10">
             <a href="{{ route('home') }}"
-               class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
-                <span>Kembali ke Beranda</span>
+               class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
+                <span class="sm:hidden">Beranda</span>
+                <span class="hidden sm:inline">Kembali ke Beranda</span>
             </a>
 
-            <div class="lg:hidden">
+            <div class="lg:hidden scale-90 sm:scale-100 origin-right">
                 <x-application-logo />
             </div>
         </div>
@@ -112,30 +113,32 @@
 
             {{-- Right Column: Interactive Auth Card (Single Unified Container) --}}
             <div class="lg:col-span-6 flex justify-center w-full">
-                <div class="w-full max-w-lg bg-white rounded-3xl p-7 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
+                <div class="w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-10 shadow-xl border border-[#e5eeff] transition-all">
 
-                    {{-- Top Tabs Segmented Control (Smooth Client-Side Switch with Native Link Fallback) --}}
-                    <div class="bg-[#eff4ff] p-1.5 rounded-2xl flex items-center gap-1 mb-6 border border-[#dce9ff]">
+                    {{-- Top Tabs Segmented Control (1 baris rapi di HP & Desktop) --}}
+                    <div class="bg-[#eff4ff] p-1 sm:p-1.5 rounded-2xl flex items-center gap-1 mb-5 sm:mb-6 border border-[#dce9ff]">
                         <a
                             id="btn-tab-login"
                             href="{{ route('login') }}"
                             onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            class="flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer {{ $activeTab === 'login' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span>
-                            <span class="material-symbols-outlined text-base">login</span>
-                            <span>Masuk ke Akun</span>
+                            <span class="hidden sm:inline-flex items-center"><span id="dot-tab-login" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'login' ? '' : 'hidden' }}"></span></span>
+                            <x-lucide-log-in class="w-4 h-4 shrink-0" />
+                            <span class="sm:hidden">Masuk</span>
+                            <span class="hidden sm:inline">Masuk ke Akun</span>
                         </a>
 
                         <a
                             id="btn-tab-register"
                             href="{{ route('register') }}"
                             onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
-                            class="flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
+                            class="flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer {{ $activeTab === 'register' ? 'bg-white text-[#1a146b] font-bold shadow-xs active-tab' : 'text-gray-500 hover:text-[#1a146b] font-semibold' }}"
                         >
-                            <span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span>
-                            <span class="material-symbols-outlined text-base">person_add</span>
-                            <span>Daftar Akun Baru</span>
+                            <span class="hidden sm:inline-flex items-center"><span id="dot-tab-register" class="w-2 h-2 rounded-full bg-[#416900] {{ $activeTab === 'register' ? '' : 'hidden' }}"></span></span>
+                            <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                            <span class="sm:hidden">Daftar</span>
+                            <span class="hidden sm:inline">Daftar Akun Baru</span>
                         </a>
                     </div>
 
@@ -146,19 +149,19 @@
                          class="{{ $activeTab === 'login' ? '' : 'hidden' }}"
                          @if($activeTab !== 'login') style="display: none;" @endif>
 
-                        <div class="mb-5">
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
-                                Selamat Datang Kembali
+                        <div class="mb-4 sm:mb-5">
+                            <h2 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
+                                Masuk ke LapangIn
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                                Masuk untuk mengelola jadwal bertanding dan tim Anda.
+                                Masuk untuk memesan lapangan dan mengelola jadwal bermain Anda.
                             </p>
                         </div>
 
                         {{-- Session Status --}}
                         @if (session('status'))
                             <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                <x-lucide-circle-check class="w-4 h-4 shrink-0" />
                                 <span>{{ session('status') }}</span>
                             </div>
                         @endif
@@ -193,9 +196,7 @@
                                 </label>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
+                                    <x-lucide-badge-check class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="login_email"
                                         type="text"
@@ -211,7 +212,7 @@
 
                                 @if ($activeTab === 'login' && $errors->has('email'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('email') }}</span>
                                     </p>
                                 @endif
@@ -233,9 +234,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
+                                    <x-lucide-lock class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="login_password"
                                         type="password"
@@ -252,22 +251,21 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPassword" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPassword" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 @if ($activeTab === 'login' && $errors->has('password'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password') }}</span>
                                     </p>
                                 @endif
                             </div>
 
-                            {{-- Remember Me & Security Badge --}}
-                            <div class="flex items-center justify-between pt-1">
+                            {{-- Remember Me --}}
+                            <div class="flex items-center pt-1">
                                 <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer">
                                     <input
                                         id="remember_me"
@@ -279,21 +277,16 @@
                                         Ingat Saya di Perangkat Ini
                                     </span>
                                 </label>
-
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-[#416900]">
-                                    <span class="material-symbols-outlined text-xs">lock</span>
-                                    <span>Sesi Aman</span>
-                                </span>
                             </div>
 
                             {{-- Submit Button --}}
                             <button
                                 type="submit"
-                                class="w-full mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
+                                class="w-full mt-5 sm:mt-6 py-3.5 px-6 rounded-xl bg-[#161358] hover:bg-[#25207c] text-white font-headline font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
                             >
                                 <span>Masuk Sekarang</span>
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] text-xs font-bold transition group-hover:translate-x-0.5">
-                                    →
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#acf847] text-[#102000] transition group-hover:translate-x-0.5">
+                                    <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                                 </span>
                             </button>
                         </form>
@@ -307,7 +300,7 @@
                                     onclick="window.switchAuthTab && window.switchAuthTab('register', event)"
                                     class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     <span>Daftar Sekarang</span>
-                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
+                                    <x-lucide-arrow-up-right class="w-3.5 h-3.5 shrink-0" />
                                 </a>
                             </p>
                         </div>
@@ -320,8 +313,8 @@
                          class="{{ $activeTab === 'register' ? '' : 'hidden' }}"
                          @if($activeTab !== 'register') style="display: none;" @endif>
 
-                        <div class="mb-5">
-                            <h2 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
+                        <div class="mb-4 sm:mb-5">
+                            <h2 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
                                 Daftar Akun Baru
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">
@@ -332,7 +325,7 @@
                         {{-- Session Status --}}
                         @if (session('status'))
                             <div class="mb-5 p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-semibold text-[#1a146b] flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">info</span>
+                                <x-lucide-info class="w-4 h-4 shrink-0" />
                                 <span>{{ session('status') }}</span>
                             </div>
                         @endif
@@ -412,9 +405,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        badge
-                                    </span>
+                                    <x-lucide-badge-check class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_name"
                                         type="text"
@@ -429,7 +420,7 @@
 
                                 @if ($activeTab === 'register' && $errors->has('name'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('name') }}</span>
                                     </p>
                                 @endif
@@ -446,9 +437,7 @@
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition"
                                      :class="emailError ? '!border-red-500 !bg-red-50/30' : ''">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        mail
-                                    </span>
+                                    <x-lucide-mail class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_email"
                                         type="email"
@@ -473,14 +462,14 @@
                                 {{-- Real-time Email Availability Warning --}}
                                 <template x-if="emailError">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span x-text="emailError"></span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('email'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!emailError">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('email') }}</span>
                                     </p>
                                 @endif
@@ -494,7 +483,7 @@
 
                                 <div class="flex items-center rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition overflow-hidden">
                                     <span class="inline-flex items-center gap-1 px-3.5 py-3 bg-[#e2edff] text-xs font-bold text-[#1a146b] shrink-0 border-r border-[#dce9ff]">
-                                        <span class="material-symbols-outlined text-sm">chat</span>
+                                        <x-lucide-message-circle class="w-4 h-4 shrink-0" />
                                         <span>+62</span>
                                     </span>
                                     <input
@@ -511,7 +500,7 @@
 
                                 @if ($activeTab === 'register' && $errors->has('no_hp'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('no_hp') }}</span>
                                     </p>
                                 @endif
@@ -527,9 +516,7 @@
                                 </div>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock
-                                    </span>
+                                    <x-lucide-lock class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_password"
                                         type="password"
@@ -548,22 +535,21 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPassword ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPassword" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPassword" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 <template x-if="passwordTooShort">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>Kata sandi minimal harus 8 karakter.</span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('password'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordTooShort">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password') }}</span>
                                     </p>
                                 @endif
@@ -576,9 +562,7 @@
                                 </label>
 
                                 <div class="relative rounded-xl bg-[#eff4ff] border border-transparent focus-within:border-[#1a146b] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1a146b]/15 transition">
-                                    <span class="material-symbols-outlined text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-lg pointer-events-none">
-                                        lock_reset
-                                    </span>
+                                    <x-lucide-key-round class="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none shrink-0" />
                                     <input
                                         id="register_password_confirmation"
                                         type="password"
@@ -597,22 +581,21 @@
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition"
                                         tabindex="-1"
                                     >
-                                        <span class="material-symbols-outlined text-lg"
-                                              x-text="showPasswordConfirm ? 'visibility_off' : 'visibility'">
-                                        </span>
+                                        <x-lucide-eye x-show="!showPasswordConfirm" class="w-5 h-5 shrink-0" />
+                                        <x-lucide-eye-off x-show="showPasswordConfirm" style="display: none;" class="w-5 h-5 shrink-0" />
                                     </button>
                                 </div>
 
                                 <template x-if="passwordMismatch">
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>Konfirmasi kata sandi tidak cocok.</span>
                                     </p>
                                 </template>
 
                                 @if ($activeTab === 'register' && $errors->has('password_confirmation'))
                                     <p class="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1" x-show="!passwordMismatch">
-                                        <span class="material-symbols-outlined text-sm">error</span>
+                                        <x-lucide-circle-alert class="w-4 h-4 shrink-0" />
                                         <span>{{ $errors->first('password_confirmation') }}</span>
                                     </p>
                                 @endif
@@ -628,9 +611,9 @@
                                     >
                                     <span class="text-xs text-gray-600 leading-relaxed">
                                         Saya menyetujui
-                                        <a href="{{ route('home') }}#syarat" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
+                                        <a href="{{ route('syarat.ketentuan') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
                                         serta
-                                        <a href="{{ route('home') }}#kebijakan" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
+                                        <a href="{{ route('kebijakan.privasi') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
                                         LapangIn
                                     </span>
                                 </label>
@@ -644,7 +627,7 @@
                             >
                                 <template x-if="!submitting">
                                     <span class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-base text-[#acf847]">bolt</span>
+                                        <x-lucide-zap class="w-4 h-4 text-[#acf847] shrink-0" />
                                         <span>Daftar Akun Sekarang</span>
                                     </span>
                                 </template>
@@ -669,7 +652,7 @@
                                     onclick="window.switchAuthTab && window.switchAuthTab('login', event)"
                                     class="inline-flex items-center gap-0.5 font-extrabold text-[#1a146b] hover:underline ml-1 cursor-pointer">
                                     <span>Masuk Sekarang</span>
-                                    <span class="material-symbols-outlined text-xs">arrow_outward</span>
+                                    <x-lucide-arrow-up-right class="w-3.5 h-3.5 shrink-0" />
                                 </a>
                             </p>
                         </div>
@@ -683,7 +666,7 @@
         {{-- Footer Help Note --}}
         <footer class="max-w-7xl mx-auto w-full text-center py-6 mt-6">
             <p class="text-xs text-gray-500 inline-flex items-center justify-center gap-1.5 flex-wrap">
-                <span class="material-symbols-outlined text-sm text-gray-400">help</span>
+                <x-lucide-circle-help class="w-4 h-4 text-gray-400 shrink-0" />
                 <span>Butuh bantuan kendala akun?</span>
                 <a href="https://wa.me/{{ config('app.support_whatsapp', '6281234567890') }}" target="_blank" rel="noopener noreferrer" class="font-bold text-[#1a146b] hover:underline">
                     Hubungi Layanan Pengguna 24/7
@@ -722,14 +705,16 @@
                 }
 
                 if (btnLogin && btnRegister) {
+                    const activeClasses = 'flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
+                    const inactiveClasses = 'flex-1 py-2.5 px-2.5 sm:px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-nowrap transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
                     if (isLogin) {
-                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
-                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        btnLogin.className = activeClasses;
+                        btnRegister.className = inactiveClasses;
                         if (dotLogin) dotLogin.classList.remove('hidden');
                         if (dotRegister) dotRegister.classList.add('hidden');
                     } else {
-                        btnRegister.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer bg-white text-[#1a146b] font-bold shadow-xs active-tab';
-                        btnLogin.className = 'flex-1 py-2.5 px-3 rounded-xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 text-center transition cursor-pointer text-gray-500 hover:text-[#1a146b] font-semibold';
+                        btnRegister.className = activeClasses;
+                        btnLogin.className = inactiveClasses;
                         if (dotRegister) dotRegister.classList.remove('hidden');
                         if (dotLogin) dotLogin.classList.add('hidden');
                     }

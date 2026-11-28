@@ -346,13 +346,13 @@ class BookingAdjustmentService
                 'hours_until_kickoff' => $hoursUntilKickoff,
                 'is_h_minus_24' => true,
                 'policy_rule' => 'under_24h',
-                'policy_badge' => 'Hangus DP (H < 24 Jam)',
+                'policy_badge' => 'Hangus 50%',
                 'total_price' => $totalPrice,
                 'total_paid' => $totalPaid,
                 'penalty_percentage' => 50,
                 'penalty_amount' => $penaltyAmount,
                 'estimated_refund' => $estimatedRefund,
-                'policy_description' => 'Pembatalan dilakukan kurang dari 24 jam sebelum jadwal bermain (< H-24 Jam). Sesuai kebijakan venue, uang muka (DP 50% / Rp ' . number_format($dpAmount, 0, ',', '.') . ') hangus sebagai kompensasi slot terkunci.',
+                'policy_description' => 'Pembatalan dilakukan kurang dari 24 jam sebelum jadwal bermain (< H-24 Jam). Sesuai kebijakan venue, biaya sebesar 50% (Rp ' . number_format($dpAmount, 0, ',', '.') . ') hangus sebagai kompensasi slot terkunci.',
             ];
         }
 

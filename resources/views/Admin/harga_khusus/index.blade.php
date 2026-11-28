@@ -113,7 +113,7 @@
         <div class="flex items-center gap-3">
             <a href="#tambah-harga-khusus"
                class="inline-flex items-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#312e81] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition">
-                <span class="material-symbols-outlined text-[#acf847] text-lg">add_circle</span>
+                <x-lucide-circle-plus class="text-[#acf847] w-5 h-5 shrink-0" />
                 <span>Tambah Harga Khusus</span>
             </a>
         </div>
@@ -122,7 +122,7 @@
     {{-- Notifikasi --}}
     @if (session('success'))
         <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center gap-2 text-sm font-semibold">
-            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <x-lucide-circle-check class="w-5 h-5 text-green-600 shrink-0" />
             <span>{{ session('success') }}</span>
         </div>
     @endif
@@ -130,7 +130,7 @@
     @if ($errors->any())
         <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
             <p class="font-bold mb-2 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-red-600 text-base">error</span>
+                <x-lucide-circle-alert class="text-red-600 w-4 h-4 shrink-0" />
                 <span>Periksa kembali data berikut:</span>
             </p>
             <ul class="list-disc pl-5 space-y-1">
@@ -146,7 +146,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e5eeff] pb-4">
             <div>
                 <h2 class="text-lg font-bold text-[#0b1c30] flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[#1a146b]">calendar_month</span>
+                    <x-lucide-calendar-days class="w-5 h-5 text-[#1a146b] shrink-0" />
                     <span>Kalender Tanggal Harga Khusus</span>
                 </h2>
                 <p class="text-xs text-[#777682] mt-0.5">
@@ -160,14 +160,14 @@
                     <button type="button" @click="prevMonth()"
                             class="p-1.5 rounded-lg hover:bg-white text-[#1a146b] transition cursor-pointer"
                             title="Bulan Sebelumnya">
-                        <span class="material-symbols-outlined text-lg leading-none">chevron_left</span>
+                        <x-lucide-chevron-left class="w-5 h-5 leading-none shrink-0" />
                     </button>
                     <span class="px-3 text-xs font-bold text-[#0b1c30] min-w-[130px] text-center"
                           x-text="currentMonthLabel"></span>
                     <button type="button" @click="nextMonth()"
                             class="p-1.5 rounded-lg hover:bg-white text-[#1a146b] transition cursor-pointer"
                             title="Bulan Berikutnya">
-                        <span class="material-symbols-outlined text-lg leading-none">chevron_right</span>
+                        <x-lucide-chevron-right class="w-5 h-5 leading-none shrink-0" />
                     </button>
                 </div>
 
@@ -260,7 +260,7 @@
         <div x-show="selectedCalendarDate" x-cloak
              class="p-4 rounded-xl bg-[#eff4ff] border border-[#dce9ff] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-xl text-[#1a146b] shrink-0 mt-0.5">event</span>
+                <x-lucide-calendar class="w-5 h-5 text-[#1a146b] shrink-0 mt-0.5" />
                 <div>
                     <h4 class="text-xs font-bold text-[#0b1c30]">
                         Detail Tanggal: <span class="text-[#1a146b]" x-text="selectedCalendarDate"></span>
@@ -285,7 +285,7 @@
 
             <a href="#tambah-harga-khusus"
                class="px-4 py-2 rounded-xl bg-[#1a146b] text-white text-xs font-bold hover:bg-[#312e81] transition shrink-0 inline-flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-sm text-[#acf847]">add</span>
+                <x-lucide-plus class="w-4 h-4 text-[#acf847] shrink-0" />
                 <span>Pilih untuk Tambah Tarif</span>
             </a>
         </div>
@@ -377,7 +377,7 @@
             <div class="mt-6 flex justify-end">
                 <button type="submit"
                     class="inline-flex items-center gap-2 rounded-xl bg-[#1a146b] px-5 py-3 text-sm font-bold text-white hover:bg-[#312e81] transition-colors shadow-sm">
-                    <span class="material-symbols-outlined text-[#acf847] text-xl">save</span>
+                    <x-lucide-save class="text-[#acf847] w-5 h-5 shrink-0" />
                     Simpan Harga Khusus
                 </button>
             </div>
@@ -402,7 +402,7 @@
                     @click="activeTab = 'aktif'"
                     :class="activeTab === 'aktif' ? 'bg-[#1a146b] text-white font-extrabold shadow-sm' : 'bg-gray-100 text-[#474651] font-semibold hover:bg-gray-200'"
                     class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer">
-                    <span class="material-symbols-outlined text-sm" :class="activeTab === 'aktif' ? 'text-[#acf847]' : 'text-gray-500'">event_available</span>
+                    <x-lucide-calendar-check class="w-4 h-4 shrink-0" x-bind:class="w-5 h-5 activeTab === 'aktif' ? 'text-[#acf847]' : 'text-gray-500' shrink-0" />
                     <span>Tarif Aktif &amp; Mendatang</span>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
                           :class="activeTab === 'aktif' ? 'bg-white/20 text-[#acf847]' : 'bg-white text-gray-700'">
@@ -414,7 +414,7 @@
                     @click="activeTab = 'selesai'"
                     :class="activeTab === 'selesai' ? 'bg-[#1a146b] text-white font-extrabold shadow-sm' : 'bg-gray-100 text-[#474651] font-semibold hover:bg-gray-200'"
                     class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer">
-                    <span class="material-symbols-outlined text-sm" :class="activeTab === 'selesai' ? 'text-[#acf847]' : 'text-gray-500'">history</span>
+                    <x-lucide-history class="w-4 h-4 shrink-0" x-bind:class="w-5 h-5 activeTab === 'selesai' ? 'text-[#acf847]' : 'text-gray-500' shrink-0" />
                     <span>Selesai (Riwayat)</span>
                     <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
                           :class="activeTab === 'selesai' ? 'bg-white/20 text-[#acf847]' : 'bg-white text-gray-700'">
@@ -524,7 +524,7 @@
                         <tr>
                             <td colspan="7" class="px-5 py-10 text-center text-[#777682]">
                                 <div class="flex flex-col items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined text-3xl text-gray-400">event_available</span>
+                                    <x-lucide-calendar-check class="w-7 h-7 text-gray-400 shrink-0" />
                                     <p class="font-bold text-sm text-[#0b1c30]">Belum ada jadwal tarif khusus mendatang</p>
                                     <p class="text-xs text-[#777682]">Tarif khusus yang tanggalnya sudah lewat otomatis dipindahkan ke tab Riwayat "Selesai".</p>
                                 </div>
@@ -577,7 +577,7 @@
 
                             <td class="px-5 py-4">
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
-                                    <span class="material-symbols-outlined text-xs text-slate-500">check_circle</span>
+                                    <x-lucide-circle-check class="w-3.5 h-3.5 text-slate-500 shrink-0" />
                                     <span>Selesai</span>
                                 </span>
                             </td>
@@ -603,7 +603,7 @@
                         <tr>
                             <td colspan="7" class="px-5 py-10 text-center text-[#777682]">
                                 <div class="flex flex-col items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined text-3xl text-gray-400">history</span>
+                                    <x-lucide-history class="w-7 h-7 text-gray-400 shrink-0" />
                                     <p class="font-bold text-sm text-[#0b1c30]">Belum ada riwayat tarif khusus yang selesai</p>
                                     <p class="text-xs text-[#777682]">Tarif khusus yang telah lewat tanggalnya akan otomatis masuk ke sini.</p>
                                 </div>
@@ -626,7 +626,7 @@
                     Edit Aturan Harga Khusus
                 </h3>
                 <button type="button" @click="editModalOpen = false" class="text-gray-400 hover:text-gray-600">
-                    <span class="material-symbols-outlined">close</span>
+                    <x-lucide-x class="w-5 h-5 shrink-0" />
                 </button>
             </div>
 
@@ -684,7 +684,7 @@
                     </button>
                     <button type="submit"
                             class="px-5 py-2.5 rounded-xl bg-[#1a146b] text-xs font-bold text-white hover:bg-[#312e81] transition-colors inline-flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-sm text-[#acf847]">check</span>
+                        <x-lucide-check class="w-4 h-4 text-[#acf847] shrink-0" />
                         Simpan Perubahan
                     </button>
                 </div>

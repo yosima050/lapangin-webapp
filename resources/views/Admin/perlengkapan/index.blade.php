@@ -21,7 +21,7 @@
 
         <a href="{{ route('admin.perlengkapan.create') }}"
            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-bold text-sm">
-            <span class="material-symbols-outlined text-[#acf847]">add_circle</span>
+            <x-lucide-circle-plus class="w-5 h-5 text-[#acf847] shrink-0" />
             Tambah Perlengkapan
         </a>
     </div>
@@ -116,7 +116,7 @@
                                     >
                                 @else
                                     <div class="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                                        <span class="material-symbols-outlined">image</span>
+                                        <x-lucide-image class="w-5 h-5 shrink-0" />
                                     </div>
                                 @endif
                             </td>
@@ -140,7 +140,7 @@
                             <td class="px-5 py-4">
                                 @if ($item->lapangans->isEmpty())
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#eaf7d8] text-[#416900] border border-[#acf847]/60">
-                                        <span class="material-symbols-outlined text-[14px]">all_inclusive</span>
+                                        <x-lucide-infinity class="w-4 h-4 shrink-0" />
                                         Semua Lapangan
                                     </span>
                                 @else
@@ -174,7 +174,7 @@
                                     {{-- Tombol Edit --}}
                                     <a href="{{ route('admin.perlengkapan.edit', $item) }}"
                                        class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-[#eff4ff] text-[#1a146b] font-bold text-xs hover:bg-[#dce9ff]">
-                                        <span class="material-symbols-outlined text-sm">edit</span>
+                                        <x-lucide-pencil class="w-4 h-4 shrink-0" />
                                         Edit
                                     </a>
 
@@ -187,7 +187,7 @@
 
                                         <button type="submit"
                                                 class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-700 font-bold text-xs hover:bg-red-100">
-                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                            <x-lucide-trash-2 class="w-4 h-4 shrink-0" />
                                             Hapus
                                         </button>
                                     </form>

@@ -33,3 +33,9 @@ SKPL_LapangIn.md
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Unlighthouse reports
+.unlighthouse/
+
+# Temporary QA evidence screenshots
+evidence_m2/

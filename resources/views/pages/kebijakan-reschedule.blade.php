@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
         <a href="{{ route('home') }}" class="hover:text-[#1a146b] flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">home</span>
+            <x-lucide-house class="w-4 h-4 shrink-0" />
             <span>Beranda</span>
         </a>
         <span>/</span>
@@ -22,7 +22,7 @@
 
         <header class="border-b border-gray-100 pb-5">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eaf7d8] text-[#416900] text-xs font-black uppercase tracking-wider mb-2">
-                <span class="material-symbols-outlined text-sm">update</span>
+                <x-lucide-refresh-ccw class="w-4 h-4 shrink-0" />
                 ATURAN RESCHEDULE &amp; REFUND
             </div>
             <h1 class="text-2xl sm:text-3xl font-headline font-black text-[#0b1c30] tracking-tight">
@@ -80,7 +80,7 @@
 
         <footer class="pt-6 border-t border-gray-100 flex items-center justify-between">
             <a href="{{ route('bantuan') }}" class="text-xs font-bold text-[#1a146b] hover:underline flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Kembali ke Pusat Bantuan</span>
             </a>
             <a href="{{ route('kontak') }}" class="text-xs font-bold text-[#416900] hover:underline">

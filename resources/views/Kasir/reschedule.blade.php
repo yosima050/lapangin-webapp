@@ -23,11 +23,11 @@
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-[#acf847]/30 border border-[#acf847] flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#416900]">check_circle</span>
+                <x-lucide-circle-check class="w-6 h-6 text-[#416900] shrink-0" />
                 <span class="text-xs font-bold text-[#102000]">{{ session('success') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#416900] hover:text-[#102000]">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -35,11 +35,11 @@
     @if (session('warning'))
         <div class="p-4 rounded-2xl bg-[#ffdad6] border border-[#ffb4ab] flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#ba1a1a]">warning</span>
+                <x-lucide-triangle-alert class="w-6 h-6 text-[#ba1a1a] shrink-0" />
                 <span class="text-xs font-bold text-[#ba1a1a]">{{ session('warning') }}</span>
             </div>
             <button type="button" @click="$el.parentElement.remove()" class="text-[#ba1a1a] hover:text-black">
-                <span class="material-symbols-outlined text-sm">close</span>
+                <x-lucide-x class="w-4 h-4 shrink-0" />
             </button>
         </div>
     @endif
@@ -57,7 +57,7 @@
 
         <button type="button" onclick="window.location.reload()"
                 class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#dce9ff] hover:bg-[#c3c0ff] text-[#0b1c30] text-xs font-bold transition-all shadow-sm">
-            <span class="material-symbols-outlined text-base">sync</span>
+            <x-lucide-refresh-cw class="w-4 h-4 shrink-0" />
             <span>Sinkronisasi Data</span>
         </button>
     </div>
@@ -81,7 +81,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">DISETUJUI</span>
                 <span class="w-6 h-6 rounded-lg bg-[#eff4ff] text-[#416900] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <x-lucide-circle-check class="w-4 h-4 shrink-0" />
                 </span>
             </div>
             <div class="flex items-baseline gap-2 mt-3">
@@ -96,7 +96,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">DITOLAK / BENTROK</span>
                 <span class="w-6 h-6 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-base">cancel</span>
+                    <x-lucide-circle-x class="w-4 h-4 shrink-0" />
                 </span>
             </div>
             <div class="flex items-baseline gap-2 mt-3">
@@ -111,7 +111,7 @@
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-[#777682]">SLOT PENGGANTI</span>
                 <span class="w-6 h-6 rounded-lg bg-[#eff4ff] text-[#416900] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-base">event_available</span>
+                    <x-lucide-calendar-check class="w-4 h-4 shrink-0" />
                 </span>
             </div>
             <div class="flex items-baseline gap-2 mt-3">
@@ -149,7 +149,7 @@
 
         <div class="flex items-center gap-2">
             <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] material-symbols-outlined text-base">search</span>
+                <x-lucide-search class="absolute left-3 top-1/2 -translate-y-1/2 text-[#777682] w-4 h-4 shrink-0" />
                 <input type="text" placeholder="Cari nama pemesan..."
                        class="pl-9 pr-3 py-1.5 rounded-xl bg-[#eff4ff] text-xs text-[#0b1c30] font-bold border border-[#e5eeff] outline-none focus:bg-white focus:ring-1 focus:ring-[#1a146b] transition-all">
             </div>
@@ -195,7 +195,7 @@
                                 {{ strtoupper($item->status === 'diajukan' ? 'Menunggu Approval' : $item->status) }}
                             </span>
                             <div class="flex items-center gap-2 text-xs text-[#777682]">
-                                <span class="material-symbols-outlined text-sm">schedule</span>
+                                <x-lucide-clock class="w-4 h-4 shrink-0" />
                                 <span>{{ $item->created_at ? $item->created_at->diffForHumans() : 'Baru saja' }}</span>
                                 <span>•</span>
                                 <span class="{{ $isValid12Jam ? 'text-[#416900]' : 'text-[#ba1a1a]' }} font-bold">
@@ -229,7 +229,7 @@
                             <div class="p-3.5 rounded-xl bg-[#eff4ff] border border-[#e5eeff] flex flex-col gap-1">
                                 <div class="flex items-center justify-between text-[10px] font-bold uppercase text-[#777682]">
                                     <span>JADWAL SEMULA</span>
-                                    <span class="material-symbols-outlined text-sm">history</span>
+                                    <x-lucide-history class="w-4 h-4 shrink-0" />
                                 </div>
                                 <span class="text-xs font-bold text-[#0b1c30]">{{ $itemCourt }}</span>
                                 <span class="text-xs font-extrabold text-[#1a146b]">{{ $item->jadwal?->tanggal ? $item->jadwal->tanggal->format('d M Y') : '-' }}</span>
@@ -255,7 +255,7 @@
 
                         <!-- Alasan Pemohon -->
                         <div class="p-3 rounded-xl bg-[#eff4ff] flex items-start gap-2.5 {{ $isItemActive ? 'ml-2' : '' }} text-xs">
-                            <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0">chat</span>
+                            <x-lucide-message-circle class="w-4 h-4 text-[#1a146b] shrink-0" />
                             <div>
                                 <span class="font-bold text-[#0b1c30]">Alasan Pemesan:</span>
                                 <span class="text-[#474651] italic">“{{ $item->alasan_pengajuan }}”</span>
@@ -265,7 +265,7 @@
                 </div>
             @empty
                 <div class="bg-white p-8 rounded-2xl border border-[#e5eeff] text-center text-[#777682]">
-                    <span class="material-symbols-outlined text-4xl text-[#acf847] mb-2">pending_actions</span>
+                    <x-lucide-clock class="w-9 h-9 text-[#acf847] mb-2 shrink-0" />
                     <p class="font-bold text-[#0b1c30]">Tidak ada pengajuan reschedule dalam database.</p>
                 </div>
             @endforelse
@@ -285,7 +285,7 @@
                     @if ($isSlotAvailable)
                         <div class="p-4 rounded-xl bg-[#acf847]/20 border border-[#acf847] flex items-center gap-3">
                             <span class="w-8 h-8 rounded-full bg-[#acf847] text-[#102000] flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-xl font-bold">check</span>
+                                <x-lucide-check class="w-5 h-5 font-bold shrink-0" />
                             </span>
                             <div>
                                 <h3 class="text-xs font-bold text-[#102000]">Slot Pengganti Terverifikasi Kosong</h3>
@@ -295,7 +295,7 @@
                     @else
                         <div class="p-4 rounded-xl bg-[#ffdad6] border border-[#ffb4ab] flex items-center gap-3">
                             <span class="w-8 h-8 rounded-full bg-[#ba1a1a] text-white flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-xl font-bold">priority_high</span>
+                                <x-lucide-alert-circle class="w-5 h-5 font-bold shrink-0" />
                             </span>
                             <div>
                                 <h3 class="text-xs font-bold text-[#ba1a1a]">Slot Pengganti Bentrok</h3>
@@ -369,7 +369,7 @@
                                 <input type="hidden" name="catatan" :value="approvalNote">
                                 <button type="submit"
                                         class="w-full py-3.5 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer">
-                                    <span class="material-symbols-outlined text-lg text-[#acf847]">check_circle</span>
+                                    <x-lucide-circle-check class="w-5 h-5 text-[#acf847] shrink-0" />
                                     <span>Setujui Reschedule &amp; Re-issue E-Tiket</span>
                                 </button>
                             </form>
@@ -379,7 +379,7 @@
                                 <input type="hidden" name="catatan" :value="approvalNote">
                                 <button type="submit"
                                         class="w-full py-2.5 px-4 rounded-xl border border-[#ba1a1a] text-[#ba1a1a] hover:bg-[#ffdad6] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
-                                    <span class="material-symbols-outlined text-base">close</span>
+                                    <x-lucide-x class="w-4 h-4 shrink-0" />
                                     <span>Tolak Pengajuan Reschedule</span>
                                 </button>
                             </form>
@@ -394,7 +394,7 @@
 
                     <!-- Aturan Reschedule Info Box -->
                     <div class="p-4 rounded-xl bg-[#eff4ff] border border-[#dce9ff] flex items-start gap-2.5 text-xs">
-                        <span class="material-symbols-outlined text-base text-[#1a146b] shrink-0 mt-0.5">info</span>
+                        <x-lucide-info class="w-4 h-4 text-[#1a146b] shrink-0 mt-0.5" />
                         <div>
                             <span class="font-bold text-[#0b1c30]">Aturan Operasional Venue:</span>
                             <p class="text-[#474651] text-[11px] mt-0.5 leading-relaxed">

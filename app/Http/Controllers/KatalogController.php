@@ -33,17 +33,20 @@ class KatalogController extends Controller
 
         // Ambil semua lapangan aktif agar filter Alpine.js di browser instan tanpa reload
         $lapangan = Lapangan::with('hargaMasters')->where('is_active', true)->get();
-        $kategoriList = Lapangan::where('is_active', true)
-            ->distinct()
-            ->whereNotNull('kategori')
-            ->where('kategori', '!=', '')
-            ->orderBy('kategori')
-            ->pluck('kategori');
+        $kategoriList = $lapangan->pluck('kategori')
+            ->filter(fn ($k) => $k !== null && $k !== '')
+            ->unique()
+            ->sort()
+            ->values();
 
-        $dataKatalog = $lapangan->map(function ($item) use ($tanggal) {
-            $slotData = $this->jadwalService->getSlotStatus((string) $item->id, $tanggal);
+        // Batch-load seluruh jadwal & harga khusus dalam 3 query saja (bebas N+1)
+        $bulkSlotData = $this->jadwalService->getBulkSlotStatus($lapangan, $tanggal);
+
+        $dataKatalog = $lapangan->map(function ($item) use ($bulkSlotData) {
+            $slotData = $bulkSlotData[(string) $item->id];
 
             $slotData['foto_url'] = $item->foto_url;
+            $slotData['foto_card_url'] = $item->foto_card_url;
             $slotData['deskripsi'] = $item->deskripsi;
             $slotData['harga_weekday'] = $item->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekday')->first()?->harga;
             $slotData['harga_weekend'] = $item->hargaMasters->whereNull('tanggal_khusus')->where('jenis_hari', 'weekend')->first()?->harga;
@@ -70,6 +73,10 @@ class KatalogController extends Controller
 
     public function show(Request $request, $id)
     {
+        if (! \Illuminate\Support\Str::isUuid((string) $id)) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date_format:Y-m-d'],
         ]);
@@ -84,18 +91,22 @@ class KatalogController extends Controller
         // Ambil status ketersediaan jam dari JadwalService
         $jadwalData = $this->jadwalService->getSlotStatus((string) $id, $tanggal);
 
-        $selectedDateCarbon = \Carbon\Carbon::parse($tanggal)->startOfDay();
-        $today = now()->startOfDay();
+        $selectedDateCarbon = \Carbon\Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        $windowStart = $selectedDateCarbon->gt($today->copy()->addDays(6))
+            ? $selectedDateCarbon->copy()
+            : $today->copy();
 
         $datesCarousel = [];
         for ($i = 0; $i < 7; $i++) {
-            $cDate = $today->copy()->addDays($i);
+            $cDate = $windowStart->copy()->addDays($i);
+            $diffDays = (int) $today->diffInDays($cDate, false);
             $datesCarousel[] = [
                 'date_str' => $cDate->toDateString(),
                 'day_num' => $cDate->format('d'),
-                'day_name' => $cDate->translatedFormat('D'),
-                'month_name' => $cDate->translatedFormat('M'),
-                'label_top' => $i === 0 ? 'HARI INI' : ($i === 1 ? 'BESOK' : strtoupper($cDate->translatedFormat('D'))),
+                'day_name' => $cDate->locale('id')->translatedFormat('D'),
+                'month_name' => $cDate->locale('id')->translatedFormat('M'),
+                'label_top' => $diffDays === 0 ? 'HARI INI' : ($diffDays === 1 ? 'BESOK' : strtoupper($cDate->locale('id')->translatedFormat('D'))),
                 'is_selected' => $cDate->toDateString() === $tanggal,
             ];
         }

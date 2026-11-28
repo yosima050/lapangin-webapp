@@ -216,7 +216,7 @@ class KasirScanner {
                 if (readerElem) {
                     readerElem.innerHTML = `
                         <div class="p-6 text-center flex flex-col items-center justify-center gap-3 bg-red-50 text-red-900 rounded-2xl border border-red-200">
-                            <span class="material-symbols-outlined text-4xl text-red-600">videocam_off</span>
+                            <svg class="w-9 h-9 text-red-600 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.66 6H14a2 2 0 0 1 2 2v2.5l5.248-3.062A.5.5 0 0 1 22 7.87v8.196"/><path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/><path d="m2 2 20 20"/></svg>
                             <div class="space-y-1">
                                 <h3 class="font-bold text-sm">Izin Akses Kamera Ditolak Browser</h3>
                                 <p class="text-xs text-red-700 max-w-sm">
@@ -507,13 +507,13 @@ class KasirScanner {
 
         if (type === 'error') {
             toast.className = 'fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#ba1a1a] text-white shadow-xl transition-all';
-            icon.textContent = 'error';
+            icon.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>';
         } else if (type === 'warning') {
             toast.className = 'fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#9a5b00] text-white shadow-xl transition-all';
-            icon.textContent = 'warning';
+            icon.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
         } else {
             toast.className = 'fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#1a146b] text-white shadow-xl transition-all';
-            icon.textContent = 'info';
+            icon.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
         }
 
         toast.classList.remove('hidden');

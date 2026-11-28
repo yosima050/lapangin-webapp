@@ -5,7 +5,7 @@
         <div class="max-w-4xl mx-auto w-full flex items-center justify-between mb-6">
             <a href="{{ route('home') }}"
                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#1a146b] hover:bg-white/80 transition shadow-xs">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
                 <span>Kembali ke Beranda</span>
             </a>
 
@@ -28,7 +28,7 @@
                 {{-- Icon and Title --}}
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 rounded-2xl bg-[#eff4ff] text-[#1a146b] flex items-center justify-center mx-auto mb-4 shadow-xs">
-                        <span class="material-symbols-outlined text-3xl">mark_email_unread</span>
+                        <x-lucide-mail class="w-7 h-7 shrink-0" />
                     </div>
                     <h1 class="text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
                         Verifikasi Alamat Email
@@ -62,7 +62,7 @@
                 {{-- Status Alert (if link re-sent) --}}
                 @if (session('status') == 'verification-link-sent')
                     <div class="mb-6 p-4 rounded-2xl bg-green-50 border border-green-200 flex items-start gap-3">
-                        <span class="material-symbols-outlined text-green-600 text-xl flex-shrink-0 mt-0.5">check_circle</span>
+                        <x-lucide-circle-check class="text-green-600 w-5 h-5 flex-shrink-0 mt-0.5" />
                         <div class="text-xs sm:text-sm font-semibold text-green-800">
                             Tautan verifikasi baru telah berhasil dikirimkan ke alamat email Anda. Silakan periksa kotak masuk atau spam.
                         </div>
@@ -71,7 +71,7 @@
 
                 {{-- Instructions --}}
                 <div class="p-3.5 bg-blue-50/70 border border-blue-100 rounded-2xl text-xs text-blue-900 leading-relaxed mb-6 flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-blue-700 text-base mt-0.5 flex-shrink-0">info</span>
+                    <x-lucide-info class="text-blue-700 w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>
                         Klik tombol di email yang Anda terima. Jika email belum masuk dalam 1–2 menit, klik tombol kirim ulang di bawah.
                     </span>
@@ -84,7 +84,7 @@
                         @csrf
                         <button type="submit"
                                 class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white font-bold text-sm tracking-wide transition shadow-sm hover:shadow-md flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-lg">forward_to_inbox</span>
+                            <x-lucide-mail-plus class="w-5 h-5 shrink-0" />
                             <span>Kirim Ulang Email</span>
                         </button>
                     </form>
@@ -95,7 +95,7 @@
                         <button type="submit"
                                 class="w-full sm:w-auto py-3 px-4 rounded-xl border border-red-200 bg-red-50/60 hover:bg-red-100/80 text-red-700 font-bold text-sm transition flex items-center justify-center gap-2"
                                 title="Keluar dari akun ini">
-                            <span class="material-symbols-outlined text-lg">logout</span>
+                            <x-lucide-log-out class="w-5 h-5 shrink-0" />
                             <span>Keluar (Log Out)</span>
                         </button>
                     </form>

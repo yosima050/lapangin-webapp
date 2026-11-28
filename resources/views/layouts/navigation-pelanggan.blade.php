@@ -1,14 +1,86 @@
 {{-- Unified Responsive Navigation Bar untuk Pelanggan LapangIn --}}
-<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
-    <nav
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        x-data="{ mobileMenuOpen: false }"
-    >
+@php
+    $initialActiveNav = request()->routeIs('home')
+        ? 'home'
+        : ((request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*'))
+            ? 'katalog'
+            : (request()->routeIs('jadwal.*')
+                ? 'jadwal'
+                : ((request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat'))
+                    ? 'riwayat'
+                    : (request()->routeIs('bantuan') ? 'bantuan' : ''))));
+@endphp
+<div x-data="{
+        mobileMenuOpen: false,
+        activeNav: '{{ $initialActiveNav }}',
+        resolveNav(urlStr) {
+            try {
+                const u = new URL(urlStr, window.location.origin);
+                if (u.origin !== window.location.origin) return null;
+                const p = u.pathname.replace(/\/+$/, '') || '/';
+                if (p === '/') return 'home';
+                if (p === '/katalog' || p.startsWith('/katalog/') || p.startsWith('/lapangan/')) return 'katalog';
+                if (p === '/jadwal' || p.startsWith('/jadwal/')) return 'jadwal';
+                if (p.startsWith('/pelanggan/booking') || p.startsWith('/pelanggan/riwayat')) return 'riwayat';
+                if (p === '/bantuan') return 'bantuan';
+                return '';
+            } catch (e) {
+                return null;
+            }
+        },
+        init() {
+            document.addEventListener('click', (e) => {
+                if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                const a = e.target.closest('a[href]');
+                if (!a || a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-progress')) return;
+                const href = a.getAttribute('href') || '';
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                const next = this.resolveNav(a.href);
+                if (next !== null) this.activeNav = next;
+            }, true);
+            document.addEventListener('submit', (e) => {
+                const form = e.target;
+                if (!form || !form.action || form.hasAttribute('data-no-progress')) return;
+                if ((form.method || 'get').toLowerCase() === 'get') {
+                    const next = this.resolveNav(form.action);
+                    if (next !== null) this.activeNav = next;
+                }
+            }, true);
+            window.addEventListener('pageshow', () => {
+                this.mobileMenuOpen = false;
+                const cur = this.resolveNav(window.location.href);
+                if (cur !== null) this.activeNav = cur;
+            });
+        }
+     }"
+     @keydown.escape.window="mobileMenuOpen = false"
+     @pagehide.window="mobileMenuOpen = false">
+    {{-- Backdrop Redup Halus saat Mobile Menu Terbuka (mulai di bawah header agar warna putih header & drawer menyatu 100%) --}}
+    <div
+        x-show="mobileMenuOpen"
+        x-cloak
+        @click="mobileMenuOpen = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="lg:hidden fixed inset-x-0 top-20 bottom-0 z-40 bg-slate-900/25 backdrop-blur-[2px]"
+        aria-hidden="true"
+    ></div>
+
+<header
+    class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-colors duration-200"
+    :class="mobileMenuOpen ? 'bg-white border-transparent shadow-none lg:bg-white/95 lg:border-gray-100 lg:shadow-xs' : 'bg-white/95 border-gray-100 shadow-xs'"
+>
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-20 flex items-center justify-between">
 
             {{-- Logo Brand --}}
             <a
                 href="{{ route('home') }}"
+                @click="mobileMenuOpen = false"
                 class="flex items-center shrink-0 hover:opacity-90 transition"
                 aria-label="LapangIn"
             >
@@ -20,21 +92,24 @@
 
                 <a
                     href="{{ route('home') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'home' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Beranda
                 </a>
 
                 <a
                     href="{{ route('katalog.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'katalog' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Jelajahi Lapangan
                 </a>
 
                 <a
                     href="{{ route('jadwal.index') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('jadwal.*') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'jadwal' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Cek Jadwal
                 </a>
@@ -43,7 +118,8 @@
                     @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
                         <a
                             href="{{ route('pelanggan.booking.index') }}"
-                            class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                            class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                            :class="activeNav === 'riwayat' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                         >
                             Riwayat Booking
                         </a>
@@ -52,7 +128,8 @@
 
                 <a
                     href="{{ route('bantuan') }}"
-                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap {{ request()->routeIs('bantuan') ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]' }}"
+                    class="py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+                    :class="activeNav === 'bantuan' ? 'text-[#1a146b] font-bold border-b-2 border-[#acf847]' : 'text-gray-600 hover:text-[#1a146b]'"
                 >
                     Pusat Bantuan
                 </a>
@@ -63,12 +140,14 @@
             <div class="hidden lg:flex items-center gap-4 ml-auto">
 
                 @guest
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-xs font-bold text-[#1a146b] hover:bg-gray-50 rounded-xl transition">
-                            Masuk
+                    <div class="flex items-center gap-2.5">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#1a146b] hover:bg-gray-50 rounded-xl transition">
+                            <x-lucide-log-in class="w-4 h-4 shrink-0" />
+                            <span>Masuk</span>
                         </a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-bold shadow-xs hover:shadow-md transition">
-                            Daftar
+                        <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-bold shadow-xs hover:shadow-md transition">
+                            <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                            <span>Daftar</span>
                         </a>
                     </div>
                 @endguest
@@ -85,7 +164,7 @@
                                 {{ Auth::user()->nama ?? Auth::user()->name ?? 'Pengguna' }}
                             </span>
 
-                            <span class="material-symbols-outlined text-gray-400 text-sm">expand_more</span>
+                            <x-lucide-chevron-down class="text-gray-400 w-4 h-4 shrink-0 transition-transform duration-200" x-bind:class="profileOpen ? 'rotate-180' : ''" />
                         </button>
 
                         <div
@@ -107,25 +186,25 @@
 
                             @if (Auth::user()->role === 'admin')
                                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">space_dashboard</span>
+                                    <x-lucide-layout-dashboard class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Dashboard Admin</span>
                                 </a>
                             @elseif (Auth::user()->role === 'kasir')
                                 <a href="{{ route('kasir.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">point_of_sale</span>
+                                    <x-lucide-calculator class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Portal Kasir POS</span>
                                 </a>
                             @else
                                 <a href="{{ route('pelanggan.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b] {{ request()->routeIs('pelanggan.dashboard') ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : '' }}">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">account_circle</span>
+                                    <x-lucide-circle-user class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Profil &amp; Pengaturan Akun</span>
                                 </a>
-                                <a href="{{ route('pelanggan.booking.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b] {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : '' }}">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">receipt_long</span>
+                                <a href="{{ route('pelanggan.booking.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]" :class="activeNav === 'riwayat' ? 'bg-[#eff4ff] text-[#1a146b] font-bold' : ''">
+                                    <x-icons.history class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Riwayat Booking &amp; Jadwal</span>
                                 </a>
                                 <a href="{{ route('katalog.index') }}" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#1a146b]">
-                                    <span class="material-symbols-outlined text-base text-[#1a146b]">sports_soccer</span>
+                                    <x-icons.sport class="w-4 h-4 text-[#1a146b] shrink-0" />
                                     <span>Cari &amp; Pesan Lapangan</span>
                                 </a>
                             @endif
@@ -135,7 +214,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full text-left flex items-center gap-2.5 px-4 py-2 font-bold text-red-600 hover:bg-red-50 transition cursor-pointer">
-                                    <span class="material-symbols-outlined text-base">logout</span>
+                                    <x-lucide-log-out class="w-4 h-4 shrink-0" />
                                     <span>Keluar (Log Out)</span>
                                 </button>
                             </form>
@@ -145,113 +224,176 @@
 
             </div>
 
-            {{-- Tombol Mobile Menu Hamburger --}}
+            {{-- Tombol Mobile Menu (@animated-burgers/burger-squeeze) --}}
             <button
                 type="button"
                 @click="mobileMenuOpen = !mobileMenuOpen"
-                class="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                class="lg:hidden relative inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors duration-200 cursor-pointer"
+                :class="mobileMenuOpen ? 'bg-[#eff4ff]' : 'hover:bg-gray-100'"
                 :aria-expanded="mobileMenuOpen"
-                aria-label="Buka menu navigasi"
+                :aria-label="mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'"
             >
-                <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-                <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span class="sr-only">Toggle navigasi</span>
+                <div class="burger burger-squeeze lapangin-burger" :class="{ 'open': mobileMenuOpen }">
+                    <div class="burger-lines"></div>
+                </div>
             </button>
 
         </div>
+    </nav>
+</header>
 
-        {{-- Mobile Menu Drawer --}}
-        <div
-            x-show="mobileMenuOpen"
-            x-cloak
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-            class="lg:hidden border-t border-gray-100 py-4 bg-white"
-        >
-            <div class="flex flex-col gap-1.5">
-
+    {{-- Clean Sporty Right Slide-Over Mobile Drawer (Selaras Tema Terang LapangIn) --}}
+    <aside
+        x-show="mobileMenuOpen"
+        x-cloak
+        @click="if ($event.target.closest('a, button[type=submit]')) mobileMenuOpen = false"
+        x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-250"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        class="lg:hidden fixed top-20 right-0 bottom-0 z-50 w-[82%] max-w-[320px] bg-white text-[#0b1c30] shadow-[-12px_0_32px_rgba(11,28,48,0.10)] border-l border-gray-200/80 flex flex-col justify-between overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Menu navigasi mobile"
+    >
+        <div class="p-4 space-y-5">
+            {{-- Kartu Akun di Atas (Bisa diklik langsung ke Profil) --}}
+            @auth
+                @php
+                    $profileRoute = Auth::user()->role === 'admin'
+                        ? route('admin.dashboard')
+                        : (Auth::user()->role === 'kasir' ? route('kasir.index') : route('pelanggan.dashboard'));
+                @endphp
                 <a
-                    href="{{ route('home') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('home') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                    href="{{ $profileRoute }}"
+                    class="flex items-center justify-between gap-3 rounded-2xl bg-[#f4f7ff] hover:bg-[#eaf0ff] border border-[#dce9ff] p-3.5 transition active:scale-[0.98]"
                 >
-                    Beranda
-                </a>
-
-                <a
-                    href="{{ route('katalog.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('katalog.*') && !request()->routeIs('pelanggan.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                >
-                    Jelajahi Lapangan
-                </a>
-
-                <a
-                    href="{{ route('jadwal.index') }}"
-                    class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('jadwal.*') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                >
-                    Cek Jadwal
-                </a>
-
-                @auth
-                    @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
-                        <a
-                            href="{{ route('pelanggan.booking.index') }}"
-                            class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('pelanggan.booking.*') || request()->routeIs('pelanggan.riwayat') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                        >
-                            Riwayat Booking
-                        </a>
-                    @endif
-
-                    <a
-                        href="{{ route('bantuan') }}"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
-                    >
-                        Pusat Bantuan
-                    </a>
-
-                    <div class="pt-2 border-t border-gray-100 mt-2">
-                        <div class="px-3 py-2 bg-gray-50 rounded-xl mb-2">
-                            <p class="text-xs font-bold text-gray-800">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
-                            <p class="text-[11px] text-gray-500">{{ Auth::user()->email }}</p>
+                    <div class="flex items-center gap-3 min-w-0">
+                        <x-lucide-user class="w-5 h-5 text-[#1a146b] shrink-0" />
+                        <div class="min-w-0">
+                            <p class="text-xs font-extrabold text-[#0b1c30] truncate">{{ Auth::user()->nama ?? Auth::user()->name }}</p>
+                            <p class="text-[11px] text-gray-500 truncate">{{ Auth::user()->email }}</p>
                         </div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer">
-                                Keluar (Log Out)
-                            </button>
-                        </form>
                     </div>
-                @endauth
+                    <x-lucide-chevron-right class="w-4 h-4 text-gray-400 shrink-0" />
+                </a>
+            @endauth
 
-                @guest
+            {{-- Daftar Navigasi Utama --}}
+            <div>
+                <p class="px-3 mb-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-gray-400">
+                    Menu Utama
+                </p>
+                <div class="flex flex-col gap-1.5">
                     <a
-                        href="{{ route('bantuan') }}"
-                        class="px-3 py-2.5 rounded-lg text-sm font-semibold {{ request()->routeIs('bantuan') ? 'font-bold text-[#1a146b] bg-[#eff4ff]' : 'text-gray-700 hover:bg-gray-50' }}"
+                        href="{{ route('home') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'home' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
                     >
-                        Pusat Bantuan
+                        <span class="flex items-center gap-3">
+                            <span class="shrink-0" :class="activeNav === 'home' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-lucide-house class="w-4 h-4" />
+                            </span>
+                            <span>Beranda</span>
+                        </span>
+                        <span x-show="activeNav === 'home'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
                     </a>
 
-                    <div class="pt-3 border-t border-gray-100 flex flex-col gap-2">
-                        <a
-                            href="{{ route('login') }}"
-                            class="w-full text-center py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-[#1a146b] hover:bg-gray-50"
-                        >
-                            Masuk
-                        </a>
-                        <a
-                            href="{{ route('register') }}"
-                            class="w-full text-center py-2.5 rounded-xl bg-[#1a146b] text-white text-sm font-bold shadow-xs"
-                        >
-                            Daftar Akun
-                        </a>
-                    </div>
-                @endguest
+                    <a
+                        href="{{ route('katalog.index') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'katalog' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
+                    >
+                        <span class="flex items-center gap-3">
+                            <span class="shrink-0" :class="activeNav === 'katalog' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-icons.sport class="w-4 h-4" />
+                            </span>
+                            <span>Jelajahi Lapangan</span>
+                        </span>
+                        <span x-show="activeNav === 'katalog'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                    </a>
 
+                    <a
+                        href="{{ route('jadwal.index') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'jadwal' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
+                    >
+                        <span class="flex items-center gap-3">
+                            <span class="shrink-0" :class="activeNav === 'jadwal' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-icons.time class="w-4 h-4" />
+                            </span>
+                            <span>Cek Jadwal</span>
+                        </span>
+                        <span x-show="activeNav === 'jadwal'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                    </a>
+
+                    @auth
+                        @if (!in_array(Auth::user()->role, ['admin', 'kasir']))
+                            <a
+                                href="{{ route('pelanggan.booking.index') }}"
+                                class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                                :class="activeNav === 'riwayat' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
+                            >
+                                <span class="flex items-center gap-3">
+                                    <span class="shrink-0" :class="activeNav === 'riwayat' ? 'text-[#acf847]' : 'text-gray-400'">
+                                        <x-icons.history class="w-4 h-4" />
+                                    </span>
+                                    <span>Riwayat Booking</span>
+                                </span>
+                                <span x-show="activeNav === 'riwayat'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                            </a>
+                        @endif
+                    @endauth
+
+                    <a
+                        href="{{ route('bantuan') }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm transition-all duration-150 active:scale-[0.98]"
+                        :class="activeNav === 'bantuan' ? 'bg-[#1a146b] text-white font-bold shadow-sm' : 'text-gray-700 hover:bg-[#f4f7ff] hover:text-[#1a146b] font-semibold'"
+                    >
+                        <span class="flex items-center gap-3">
+                            <span class="shrink-0" :class="activeNav === 'bantuan' ? 'text-[#acf847]' : 'text-gray-400'">
+                                <x-lucide-circle-help class="w-4 h-4" />
+                            </span>
+                            <span>Pusat Bantuan</span>
+                        </span>
+                        <span x-show="activeNav === 'bantuan'" class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                    </a>
+                </div>
             </div>
         </div>
 
-    </nav>
-</header>
+        {{-- Footer Dock Bawah --}}
+        <div class="p-4 border-t border-gray-100 bg-[#f8faff]">
+            @auth
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 bg-white hover:bg-red-50 text-xs font-bold text-red-600 transition active:scale-[0.98] cursor-pointer shadow-2xs"
+                    >
+                        <x-lucide-log-out class="w-4 h-4 shrink-0" />
+                        <span>Keluar (Log Out)</span>
+                    </button>
+                </form>
+            @else
+                <div class="grid grid-cols-2 gap-2">
+                    <a
+                        href="{{ route('login') }}"
+                        class="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#1a146b] hover:bg-gray-50 transition active:scale-[0.98]"
+                    >
+                        <x-lucide-log-in class="w-4 h-4 shrink-0" />
+                        <span>Masuk</span>
+                    </a>
+                    <a
+                        href="{{ route('register') }}"
+                        class="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs font-extrabold shadow-sm transition active:scale-[0.98]"
+                    >
+                        <x-lucide-user-plus class="w-4 h-4 shrink-0" />
+                        <span>Daftar</span>
+                    </a>
+                </div>
+            @endauth
+        </div>
+    </aside>
+</div>

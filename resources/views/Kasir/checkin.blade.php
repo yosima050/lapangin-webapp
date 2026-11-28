@@ -24,7 +24,7 @@
 
         <div class="flex items-center gap-3">
             <div class="px-4 py-2 rounded-2xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-[#1a146b]">receipt_long</span>
+                <x-lucide-receipt-text class="w-6 h-6 text-[#1a146b] shrink-0" />
                 <div>
                     <p class="text-[10px] uppercase font-bold text-gray-400">Total Check-In Hari Ini</p>
                     <p class="text-lg font-headline font-black text-[#1a146b]">{{ $totalCheckInToday ?? 0 }} Tiket</p>
@@ -36,7 +36,7 @@
     {{-- Flash Notifications / Feedback Alert --}}
     @if (session('success'))
         <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3 shadow-xs">
-            <span class="material-symbols-outlined text-emerald-600 text-2xl shrink-0">check_circle</span>
+            <x-lucide-circle-check class="text-emerald-600 w-6 h-6 shrink-0" />
             <div class="text-xs sm:text-sm">
                 <p class="font-bold">Berhasil!</p>
                 <p class="mt-0.5">{{ session('success') }}</p>
@@ -46,7 +46,7 @@
 
     @if (session('error'))
         <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 flex items-start gap-3 shadow-xs">
-            <span class="material-symbols-outlined text-red-600 text-2xl shrink-0">error</span>
+            <x-lucide-circle-alert class="text-red-600 w-6 h-6 shrink-0" />
             <div class="text-xs sm:text-sm">
                 <p class="font-bold">Peringatan / Validasi Gagal</p>
                 <p class="mt-0.5">{{ session('error') }}</p>
@@ -58,7 +58,7 @@
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col gap-5">
         <div class="flex items-center justify-between pb-3 border-b border-gray-100">
             <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-xl text-[#1a146b]">barcode_scanner</span>
+                <x-lucide-scan-barcode class="w-5 h-5 text-[#1a146b] shrink-0" />
                 <h2 class="text-base font-headline font-bold text-[#0b1c30]">
                     Input Pemindai Barcode / QR Code Tiket
                 </h2>
@@ -73,9 +73,7 @@
             @csrf
 
             <div class="relative">
-                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 pointer-events-none">
-                    qr_code_2
-                </span>
+                <x-lucide-qr-code class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 pointer-events-none shrink-0" />
 
                 <input
                     id="barcode-input"
@@ -95,13 +93,13 @@
                     class="absolute right-2.5 top-1/2 -translate-y-1/2 px-5 py-2.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-1.5 cursor-pointer"
                 >
                     <span>Proses</span>
-                    <span class="material-symbols-outlined text-base">keyboard_return</span>
+                    <x-lucide-corner-down-left class="w-4 h-4 shrink-0" />
                 </button>
             </div>
 
             <div class="flex flex-wrap items-center justify-between text-xs text-gray-500 pt-1">
                 <span class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-base text-emerald-600">flash_on</span>
+                    <x-lucide-zap class="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Scanner HID langsung auto-submit saat memindai kode tanpa perlu menekan tombol Enter.</span>
                 </span>
                 <span class="text-gray-400">Tekan ESC untuk mengosongkan kolom input.</span>
@@ -116,7 +114,7 @@
         <div class="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col gap-4">
             <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-emerald-600 text-lg">task_alt</span>
+                    <x-lucide-circle-check-big class="text-emerald-600 w-5 h-5 shrink-0" />
                     <h3 class="text-sm font-headline font-bold text-[#0b1c30]">Baru Saja Check-In (Hari Ini)</h3>
                 </div>
                 <span class="text-xs text-gray-400">{{ count($recentCheckIns) }} data</span>
@@ -145,7 +143,7 @@
 
                         <a href="{{ route('kasir.struk', $item->id) }}"
                            class="shrink-0 px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-[#eff4ff] border border-gray-200 text-xs font-bold text-[#1a146b] flex items-center gap-1 transition shadow-2xs">
-                            <span class="material-symbols-outlined text-sm">print</span>
+                            <x-lucide-printer class="w-4 h-4 shrink-0" />
                             <span>Cetak Struk</span>
                         </a>
                     </div>
@@ -161,7 +159,7 @@
         <div class="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col gap-4">
             <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-amber-600 text-lg">pending_actions</span>
+                    <x-lucide-clock class="text-amber-600 w-5 h-5 shrink-0" />
                     <h3 class="text-sm font-headline font-bold text-[#0b1c30]">Antrean Main Hari Ini (Belum Check-In)</h3>
                 </div>
                 <span class="text-xs text-gray-400">{{ count($pendingToday) }} data</span>
@@ -199,7 +197,7 @@
                             <input type="hidden" name="code" value="{{ $item->kode_qr ?: $item->token_manual }}">
                             <button type="submit"
                                     class="shrink-0 px-3 py-1.5 rounded-xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] text-xs font-black flex items-center gap-1 transition shadow-xs cursor-pointer">
-                                <span class="material-symbols-outlined text-sm">how_to_reg</span>
+                                <x-lucide-user-check class="w-4 h-4 shrink-0" />
                                 <span>Check-in</span>
                             </button>
                         </form>

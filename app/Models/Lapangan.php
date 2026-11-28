@@ -46,6 +46,27 @@ class Lapangan extends Model
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->nama) . '&background=E0E7FF&color=3730A3&size=512';
     }
 
+    public function getFotoThumbnailUrlAttribute(): string
+    {
+        $url = $this->foto_url;
+        if (str_contains($url, 'images.unsplash.com')) {
+            // Replace / inject compact parameters for thumbnails
+            $baseUrl = explode('?', $url)[0];
+            return $baseUrl . '?auto=format&fit=crop&w=150&h=150&fm=webp&q=75';
+        }
+        return $url;
+    }
+
+    public function getFotoCardUrlAttribute(): string
+    {
+        $url = $this->foto_url;
+        if (str_contains($url, 'images.unsplash.com')) {
+            $baseUrl = explode('?', $url)[0];
+            return $baseUrl . '?auto=format&fit=crop&w=480&h=440&fm=webp&q=75';
+        }
+        return $url;
+    }
+
     protected function casts(): array
     {
         return [

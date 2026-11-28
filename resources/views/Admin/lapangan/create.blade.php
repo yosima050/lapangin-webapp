@@ -9,7 +9,7 @@
     {{-- Breadcrumb & Back --}}
     <div class="flex items-center justify-between">
         <a href="{{ route('admin.lapangan.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-[#474651] hover:text-[#1a146b] transition-colors">
-            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <x-lucide-arrow-left class="w-4 h-4 shrink-0" />
             <span>Kembali ke Master Data Lapangan</span>
         </a>
         <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#eff4ff] text-[#1a146b] border border-[#dce9ff]">
@@ -26,7 +26,7 @@
             <div>
                 <div class="border-b border-[#eff4ff] pb-3 flex items-center justify-between">
                     <h2 class="text-base font-headline font-extrabold text-[#0b1c30] flex items-center gap-2">
-                        <span class="material-symbols-outlined text-xl text-[#1a146b]">sports_soccer</span>
+                        <x-lucide-dribbble class="w-5 h-5 text-[#1a146b] shrink-0" />
                         <span>Informasi Utama Lapangan</span>
                     </h2>
                 </div>
@@ -103,7 +103,7 @@
                         {{-- Notifikasi Instan Client-side Validasi Ukuran File > 3MB --}}
                         <div id="foto-size-error" class="hidden mt-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2"></div>
                         <div id="foto-preview-box" class="hidden mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-base text-emerald-600 shrink-0">check_circle</span>
+                            <x-lucide-circle-check class="w-4 h-4 text-emerald-600 shrink-0" />
                             <span id="foto-preview-text"></span>
                         </div>
 
@@ -132,7 +132,7 @@
             <div>
                 <div class="border-b border-[#eff4ff] pb-3 flex items-center justify-between">
                     <h2 class="text-base font-headline font-extrabold text-[#0b1c30] flex items-center gap-2">
-                        <span class="material-symbols-outlined text-xl text-[#1a146b]">payments</span>
+                        <x-lucide-banknote class="w-5 h-5 text-[#1a146b] shrink-0" />
                         <span>Tarif Dasar (Harga Master)</span>
                     </h2>
                 </div>
@@ -226,7 +226,7 @@
             <div class="bg-[#eff4ff] p-6 rounded-2xl border border-[#dce9ff]">
                 <div class="flex items-center justify-between border-b border-[#dce9ff] pb-3">
                     <h3 class="text-xs font-bold text-[#0b1c30] flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-base text-[#1a146b]">event</span>
+                        <x-lucide-calendar class="w-4 h-4 text-[#1a146b] shrink-0" />
                         <span>Tarif Khusus Tanggal Merah / Libur Nasional (Opsional)</span>
                     </h3>
                     <span class="text-[10px] text-[#777682]">Bisa diatur sekarang atau nanti</span>
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (previewBox) previewBox.classList.add('hidden');
                     if (errorBox) {
                         errorBox.innerHTML = `
-                            <span class="material-symbols-outlined text-base text-red-600 shrink-0">error</span>
+                            <x-lucide-circle-alert class="w-4 h-4 text-red-600 shrink-0" />
                             <span>Ukuran file terlalu besar (${fileSizeMB} MB). Maksimal ukuran foto adalah 3MB. Silakan pilih foto lain yang lebih kecil.</span>
                         `;
                         errorBox.classList.remove('hidden');

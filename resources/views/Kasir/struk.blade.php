@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
     @vite(['resources/css/app.css'])
 
@@ -101,12 +100,12 @@
             <div class="flex items-center gap-2">
                 <a href="{{ route('kasir.index') }}"
                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition">
-                    <span class="material-symbols-outlined text-base">desktop_windows</span>
+                    <x-lucide-monitor class="w-4 h-4 shrink-0" />
                     <span>Meja Kasir</span>
                 </a>
                 <a href="{{ route('kasir.checkin.index') }}"
                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition">
-                    <span class="material-symbols-outlined text-base">barcode_scanner</span>
+                    <x-lucide-scan-barcode class="w-4 h-4 shrink-0" />
                     <span>Scanner</span>
                 </a>
             </div>
@@ -130,7 +129,7 @@
         <button type="button"
                 onclick="window.print()"
                 class="w-full py-3 px-4 rounded-xl bg-[#acf847] hover:bg-[#9be338] text-[#1a146b] font-headline font-black text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition cursor-pointer">
-            <span class="material-symbols-outlined text-lg">print</span>
+            <x-lucide-printer class="w-5 h-5 shrink-0" />
             <span>Cetak Struk Sekarang (Ctrl + P)</span>
         </button>
     </div>
