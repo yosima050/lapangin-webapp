@@ -524,8 +524,8 @@
                         </div>
                     </div>
 
-                    {{-- Horizontal 7-Day Date Buttons Full Width (SPA Reactive tanpa reload) --}}
-                    <div class="flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {{-- Horizontal 7-Day Date Buttons Full Width (SPA Reactive tanpa reload, min-h cegah CLS) --}}
+                    <div class="flex sm:grid sm:grid-cols-7 gap-2 sm:gap-2.5 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-h-[82px] sm:min-h-[100px]">
                         <template x-for="d in datesCarousel" :key="d.date_str">
                             <button type="button"
                                     @click="changeDate(d.date_str)"

@@ -353,8 +353,27 @@
                         </div>
                     </div>
 
-                    {{-- Strip 7 Hari Full Width --}}
-                    <div class="flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-3 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {{-- Strip 7 Hari Full Width (SSR awal agar CLS = 0, lalu reaktif saat ganti tanggal) --}}
+                    <div x-show="!hasSwitchedDate" class="flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-3 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-h-[82px] sm:min-h-[104px]">
+                        @foreach ($dateOptions as $dOpt)
+                            <a
+                                href="{{ route('jadwal.index', array_merge(request()->query(), ['tanggal' => $dOpt['date']])) }}"
+                                data-no-progress
+                                @click.prevent="switchDate('{{ $dOpt['date'] }}', $el.href)"
+                                :class="activeDate === '{{ $dOpt['date'] }}' ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-gray-50/90 hover:bg-white hover:border-[#1a146b]/40 text-gray-700 border-gray-200/90 shadow-2xs'"
+                                class="flex flex-col items-center justify-center min-w-[68px] shrink-0 sm:min-w-0 sm:w-full snap-start py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all text-center cursor-pointer {{ $dOpt['date'] === $tanggal ? 'bg-[#1a146b] text-white border-[#1a146b] shadow-md' : 'bg-gray-50/90 text-gray-700 border-gray-200/90 shadow-2xs' }}"
+                            >
+                                <span
+                                    :class="activeDate === '{{ $dOpt['date'] }}' ? 'text-[#acf847]' : 'text-gray-600'"
+                                    class="text-[10px] sm:text-xs font-extrabold tracking-wider whitespace-nowrap {{ $dOpt['date'] === $tanggal ? 'text-[#acf847]' : 'text-gray-600' }}"
+                                >{{ $dOpt['label_top'] }}</span>
+                                <span class="text-lg sm:text-2xl font-black leading-tight mt-0.5 sm:mt-1">{{ $dOpt['day_num'] }}</span>
+                                <span class="text-[10px] sm:text-xs font-semibold opacity-85 mt-0.5">{{ $dOpt['month_name'] }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <div x-show="hasSwitchedDate" x-cloak class="flex sm:grid sm:grid-cols-7 overflow-x-auto gap-2 sm:gap-3 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-h-[82px] sm:min-h-[104px]">
                         <template x-for="dOpt in dateOptions" :key="dOpt.date">
                             <a
                                 :href="jadwalDateUrl(dOpt.date)"
@@ -364,12 +383,12 @@
                                 class="flex flex-col items-center justify-center min-w-[68px] shrink-0 sm:min-w-0 sm:w-full snap-start py-2.5 sm:py-3.5 px-2 rounded-xl sm:rounded-2xl border transition-all text-center cursor-pointer"
                             >
                                 <span
-                                    :class="activeDate === dOpt.date ? 'text-[#acf847]' : 'text-gray-500'"
+                                    :class="activeDate === dOpt.date ? 'text-[#acf847]' : 'text-gray-600'"
                                     class="text-[10px] sm:text-xs font-extrabold tracking-wider whitespace-nowrap"
                                     x-text="dOpt.label_top"
                                 ></span>
                                 <span class="text-lg sm:text-2xl font-black leading-tight mt-0.5 sm:mt-1" x-text="dOpt.day_num"></span>
-                                <span class="text-[10px] sm:text-xs font-semibold opacity-80 mt-0.5" x-text="dOpt.month_name"></span>
+                                <span class="text-[10px] sm:text-xs font-semibold opacity-85 mt-0.5" x-text="dOpt.month_name"></span>
                             </a>
                         </template>
                     </div>
@@ -465,10 +484,10 @@
 
                 {{-- Slot Lewat --}}
                 <div class="flex items-center gap-1.5 sm:gap-2">
-                    <span class="w-5 h-5 rounded-md bg-gray-100 border border-gray-200 text-gray-400 flex items-center justify-center shrink-0">
+                    <span class="w-5 h-5 rounded-md bg-gray-100 border border-gray-200 text-gray-500 flex items-center justify-center shrink-0">
                         <x-lucide-minus class="w-3 h-3" stroke-width="2.5" />
                     </span>
-                    <span class="font-medium text-gray-400">Lewat Jam</span>
+                    <span class="font-medium text-gray-600">Lewat Jam</span>
                 </div>
             </div>
 
@@ -608,11 +627,11 @@
                                                 <span class="text-xs font-black tracking-tight">{{ $slot['jam_mulai'] }}</span>
                                                 <span class="w-1.5 h-1.5 rounded-full" :class="clickedSlotKey === '{{ $slotKey }}' ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
                                             </div>
-                                            <span class="text-[9px] sm:text-[10px]" :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-white/80' : 'text-gray-400'">
+                                            <span class="text-[9px] sm:text-[10px]" :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-white/85' : 'text-gray-500'">
                                                 {{ $slot['jam_mulai'] }} - {{ $slot['jam_selesai'] }}
                                             </span>
                                             <span class="mt-0.5 text-[9px] sm:text-[10px] font-bold"
-                                                  :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-[#acf847]' : 'text-emerald-600'"
+                                                  :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-[#acf847]' : 'text-emerald-700'"
                                                   x-text="clickedSlotKey === '{{ $slotKey }}' ? 'DIPILIH' : 'Tersedia'">
                                                 Tersedia
                                             </span>
@@ -650,16 +669,16 @@
                                     @else
                                         {{-- Lewat Jam --}}
                                         <div
-                                            class="relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed text-center"
+                                            class="relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border border-gray-200 bg-gray-100 text-gray-600 cursor-not-allowed text-center"
                                             title="Jam telah berlalu: {{ $slot['jam_label'] }}"
                                         >
-                                            <span class="text-xs font-semibold tracking-tight text-gray-400">
+                                            <span class="text-xs font-semibold tracking-tight text-gray-600">
                                                 {{ $slot['jam_mulai'] }}
                                             </span>
-                                            <span class="text-[9px] sm:text-[10px] font-medium text-gray-400">
+                                            <span class="text-[9px] sm:text-[10px] font-medium text-gray-500">
                                                 s/d {{ $slot['jam_selesai'] }}
                                             </span>
-                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-semibold uppercase bg-gray-200 text-gray-500">
+                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-semibold uppercase bg-gray-200 text-gray-600">
                                                 LEWAT
                                             </span>
                                         </div>
