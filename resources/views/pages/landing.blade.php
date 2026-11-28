@@ -66,9 +66,19 @@
                     currentSlide: 0,
                     totalSlides: {{ count($carouselSlides) }},
                     timer: null,
+                    autoStarted: false,
+                    startAuto() {
+                        if (this.autoStarted || this.totalSlides <= 1) return;
+                        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                        this.autoStarted = true;
+                        this.timer = setInterval(() => this.next(), 6000);
+                    },
                     init() {
                         if (this.totalSlides > 1) {
-                            this.timer = setInterval(() => this.next(), 5500);
+                            const trigger = () => this.startAuto();
+                            ['pointermove', 'touchstart', 'scroll', 'keydown'].forEach((evt) => {
+                                window.addEventListener(evt, trigger, { once: true, passive: true });
+                            });
                         }
                     },
                     next() {
@@ -78,8 +88,8 @@
                         this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
                     }
                  }"
-                 @mouseenter="if (timer) clearInterval(timer)"
-                 @mouseleave="if (totalSlides > 1) timer = setInterval(() => next(), 5500)">
+                 @mouseenter="if (timer) { clearInterval(timer); timer = null; }"
+                 @mouseleave="if (autoStarted && totalSlides > 1 && !timer) timer = setInterval(() => next(), 6000)">
 
                 <div class="relative w-full h-[350px] sm:h-[450px] lg:h-[520px] xl:h-[550px] overflow-hidden">
                     @foreach ($carouselSlides as $idx => $slide)
@@ -151,12 +161,12 @@
                         </div>
 
                         {{-- Slide Dots (Pojok Kanan Bawah di Desktop, Bawah Kiri di HP) --}}
-                        <div class="mt-3.5 sm:mt-0 sm:absolute sm:bottom-16 sm:right-10 lg:right-12 flex items-center gap-1.5 pointer-events-auto">
+                        <div class="mt-3.5 sm:mt-0 sm:absolute sm:bottom-16 sm:right-10 lg:right-12 flex items-center gap-0.5 pointer-events-auto">
                             @foreach ($carouselSlides as $idx => $slide)
                                 <button type="button"
                                         @click="currentSlide = {{ $idx }}"
                                         aria-label="Pindah ke Slide {{ $idx + 1 }}"
-                                        class="py-1 cursor-pointer">
+                                        class="min-w-[24px] min-h-[24px] inline-flex items-center justify-center px-1 cursor-pointer">
                                     <span class="block h-1.5 rounded-full transition-all duration-300"
                                           :class="currentSlide === {{ $idx }} ? 'w-6 bg-[#acf847]' : 'w-1.5 bg-white/45 hover:bg-white/75'"></span>
                                 </button>
@@ -245,11 +255,12 @@
 
                     {{-- Pilih Cabang Olahraga (Custom Dropdown) --}}
                     <div class="sm:col-span-5 relative" @click.outside="katOpen = false">
-                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-400 mb-1.5 px-1">
+                        <span id="hero_kat_label" class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
                             Cabang Olahraga
-                        </label>
+                        </span>
                         <input type="hidden" name="kategori" :value="selectedKat">
                         <button type="button"
+                                aria-labelledby="hero_kat_label"
                                 @click="katOpen = !katOpen; dateOpen = false"
                                 :aria-expanded="katOpen"
                                 class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
@@ -261,7 +272,7 @@
                                 <span class="truncate" x-text="selectedKat || 'Semua Olahraga'"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
-                                  :class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
+                                  :class="katOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-500'">
                                 <x-lucide-chevron-down class="w-4 h-4 sm:w-5 sm:h-5" />
                             </span>
                         </button>
@@ -301,11 +312,12 @@
 
                     {{-- Pilih Tanggal Main (Custom Calendar Popover) --}}
                     <div class="sm:col-span-4 relative" @click.outside="dateOpen = false">
-                        <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-400 mb-1.5 px-1">
+                        <span id="hero_date_label" class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-600 mb-1.5 px-1">
                             Tanggal Main
-                        </label>
+                        </span>
                         <input type="hidden" name="tanggal" :value="selectedDate">
                         <button type="button"
+                                aria-labelledby="hero_date_label"
                                 @click="dateOpen = !dateOpen; katOpen = false"
                                 :aria-expanded="dateOpen"
                                 class="w-full flex items-center justify-between gap-2.5 rounded-xl border py-3 sm:py-3.5 pl-3.5 pr-3.5 text-left text-sm sm:text-[15px] font-bold text-[#0b1c30] transition cursor-pointer"
@@ -317,7 +329,7 @@
                                 <span class="truncate" x-text="dateLabel"></span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
-                                  :class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-400'">
+                                  :class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-500'">
                                 <x-lucide-chevron-down class="w-4 h-4 sm:w-5 sm:h-5" />
                             </span>
                         </button>
@@ -370,7 +382,7 @@
                             {{-- Nama Hari --}}
                             <div class="grid grid-cols-7 gap-0.5 text-center mb-1">
                                 <template x-for="dh in dayHeaders" :key="dh">
-                                    <span class="text-[10px] font-bold text-gray-400 py-1" x-text="dh"></span>
+                                    <span class="text-[10px] font-bold text-gray-600 py-1" x-text="dh"></span>
                                 </template>
                             </div>
 
@@ -421,7 +433,7 @@
                         <x-lucide-arrow-right class="w-3.5 h-3.5 shrink-0" />
                     </a>
                     <a href="{{ route('katalog.index') }}"
-                       class="text-[11px] sm:text-xs font-semibold text-gray-500 hover:text-[#1a146b] transition">
+                       class="text-[11px] sm:text-xs font-semibold text-gray-600 hover:text-[#1a146b] transition">
                         {{ $totalLapanganAktif }} Lapangan Aktif &bull; Lihat Semua
                     </a>
                 </div>
