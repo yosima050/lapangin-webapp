@@ -597,33 +597,24 @@
                                             @click.prevent="selectSlot('{{ route('katalog.show', ['id' => $lap->id, 'tanggal' => $tanggal, 'jam' => $slot['jam_mulai']]) }}', '{{ $slotKey }}')"
                                             :class="{
                                                 'pointer-events-none': clickedSlotKey !== null,
-                                                'animate-pulse bg-gray-200 border-gray-300': clickedSlotKey === '{{ $slotKey }}',
-                                                'opacity-40': clickedSlotKey !== null && clickedSlotKey !== '{{ $slotKey }}',
-                                                'bg-[#f7fee7] border-[#acf847] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] hover:-translate-y-0.5 hover:shadow-md': clickedSlotKey !== '{{ $slotKey }}'
+                                                'bg-[#1a146b] border-[#1a146b] text-white shadow-md scale-[1.02]': clickedSlotKey === '{{ $slotKey }}',
+                                                'bg-white border-gray-200 hover:border-[#1a146b]/40 hover:bg-[#f8faff] text-[#0b1c30] hover:shadow-xs': clickedSlotKey !== '{{ $slotKey }}'
                                             }"
-                                            class="group relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border-2 transition transform cursor-pointer text-center"
-                                            title="Slot Kosong: {{ $slot['jam_label'] }}"
+                                            class="group relative flex flex-col items-center justify-center py-2.5 px-1 sm:py-3 sm:px-2 rounded-xl border transition-all duration-150 active:scale-95 cursor-pointer text-center gap-0.5"
+                                            title="Slot Tersedia: {{ $slot['jam_label'] }}"
                                         >
-                                            <template x-if="clickedSlotKey === '{{ $slotKey }}'">
-                                                <div class="flex flex-col items-center justify-center gap-1.5 py-0.5">
-                                                    <div class="w-10 h-3.5 bg-gray-300 rounded-md"></div>
-                                                    <div class="w-12 h-2.5 bg-gray-300 rounded-md"></div>
-                                                    <div class="w-8 h-2.5 bg-gray-300 rounded-md mt-0.5"></div>
-                                                </div>
-                                            </template>
-                                            <template x-if="clickedSlotKey !== '{{ $slotKey }}'">
-                                                <div class="flex flex-col items-center justify-center">
-                                                    <span class="text-xs font-black tracking-tight group-hover:scale-105 transition-transform">
-                                                        {{ $slot['jam_mulai'] }}
-                                                    </span>
-                                                    <span class="text-[9px] sm:text-[10px] font-bold text-[#416900] group-hover:text-[#102000]">
-                                                        s/d {{ $slot['jam_selesai'] }}
-                                                    </span>
-                                                    <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
-                                                        KOSONG
-                                                    </span>
-                                                </div>
-                                            </template>
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-xs font-black tracking-tight">{{ $slot['jam_mulai'] }}</span>
+                                                <span class="w-1.5 h-1.5 rounded-full" :class="clickedSlotKey === '{{ $slotKey }}' ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                            </div>
+                                            <span class="text-[9px] sm:text-[10px]" :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-white/80' : 'text-gray-400'">
+                                                {{ $slot['jam_mulai'] }} - {{ $slot['jam_selesai'] }}
+                                            </span>
+                                            <span class="mt-0.5 text-[9px] sm:text-[10px] font-bold"
+                                                  :class="clickedSlotKey === '{{ $slotKey }}' ? 'text-[#acf847]' : 'text-emerald-600'"
+                                                  x-text="clickedSlotKey === '{{ $slotKey }}' ? 'DIPILIH' : 'Tersedia'">
+                                                Tersedia
+                                            </span>
                                         </a>
                                     @elseif ($isPending)
                                         <div
@@ -690,29 +681,20 @@
                                                     @click.prevent="selectSlot(slotBookingUrl('{{ $lap->id }}', slot.jam_mulai), '{{ $lap->id }}_' + slot.jam_mulai)"
                                                     :class="{
                                                         'pointer-events-none': clickedSlotKey !== null,
-                                                        'animate-pulse bg-gray-200 border-gray-300': clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai),
-                                                        'opacity-40': clickedSlotKey !== null && clickedSlotKey !== ('{{ $lap->id }}_' + slot.jam_mulai),
-                                                        'bg-[#f7fee7] border-[#acf847] hover:bg-[#acf847] hover:border-[#98e235] text-[#102000] hover:-translate-y-0.5 hover:shadow-md': clickedSlotKey !== ('{{ $lap->id }}_' + slot.jam_mulai)
+                                                        'bg-[#1a146b] border-[#1a146b] text-white shadow-md scale-[1.02]': clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai),
+                                                        'bg-white border-gray-200 hover:border-[#1a146b]/40 hover:bg-[#f8faff] text-[#0b1c30] hover:shadow-xs': clickedSlotKey !== ('{{ $lap->id }}_' + slot.jam_mulai)
                                                     }"
-                                                    class="group relative flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-2 rounded-xl border-2 transition transform cursor-pointer text-center"
-                                                    :title="'Slot Kosong: ' + slot.jam_label"
+                                                    class="group relative flex flex-col items-center justify-center py-2.5 px-1 sm:py-3 sm:px-2 rounded-xl border transition-all duration-150 active:scale-95 cursor-pointer text-center gap-0.5"
+                                                    :title="'Slot Tersedia: ' + slot.jam_label"
                                                 >
-                                                    <template x-if="clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai)">
-                                                        <div class="flex flex-col items-center justify-center gap-1.5 py-0.5">
-                                                            <div class="w-10 h-3.5 bg-gray-300 rounded-md"></div>
-                                                            <div class="w-12 h-2.5 bg-gray-300 rounded-md"></div>
-                                                            <div class="w-8 h-2.5 bg-gray-300 rounded-md mt-0.5"></div>
-                                                        </div>
-                                                    </template>
-                                                    <template x-if="clickedSlotKey !== ('{{ $lap->id }}_' + slot.jam_mulai)">
-                                                        <div class="flex flex-col items-center justify-center">
-                                                            <span class="text-xs font-black tracking-tight group-hover:scale-105 transition-transform" x-text="slot.jam_mulai"></span>
-                                                            <span class="text-[9px] sm:text-[10px] font-bold text-[#416900] group-hover:text-[#102000]" x-text="'s/d ' + slot.jam_selesai"></span>
-                                                            <span class="mt-1 px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-extrabold uppercase bg-white/80 group-hover:bg-white text-[#416900]">
-                                                                KOSONG
-                                                            </span>
-                                                        </div>
-                                                    </template>
+                                                    <div class="flex items-center gap-1">
+                                                        <span class="text-xs font-black tracking-tight" x-text="slot.jam_mulai"></span>
+                                                        <span class="w-1.5 h-1.5 rounded-full" :class="clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai) ? 'bg-[#acf847]' : 'bg-[#416900]'"></span>
+                                                    </div>
+                                                    <span class="text-[9px] sm:text-[10px]" :class="clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai) ? 'text-white/80' : 'text-gray-400'" x-text="slot.jam_mulai + ' - ' + slot.jam_selesai"></span>
+                                                    <span class="mt-0.5 text-[9px] sm:text-[10px] font-bold"
+                                                          :class="clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai) ? 'text-[#acf847]' : 'text-emerald-600'"
+                                                          x-text="clickedSlotKey === ('{{ $lap->id }}_' + slot.jam_mulai) ? 'DIPILIH' : 'Tersedia'"></span>
                                                 </a>
                                             </template>
 

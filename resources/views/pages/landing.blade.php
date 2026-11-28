@@ -200,14 +200,15 @@
                     get dateLabel() {
                         const [y, m, d] = this.selectedDate.split('-').map(Number);
                         const dt = new Date(y, m - 1, d);
-                        const tomorrowStr = this.addDays(this.todayStr, 1);
-                        if (this.selectedDate === this.todayStr) {
-                            return 'Hari Ini • ' + d + ' ' + this.shortMonths[m - 1];
-                        }
-                        if (this.selectedDate === tomorrowStr) {
-                            return 'Besok • ' + d + ' ' + this.shortMonths[m - 1];
+                        if (this.selectedDate === this.todayStr || this.selectedDate === this.addDays(this.todayStr, 1)) {
+                            return d + ' ' + this.shortMonths[m - 1] + ' ' + y;
                         }
                         return this.dayHeaders[dt.getDay()] + ', ' + d + ' ' + this.shortMonths[m - 1] + ' ' + y;
+                    },
+                    get dateBadge() {
+                        if (this.selectedDate === this.todayStr) return 'Hari Ini';
+                        if (this.selectedDate === this.addDays(this.todayStr, 1)) return 'Besok';
+                        return '';
                     },
                     get canPrevMonth() {
                         const [ty, tm] = this.todayStr.split('-').map(Number);
@@ -326,7 +327,12 @@
                                 <span class="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#1a146b] inline-flex items-center justify-center">
                                     <x-icons.calendar class="w-full h-full" />
                                 </span>
-                                <span class="truncate" x-text="dateLabel"></span>
+                                <span class="flex items-center gap-2 min-w-0">
+                                    <span class="truncate" x-text="dateLabel"></span>
+                                    <span x-show="dateBadge"
+                                          x-text="dateBadge"
+                                          class="shrink-0 px-2 py-0.5 rounded-md bg-[#eaf7d8] text-[#416900] text-[10px] sm:text-[11px] font-extrabold leading-none"></span>
+                                </span>
                             </span>
                             <span class="shrink-0 transition-transform duration-200"
                                   :class="dateOpen ? 'rotate-180 text-[#1a146b]' : 'text-gray-500'">
