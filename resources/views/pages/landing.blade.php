@@ -448,63 +448,128 @@
         </div>
     </section>
 
-    {{-- 2. USP / Fitur Unggulan (4 Card) --}}
-    <section class="py-10 sm:py-20 bg-white border-y border-gray-100">
+    {{-- 2. Keunggulan LapangIn (Asymmetric Product Bento — Tanpa 4 Kartu Icon Generik) --}}
+    <section class="py-12 sm:py-20 bg-white border-y border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-7 sm:mb-14">
-                <span class="inline-block text-[11px] sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-1.5 sm:mb-2">Kenapa LapangIn?</span>
-                <h2 class="text-xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
-                    Pengalaman Reservasi Olahraga Modern
-                </h2>
-                <p class="mt-2 sm:mt-3 text-xs sm:text-base text-gray-600">
-                    Semua kenyamanan mulai dari pemilihan jadwal hingga bermain di lapangan kami rancang tanpa ribet.
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-12">
+                <div class="max-w-2xl space-y-2">
+                    <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#416900]">
+                        <span class="h-1.5 w-6 rounded-full bg-[#acf847]"></span>
+                        Kenapa LapangIn
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#0b1c30] tracking-tight leading-[1.15]">
+                        Dirancang Buat Yang Serius Main.
+                    </h2>
+                </div>
+                <p class="text-xs sm:text-sm text-gray-600 max-w-sm leading-relaxed">
+                    Dari cek slot kosong, pilih cara bayar, sampai check-in, semuanya terhubung langsung ke kasir lapangan.
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                {{-- USP Card 1 --}}
-                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
-                        <x-lucide-dribbble class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
+
+                {{-- Bento 1 (7 Cols, Featured Dark Navy): Jadwal Real-Time + Mini Live Slot Preview --}}
+                <div class="md:col-span-7 rounded-3xl bg-[#1a146b] text-white p-6 sm:p-8 flex flex-col justify-between gap-6 border border-[#1a146b] shadow-sm">
+                    <div class="space-y-2 max-w-lg">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#acf847]">
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#acf847]"></span>
+                            Sinkron Langsung dengan Kasir
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-headline font-black tracking-tight leading-snug">
+                            Jadwal Real-Time, Bebas Double-Booking
+                        </h3>
+                        <p class="text-xs sm:text-sm text-indigo-100/85 leading-relaxed">
+                            Begitu slot dikunci lewat web atau kasir offline, jam tersebut langsung tertutup otomatis. Tidak ada lagi jadwal bentrok di hari main.
+                        </p>
                     </div>
-                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Standar Lantai AFC</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
-                        Material vinyl &amp; interlock standar federasi internasional, ramah lutut, antiselip, dan nyaman untuk laga intens.
-                    </p>
+
+                    {{-- Mini Product Preview: 3 Slot Jam Live (Kontras Terang & Jelas di Atas Navy) --}}
+                    <div class="grid grid-cols-3 gap-2 sm:gap-2.5 pt-2">
+                        <div class="rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-center shadow-xs">
+                            <span class="block text-xs sm:text-sm font-black text-red-700 line-through">18:00</span>
+                            <span class="block text-[10px] font-bold text-red-600 mt-0.5">Terisi</span>
+                        </div>
+                        <div class="rounded-xl bg-[#acf847] text-[#102000] px-3 py-2.5 text-center shadow-sm">
+                            <span class="block text-xs sm:text-sm font-black">19:00</span>
+                            <span class="block text-[10px] font-extrabold mt-0.5">Dipilih</span>
+                        </div>
+                        <div class="rounded-xl bg-white border border-white/90 px-3 py-2.5 text-center shadow-xs">
+                            <div class="inline-flex items-center justify-center gap-1">
+                                <span class="text-xs sm:text-sm font-black text-[#0b1c30]">20:00</span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#416900]"></span>
+                            </div>
+                            <span class="block text-[10px] font-bold text-emerald-700 mt-0.5">Tersedia</span>
+                        </div>
+                    </div>
                 </div>
 
-                {{-- USP Card 2 --}}
-                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
-                        <x-lucide-banknote class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                {{-- Bento 2 (5 Cols, Crisp Light): Pembayaran Fleksibel Lunas / DP 50% --}}
+                <div class="md:col-span-5 rounded-3xl bg-[#f8f9ff] p-6 sm:p-8 flex flex-col justify-between gap-6 border border-[#e5eeff]">
+                    <div class="space-y-2">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#416900]">
+                            Pembayaran Fleksibel
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
+                            Bayar Lunas 100% atau DP 50%
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                            Bebas pilih bayar penuh langsung beres, atau kunci jadwal dulu dengan DP 50% lewat QRIS, Virtual Account, dan E-Wallet.
+                        </p>
                     </div>
-                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Pembayaran DP 50%</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
-                        Cukup bayar uang muka 50% secara instan lewat payment gateway resmi untuk mengamankan slot tim Anda.
-                    </p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="rounded-xl bg-white border border-[#1a146b]/20 px-3 py-2.5">
+                            <span class="block text-xs font-extrabold text-[#1a146b]">Bayar Lunas</span>
+                            <span class="block text-[10px] font-semibold text-gray-600 mt-0.5">Langsung main di venue</span>
+                        </div>
+                        <div class="rounded-xl bg-white border border-gray-200 px-3 py-2.5">
+                            <span class="block text-xs font-extrabold text-[#0b1c30]">DP 50%</span>
+                            <span class="block text-[10px] font-semibold text-gray-600 mt-0.5">Sisa bayar di kasir</span>
+                        </div>
+                    </div>
                 </div>
 
-                {{-- USP Card 3 --}}
-                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#1a146b] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
-                        <x-lucide-scan-line class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                {{-- Bento 3 (5 Cols, Crisp Light): Standar Lapangan Kompetisi --}}
+                <div class="md:col-span-5 rounded-3xl bg-[#f8f9ff] p-6 sm:p-8 flex flex-col justify-center border border-[#e5eeff]">
+                    <div class="space-y-2">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#1a146b]">
+                            Kualitas Arena
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
+                            Permukaan Standar Kompetisi
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                            Material lapangan ramah lutut dan antiselip, lengkap dengan pencahayaan LED merata untuk sesi siang hingga malam.
+                        </p>
                     </div>
-                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Check-in Cepat QR</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
-                        Tiba di lokasi tinggal tunjukkan tiket digital. Kasir scan QR dalam hitungan detik tanpa bukti transfer manual.
-                    </p>
                 </div>
 
-                {{-- USP Card 4 --}}
-                <div class="p-4 sm:p-6 rounded-2xl bg-[#f8f9ff] border border-gray-100 hover:border-[#1a146b]/20 hover:shadow-lg transition-all duration-200">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#416900] text-white flex items-center justify-center mb-3 sm:mb-5 shadow-sm">
-                        <x-lucide-clock class="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                {{-- Bento 4 (7 Cols, Soft Court-Lime Surface): Check-in QR & Token --}}
+                <div class="md:col-span-7 rounded-3xl bg-[#f4fbe6] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 border border-[#d7f0a6]">
+                    <div class="space-y-2 max-w-md">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#416900]">
+                            Check-in Tanpa Antre
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight leading-snug">
+                            E-Tiket QR &amp; Token Instan
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                            Tak perlu screenshot bukti transfer ke chat admin. Cukup tunjukkan QR Code atau sebutkan 6 karakter token di meja resepsionis.
+                        </p>
                     </div>
-                    <h3 class="text-sm sm:text-lg font-headline font-bold text-[#1a146b] mb-1.5 sm:mb-2 leading-snug">Jadwal Real-Time</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 leading-snug sm:leading-relaxed">
-                        Jadwal terhubung langsung dengan sistem kasir lapangan. Bebas risiko bentrok jadwal atau double-booking.
-                    </p>
+
+                    {{-- Mini Boarding Pass Chip --}}
+                    <div class="shrink-0 rounded-2xl bg-white border border-[#c7e68b] px-4 py-3.5 shadow-xs flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-[#1a146b] text-[#acf847] flex items-center justify-center shrink-0">
+                            <x-lucide-qr-code class="w-6 h-6" />
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600">Token Gerbang</span>
+                            <span class="block font-mono text-base font-black tracking-[0.18em] text-[#1a146b]">LPN720</span>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -670,91 +735,177 @@
         </div>
     </section>
 
-    {{-- 4. Alur Reservasi (Editorial Split Layout — Tanpa 3 Kotak Generik) --}}
-    <section id="cara-kerja" class="py-12 sm:py-20 bg-white border-t border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+    {{-- 4. Alur Reservasi (Odoo-Style Illustrated Winding Roadmap) --}}
+    <section id="cara-kerja" class="relative py-14 sm:py-24 bg-white border-t border-gray-100 overflow-hidden">
+        {{-- Pola Latar Halus --}}
+        <div class="absolute inset-0 opacity-[0.35] pointer-events-none"
+             style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 26px 26px;"></div>
 
-                {{-- Kolom Kiri: Editorial Lead & CTA --}}
-                <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
-                    <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#416900]">
-                        <span class="h-1.5 w-6 rounded-full bg-[#acf847]"></span>
-                        Alur Reservasi
-                    </span>
-                    <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#0b1c30] tracking-tight leading-[1.15]">
-                        Dari Pilih Jam Sampai Main, Semua Beres Tanpa Ribet.
-                    </h2>
-                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-                        Tidak perlu chat admin atau tunggu konfirmasi manual. Cek slot kosong secara langsung, pilih bayar lunas atau DP 50%, lalu tunjukkan E-Tiket saat tiba di venue.
-                    </p>
-                    <div class="pt-2">
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Header --}}
+            <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
+                <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#416900] mb-2">
+                    <span class="h-1.5 w-5 rounded-full bg-[#acf847]"></span>
+                    Alur Reservasi
+                </span>
+                <h2 class="text-2xl sm:text-4xl lg:text-[42px] font-headline font-black text-[#0b1c30] tracking-tight leading-tight">
+                    Mulai Main dalam 3 Langkah
+                </h2>
+                <p class="mt-2.5 text-xs sm:text-base text-gray-600">
+                    Tanpa chat admin manual. Ikuti jalurnya dari pilih jam sampai masuk lapangan.
+                </p>
+            </div>
+
+            {{-- Illustrated Winding Roadmap Container --}}
+            <div class="relative">
+                {{-- Garis Putus-Putus Melengkung Ala Odoo (Desktop) --}}
+                <svg class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none"
+                     viewBox="0 0 1120 380"
+                     fill="none"
+                     preserveAspectRatio="none"
+                     aria-hidden="true">
+                    <path d="M 10 265 L 330 265 Q 385 265 385 210 L 385 160 Q 385 105 440 105 L 1110 105"
+                          stroke="#84cc16"
+                          stroke-width="3.5"
+                          stroke-linecap="round"
+                          stroke-dasharray="10 11" />
+                </svg>
+
+                {{-- Garis Vertikal Putus-Putus (Mobile) --}}
+                <div class="lg:hidden absolute left-1/2 top-16 bottom-16 -translate-x-1/2 w-0.5 border-l-2 border-dashed border-[#84cc16]/70 pointer-events-none" aria-hidden="true"></div>
+
+                <div class="relative grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-8 items-start">
+
+                    {{-- LANGKAH 1 (Posisi Bawah Kiri di Desktop + Panah "Mulai di sini") --}}
+                    <div class="relative flex flex-col items-center text-center lg:mt-32 bg-white/85 lg:bg-transparent backdrop-blur-[1px] rounded-2xl p-4 lg:p-0">
+                        {{-- Label "Mulai di sini" + Panah Melengkung --}}
+                        <div class="mb-2 flex flex-col items-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#eaf7d8] text-[#284200] text-[11px] font-extrabold tracking-wide -rotate-3">
+                                Mulai di sini
+                            </span>
+                            <svg class="w-8 h-9 text-gray-400 mt-0.5" viewBox="0 0 36 40" fill="none" aria-hidden="true">
+                                <path d="M12 4 C22 12, 24 22, 19 34" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                <path d="M14 28 L19 35 L25 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+
+                        {{-- Ilustrasi Pedestal 1: Jadwal & Lapangan --}}
+                        <div class="w-40 h-32 flex items-center justify-center">
+                            <svg viewBox="0 0 180 140" fill="none" class="w-full h-full" aria-hidden="true">
+                                {{-- Pedestal 3D --}}
+                                <ellipse cx="90" cy="112" rx="64" ry="18" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <path d="M26 104 V112 C26 122 55 130 90 130 C125 130 154 122 154 112 V104" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="64" ry="18" fill="#ACF847" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="50" ry="12" fill="#D9FCA3" />
+
+                                {{-- Kartu Jadwal di Atas Pedestal --}}
+                                <rect x="46" y="24" width="88" height="72" rx="10" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <path d="M46 42 H134" stroke="#0B1C30" stroke-width="2.5" />
+                                <rect x="47.5" y="25.5" width="85" height="15.5" rx="8" fill="#1A146B" />
+                                <circle cx="58" cy="33" r="2.2" fill="#ACF847" />
+                                <circle cx="66" cy="33" r="2.2" fill="#FFFFFF" fill-opacity="0.6" />
+                                <circle cx="74" cy="33" r="2.2" fill="#FFFFFF" fill-opacity="0.6" />
+
+                                {{-- Grid Slot Mini --}}
+                                <rect x="56" y="50" width="20" height="14" rx="4" fill="#EFF4FF" stroke="#0B1C30" stroke-width="1.8" />
+                                <rect x="80" y="50" width="20" height="14" rx="4" fill="#ACF847" stroke="#0B1C30" stroke-width="1.8" />
+                                <rect x="104" y="50" width="20" height="14" rx="4" fill="#EFF4FF" stroke="#0B1C30" stroke-width="1.8" />
+                                <rect x="56" y="70" width="20" height="14" rx="4" fill="#EFF4FF" stroke="#0B1C30" stroke-width="1.8" />
+                                <rect x="80" y="70" width="44" height="14" rx="4" fill="#1A146B" />
+
+                                {{-- Kursor Klik --}}
+                                <path d="M93 60 L108 69 L100 71 L98 79 L93 60 Z" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.2" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+
+                        <h3 class="mt-2 text-lg sm:text-xl font-headline font-black text-[#0b1c30]">
+                            Pilih Jadwal &amp; Lapangan
+                        </h3>
+                        <p class="mt-1.5 text-xs sm:text-sm text-gray-600 max-w-[260px] leading-relaxed">
+                            Cek slot jam yang kosong secara live, pilih tanggal main, dan tambah perlengkapan kalau perlu.
+                        </p>
                         <a href="{{ route('jadwal.index') }}"
-                           class="inline-flex items-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] active:scale-[0.98] px-5 py-3 text-xs sm:text-sm font-extrabold text-white shadow-sm transition">
-                            <span>Cek Jadwal Sekarang</span>
-                            <x-lucide-arrow-right class="w-4 h-4 text-[#acf847] shrink-0" />
+                           class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#1a146b] hover:bg-[#130f52] px-4 py-2 text-xs font-extrabold text-white shadow-xs transition active:scale-95">
+                            <span>Cek Jadwal</span>
+                            <x-lucide-arrow-right class="w-3.5 h-3.5 text-[#acf847]" />
                         </a>
                     </div>
-                </div>
 
-                {{-- Kolom Kanan: Daftar Langkah Editorial dengan Pembatas Garis Halus --}}
-                <div class="lg:col-span-7 divide-y divide-gray-200/80 border-y border-gray-200/80">
+                    {{-- LANGKAH 2 (Posisi Atas Tengah di Desktop) --}}
+                    <div class="relative flex flex-col items-center text-center bg-white/85 lg:bg-transparent backdrop-blur-[1px] rounded-2xl p-4 lg:p-0">
+                        {{-- Ilustrasi Pedestal 2: Bayar Lunas atau DP 50% --}}
+                        <div class="w-40 h-32 flex items-center justify-center">
+                            <svg viewBox="0 0 180 140" fill="none" class="w-full h-full" aria-hidden="true">
+                                {{-- Pedestal 3D --}}
+                                <ellipse cx="90" cy="112" rx="64" ry="18" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <path d="M26 104 V112 C26 122 55 130 90 130 C125 130 154 122 154 112 V104" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="64" ry="18" fill="#ACF847" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="50" ry="12" fill="#D9FCA3" />
 
-                    {{-- Langkah 01 --}}
-                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
-                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#1a146b]/25 group-hover:text-[#1a146b] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
-                            01
-                        </span>
-                        <div class="space-y-2 min-w-0">
-                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
-                                Pilih Lapangan &amp; Jam Bermain
-                            </h3>
-                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                                Lihat ketersediaan jam secara live, pilih tanggal serta durasi main (hingga 4 jam), dan tambahkan sewa perlengkapan bila diperlukan.
-                            </p>
-                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Jadwal Real-Time</span>
-                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Opsional Sewa Perlengkapan</span>
-                            </div>
+                                {{-- Kartu Pembayaran --}}
+                                <rect x="44" y="34" width="92" height="60" rx="10" fill="#1A146B" stroke="#0B1C30" stroke-width="2.5" />
+                                <rect x="44" y="48" width="92" height="12" fill="#ACF847" stroke="#0B1C30" stroke-width="2" />
+                                <rect x="55" y="70" width="26" height="10" rx="3" fill="#FFFFFF" />
+                                <rect x="88" y="72" width="36" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.45" />
+
+                                {{-- Badge Centang Melayang --}}
+                                <circle cx="132" cy="34" r="15" fill="#ACF847" stroke="#0B1C30" stroke-width="2.5" />
+                                <path d="M126 34 L130.5 38.5 L139 30" stroke="#0B1C30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+
+                        <h3 class="mt-2 text-lg sm:text-xl font-headline font-black text-[#0b1c30]">
+                            Bayar Lunas atau DP 50%
+                        </h3>
+                        <p class="mt-1.5 text-xs sm:text-sm text-gray-600 max-w-[270px] leading-relaxed">
+                            Bebas pilih bayar langsung lunas (100%) atau DP 50% dulu untuk mengunci slot via QRIS, VA, dan E-Wallet.
+                        </p>
+                        <div class="mt-4 flex flex-wrap items-center justify-center gap-1.5">
+                            <span class="px-2.5 py-1 rounded-lg bg-[#eaf7d8] text-[#284200] text-[11px] font-extrabold">Lunas 100%</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-extrabold">Atau DP 50%</span>
                         </div>
                     </div>
 
-                    {{-- Langkah 02 --}}
-                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
-                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#416900]/40 group-hover:text-[#416900] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
-                            02
-                        </span>
-                        <div class="space-y-2 min-w-0">
-                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
-                                Bayar Lunas atau DP 50% Sesuai Pilihan
-                            </h3>
-                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                                Bebas pilih <strong class="text-[#0b1c30]">bayar langsung lunas (100%)</strong> biar langsung beres, atau <strong class="text-[#0b1c30]">DP 50% dulu</strong> untuk mengunci slot lalu lunasi sisanya di kasir venue.
-                            </p>
-                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                                <span class="px-2.5 py-1 rounded-lg bg-[#eaf7d8] text-[#284200] text-[11px] font-bold">Bayar Lunas 100%</span>
-                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Atau DP 50%</span>
-                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 text-[11px] font-bold">QRIS · VA · E-Wallet</span>
-                            </div>
-                        </div>
-                    </div>
+                    {{-- LANGKAH 3 (Posisi Atas Kanan di Desktop) --}}
+                    <div class="relative flex flex-col items-center text-center bg-white/85 lg:bg-transparent backdrop-blur-[1px] rounded-2xl p-4 lg:p-0">
+                        {{-- Ilustrasi Pedestal 3: E-Tiket QR & Langsung Main --}}
+                        <div class="w-40 h-32 flex items-center justify-center">
+                            <svg viewBox="0 0 180 140" fill="none" class="w-full h-full" aria-hidden="true">
+                                {{-- Pedestal 3D --}}
+                                <ellipse cx="90" cy="112" rx="64" ry="18" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <path d="M26 104 V112 C26 122 55 130 90 130 C125 130 154 122 154 112 V104" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="64" ry="18" fill="#ACF847" stroke="#0B1C30" stroke-width="2.5" />
+                                <ellipse cx="90" cy="104" rx="50" ry="12" fill="#D9FCA3" />
 
-                    {{-- Langkah 03 --}}
-                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
-                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#1a146b]/25 group-hover:text-[#1a146b] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
-                            03
-                        </span>
-                        <div class="space-y-2 min-w-0">
-                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
-                                Tunjukkan E-Tiket QR &amp; Langsung Main
-                            </h3>
-                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                                E-Tiket terbit otomatis setelah transaksi terverifikasi. Cukup scan QR Code atau sebutkan Token 6 karakter di meja resepsionis untuk check-in instan.
-                            </p>
-                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">E-Tiket Otomatis</span>
-                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Check-in QR &amp; Token</span>
-                            </div>
+                                {{-- E-Tiket HP + QR Code --}}
+                                <rect x="60" y="18" width="60" height="82" rx="10" fill="#FFFFFF" stroke="#0B1C30" stroke-width="2.5" />
+                                <rect x="78" y="24" width="24" height="3.5" rx="1.75" fill="#CBD5E1" />
+
+                                {{-- Kotak QR --}}
+                                <rect x="70" y="34" width="40" height="40" rx="6" fill="#EFF4FF" stroke="#0B1C30" stroke-width="2" />
+                                <rect x="75" y="39" width="10" height="10" rx="1.5" fill="#1A146B" />
+                                <rect x="95" y="39" width="10" height="10" rx="1.5" fill="#1A146B" />
+                                <rect x="75" y="59" width="10" height="10" rx="1.5" fill="#1A146B" />
+                                <rect x="90" y="54" width="6" height="6" rx="1" fill="#1A146B" />
+                                <rect x="99" y="61" width="6" height="8" rx="1" fill="#416900" />
+
+                                {{-- Strip Token Bawah --}}
+                                <rect x="72" y="81" width="36" height="10" rx="4" fill="#1A146B" />
+                                <path d="M80 86 H100" stroke="#ACF847" stroke-width="2.2" stroke-linecap="round" />
+                            </svg>
                         </div>
+
+                        <h3 class="mt-2 text-lg sm:text-xl font-headline font-black text-[#0b1c30]">
+                            Scan QR &amp; Langsung Main
+                        </h3>
+                        <p class="mt-1.5 text-xs sm:text-sm text-gray-600 max-w-[260px] leading-relaxed">
+                            Tunjukkan E-Tiket QR Code atau Token 6 karakter di meja resepsionis untuk check-in instan.
+                        </p>
+                        <a href="{{ route('katalog.index') }}"
+                           class="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white hover:border-[#1a146b] px-4 py-2 text-xs font-extrabold text-[#1a146b] shadow-2xs transition active:scale-95">
+                            <span>Jelajahi Lapangan</span>
+                            <x-lucide-arrow-right class="w-3.5 h-3.5" />
+                        </a>
                     </div>
 
                 </div>

@@ -151,10 +151,10 @@
 
                         <div class="mb-4 sm:mb-5">
                             <h2 class="text-xl sm:text-2xl font-headline font-black text-[#0b1c30] tracking-tight">
-                                Selamat Datang Kembali
+                                Masuk ke LapangIn
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                                Masuk untuk mengelola jadwal bertanding dan tim Anda.
+                                Masuk untuk memesan lapangan dan mengelola jadwal bermain Anda.
                             </p>
                         </div>
 
@@ -611,9 +611,9 @@
                                     >
                                     <span class="text-xs text-gray-600 leading-relaxed">
                                         Saya menyetujui
-                                        <a href="{{ route('home') }}#syarat" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
+                                        <a href="{{ route('syarat.ketentuan') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
                                         serta
-                                        <a href="{{ route('home') }}#kebijakan" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
+                                        <a href="{{ route('kebijakan.privasi') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
                                         LapangIn
                                     </span>
                                 </label>

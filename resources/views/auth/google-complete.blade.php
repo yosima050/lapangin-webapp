@@ -156,9 +156,9 @@
                             >
                             <span class="text-xs text-gray-600 leading-relaxed">
                                 Saya menyetujui
-                                <a href="{{ route('home') }}#syarat" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
+                                <a href="{{ route('syarat.ketentuan') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Syarat &amp; Ketentuan</a>
                                 serta
-                                <a href="{{ route('home') }}#kebijakan" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
+                                <a href="{{ route('kebijakan.privasi') }}" target="_blank" class="font-bold underline text-[#1a146b] hover:text-[#312e81]">Kebijakan Privasi</a>
                                 LapangIn
                             </span>
                         </label>
