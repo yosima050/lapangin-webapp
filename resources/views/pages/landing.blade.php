@@ -921,12 +921,7 @@
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#acf847]/20 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div class="relative z-10 max-w-3xl mx-auto text-center space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-[#acf847] text-xs font-semibold">
-                        <x-lucide-user-plus class="w-4 h-4 shrink-0" />
-                        Gabung Komunitas LapangIn
-                    </div>
-
+                <div class="relative z-10 max-w-3xl mx-auto text-center space-y-5">
                     <h2 class="text-2xl sm:text-4xl lg:text-5xl font-headline font-black tracking-tight leading-tight">
                         Daftar Akun Sekarang, Riwayat Booking Tersimpan Rapi
                     </h2>

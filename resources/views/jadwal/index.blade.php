@@ -521,10 +521,11 @@
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($lap->nama) }}&background=1a146b&color=acf847&size=200';"
                                 >
                                 <div class="min-w-0">
-                                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                        <span class="px-2 py-0.5 rounded-md bg-[#1a146b]/10 text-[#1a146b] text-[10px] font-extrabold uppercase tracking-wider">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#416900]">
                                             {{ $lap->kategori }}
                                         </span>
+                                        <span class="text-gray-300">&middot;</span>
                                         <span class="text-[11px] sm:text-xs text-gray-500">
                                             {{ $row['jam_operasional']['jam_buka'] }} – {{ $row['jam_operasional']['jam_tutup'] }} WIB
                                         </span>
@@ -541,14 +542,14 @@
                                     <span x-show="isLoadingDate" style="display: none;" class="inline-block h-6 w-24 sm:w-28 rounded-full skeleton-shimmer align-middle"></span>
                                     <span
                                         x-show="!isLoadingDate"
-                                        :class="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0 ? 'bg-[#eaf7d8] text-[#416900]' : 'bg-red-50 text-red-600'"
-                                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold"
+                                        :class="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0 ? 'text-[#416900]' : 'text-rose-600'"
+                                        class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold"
                                     >
                                         <span
-                                            :class="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0 ? 'bg-[#416900]' : 'bg-red-500'"
-                                            class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+                                            :class="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0 ? 'bg-[#416900]' : 'bg-rose-500'"
+                                            class="w-1.5 h-1.5 rounded-full"
                                         ></span>
-                                        <span x-text="(rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) + ' Slot Tersedia'">{{ $row['tersedia_count'] }} Slot Tersedia</span>
+                                        <span x-text="((rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) > 0) ? ((rowByLapangan('{{ $lap->id }}')?.tersedia_count ?? {{ $row['tersedia_count'] }}) + ' slot tersedia') : 'Slot penuh'">{{ $row['tersedia_count'] > 0 ? $row['tersedia_count'] . ' slot tersedia' : 'Slot penuh' }}</span>
                                     </span>
                                 </div>
                                 <a

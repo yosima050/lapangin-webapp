@@ -157,11 +157,7 @@
                                    class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-105"
                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($item['lapangan_nama']) }}&background=1a146b&color=acf847&size=512';"
                                 >
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent md:hidden"></div>
-
-                                <span class="absolute top-2 left-2 sm:top-3.5 sm:left-3.5 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full bg-[#1a146b]/90 backdrop-blur-md text-[#acf847] text-[10px] sm:text-xs font-bold shadow-sm max-w-[96px] sm:max-w-none truncate">
-                                    {{ $item['kategori'] }}
-                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent md:hidden"></div>
                             </div>
 
                             {{-- Content Lapangan & Tarif --}}
@@ -169,10 +165,10 @@
                                 <div>
                                     <div class="flex items-start justify-between gap-2">
                                         <div class="min-w-0">
-                                            <p class="hidden sm:block text-xs font-bold uppercase tracking-wider text-[#416900]">
+                                            <p class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-[#416900]">
                                                 {{ $item['kategori'] }}
                                             </p>
-                                            <h3 class="sm:mt-1 text-sm sm:text-base md:text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition leading-snug line-clamp-2">
+                                            <h3 class="mt-0.5 sm:mt-1 text-sm sm:text-base md:text-lg font-extrabold text-[#1a146b] group-hover:text-indigo-800 transition leading-snug line-clamp-2">
                                                 {{ $item['lapangan_nama'] }}
                                             </h3>
                                         </div>
@@ -209,10 +205,13 @@
                                             </div>
                                         </div>
 
+                                        @php
+                                            $availableSlotCount = collect($item['slots'])->where('is_tersedia', true)->count();
+                                        @endphp
                                         <div class="text-right">
-                                            <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[#eaf7d8] text-[#416900]">
-                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#416900]"></span>
-                                                {{ collect($item['slots'])->where('is_tersedia', true)->count() }} slot
+                                            <span class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold {{ $availableSlotCount > 0 ? 'text-[#416900]' : 'text-rose-600' }}">
+                                                <span class="w-1.5 h-1.5 rounded-full {{ $availableSlotCount > 0 ? 'bg-[#416900]' : 'bg-rose-500' }}"></span>
+                                                {{ $availableSlotCount > 0 ? $availableSlotCount . ' slot tersedia' : 'Slot penuh' }}
                                             </span>
                                         </div>
                                     </div>
