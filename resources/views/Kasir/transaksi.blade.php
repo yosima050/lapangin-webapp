@@ -199,7 +199,7 @@
             <button
                 type="button"
                 data-testid="shift-close-button"
-                @click="alert('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
+                @click="window.lapanginNotify('Rekonsiliasi kas shift berhasil diverifikasi dan ditutup!')"
                     class="w-full py-3 px-4 rounded-xl bg-[#1a146b] hover:bg-[#312e81] text-white font-headline font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer">
                 <x-lucide-clock-alert class="w-4 h-4 text-[#acf847] shrink-0" />
                 <span>Tutup Shift &amp; Cetak Berita Acara</span>

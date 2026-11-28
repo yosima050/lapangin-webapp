@@ -105,7 +105,7 @@
                 Silakan isi formulir di bawah ini. Tim kami akan menghubungi Anda kembali dalam kurun waktu 1x24 jam.
             </p>
 
-            <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Terima kasih! Pesan Anda telah terkirim ke customer care LapangIn.'); this.reset();" class="space-y-4">
+            <form action="#" method="POST" onsubmit="event.preventDefault(); window.lapanginNotify('Terima kasih! Pesan Anda telah terkirim ke customer care LapangIn.'); this.reset();" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>

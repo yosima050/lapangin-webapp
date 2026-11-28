@@ -913,7 +913,7 @@
                                         <span>Cetak Struk Pembayaran</span>
                                     </button>
                                 @endif
-                                <button type="button" onclick="alert('Bukti pembayaran telah dikirim ke nomor WhatsApp {{ $customerPhone }}')"
+                                <button type="button" onclick="window.lapanginNotify('Bukti pembayaran telah dikirim ke nomor WhatsApp {{ $customerPhone }}')"
                                         class="py-3 px-4 rounded-xl bg-[#eff4ff] hover:bg-[#e5eeff] text-[#0b1c30] text-xs font-bold flex items-center justify-center gap-2 border border-[#dce9ff] transition-colors">
                                     <x-lucide-message-circle class="w-5 h-5 text-[#416900] shrink-0" />
                                     <span>Kirim Bukti ke WhatsApp Tamu</span>
