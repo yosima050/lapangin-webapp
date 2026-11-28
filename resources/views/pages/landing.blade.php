@@ -670,57 +670,93 @@
         </div>
     </section>
 
-    {{-- 4. Cara Kerja (3 Langkah) --}}
-    <section id="cara-kerja" class="py-10 sm:py-20 bg-white border-t border-gray-100">
+    {{-- 4. Alur Reservasi (Editorial Split Layout — Tanpa 3 Kotak Generik) --}}
+    <section id="cara-kerja" class="py-12 sm:py-20 bg-white border-t border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-7 sm:mb-14">
-                <span class="inline-block text-[11px] sm:text-sm font-bold text-[#416900] uppercase tracking-wider mb-1.5 sm:mb-2">Alur Reservasi</span>
-                <h2 class="text-xl sm:text-4xl font-headline font-black text-[#1a146b] tracking-tight">
-                    3 Langkah Mudah Booking di LapangIn
-                </h2>
-                <p class="mt-2 sm:mt-3 text-xs sm:text-base text-gray-600">
-                    Proses reservasi praktis tanpa konfirmasi via chat manual yang memakan waktu.
-                </p>
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 relative">
-                {{-- Langkah 1 --}}
-                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
-                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
-                        1
-                    </div>
-                    <div>
-                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Pilih Jadwal &amp; Lapangan</h3>
-                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                            Pilih jenis olahraga, cek ketersediaan jam secara live, dan tentukan durasi bermain yang Anda inginkan.
-                        </p>
+                {{-- Kolom Kiri: Editorial Lead & CTA --}}
+                <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
+                    <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#416900]">
+                        <span class="h-1.5 w-6 rounded-full bg-[#acf847]"></span>
+                        Alur Reservasi
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-headline font-black text-[#0b1c30] tracking-tight leading-[1.15]">
+                        Dari Pilih Jam Sampai Main, Semua Beres Tanpa Ribet.
+                    </h2>
+                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                        Tidak perlu chat admin atau tunggu konfirmasi manual. Cek slot kosong secara langsung, pilih bayar lunas atau DP 50%, lalu tunjukkan E-Tiket saat tiba di venue.
+                    </p>
+                    <div class="pt-2">
+                        <a href="{{ route('jadwal.index') }}"
+                           class="inline-flex items-center gap-2 rounded-xl bg-[#1a146b] hover:bg-[#130f52] active:scale-[0.98] px-5 py-3 text-xs sm:text-sm font-extrabold text-white shadow-sm transition">
+                            <span>Cek Jadwal Sekarang</span>
+                            <x-lucide-arrow-right class="w-4 h-4 text-[#acf847] shrink-0" />
+                        </a>
                     </div>
                 </div>
 
-                {{-- Langkah 2 --}}
-                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
-                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#416900] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
-                        2
-                    </div>
-                    <div>
-                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Bayar DP Online Aman</h3>
-                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                            Cukup selesaikan down payment (DP 50%) melalui QRIS, Virtual Account, atau E-Wallet favorit Anda.
-                        </p>
-                    </div>
-                </div>
+                {{-- Kolom Kanan: Daftar Langkah Editorial dengan Pembatas Garis Halus --}}
+                <div class="lg:col-span-7 divide-y divide-gray-200/80 border-y border-gray-200/80">
 
-                {{-- Langkah 3 --}}
-                <div class="relative bg-[#f8f9ff] p-4 md:p-8 rounded-2xl border border-gray-100 flex md:block items-start gap-3.5 text-left md:text-center">
-                    <div class="w-10 h-10 md:w-14 md:h-14 shrink-0 md:mx-auto rounded-xl md:rounded-2xl bg-[#1a146b] text-white flex items-center justify-center font-headline font-black text-base md:text-xl shadow-md md:mb-6">
-                        3
+                    {{-- Langkah 01 --}}
+                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
+                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#1a146b]/25 group-hover:text-[#1a146b] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
+                            01
+                        </span>
+                        <div class="space-y-2 min-w-0">
+                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
+                                Pilih Lapangan &amp; Jam Bermain
+                            </h3>
+                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                Lihat ketersediaan jam secara live, pilih tanggal serta durasi main (hingga 4 jam), dan tambahkan sewa perlengkapan bila diperlukan.
+                            </p>
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Jadwal Real-Time</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Opsional Sewa Perlengkapan</span>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm md:text-lg font-headline font-bold text-[#1a146b] mb-1 md:mb-2">Scan QR di Lokasi</h3>
-                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                            Tiba di venue, tunjukkan tiket digital QR Code ke meja kasir untuk check-in instan dan langsung bermain!
-                        </p>
+
+                    {{-- Langkah 02 --}}
+                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
+                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#416900]/40 group-hover:text-[#416900] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
+                            02
+                        </span>
+                        <div class="space-y-2 min-w-0">
+                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
+                                Bayar Lunas atau DP 50% Sesuai Pilihan
+                            </h3>
+                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                Bebas pilih <strong class="text-[#0b1c30]">bayar langsung lunas (100%)</strong> biar langsung beres, atau <strong class="text-[#0b1c30]">DP 50% dulu</strong> untuk mengunci slot lalu lunasi sisanya di kasir venue.
+                            </p>
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span class="px-2.5 py-1 rounded-lg bg-[#eaf7d8] text-[#284200] text-[11px] font-bold">Bayar Lunas 100%</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Atau DP 50%</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 text-[11px] font-bold">QRIS · VA · E-Wallet</span>
+                            </div>
+                        </div>
                     </div>
+
+                    {{-- Langkah 03 --}}
+                    <div class="group py-6 sm:py-7 flex items-start gap-4 sm:gap-6">
+                        <span class="font-headline font-black text-2xl sm:text-3xl tracking-tight text-[#1a146b]/25 group-hover:text-[#1a146b] transition-colors tabular-nums shrink-0 leading-none pt-0.5">
+                            03
+                        </span>
+                        <div class="space-y-2 min-w-0">
+                            <h3 class="text-base sm:text-lg font-headline font-extrabold text-[#0b1c30]">
+                                Tunjukkan E-Tiket QR &amp; Langsung Main
+                            </h3>
+                            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                E-Tiket terbit otomatis setelah transaksi terverifikasi. Cukup scan QR Code atau sebutkan Token 6 karakter di meja resepsionis untuk check-in instan.
+                            </p>
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">E-Tiket Otomatis</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-[#f4f7ff] text-[#1a146b] text-[11px] font-bold">Check-in QR &amp; Token</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
